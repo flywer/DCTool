@@ -1,7 +1,7 @@
 import {RouteRecordRaw} from 'vue-router'
 
 const view1 = () => import('@render/views/examples/view1.vue')
-const view2 = () => import ('@render/views/examples/view2.vue')
+const view2 = () => import ('@render/views/ldDecrypt/index.vue')
 export const routeName = {
     view1: 'view1',
     view2: 'view2',

@@ -5,5 +5,8 @@ export const channels = reactive({
         max: 'window/max',
         min: "window/min",
         close: "window/close"
+    },
+    ldDecrypt: {
+        decrypt: 'ldDecrypt/decrypt'
     }
 })

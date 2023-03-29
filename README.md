@@ -1,8 +1,6 @@
-# Electron-App-Template
+# Image2Excel
 
-一个 electron + vue + naive-ui 的框架模板
-
-![img.png](https://pic-bed-1307818467.cos.ap-guangzhou.myqcloud.com/img/202303101749721.png)
+图像识别表格转Excel
 
 ## 常用命令
 

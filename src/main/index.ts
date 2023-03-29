@@ -1,3 +1,4 @@
+import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import { app } from 'electron'
 import { createEinf } from 'einf'
 import { AppController } from './controller/app.controller'
@@ -34,7 +35,7 @@ async function bootstrap() {
 
     await createEinf({
       window: createWindow,
-      controllers: [AppController,WindowController],
+      controllers: [AppController,WindowController,LdDecryptController],
       injects: [{
         name: 'IS_DEV',
         inject: !app.isPackaged,

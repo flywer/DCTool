@@ -62,7 +62,7 @@ const menuOptions: MenuOption[] = [
                 name: routeName.view2,
               }
             },
-            {default: () => '页面'}
+            {default: () => '绿盾解密'}
         ),
     key: routeName.view2,
     icon: renderIcon(AccessibleIcon)
