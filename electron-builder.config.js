@@ -19,7 +19,7 @@ const config = {
         target: 'nsis', // 设置目标安装包工具
       },
     ],
-    requestedExecutionLevel: 'requireAdministrator', // 设置应用权限等级
+    // requestedExecutionLevel: 'requireAdministrator', // 设置应用权限等级
   },
   nsis: {
     oneClick: false, // 是否一键安装

@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider class="h-full">
+  <n-layout has-sider class="h-full" style="min-height: 100vh;">
     <n-layout-sider
         class="padding-top-32 h-full-vh"
         collapse-mode="width"
@@ -35,6 +35,7 @@ import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink} from "vue-router";
 import {HomeOutlined} from '@vicons/antd'
 import {AccessibleIcon} from '@vicons/fa'
+import {VisualRecognition, Svg, DataVis3} from '@vicons/carbon'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 // 菜单项
@@ -45,12 +46,12 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.view1,
+                name: routeName.home,
               }
             },
             {default: () => '首页'}
         ),
-    key: routeName.view1,
+    key: routeName.home,
     icon: renderIcon(HomeOutlined)
   },
   {
@@ -59,13 +60,55 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.view2,
+                name: routeName.ldDecrypt,
               }
             },
             {default: () => '绿盾解密'}
         ),
-    key: routeName.view2,
+    key: routeName.ldDecrypt,
     icon: renderIcon(AccessibleIcon)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.ocr,
+              }
+            },
+            {default: () => 'OCR'}
+        ),
+    key: routeName.ocr,
+    icon: renderIcon(VisualRecognition)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.svg,
+              }
+            },
+            {default: () => 'SVG转换'}
+        ),
+    key: routeName.svg,
+    icon: renderIcon(Svg)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.datacenter,
+              }
+            },
+            {default: () => '数据中台'}
+        ),
+    key: routeName.datacenter,
+    icon: renderIcon(DataVis3)
   }
 ]
 

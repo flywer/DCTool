@@ -1,51 +1,54 @@
+import {DatacenterController} from "@main/controller/datacenter.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
-import { app } from 'electron'
-import { createEinf } from 'einf'
-import { AppController } from './controller/app.controller'
-import { createWindow } from './main.window'
+import {OcrController} from "@main/controller/ocr.controller";
+import {SvgController} from "@main/controller/svg.controller";
+import {app} from 'electron'
+import {createEinf} from 'einf'
+import {AppController} from './controller/app.controller'
+import {createWindow} from './main.window'
 import {WindowController} from "@main/controller/window.controller";
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
 async function electronAppInit() {
-  const isDev = !app.isPackaged
-  app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin')
-      app.exit()
-  })
+    const isDev = !app.isPackaged
+    app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+            app.exit()
+        }
+    })
 
-  if (isDev) {
-    if (process.platform === 'win32') {
-      process.on('message', (data) => {
-        if (data === 'graceful-exit')
-          app.exit()
-      })
+    if (isDev) {
+        if (process.platform === 'win32') {
+            process.on('message', (data) => {
+                if (data === 'graceful-exit') {
+                    app.exit()
+                }
+            })
+        } else {
+            process.on('SIGTERM', () => {
+                app.exit()
+            })
+        }
     }
-    else {
-      process.on('SIGTERM', () => {
-        app.exit()
-      })
-    }
-  }
 }
 
 async function bootstrap() {
-  try {
-    await electronAppInit()
+    try {
+        await electronAppInit()
 
-    await createEinf({
-      window: createWindow,
-      controllers: [AppController,WindowController,LdDecryptController],
-      injects: [{
-        name: 'IS_DEV',
-        inject: !app.isPackaged,
-      }],
-    })
-  }
-  catch (error) {
-    console.error(error)
-    app.quit()
-  }
+        await createEinf({
+            window: createWindow,
+            controllers: [AppController, WindowController, LdDecryptController, OcrController,SvgController,DatacenterController],
+            injects: [{
+                name: 'IS_DEV',
+                inject: !app.isPackaged,
+            }],
+        })
+    } catch (error) {
+        console.error(error)
+        app.quit()
+    }
 }
 
 bootstrap()

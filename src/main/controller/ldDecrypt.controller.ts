@@ -6,6 +6,8 @@ import {dialog} from "electron";
 import fs from 'fs';
 import {exec} from 'child_process';
 import path from 'path';
+import log from "electron-log";
+import fes from 'fs-extra';
 
 @Controller()
 export class LdDecryptController {
@@ -15,8 +17,9 @@ export class LdDecryptController {
     @IpcHandle(channels.ldDecrypt.decrypt)
     public async ldDecrypt() {
         dialog.showOpenDialog({
-            title: '选择待解密的文件或文件夹',
-            properties: ['openFile', 'multiSelections']
+            title: '选择待解密的文件',
+            properties: ['openFile', 'multiSelections'],
+            buttonLabel: '解密'
         }).then(result => {
             if (!result.canceled) {
                 const filePaths = result.filePaths;
@@ -41,17 +44,17 @@ export class LdDecryptController {
                                     //保存文件路径
                                     const savePath = dirPath + '\\' + fileName + '_temp' + '.js';
 
-                                    fs.writeFile(savePath, data, (err) => {
-                                        if (err) throw err;
+                                    fs.writeFileSync(savePath, data);
 
-                                        //修改文件名
-                                        exec(`ren ${path.basename(savePath)} ${fileName + '_解密' + fileExt}`, {cwd: `${path.dirname(savePath)}`}, (error, stdout, stderr) => {
-                                            if (error) {
-                                                console.log(stderr)
-                                                throw err;
-                                            }
-                                        })
+                                    //修改文件名
+                                    exec(`ren \"${path.basename(savePath)}\" \"${fileName + '_解密' + fileExt}\"`, {cwd: `${path.dirname(savePath)}`}, (error, stdout, stderr) => {
+                                        if (error) {
+                                            log.error(error)
+                                            throw err;
+                                        }
                                     });
+
+                                    //fes.move('C:\\Users\\aknith\\Desktop\\执法人员性质_解密.xlsx','D:\\执法人员性质_解密.xlsx')
 
                                 });
                             } else if (type == FilePathType.dir) {
@@ -62,13 +65,13 @@ export class LdDecryptController {
 
                         })
                         .catch((error) => {
-                            console.error(error);
+                            log.error(error);
                         });
                 })
             }
 
         }).catch(err => {
-            console.log(err)
+            log.log(err)
         })
 
     }
