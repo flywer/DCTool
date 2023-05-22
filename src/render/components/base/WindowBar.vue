@@ -35,7 +35,7 @@ import {window_max,window_min,window_close} from "@render/api/window.api";
 <style scoped lang="less">
 #window-bar {
   -webkit-app-region: drag; /*头部可拖动*/
-  background-color: transparent; /*transparent*/
+  //background-color: transparent; /*transparent*/
   position: fixed;
   top: 0;
   left: 0;

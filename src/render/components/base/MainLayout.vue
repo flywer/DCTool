@@ -1,15 +1,14 @@
 <template>
-  <n-layout has-sider class="h-full" style="min-height: 100vh;">
+  <n-layout has-sider style="margin-top: 32px">
     <n-layout-sider
-        class="padding-top-32 h-full-vh"
+        style="overflow: hidden"
         collapse-mode="width"
         :collapsed-width="64"
-        :width="180"
+        :width="145"
         :collapsed="collapsed"
-        show-trigger
+        :show-trigger="false"
         @collapse="collapsed = true"
         @expand="collapsed = false"
-        style="background-color: #cdeaf8"
     >
       <n-menu
           ref="menuInstRef"
@@ -20,7 +19,7 @@
           :options="menuOptions"
       />
     </n-layout-sider>
-    <n-layout class="padding-top-32">
+    <n-layout>
       <n-message-provider>
         <router-view/>
       </n-message-provider>
@@ -119,8 +118,5 @@ const selectedKey = ref(menuOptions[0].key)
 // 菜单是否折叠
 const collapsed = ref(false)
 
+const containerRef = ref<HTMLElement | undefined>(undefined)
 </script>
-
-<style scoped lang="less">
-
-</style>
