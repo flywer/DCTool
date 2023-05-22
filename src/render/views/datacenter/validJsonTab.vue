@@ -1,5 +1,5 @@
 <template>
-  <n-scrollbar style="max-height: 400px;padding-right: 10px" trigger="hover">
+  <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
     <n-alert title="说明" type="default" :show-icon="false">
       对于相同结构的表，没有必要每次都建一遍质检任务，在这里粘贴一个原始新建的质检任务JSON，即可生成万用的同表结构的JSON，只需自己修改任务名
     </n-alert>
@@ -143,12 +143,18 @@ const validJsonTrans = (e: MouseEvent) => {
 }
 
 const getBaseInfo = () => {
-  const json = JSON.parse(validJsonInputRef.value);
-  validJsonFormModel.value.name = json.name;
-  validJsonFormModel.value.projectId = json.projectId.toString();
-  validJsonFormModel.value.personId = json.personId;
-  validJsonFormModel.value.email = json.email;
-  validJsonFormModel.value.description = json.description;
+  let json;
+  try {
+    json = JSON.parse(validJsonInputRef?.value);
+    validJsonFormModel.value.name = json.name;
+    validJsonFormModel.value.projectId = json.projectId.toString();
+    validJsonFormModel.value.personId = json.personId;
+    validJsonFormModel.value.email = json.email;
+    validJsonFormModel.value.description = json.description;
+  } catch (e) {
+    console.error(`解析 JSON 失败：${json}`, e)
+  }
+
 }
 
 

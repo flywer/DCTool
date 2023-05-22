@@ -1,8 +1,7 @@
 <template>
   <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
     <n-alert title="说明" type="default" :show-icon="false">
-      备份任务的写法基本相同，这里只需这个表单的信息即可生成对应的备份任务JSON<br>
-      目前只能用于两张表皆是中台TBDS-hive表
+      清除任务的写法基本相同，目前只支持中台的TBDS-hive表
     </n-alert>
     <n-card style="margin-top: 10px">
       <n-tabs type="line" animated>
@@ -136,13 +135,13 @@ const formModel = ref({
   tableName: ''
 })
 
-const previewRef = ref(`工作流名称：bf_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr || ''}_${formModel.value.tableName}`)
+const previewRef = ref(`工作流名称：clean_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr || ''}_${formModel.value.tableName}`)
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName],
     ([projectId, tableName]) => {
       const abbr = projectIdOptions.find(option => option.value === projectId)?.abbr || ''
-      previewRef.value = `工作流名称：bf_${abbr}_${tableName}`
-      formModel.value.name = `bf_${abbr}_${tableName}`
+      previewRef.value = `工作流名称：clean_${abbr}_${tableName}`
+      formModel.value.name = `clean_${abbr}_${tableName}`
     }
 )
 const rules = {
@@ -203,7 +202,7 @@ let outputModel = {
           taskDefKey: "sjk89c53bb21e024d8c9e519d9618b952c2"
         },
         sparkConfig: {
-          saveMode: "append"
+          saveMode: "overwrite"
         },
         sql: "",
         id: "sjk89c53bb21e024d8c9e519d9618b952c2",
@@ -230,8 +229,9 @@ const generate = (e: MouseEvent) => {
   formRef.value?.validate((errors) => {
     if (!errors) {
       if (formModel.value.sourceTable === '' || formModel.value.targetTable === '') {
-        formModel.value.sourceTable = `di_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr}_${formModel.value.tableName}_temp_ods`
-        formModel.value.targetTable = `di_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr}_${formModel.value.tableName}_ods`
+        const  tableName = `di_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr}_${formModel.value.tableName}_temp_ods`
+        formModel.value.sourceTable = tableName
+        formModel.value.targetTable = tableName
       }
       outputModel = JSON.parse(updateSjkUUID(removeIds(outputModel)))
 
@@ -243,7 +243,7 @@ const generate = (e: MouseEvent) => {
       outputModel.email = formModel.value.email
       outputModel.description = formModel.value.description
 
-      outputModel.dataDevBizVo.sparkSqlDtoList[0].sql = `INSERT INTO ` + `${formModel.value.targetTable}` + ' SELECT * FROM ' + `${formModel.value.sourceTable}`
+      outputModel.dataDevBizVo.sparkSqlDtoList[0].sql = `INSERT INTO ` + `${formModel.value.targetTable}` + ' SELECT * FROM ' + `${formModel.value.sourceTable}` + ' WHERE 1 = 0'
       outputModel.dataDevBizVo.sparkSqlDtoList[0].sourceTable = [`${formModel.value.sourceTable}`]
       outputModel.dataDevBizVo.sparkSqlDtoList[0].targetTable = formModel.value.targetTable
 

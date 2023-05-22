@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider style="margin-top: 32px">
+  <n-layout has-sider style="margin-top: 32px;height: 100%">
     <n-layout-sider
         style="overflow: hidden"
         collapse-mode="width"
@@ -19,7 +19,7 @@
           :options="menuOptions"
       />
     </n-layout-sider>
-    <n-layout>
+    <n-layout style="height:100%">
       <n-message-provider>
         <router-view/>
       </n-message-provider>
