@@ -35,6 +35,7 @@ import {RouterLink} from "vue-router";
 import {HomeOutlined} from '@vicons/antd'
 import {AccessibleIcon} from '@vicons/fa'
 import {VisualRecognition, Svg, DataVis3} from '@vicons/carbon'
+import {LetterF} from '@vicons/tabler'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 // 菜单项
@@ -108,6 +109,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.datacenter,
     icon: renderIcon(DataVis3)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.flattenText,
+              }
+            },
+            {default: () => '文本扁平'}
+        ),
+    key: routeName.flattenText,
+    icon: renderIcon(LetterF)
   }
 ]
 

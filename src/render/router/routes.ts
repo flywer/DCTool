@@ -6,12 +6,15 @@ const ocr = () => import('@render/views/ocr/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
 const datacenter = () => import('@render/views/datacenter/index.vue')
 
+const flattenText = () => import('@render/views/flattenText/index.vue')
+
 export const routeName = {
     home: 'home',
     ldDecrypt: 'ldDecrypt',
     ocr: 'ocr',
     svg: 'svg',
-    datacenter:'datacenter'
+    datacenter: 'datacenter',
+    flattenText: 'flattenText'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -40,8 +43,13 @@ export const routes: Array<RouteRecordRaw> = [
         component: svg
     },
     {
-         name: routeName.datacenter,
+        name: routeName.datacenter,
         path: '/datacenter/index',
         component: datacenter
+    },
+    {
+        name: routeName.flattenText,
+        path: '/flattenText/index',
+        component: flattenText
     }
 ]

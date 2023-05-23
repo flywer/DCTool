@@ -14,6 +14,9 @@ export const channels = reactive({
     },
     svg:{
         saveSvgFile:'svg/saveSvgFile'
+    },
+    datacenter:{
+        request:'datacenter/request'
     }
 
 })

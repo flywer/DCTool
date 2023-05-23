@@ -1,0 +1,56 @@
+<template>
+  <n-layout style="padding-left: 20px;padding-right: 20px;margin-top: 20px">
+    <n-input
+        v-model:value="inputValue"
+        type="textarea"
+        placeholder=""
+        :autosize="{
+        minRows: 5,
+        maxRows: 8
+      }"
+        :clearable="true"
+    />
+    <n-space justify="center" style="margin-top: 20px">
+      <n-button type="primary" style="width: 80px" @click="trans">确认</n-button>
+      <n-button :disabled="resValue === ''" style="width: 120px" @click="copyText(resValue)">
+        复制结果
+      </n-button>
+    </n-space>
+    <n-space style="margin-top: 20px;">
+      <n-text>扁平化：</n-text>
+    </n-space>
+
+    <n-input :value="resValue" type="textarea" :autosize="{
+        minRows: 3,
+        maxRows: 3
+      }" style="margin-top: 10px" placeholder="" readonly
+    ></n-input>
+  </n-layout>
+</template>
+
+<script setup lang="ts">
+import {get_job_project_list} from "@render/api/datacenter";
+import {useMessage} from "naive-ui";
+import {onMounted, ref} from 'vue'
+import useClipboard from "vue-clipboard3";
+
+const message = useMessage()
+
+const {toClipboard} = useClipboard();
+
+const copyText = async (text) => {
+  await toClipboard(text);
+  message.success('复制成功')
+}
+
+const inputValue = ref('');
+const resValue = ref('');
+const trans = () => {
+  resValue.value = inputValue.value.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+}
+
+</script>
+
+<style scoped>
+
+</style>

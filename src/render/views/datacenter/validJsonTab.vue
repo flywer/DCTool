@@ -67,13 +67,15 @@
 </template>
 
 <script setup lang="ts">
+import {get_job_project_list, get_person_list} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import {uuid} from "vue3-uuid";
 import useClipboard from 'vue-clipboard3';
 import {useMessage, FormInst} from 'naive-ui'
+import pinyin from 'pinyin';
 
 const message = useMessage()
 

@@ -41,7 +41,7 @@ import {window_max,window_min,window_close} from "@render/api/window.api";
   left: 0;
   width: 100%;
   height: 32px;
-  z-index: 9999;
+  z-index: 1000;
   user-select: none;
 
   .n-layout-content {
