@@ -11,10 +11,10 @@ export class DatacenterController {
 
     private static authToken = 'bb34f495-6a6c-47c4-ad6a-6fcf554389df';
 
-    @IpcHandle(channels.datacenter.request)
-    public async datacenterRequest(path: string, method: 'POST' | 'GET') {
+    @IpcHandle(channels.datacenter.jobList)
+    public async handleJobList() {
         let result
-        await this.makeRequest(method, path)
+        await this.commonGetRequest('/gather/api/jobProject/list', null)
             .then((res) => {
                 result = res;
             })
@@ -24,82 +24,29 @@ export class DatacenterController {
         return result
     }
 
-    public makeRequest(method, path) {
-        return new Promise((resolve, reject) => {
-            const request = net.request({
-                method: method,
-                url: `${DatacenterController.apiUrl}${path}`
-            });
-            request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
-            request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-
-            let data = '';
-
-            request.on('response', (response) => {
-                response.on('data', (chunk) => {
-                    data += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        const res = JSON.parse(data);
-                        resolve(res);
-                    } catch (err) {
-                        reject(err);
-                    }
-                });
-            });
-
-            request.on('error', (err) => {
-                reject(err);
-            });
-
-            if (path == '/services/am-usrc/usrc/user/sm-list') {
-                request.write('{}')
-            }
-
-            request.end();
+    @IpcHandle(channels.datacenter.personList)
+    public async handlePersonList() {
+        let result
+        await this.commonPostRequest('/services/am-usrc/usrc/user/sm-list', {}).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
         });
+        return result
     }
 
     @IpcHandle(channels.datacenter.dataSourceList)
     public async handleDataSourceList(current: number, size: number) {
         let result
-        await new Promise((resolve, reject) => {
-            const request = net.request({
-                method: 'GET',
-                url: `${DatacenterController.apiUrl}/gather/api/jobJdbcDatasource/findPage?current=${current}&size=${size}`
+        const query = `current=${current}&size=${size}`
+
+        await this.commonGetRequest('/gather/api/jobJdbcDatasource/findPage', query)
+            .then((res) => {
+                result = res;
+            })
+            .catch((err) => {
+                console.error(err);
             });
-            request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
-            request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-
-            let data = '';
-
-            request.on('response', (response) => {
-                response.on('data', (chunk) => {
-                    data += chunk;
-                });
-
-                response.on('end', () => {
-                    try {
-                        const res = JSON.parse(data);
-                        resolve(res);
-                    } catch (err) {
-                        reject(err);
-                    }
-                });
-            });
-
-            request.on('error', (err) => {
-                reject(err);
-            });
-
-            request.end();
-        }).then((res) => {
-            result = res;
-        }).catch((err) => {
-            console.error(err);
-        });
         return result
     }
 
@@ -123,6 +70,54 @@ export class DatacenterController {
             console.error(err);
         });
         return result
+    }
+
+    @IpcHandle(channels.datacenter.getColumns)
+    public async handleGetColumns(datasourceId: string, tableName: string) {
+        let result
+
+        const query = `datasourceId=${datasourceId}&tableName=${tableName}`;
+
+        await this.commonGetRequest('/gather/api/metadata/getColumns', query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    public commonGetRequest(url: string, query: string) {
+        return new Promise((resolve, reject) => {
+            const request = net.request({
+                method: 'GET',
+                url: `${DatacenterController.apiUrl}${url}?${query || ''}`
+            });
+            request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
+            //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
+
+            let data = '';
+
+            request.on('response', (response) => {
+                response.on('data', (chunk) => {
+                    data += chunk;
+                });
+
+                response.on('end', () => {
+                    try {
+                        const res = JSON.parse(data);
+                        resolve(res);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            });
+
+            request.on('error', (err) => {
+                reject(err);
+            });
+
+            request.end();
+        })
     }
 
     public commonPostRequest(url: string, params: any) {

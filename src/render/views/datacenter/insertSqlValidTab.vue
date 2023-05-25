@@ -150,7 +150,6 @@ const checkSql = () => {
 
   paramModel.taskType = `${sourceDatasource.toUpperCase()}2${targetDataSource.toUpperCase()}`
 
-  console.log(paramModel)
   check_insert_sql(paramModel).then((res) => {
     resRef.value = `${res.value}\n${res.msg || ''}`
     if (res.code === 3) {

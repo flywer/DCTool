@@ -120,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import {add_workFlow} from "@render/api/datacenter";
+import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -276,7 +276,7 @@ const isLoading = ref(false)
 
 const addWorkFlow = () => {
   isLoading.value = true
-  add_workFlow(outputModel).then((res) => {
+  add_work_flow(outputModel).then((res) => {
     if (res.code == 200) {
       message.success(res.message)
     } else {
