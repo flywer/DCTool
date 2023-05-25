@@ -11,14 +11,14 @@
         <backup-json-tab/>
       </n-tab-pane>
       <n-tab-pane name="4" tab="清空JSON生成">
-       <clean-json-tab/>
+        <clean-json-tab/>
       </n-tab-pane>
-<!--      <n-tab-pane name="5" tab="融合JSON生成">
-        <backup-json-tab/>
+      <n-tab-pane name="5" tab="INSERT语句校验">
+        <insert-sql-valid-tab/>
       </n-tab-pane>
-      <n-tab-pane name="6" tab="入库JSON生成">
-        <backup-json-tab/>
-      </n-tab-pane>-->
+      <!--     <n-tab-pane name="6" tab="入库JSON生成">
+            <backup-json-tab/>
+          </n-tab-pane>-->
     </n-tabs>
   </n-layout>
 
@@ -28,6 +28,7 @@
 import BackupJsonTab from "@render/views/datacenter/backupJsonTab.vue";
 import CleanJsonTab from "@render/views/datacenter/cleanJsonTab.vue";
 import HiveSqlTab from "@render/views/datacenter/hiveSqlTab.vue";
+import InsertSqlValidTab from "@render/views/datacenter/insertSqlValidTab.vue";
 import ValidJsonTab from "@render/views/datacenter/validJsonTab.vue";
 </script>
 

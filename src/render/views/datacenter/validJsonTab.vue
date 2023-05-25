@@ -4,14 +4,14 @@
       对于相同结构的表，没有必要每次都建一遍质检任务，在这里粘贴一个原始新建的质检任务JSON，即可生成万用的同表结构的JSON，只需自己修改任务名
     </n-alert>
     <n-input
-        style="margin-top: 20px"
+        style="margin-top: 10px"
         v-model:value="validJsonInputRef"
         type="textarea"
         placeholder="输入原始JSON"
         :clearable="true"
         @blur="getBaseInfo"
     />
-    <n-card style="margin-top: 20px">
+    <n-card style="margin-top: 10px">
       <n-form
           ref="validJsonFormRef"
           inline
@@ -51,14 +51,14 @@
         </n-grid>
       </n-form>
     </n-card>
-    <n-space justify="center" style="margin-top: 20px">
+    <n-space justify="center" style="margin-top: 10px">
       <n-button type="primary" style="width: 120px" @click="validJsonTrans">转换</n-button>
       <n-button :disabled="validJsonResRef === ''" style="width: 120px" @click="copyText(validJsonResRef)">
         复制结果
       </n-button>
     </n-space>
     <n-input
-        style="margin-top: 20px"
+        style="margin-top: 10px"
         v-model:value="validJsonResRef"
         type="textarea"
         placeholder=""

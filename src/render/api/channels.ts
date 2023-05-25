@@ -12,11 +12,14 @@ export const channels = reactive({
     ocr: {
         scan: 'ocr/scan'
     },
-    svg:{
-        saveSvgFile:'svg/saveSvgFile'
+    svg: {
+        saveSvgFile: 'svg/saveSvgFile'
     },
-    datacenter:{
-        request:'datacenter/request'
+    datacenter: {
+        request: 'datacenter/request',
+        dataSourceList: 'datacenter/dataSourceList',
+        checkInsertSql: 'datacenter/checkInsertSql',
+
     }
 
 })

@@ -10,13 +10,13 @@
       }"
         :clearable="true"
     />
-    <n-space justify="center" style="margin-top: 20px">
+    <n-space justify="center" style="margin-top: 10px">
       <n-button type="primary" style="width: 80px" @click="trans">确认</n-button>
       <n-button :disabled="resValue === ''" style="width: 120px" @click="copyText(resValue)">
         复制结果
       </n-button>
     </n-space>
-    <n-space style="margin-top: 20px;">
+    <n-space style="margin-top: 10px;">
       <n-text>扁平化：</n-text>
     </n-space>
 

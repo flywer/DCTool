@@ -10,8 +10,8 @@
       }"
         :clearable="true"
     />
-    <n-space justify="center" style="margin-top: 20px">
-      <n-button style="width: 80px" @click="submit">确认</n-button>
+    <n-space justify="center" style="margin-top: 10px">
+      <n-button style="width: 120px" @click="submit">确认</n-button>
     </n-space>
     <n-space style="margin-top: 20px;">
       <n-text>base64编码：</n-text>
