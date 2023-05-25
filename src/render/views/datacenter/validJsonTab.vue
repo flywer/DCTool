@@ -51,11 +51,24 @@
         </n-grid>
       </n-form>
     </n-card>
-    <n-space justify="center" style="margin-top: 10px">
+    <n-space justify="center" align="center" style="margin-top: 10px">
       <n-button type="primary" style="width: 120px" @click="validJsonTrans">转换</n-button>
       <n-button :disabled="validJsonResRef === ''" style="width: 120px" @click="copyText(validJsonResRef)">
         复制结果
       </n-button>
+      <n-divider :vertical="true"/>
+      <n-button type="primary" :disabled="validJsonResRef === ''" style="width: 120px" @click="addWorkFlow"
+                :loading="isLoading"
+      >执行
+      </n-button>
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-icon size="16">
+            <QuestionCircleTwotone/>
+          </n-icon>
+        </template>
+        直接在中台创建此任务
+      </n-tooltip>
     </n-space>
     <n-input
         style="margin-top: 10px"
@@ -67,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_job_project_list, get_person_list} from "@render/api/datacenter";
+import {add_workFlow, get_job_project_list, get_person_list} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -76,6 +89,7 @@ import {uuid} from "vue3-uuid";
 import useClipboard from 'vue-clipboard3';
 import {useMessage, FormInst} from 'naive-ui'
 import pinyin from 'pinyin';
+import {QuestionCircleTwotone} from '@vicons/antd'
 
 const message = useMessage()
 
@@ -159,6 +173,19 @@ const getBaseInfo = () => {
 
 }
 
+const isLoading = ref(false)
+
+const addWorkFlow = () => {
+  isLoading.value = true
+  add_workFlow(JSON.parse(validJsonResRef.value)).then((res) => {
+    if (res.code == 200) {
+      message.success(res.message)
+    } else {
+      message.error(res.message)
+    }
+    isLoading.value = false
+  })
+}
 
 </script>
 

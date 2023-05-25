@@ -91,11 +91,24 @@
       </n-tabs>
 
     </n-card>
-    <n-space justify="center" style="margin-top: 10px">
+    <n-space justify="center" align="center" style="margin-top: 10px">
       <n-button type="primary" style="width: 120px" @click="generate">生成</n-button>
       <n-button :disabled="resRef === ''" style="width: 120px" @click="copyText(resRef)">
         复制结果
       </n-button>
+      <n-divider :vertical="true"/>
+      <n-button type="primary" :disabled="resRef === ''" style="width: 120px" @click="addWorkFlow" :loading="isLoading">
+        执行
+      </n-button>
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-icon size="16">
+            <QuestionCircleTwotone/>
+          </n-icon>
+        </template>
+        直接在中台创建此任务
+      </n-tooltip>
+
     </n-space>
     <n-input
         style="margin-top: 10px"
@@ -107,12 +120,14 @@
 </template>
 
 <script setup lang="ts">
+import {add_workFlow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {FormInst, useMessage} from "naive-ui";
 import {ref, watch} from "vue";
 import useClipboard from "vue-clipboard3";
+import {QuestionCircleTwotone} from '@vicons/antd'
 
 const message = useMessage()
 
@@ -254,6 +269,20 @@ const generate = (e: MouseEvent) => {
     } else {
       console.log(errors)
     }
+  })
+}
+
+const isLoading = ref(false)
+
+const addWorkFlow = () => {
+  isLoading.value = true
+  add_workFlow(outputModel).then((res) => {
+    if (res.code == 200) {
+      message.success(res.message)
+    } else {
+      message.error(res.message)
+    }
+    isLoading.value = false
   })
 }
 </script>

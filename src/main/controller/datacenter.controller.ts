@@ -106,10 +106,30 @@ export class DatacenterController {
     @IpcHandle(channels.datacenter.checkInsertSql)
     public async handleCheckInsertSql(params: any) {
         let result
-        await new Promise((resolve, reject) => {
+        await this.commonPostRequest('/data_develop/assembly/checkSql', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.addWorkFlow)
+    public async handleAddWorkFlow(params: any) {
+        let result
+        await this.commonPostRequest('/workflow/proc/add', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    public commonPostRequest(url: string, params: any) {
+        return new Promise((resolve, reject) => {
             const request = net.request({
                 method: 'POST',
-                url: `${DatacenterController.apiUrl}/data_develop/assembly/checkSql`
+                url: `${DatacenterController.apiUrl}${url}`
             });
             request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
             request.setHeader('Content-Type', 'application/json;charset=UTF-8');
@@ -138,11 +158,6 @@ export class DatacenterController {
             request.write(JSON.stringify(params))
 
             request.end();
-        }).then((res) => {
-            result = res;
-        }).catch((err) => {
-            console.error(err);
-        });
-        return result
+        })
     }
 }

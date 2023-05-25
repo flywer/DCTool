@@ -19,6 +19,7 @@ export const channels = reactive({
         request: 'datacenter/request',
         dataSourceList: 'datacenter/dataSourceList',
         checkInsertSql: 'datacenter/checkInsertSql',
+        addWorkFlow: 'datacenter/addWorkFlow',
 
     }
 
