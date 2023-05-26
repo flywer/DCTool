@@ -23,14 +23,14 @@
                 <n-select
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
-                    :options="projectIdOptions"
+                    :options="projectIdOptions" :consistent-menu-width="false"
                 />
               </n-form-item-gi>
               <n-form-item-gi  label="责任人" path="personId">
                 <n-select
                     v-model:value="formModel.personId"
                     placeholder="选择责任人"
-                    :options="personIdOptions"
+                    :options="personIdOptions" :consistent-menu-width="false"
                 />
               </n-form-item-gi>
               <n-form-item-gi :span="4"> {{ previewRef }}</n-form-item-gi>
