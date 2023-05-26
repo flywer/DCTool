@@ -16,6 +16,9 @@
       <n-tab-pane name="5" tab="INSERT语句校验">
         <insert-sql-valid-tab/>
       </n-tab-pane>
+      <n-tab-pane name="6" tab="入库JSON生成">
+        <into-theme-tab/>
+      </n-tab-pane>
       <!--     <n-tab-pane name="6" tab="入库JSON生成">
             <backup-json-tab/>
           </n-tab-pane>-->
@@ -29,6 +32,7 @@ import BackupJsonTab from "@render/views/datacenter/backupJsonTab.vue";
 import CleanJsonTab from "@render/views/datacenter/cleanJsonTab.vue";
 import HiveSqlTab from "@render/views/datacenter/hiveSqlTab.vue";
 import InsertSqlValidTab from "@render/views/datacenter/insertSqlValidTab.vue";
+import IntoThemeTab from "@render/views/datacenter/intoThemeTab.vue";
 import ValidJsonTab from "@render/views/datacenter/validJsonTab.vue";
 </script>
 

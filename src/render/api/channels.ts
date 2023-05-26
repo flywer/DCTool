@@ -23,6 +23,7 @@ export const channels = reactive({
         getColumns: 'datacenter/getColumns',
         jobList: 'datacenter/jobList',
         personList: 'datacenter/personList',
+        getTables: 'datacenter/getTables',
 
     }
 

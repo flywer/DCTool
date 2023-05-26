@@ -86,6 +86,20 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getTables)
+    public async handleGetTables(datasourceId: string) {
+        let result
+
+        const query = `datasourceId=${datasourceId}`;
+
+        await this.commonGetRequest('/gather/api/metadata/getTables', query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string) {
         return new Promise((resolve, reject) => {
             const request = net.request({

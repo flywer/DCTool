@@ -14,20 +14,20 @@
                   :rules="rules"
                   label-placement="left"
           >
-            <n-grid :cols="4" :x-gap="12">
-              <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-grid :cols="3" :x-gap="12">
+              <n-form-item-gi label="表名" path="tableName">
                 <n-input v-model:value="formModel.tableName" placeholder="输入表名"
                          @keydown.enter.prevent
                 />
               </n-form-item-gi>
-              <n-form-item-gi :span="2" label="项目" path="projectId">
+              <n-form-item-gi label="项目" path="projectId">
                 <n-select
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
                     :options="projectIdOptions"
                 />
               </n-form-item-gi>
-              <n-form-item-gi :span="2" label="责任人" path="personId">
+              <n-form-item-gi label="责任人" path="personId">
                 <n-select
                     v-model:value="formModel.personId"
                     placeholder="选择责任人"
@@ -150,7 +150,7 @@ const formModel = ref({
   tableName: ''
 })
 
-const previewRef = ref(`工作流名称：bf_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr || ''}_${formModel.value.tableName}`)
+const previewRef = ref('')
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName],
     ([projectId, tableName]) => {

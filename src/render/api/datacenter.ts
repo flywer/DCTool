@@ -32,7 +32,24 @@ export const add_work_flow = async (obj: any) => {
 }
 
 // 获取表字段数组
-export const get_columns = async (datasourceId: number, tableName: string) => {
+export const get_tables = async (datasourceId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTables, datasourceId))
+    return data.data
+}
+
+// 获取表字段数组
+export const get_columns = async (datasourceId: string, tableName: string) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getColumns, datasourceId, tableName))
-    return data
+    // 遍历原数组中的每个元素，使用split()方法将其按照:分割成一个数组。
+    // 取这个新数组中第二个元素（索引为1），也就是两个冒号之间的值。
+    // 将这个值存储到一个新的数组中。
+    // 最后返回新的数组即可。
+    return data.data.map((item) => {
+        if (item.indexOf(':') === -1) {
+            return item.toLowerCase();
+        }
+
+        const parts = item.split(':');
+        return parts[1].toLowerCase();
+    });
 }
