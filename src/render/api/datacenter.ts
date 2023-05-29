@@ -53,3 +53,21 @@ export const get_columns = async (datasourceId: string, tableName: string) => {
         return parts[1];
     });
 }
+
+// 获取dataXJobJson
+export const build_datax_json = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.buildDataXJson, obj))
+    return data.data
+}
+
+// 创建采集任务
+export const add_datax_job = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.addDataXJob, obj))
+    return data
+}
+
+// 创建采集调度任务
+export const add_sched_task = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.addSchedTask, obj))
+    return data
+}

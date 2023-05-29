@@ -100,6 +100,39 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.buildDataXJson)
+    public async handleBuildDataXJson(params: any) {
+        let result
+        await this.commonPostRequest('/gather/api/dataxJson/buildJson', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.addDataXJob)
+    public async handleAddDataXJob(params: any) {
+        let result
+        await this.commonPostRequest('/gather/api/jobTemplate/add', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.addSchedTask)
+    public async handleAddSchedTask(params: any) {
+        let result
+        await this.commonPostRequest('/gather/api/job/add', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string) {
         return new Promise((resolve, reject) => {
             const request = net.request({

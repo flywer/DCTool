@@ -19,9 +19,9 @@
       <n-tab-pane name="6" tab="入库JSON生成">
         <into-theme-tab/>
       </n-tab-pane>
-      <!--     <n-tab-pane name="6" tab="入库JSON生成">
-            <backup-json-tab/>
-          </n-tab-pane>-->
+      <n-tab-pane name="7" tab="共享JSON生成">
+        <share-json-tab/>
+      </n-tab-pane>
     </n-tabs>
   </n-layout>
 
@@ -33,6 +33,7 @@ import CleanJsonTab from "@render/views/datacenter/cleanJsonTab.vue";
 import HiveSqlTab from "@render/views/datacenter/hiveSqlTab.vue";
 import InsertSqlValidTab from "@render/views/datacenter/insertSqlValidTab.vue";
 import IntoThemeTab from "@render/views/datacenter/intoThemeTab.vue";
+import ShareJsonTab from "@render/views/datacenter/shareJsonTab.vue";
 import ValidJsonTab from "@render/views/datacenter/validJsonTab.vue";
 </script>
 

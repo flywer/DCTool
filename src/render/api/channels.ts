@@ -24,6 +24,9 @@ export const channels = reactive({
         jobList: 'datacenter/jobList',
         personList: 'datacenter/personList',
         getTables: 'datacenter/getTables',
+        buildDataXJson: 'datacenter/buildDataXJson',
+        addDataXJob:  'datacenter/addDataXJob',
+        addSchedTask: 'datacenter/addSchedTask',
 
     }
 
