@@ -27,6 +27,7 @@
     "moment": "^2.29.4",
     "pinyin": "^3.0.0-alpha.5",
     "sharp": "^0.32.0",
+    "sql-formatter": "^12.2.1",
     "tesseract.js": "^4.0.2",
     "vfonts": "^0.0.3",
     "vue": "^3.2.38",

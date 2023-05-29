@@ -118,7 +118,10 @@
         去除不同名称字段
       </n-checkbox>
       <n-divider :vertical="true"/>
-      <n-button type="primary" style="width: 120px" @click="generateSql">SQL生成</n-button>
+      <n-button type="primary" style="width: 120px" @click="generateSql" :loading="isGenerating">SQL生成</n-button>
+      <n-button :disabled="insertSqlRef === ''" style="width: 120px" @click="copyText(insertSqlRef)">
+        复制结果
+      </n-button>
     </n-space>
     <n-input
         v-model:value="insertSqlRef"
@@ -144,8 +147,17 @@ import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
 import {ref, watch} from 'vue'
+import {format} from 'sql-formatter';
+import useClipboard from "vue-clipboard3";
 
 const message = useMessage()
+
+const {toClipboard} = useClipboard();
+
+const copyText = async (text) => {
+  await toClipboard(text);
+  message.success('复制成功')
+}
 
 const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
@@ -173,6 +185,7 @@ const rules = {
     message: '请输入工作流名称'
   },
   projectId: {
+    key: 'table',
     required: true,
     trigger: ['blur', 'change'],
     message: '请选择项目'
@@ -207,6 +220,7 @@ const rules = {
     message: '请输入目标表'
   },
   tableName: {
+    key: 'table',
     required: true,
     trigger: ['blur', 'input'],
     message: '请输入表名'
@@ -249,8 +263,11 @@ const removeIdCheckRef = ref(true)
 const removeDiffCheckRef = ref(true)
 
 const insertSqlRef = ref('')
+const isGenerating = ref(false)
 
 const generateSql = () => {
+
+  isGenerating.value = true
 
   if (formModel.value.sourceDataSourceId.length < 1) {
     formModel.value.sourceDataSourceId = '6'
@@ -269,15 +286,14 @@ const generateSql = () => {
             targetTableColumns = targetTableColumns.filter(c => c !== 'id')
           }
           if (removeDiffCheckRef.value) {
-            const columns = intersectArrays(sourceTableColumns, targetTableColumns)
-            sourceTableColumns = columns
-            targetTableColumns = columns
+            const elements = findCommonElements(sourceTableColumns, targetTableColumns);
+            sourceTableColumns = elements.updatedArr1
+            targetTableColumns = elements.updatedArr2
           }
 
-          insertSqlRef.value = `INSERT INTO ${formModel.value.targetTableName} (${targetTableColumns.join(',')})` +
-              `\nSELECT\n${sourceTableColumns.join(',')}\n` +
-              `FROM ${formModel.value.sourceTableName}`
-
+          insertSqlRef.value = format(`INSERT INTO ${formModel.value.targetTableName} (${targetTableColumns.join(',')})
+                                       SELECT ${sourceTableColumns.join(',')}
+                                       FROM ${formModel.value.sourceTableName}`, {language: 'mysql'})
         } else {
           console.error(errors)
         }
@@ -285,7 +301,44 @@ const generateSql = () => {
       (rule) => {
         return rule?.key === 'table'
       }
-  )
+  ).then(() => {
+    isGenerating.value = false
+  }).catch(() => {
+    isGenerating.value = false
+  })
+}
+
+// 合并两数组，只取共有元素
+const intersectArrays = <T>(a: T[], b: T[]): (string | T)[] => {
+  const setA = new Set(a);
+  const setB = new Set(b);
+  return [...setA].filter(x => setB.has(x));
+}
+
+// 根据两数组的共有元素，不区分大小写，过滤原数组，并返回更新之后的原数组
+function findCommonElements(arr1: string[], arr2: string[]) {
+  const commonElements: string[] = [];
+
+  // 将arr1数组中的所有元素转换为小写字母形式，以便与arr2数组进行比较
+  const lowerCaseArr1 = arr1.map((el) => el.toLowerCase());
+
+  for (const element of arr2) {
+    // 将arr2数组中的元素转换为小写字母形式，以便与arr1数组中的元素进行比较
+    const lowerCaseElement = element.toLowerCase();
+
+    if (lowerCaseArr1.includes(lowerCaseElement)) {
+      commonElements.push(lowerCaseElement);
+    }
+  }
+
+  // 在原始数组中过滤出包含相同元素的新数组
+  const updatedArr1 = arr1.filter((el) => commonElements.includes(el.toLowerCase()));
+  const updatedArr2 = arr2.filter((el) => commonElements.includes(el.toLowerCase()));
+
+  return {
+    updatedArr1,
+    updatedArr2
+  };
 }
 
 let paramsModel = {
@@ -335,7 +388,8 @@ const isLoading = ref(false)
 const addWorkFlow = () => {
   isLoading.value = true
 
-  formRef.value?.validate((errors) => {
+  formRef.value?.validate(
+      (errors) => {
         if (!errors) {
 
           paramsModel.modelJson = paramsModel.modelJson.replace(/sourceTable/g, `${formModel.value.sourceTableName}`).replace(/targetTable/g, `${formModel.value.targetTableName}`)
@@ -367,23 +421,19 @@ const addWorkFlow = () => {
               message.error(res.message)
             }
             isLoading.value = false
+          }).catch(()=>{
+             isLoading.value = false
           })
 
         } else {
           console.log(errors)
         }
       }
-  )
+  ).catch(()=>{
+      isLoading.value = false
+  })
 
 }
-
-// 合并两数组，只取共有元素
-const intersectArrays = <T>(a: T[], b: T[]): T[] => {
-  const setA = new Set(a);
-  const setB = new Set(b);
-  return [...setA].filter(x => setB.has(x));
-}
-
 
 </script>
 

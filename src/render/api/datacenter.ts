@@ -46,10 +46,10 @@ export const get_columns = async (datasourceId: string, tableName: string) => {
     // 最后返回新的数组即可。
     return data.data.map((item) => {
         if (item.indexOf(':') === -1) {
-            return item.toLowerCase();
+            return item;
         }
 
         const parts = item.split(':');
-        return parts[1].toLowerCase();
+        return parts[1];
     });
 }
