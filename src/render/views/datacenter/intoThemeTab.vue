@@ -33,7 +33,7 @@
                     :options="personIdOptions" :consistent-menu-width="false"
                 />
               </n-form-item-gi>
-              <n-form-item-gi :span="4"> {{ previewRef }}</n-form-item-gi>
+              <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
             </n-grid>
           </n-form>
         </n-tab-pane>

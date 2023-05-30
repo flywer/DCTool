@@ -20,11 +20,13 @@
             :default-value="6"
             :options="datasourceOptions"
             style="width: 200px"
+            :size="'small'"
         >
         </n-select>
         <n-input v-model:value="targetTableRef.tableName"
                  placeholder=""
                  readonly style="width: 200px"
+                  :size="'small'"
         />
       </n-space>
       <n-divider/>
@@ -36,6 +38,7 @@
                 v-model:value="sourceTableDataSourceId"
                 :options="datasourceOptions"
                 style="width: 200px"
+                 :size="'small'"
             />
           </n-space>
 
@@ -47,6 +50,7 @@
             <n-input :value="table" style="width: 200px"
                      placeholder=""
                      readonly
+                      :size="'small'"
             />
           </n-space>
         </n-gi>

@@ -11,7 +11,7 @@
         :clearable="true"
         @blur="getBaseInfo"
     />
-    <n-card style="margin-top: 10px">
+    <n-card style="margin-top: 10px" :content-style="{paddingBottom:0}">
       <n-form
           ref="validJsonFormRef"
           inline

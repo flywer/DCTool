@@ -4,7 +4,7 @@
       备份任务的写法基本相同，这里只需这个表单的信息即可生成对应的备份任务JSON<br>
       目前只能用于两张表皆是中台TBDS-hive表
     </n-alert>
-    <n-card style="margin-top: 10px">
+    <n-card style="margin-top: 10px" :content-style="{paddingTop:0,paddingBottom:0}">
       <n-tabs type="line" animated>
         <n-tab-pane name="1" tab="简易模式">
           <n-form ref="formRef"
@@ -34,8 +34,7 @@
                     :options="personIdOptions" :consistent-menu-width="false"
                 />
               </n-form-item-gi>
-              <n-form-item-gi :span="4"> {{ previewRef }}</n-form-item-gi>
-
+              <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
             </n-grid>
           </n-form>
 
