@@ -1,7 +1,6 @@
 <template>
-  <n-layout has-sider style="margin-top: 32px;height: 100%">
+  <n-layout has-sider style="margin-top: 32px;">
     <n-layout-sider
-        style="overflow: hidden"
         collapse-mode="width"
         :collapsed-width="64"
         :width="145"
@@ -10,15 +9,18 @@
         @collapse="collapsed = true"
         @expand="collapsed = false"
     >
-      <n-menu
-          ref="menuInstRef"
-          v-model:value="selectedKey"
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :collapsed-icon-size="22"
-          :options="menuOptions"
-      />
+      <n-scrollbar style="height: calc(100vh - 32px);" trigger="hover">
+        <n-menu
+            ref="menuInstRef"
+            v-model:value="selectedKey"
+            :collapsed="collapsed"
+            :collapsed-width="74"
+            :collapsed-icon-size="22"
+            :options="menuOptions"
+        />
+      </n-scrollbar>
     </n-layout-sider>
+
     <n-layout style="height:100%">
       <n-message-provider>
         <router-view/>
@@ -34,8 +36,9 @@ import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink} from "vue-router";
 import {HomeOutlined} from '@vicons/antd'
 import {AccessibleIcon} from '@vicons/fa'
-import {VisualRecognition, Svg, DataVis3} from '@vicons/carbon'
-import {LetterF} from '@vicons/tabler'
+import {VisualRecognition, Svg, DataVis3, Sql} from '@vicons/carbon'
+import {LetterF, LetterH} from '@vicons/tabler'
+import {TextGrammarCheckmark24Regular} from '@vicons/fluent'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 // 菜单项
@@ -46,13 +49,55 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.home,
+                name: routeName.datacenter,
               }
             },
-            {default: () => '首页'}
+            {default: () => 'JSON生成'}
         ),
-    key: routeName.home,
-    icon: renderIcon(HomeOutlined)
+    key: routeName.datacenter,
+    icon: renderIcon(DataVis3)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.hiveSqlTrans,
+              }
+            },
+            {default: () => 'SQL转换'}
+        ),
+    key: routeName.hiveSqlTrans,
+    icon: renderIcon(LetterH)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.execSql,
+              }
+            },
+            {default: () => 'SQL执行'}
+        ),
+    key: routeName.execSql,
+    icon: renderIcon(Sql)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.sqlValid,
+              }
+            },
+            {default: () => 'SQL校验'}
+        ),
+    key: routeName.sqlValid,
+    icon: renderIcon(TextGrammarCheckmark24Regular)
   },
   {
     label: () =>
@@ -67,6 +112,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.ldDecrypt,
     icon: renderIcon(AccessibleIcon)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.flattenText,
+              }
+            },
+            {default: () => '文本扁平'}
+        ),
+    key: routeName.flattenText,
+    icon: renderIcon(LetterF)
   },
   {
     label: () =>
@@ -96,34 +155,6 @@ const menuOptions: MenuOption[] = [
     key: routeName.svg,
     icon: renderIcon(Svg)
   },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.datacenter,
-              }
-            },
-            {default: () => '数据中台'}
-        ),
-    key: routeName.datacenter,
-    icon: renderIcon(DataVis3)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.flattenText,
-              }
-            },
-            {default: () => '文本扁平'}
-        ),
-    key: routeName.flattenText,
-    icon: renderIcon(LetterF)
-  }
 ]
 
 // 菜单实例

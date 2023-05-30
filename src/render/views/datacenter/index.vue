@@ -1,9 +1,9 @@
 <template>
   <n-layout style="margin-left: 10px;margin-right: 10px;margin-top: 10px;">
     <n-tabs type="line" animated>
-      <n-tab-pane name="1" tab="Hive建表语句转换">
+<!--      <n-tab-pane name="1" tab="Hive建表语句转换">
         <hive-sql-tab/>
-      </n-tab-pane>
+      </n-tab-pane>-->
       <n-tab-pane name="2" tab="质检JSON生成">
         <valid-json-tab/>
       </n-tab-pane>

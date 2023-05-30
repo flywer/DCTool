@@ -71,3 +71,13 @@ export const add_sched_task = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.addSchedTask, obj))
     return data
 }
+
+export const exec_sql = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.execSql, obj))
+    return data
+}
+
+export const sql_valid = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.sqlValid, obj))
+    return data
+}

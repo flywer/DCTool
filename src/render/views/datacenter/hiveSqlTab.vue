@@ -1,26 +1,30 @@
 <template>
-  <n-alert title="说明" type="default" :show-icon="false">
-    因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句，注意decimal类型没有自动转换，可自行手动改为varchar或者string
-  </n-alert>
-  <n-input
-      style="margin-top: 10px"
-      v-model:value="hiveSqlInputRef"
-      type="textarea"
-      placeholder="输入MYSQL建表语句"
-      :clearable="true"
-  />
-  <n-space justify="center" style="margin-top: 10px">
-    <n-button type="primary" style="width: 120px" @click="hiveSqlTrans">转换</n-button>
-    <n-button :disabled="hiveSqlResRef === ''" style="width: 120px" @click="copyText(hiveSqlResRef)">
-      复制结果
-    </n-button>
-  </n-space>
-  <n-input
-      style="margin-top: 10px"
-      v-model:value="hiveSqlResRef"
-      type="textarea"
-      placeholder=""
-  />
+  <n-layout style="margin: 10px 10px 0 10px">
+    <n-scrollbar style="height: calc(100vh - 42px); padding-right: 10px;" trigger="hover">
+      <n-alert title="说明" type="default" :show-icon="false">
+        因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句，注意decimal类型没有自动转换，可自行手动改为varchar或者string
+      </n-alert>
+      <n-input
+          style="margin-top: 10px"
+          v-model:value="hiveSqlInputRef"
+          type="textarea"
+          placeholder="输入MYSQL建表语句"
+          :clearable="true"
+      />
+      <n-space justify="center" style="margin-top: 10px">
+        <n-button type="primary" style="width: 120px" @click="hiveSqlTrans">转换</n-button>
+        <n-button :disabled="hiveSqlResRef === ''" style="width: 120px" @click="copyText(hiveSqlResRef)">
+          复制结果
+        </n-button>
+      </n-space>
+      <n-input
+          style="margin-top: 10px"
+          v-model:value="hiveSqlResRef"
+          type="textarea"
+          placeholder=""
+      />
+    </n-scrollbar>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
@@ -64,15 +68,14 @@ const hiveSqlTrans = () => {
   const new_string = new_lines.join('\n');
 
   const trans_string = new_string
-      .replace(/varchar/g, 'VARCHAR') // varchar 格式化
-      .replace(/comment/g, 'COMMENT') // comment 格式化
-      .replace(/text/g, 'TEXT') // text 格式化
-      .replace(/comment =|COMMENT =/g, 'COMMENT') // comment = 转为 COMMENT
-      .replace(/datetime|DATETIME/g, 'TIMESTAMP') // datetime转为TIMESTAMP
-      .replace(/date/g, 'DATE') // date 格式化
-      .replace(/NOT NULL|NULL|null|not null/g, '') // 删除无法识别的关键词
-      .replace(/int(\(.*\))?/g, 'INT') // int无需长度
-      .replace(/INT(\(.*\))?/g, 'INT') // INT无需长度
+      .replace(/varchar/gi, 'VARCHAR') // varchar 格式化
+      .replace(/comment/gi, 'COMMENT') // comment 格式化
+      .replace(/text/gi, 'STRING') // text 格式化
+      .replace(/comment =/gi, 'COMMENT') // comment = 转为 COMMENT
+      .replace(/datetime/gi, 'TIMESTAMP') // datetime转为TIMESTAMP
+      .replace(/date/gi, 'DATE') // date 格式化
+      .replace(/not null|null/gi, '') // 删除无法识别的关键词
+      .replace(/int(\(.*\))?/gi, 'INT') // int无需长度
       .replace(/;.*'/g, '\'') // 清除多余注释
       .replace(";", " ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' STORED AS ORC ") // 添加hive建表语句
       .replace(/\n\s*\n/g, '\n')// 删除多余空行

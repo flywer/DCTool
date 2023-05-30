@@ -133,6 +133,28 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.execSql)
+    public async handleExecSql(params: any) {
+        let result
+        await this.commonPostRequest('/datawork/datamodelTables/save', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.sqlValid)
+    public async handleSqlValid(params: any) {
+        let result
+        await this.commonPostRequest('/gather/api/metadataCatch/executeSqlPost', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string) {
         return new Promise((resolve, reject) => {
             const request = net.request({

@@ -27,6 +27,8 @@ export const channels = reactive({
         buildDataXJson: 'datacenter/buildDataXJson',
         addDataXJob:  'datacenter/addDataXJob',
         addSchedTask: 'datacenter/addSchedTask',
+        execSql: 'datacenter/execSql',
+        sqlValid: 'datacenter/sqlValid',
 
     }
 

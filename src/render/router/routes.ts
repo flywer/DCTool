@@ -7,6 +7,10 @@ const svg = () => import('@render/views/svgConvert/index.vue')
 const datacenter = () => import('@render/views/datacenter/index.vue')
 
 const flattenText = () => import('@render/views/flattenText/index.vue')
+const cjJob = () => import('@render/views/cjJob/index.vue')
+const execSql = () => import('@render/views/execSql/index.vue')
+const sqlValid = () => import('@render/views/sqlValid/index.vue')
+const hiveSqlTrans = () => import('@render/views/datacenter/hiveSqlTab.vue')
 
 export const routeName = {
     home: 'home',
@@ -14,7 +18,11 @@ export const routeName = {
     ocr: 'ocr',
     svg: 'svg',
     datacenter: 'datacenter',
-    flattenText: 'flattenText'
+    flattenText: 'flattenText',
+    cjJob: 'cjJob',
+    execSql: 'execSql',
+    sqlValid: 'sqlValid',
+    hiveSqlTrans: 'hiveSqlTrans'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -51,5 +59,24 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.flattenText,
         path: '/flattenText/index',
         component: flattenText
+    },
+    {
+        name: routeName.cjJob,
+        path: '/cjJob/index',
+        component: cjJob
+    },
+    {
+        name: routeName.execSql,
+        path: '/execSql/index',
+        component: execSql
+    },
+    {
+        name: routeName.sqlValid,
+        path: '/sqlValid/index',
+        component: sqlValid
+    },{
+        name: routeName.hiveSqlTrans,
+        path: '/hiveSqlTrans/index',
+        component: hiveSqlTrans
     }
 ]
