@@ -25,6 +25,7 @@
                     placeholder="选择项目"
                     :options="projectIdOptions"
                     :consistent-menu-width="false"
+                    filterable
                 />
               </n-form-item-gi>
               <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
@@ -79,6 +80,7 @@
 </template>
 
 <script lang="ts" setup>
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_datax_job, add_sched_task, build_datax_json, get_columns} from "@render/api/datacenter";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {FormInst, useMessage} from "naive-ui";
@@ -161,12 +163,12 @@ const rules = {
 const previewRef = ref('')
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName],
-    ([projectId, tableName]) => {
-      const abbr = projectIdOptions.find(option => option.value === projectId)?.abbr || ''
-      formModel.value.name = `gx_${abbr}_${tableName}`
+    async ([projectId, tableName]) => {
+      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+      formModel.value.name = `gx_${projectAbbr}_${tableName}`
       formModel.value.sourceTableName = `sztk_${tableName}`
       formModel.value.targetTableName = `gdsztk_${tableName}`
-      previewRef.value = `工作流名称：rk_${abbr}_${tableName}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
+      previewRef.value = `工作流名称：rk_${projectAbbr}_${tableName}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
 
     }
 )

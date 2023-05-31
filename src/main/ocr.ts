@@ -1,3 +1,4 @@
+/*
 import {app} from "electron";
 import * as fs from 'fs';
 import path from "path";
@@ -29,7 +30,7 @@ export const ocr = async (filePath: string) => {
         text = result.data.text;
         console.log(text)
 
-        /*             // 将识别结果整理为Excel表格
+        /!*             // 将识别结果整理为Excel表格
                     const words = text.split(' ');
                     const rows = [];
                     let currentRow = [];
@@ -47,7 +48,7 @@ export const ocr = async (filePath: string) => {
                     const workbook = xlsx.utils.book_new();
                     const worksheet = xlsx.utils.aoa_to_sheet(rows);
                     xlsx.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-                    xlsx.writeFile(workbook, 'output.xlsx'); */
+                    xlsx.writeFile(workbook, 'output.xlsx'); *!/
     });
 
     return text
@@ -55,3 +56,4 @@ export const ocr = async (filePath: string) => {
 
 
 
+*/

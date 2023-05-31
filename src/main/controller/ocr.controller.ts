@@ -1,4 +1,4 @@
-import {ocr} from "@main/ocr";
+// import {ocr} from "@main/ocr";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
 import {dialog} from "electron";
@@ -10,7 +10,7 @@ export class OcrController {
 
     @IpcHandle(channels.ocr.scan)
     public async scan() {
-        let result = ''
+        /* let result = ''
         await dialog.showOpenDialog({
             title: '选择待解密的文件',
             filters: [{
@@ -25,6 +25,6 @@ export class OcrController {
             }
         });
 
-        return result
+        return result */
     }
 }

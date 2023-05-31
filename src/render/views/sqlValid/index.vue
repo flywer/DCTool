@@ -26,14 +26,14 @@
                   type="textarea"
                   placeholder="输入SQL语句"
                   :clearable="true"
-                  :autosize=" {  minRows: 5 }"
+                  :autosize=" {  minRows: 5,maxRows:14 }"
               />
             </n-form-item-gi>
           </n-grid>
         </n-form>
       </n-card>
       <n-space justify="center" align="center" style="margin-top: 10px">
-        <n-button type="primary" style="width: 120px" @click="exec" :loading="isLoading">执行</n-button>
+        <n-button type="primary" style="width: 120px" @click="exec" :loading="isLoading">校验</n-button>
       </n-space>
 
       <n-input
@@ -96,9 +96,9 @@ const exec = () => {
 
       await sql_valid(paramModel).then((res) => {
         if (res.code == 0) {
-          message.success('执行成功')
+          message.success('校验成功')
         } else {
-          message.error('执行失败，具体看返回结果')
+          message.error('校验失败，具体看返回结果')
           resRef.value = res.msg
         }
 

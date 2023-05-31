@@ -39,7 +39,7 @@
                   type="textarea"
                   placeholder="输入SQL语句"
                   :clearable="true"
-                  :autosize=" {  minRows: 5 }"
+                  :autosize=" {  minRows: 5,maxRows:14 }"
               />
             </n-form-item-gi>
           </n-grid>

@@ -10,7 +10,7 @@
 import {scan} from "@render/api/ocr.api";
 
 const ocr = () => {
-  scan()
+ // scan()
 }
 
 </script>

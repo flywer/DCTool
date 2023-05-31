@@ -6,6 +6,8 @@ import {router} from "@render/router";
 import 'vfonts/Lato.css'
 // 全局样式
 import '@render/styles/css/global.css'
+// 全局样式
+import '@render/styles/css/tailwind.css'
 
 createApp(App)
     .use(naive)

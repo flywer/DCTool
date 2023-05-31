@@ -25,10 +25,16 @@ export const channels = reactive({
         personList: 'datacenter/personList',
         getTables: 'datacenter/getTables',
         buildDataXJson: 'datacenter/buildDataXJson',
-        addDataXJob:  'datacenter/addDataXJob',
+        addDataXJob: 'datacenter/addDataXJob',
         addSchedTask: 'datacenter/addSchedTask',
         execSql: 'datacenter/execSql',
         sqlValid: 'datacenter/sqlValid',
+
+    },
+    auxiliaryDb: {
+        getProjectInfo: 'auxiliaryDb/getProjectInfo',
+        updateProjectInfo: 'auxiliaryDb/updateProjectInfo',
+        findByProjectId: 'auxiliaryDb/findByProjectId',
 
     }
 

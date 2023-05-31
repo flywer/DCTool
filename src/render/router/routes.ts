@@ -11,6 +11,7 @@ const cjJob = () => import('@render/views/cjJob/index.vue')
 const execSql = () => import('@render/views/execSql/index.vue')
 const sqlValid = () => import('@render/views/sqlValid/index.vue')
 const hiveSqlTrans = () => import('@render/views/datacenter/hiveSqlTab.vue')
+const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -22,13 +23,14 @@ export const routeName = {
     cjJob: 'cjJob',
     execSql: 'execSql',
     sqlValid: 'sqlValid',
-    hiveSqlTrans: 'hiveSqlTrans'
+    hiveSqlTrans: 'hiveSqlTrans',
+    projectAbbr: 'projectAbbr'
 }
 
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect:'/datacenter/index',
+        redirect: '/datacenter/index',
     },
     {
         path: '/examples',
@@ -74,9 +76,15 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.sqlValid,
         path: '/sqlValid/index',
         component: sqlValid
-    },{
+    },
+    {
         name: routeName.hiveSqlTrans,
         path: '/hiveSqlTrans/index',
         component: hiveSqlTrans
+    },
+    {
+        name: routeName.projectAbbr,
+        path: '/projectAbbr/index',
+        component: projectAbbr
     }
 ]

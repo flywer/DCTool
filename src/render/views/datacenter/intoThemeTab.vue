@@ -23,7 +23,9 @@
                 <n-select
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
-                    :options="projectIdOptions" :consistent-menu-width="false"
+                    :options="projectIdOptions"
+                    :consistent-menu-width="false"
+                    filterable
                 />
               </n-form-item-gi>
               <n-form-item-gi label="责任人" path="personId">
@@ -56,6 +58,7 @@
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
                     :options="projectIdOptions"
+                    filterable
                 />
               </n-form-item-gi>
               <n-form-item-gi label="责任人" path="personId">
@@ -141,6 +144,7 @@
 </template>
 
 <script setup lang="ts">
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow, get_columns, get_tables} from "@render/api/datacenter";
 import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
@@ -230,12 +234,12 @@ const rules = {
 const previewRef = ref('')
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName],
-    ([projectId, tableName]) => {
-      const abbr = projectIdOptions.find(option => option.value === projectId)?.abbr || ''
-      formModel.value.name = `rk_${abbr}_${tableName}`
-      formModel.value.sourceTableName = `df_${abbr}_${tableName}_dwb`
+    async ([projectId, tableName]) => {
+      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+      formModel.value.name = `rk_${projectAbbr}_${tableName}`
+      formModel.value.sourceTableName = `df_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr || ''}_${tableName}_dwb`
       formModel.value.targetTableName = `sztk_${tableName}`
-      previewRef.value = `工作流名称：rk_${abbr}_${tableName}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
+      previewRef.value = `工作流名称：rk_${projectAbbr}_${tableName}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
 
     }
 )
@@ -421,16 +425,16 @@ const addWorkFlow = () => {
               message.error(res.message)
             }
             isLoading.value = false
-          }).catch(()=>{
-             isLoading.value = false
+          }).catch(() => {
+            isLoading.value = false
           })
 
         } else {
           console.log(errors)
         }
       }
-  ).catch(()=>{
-      isLoading.value = false
+  ).catch(() => {
+    isLoading.value = false
   })
 
 }

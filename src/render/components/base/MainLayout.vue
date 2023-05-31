@@ -133,13 +133,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.ocr,
+                name: routeName.svg,
               }
             },
-            {default: () => 'OCR'}
+            {default: () => 'SVG转换'}
         ),
-    key: routeName.ocr,
-    icon: renderIcon(VisualRecognition)
+    key: routeName.svg,
+    icon: renderIcon(Svg)
   },
   {
     label: () =>
@@ -147,12 +147,12 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.svg,
+                name: routeName.projectAbbr,
               }
             },
-            {default: () => 'SVG转换'}
+            {default: () => '项目简称'}
         ),
-    key: routeName.svg,
+    key: routeName.projectAbbr,
     icon: renderIcon(Svg)
   },
 ]

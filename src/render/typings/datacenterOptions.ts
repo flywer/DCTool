@@ -6,12 +6,11 @@ import pinyin from "pinyin";
 export const projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list()).map(
     (v => ({
         label: v.name,
-        value: v.id.toString(),
-        abbr: pinyin(v.name.replaceAll(/广东/g, '').replaceAll(/数据归集/g, ''), {
-            style: pinyin.STYLE_FIRST_LETTER,
-        }).join('')
+        value: v.id.toString()
     }))
 )
+
+
 
 // 负责人
 export const personIdOptions: Array<SelectOption | SelectGroupOption> = (await get_person_list()).map(

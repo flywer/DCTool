@@ -31,6 +31,7 @@
                 v-model:value="validJsonFormModel.projectId"
                 placeholder="选择项目"
                 :options="projectIdOptions"
+                filterable
             />
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="责任人" path="personId">

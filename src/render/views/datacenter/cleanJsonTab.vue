@@ -23,7 +23,9 @@
                 <n-select
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
-                    :options="projectIdOptions" :consistent-menu-width="false"
+                    :options="projectIdOptions"
+                    :consistent-menu-width="false"
+                    filterable
                 />
               </n-form-item-gi>
               <n-form-item-gi  label="责任人" path="personId">
@@ -68,6 +70,7 @@
                     v-model:value="formModel.projectId"
                     placeholder="选择项目"
                     :options="projectIdOptions"
+                    filterable
                 />
               </n-form-item-gi>
               <n-form-item-gi :span="2" label="责任人" path="personId">
@@ -120,6 +123,7 @@
 </template>
 
 <script setup lang="ts">
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
@@ -153,10 +157,10 @@ const formModel = ref({
 const previewRef = ref('')
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName],
-    ([projectId, tableName]) => {
-      const abbr = projectIdOptions.find(option => option.value === projectId)?.abbr || ''
-      previewRef.value = `工作流名称：qc_${abbr}_${tableName}`
-      formModel.value.name = `qc_${abbr}_${tableName}`
+    async ([projectId, tableName]) => {
+      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+      previewRef.value = `工作流名称：qc_${projectAbbr}_${tableName}`
+      formModel.value.name = `qc_${projectAbbr}_${tableName}`
     }
 )
 const rules = {
@@ -241,10 +245,10 @@ let outputModel = {
 
 const generate = (e: MouseEvent) => {
   e.preventDefault()
-  formRef.value?.validate((errors) => {
+  formRef.value?.validate(async (errors) => {
     if (!errors) {
       if (formModel.value.sourceTable === '' || formModel.value.targetTable === '') {
-        const tableName = `di_${projectIdOptions.find(option => option.value === formModel.value.projectId)?.abbr}_${formModel.value.tableName}_temp_ods`
+        const tableName = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
         formModel.value.sourceTable = tableName
         formModel.value.targetTable = tableName
       }
