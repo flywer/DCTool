@@ -28,7 +28,7 @@ export const routeName = {
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/examples',
+        redirect:'/datacenter/index',
     },
     {
         path: '/examples',
