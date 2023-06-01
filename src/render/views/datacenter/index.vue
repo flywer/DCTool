@@ -4,9 +4,9 @@
 <!--      <n-tab-pane name="1" tab="Hive建表语句转换">
         <hive-sql-tab/>
       </n-tab-pane>-->
-      <n-tab-pane name="2" tab="质检JSON生成">
+<!--      <n-tab-pane name="2" tab="质检JSON生成">
         <valid-json-tab/>
-      </n-tab-pane>
+      </n-tab-pane>-->
       <n-tab-pane name="3" tab="备份JSON生成">
         <backup-json-tab/>
       </n-tab-pane>
@@ -34,7 +34,7 @@ import HiveSqlTab from "@render/views/datacenter/hiveSqlTab.vue";
 import InsertSqlValidTab from "@render/views/datacenter/insertSqlValidTab.vue";
 import IntoThemeTab from "@render/views/datacenter/intoThemeTab.vue";
 import ShareJsonTab from "@render/views/datacenter/shareJsonTab.vue";
-import ValidJsonTab from "@render/views/datacenter/validJsonTab.vue";
+import ValidJsonTab from "@render/views/zjJob/zjJsonTransTab.vue";
 </script>
 
 <style scoped>

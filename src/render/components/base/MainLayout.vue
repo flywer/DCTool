@@ -1,6 +1,7 @@
 <template>
   <n-layout has-sider style="margin-top: 32px;">
     <n-layout-sider
+         class="select-none"
         collapse-mode="width"
         :collapsed-width="64"
         :width="145"
@@ -37,12 +38,26 @@ import {RouterLink} from "vue-router";
 import {HomeOutlined} from '@vicons/antd'
 import {AccessibleIcon} from '@vicons/fa'
 import {VisualRecognition, Svg, DataVis3, Sql} from '@vicons/carbon'
-import {LetterF, LetterH} from '@vicons/tabler'
+import {LetterF, LetterH, LetterZ} from '@vicons/tabler'
 import {TextGrammarCheckmark24Regular} from '@vicons/fluent'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 // 菜单项
 const menuOptions: MenuOption[] = [
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.zjJob,
+              }
+            },
+            {default: () => '质检任务'}
+        ),
+    key: routeName.zjJob,
+    icon: () => h('span', 'ZJ')
+  },
   {
     label: () =>
         h(
@@ -154,7 +169,7 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.projectAbbr,
     icon: renderIcon(Svg)
-  },
+  }
 ]
 
 // 菜单实例

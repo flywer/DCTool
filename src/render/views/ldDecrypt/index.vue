@@ -4,7 +4,6 @@
       <n-button @click="decrypt" style="width: 80%">选择待解密的文件</n-button>
     </n-gi>
   </n-grid>
-
 </template>
 
 <script setup lang="ts">

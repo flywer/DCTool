@@ -1,16 +1,17 @@
 <template>
   <n-layout class="m-2">
-    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 50px);" trigger="hover">
       <n-alert title="说明" type="default" :show-icon="false">
         在这里配置每个项目的缩写简称
       </n-alert>
       <n-data-table
-          class="mt-2"
+          class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
           :pagination="false"
           :bordered="false"
           :size="'small'"
+          :loading="isLoading"
       />
     </n-scrollbar>
   </n-layout>
@@ -30,6 +31,8 @@ const message = useMessage()
 
 const tableDataRef = ref([])
 
+const isLoading = ref(true)
+
 type ProjectInfo = {
   id: number
   projectId: string
@@ -39,44 +42,27 @@ type ProjectInfo = {
 }
 
 onMounted(async () => {
+  await tableDataInit()
+})
+
+const tableDataInit = async () => {
+  isLoading.value = true
   const map = (await get_job_project_list()).map(
       (v => ({
         projectName: v.name,
         projectId: v.id.toString(),
-        projectAbbr: pinyin(
-            v.name.replaceAll(/行政行为/g, 'xzxw')
-                .replaceAll(/省政务服务数据管理局/g, '省政数局')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-              style: pinyin.STYLE_FIRST_LETTER,
-            }).join(''),
-        tableAbbr: pinyin(
-            v.name.replaceAll(/行政行为/g, '')
-                .replaceAll(/省政务服务数据管理局/g, '省政数局')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-              style: pinyin.STYLE_FIRST_LETTER,
-            }).join('')
+        projectAbbr: '',
+        tableAbbr: ''
       })));
 
   const projectInfo: ProjectInfo[] = await get_project_info()
 
+  // 融合辅助库内没有的项目
   tableDataRef.value = projectInfo.concat(map.filter((m) => {
     return !projectInfo.some((p) => p.projectId === m.projectId);
   }))
-})
-
-let tableDataWatch = computed(() => {
-  return JSON.parse(JSON.stringify(tableDataRef.value));
-})
-
-watch(tableDataWatch, async (newValue, oldValue) => {
-  if (oldValue.length != 0 && newValue !== oldValue) {
-    await update_project_info(newValue)
-  }
-}, {deep: true})
+  isLoading.value = false
+}
 
 const createColumns = ({}: {
   edit: (row: ProjectInfo) => void
@@ -100,8 +86,14 @@ const createColumns = ({}: {
       render(row) {
         return h(showOrEdit, {
           value: row.projectAbbr,
-          onUpdateValue(v) {
+          async onUpdateValue(v) {
             tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
+            update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+              tableDataInit().then(() => {
+                message.success('修改成功')
+              })
+
+            })
           }
         })
       }
@@ -113,8 +105,13 @@ const createColumns = ({}: {
       render(row) {
         return h(showOrEdit, {
           value: row.tableAbbr,
-          onUpdateValue(v) {
+          async onUpdateValue(v) {
             tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
+            update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+              tableDataInit().then(() => {
+                message.success('修改成功')
+              })
+            })
           }
         })
       }
@@ -127,6 +124,10 @@ const columnsRef = ref(createColumns({
     message.success(`Edit ${row.projectName}`)
   }
 }))
+
+const onUpdateTableData = () => {
+
+}
 
 </script>
 

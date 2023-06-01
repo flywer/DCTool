@@ -1,16 +1,22 @@
 // 项目
 import {get_datasource_list, get_job_project_list, get_person_list} from "@render/api/datacenter";
 import {SelectGroupOption, SelectOption} from "naive-ui";
-import pinyin from "pinyin";
 
-export const projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list()).map(
+export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list()).map(
     (v => ({
         label: v.name,
         value: v.id.toString()
     }))
 )
 
-
+export const projectIdOptionsUpdate = async () => {
+    projectIdOptions = (await get_job_project_list()).map(
+        (v => ({
+            label: v.name,
+            value: v.id.toString()
+        }))
+    )
+}
 
 // 负责人
 export const personIdOptions: Array<SelectOption | SelectGroupOption> = (await get_person_list()).map(

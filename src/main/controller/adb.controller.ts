@@ -14,7 +14,8 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.updateProjectInfo)
-    public async handleUpdateProjectInfo(arr: any[]) {
+    public async handleUpdateProjectInfo(arr: any) {
+        arr = JSON.parse(arr)
         const projectInfoList: ProjectInfo[] = arr.map((
             v => ({
                 id: v.id || null,
@@ -30,7 +31,6 @@ export class AdbController {
 
     @IpcHandle(channels.auxiliaryDb.findByProjectId)
     public async handleFindByProjectId(projectId: string) {
-        console.log(projectId)
         return await AppDataSource.getRepository(ProjectInfo).findOneBy({
             projectId: projectId
         })

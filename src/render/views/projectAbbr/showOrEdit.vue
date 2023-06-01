@@ -1,14 +1,24 @@
 <template>
   <div style="min-height: 22px" @click="handleOnClick">
-    <n-input
-        v-if="isEdit"
-        ref="inputRef"
-        placeholder=""
-        v-model:value="inputValue"
-        @change="handleChange"
-        @blur="handleChange"
-
-    />
+    <n-input-group v-if="isEdit">
+      <n-input
+          ref="inputRef"
+          placeholder=""
+          v-model:value="inputValue"
+          @blur="handleBlur"
+          @keyup.enter="handleChange"
+      />
+      <n-button @mousedown.prevent @click.stop="handleChange">
+        <n-icon>
+          <CheckmarkSharp/>
+        </n-icon>
+      </n-button>
+      <!--      <n-button @mousedown.prevent @click.stop="handleClose">
+              <n-icon>
+                <CloseSharp/>
+              </n-icon>
+            </n-button>-->
+    </n-input-group>
     <span v-else>
       {{ value }}
     </span>
@@ -18,6 +28,7 @@
 <script setup lang="ts">
 import {NInput} from "naive-ui";
 import {nextTick, ref} from "vue";
+import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
 
 const props = defineProps({
   value: [String, Number],
@@ -31,15 +42,27 @@ const inputRef = ref(null)
 const inputValue = ref(props.value?.toString())
 
 const handleOnClick = () => {
-  isEdit.value = true
-  nextTick(() => {
-    inputRef.value.focus()
-  })
+  if (!isEdit.value) {
+    isEdit.value = true
+    nextTick(() => {
+      inputRef.value.focus()
+    })
+  }
 }
 
 function handleChange() {
   emit('updateValue', inputValue.value)
   isEdit.value = false
+}
+
+const handleClose = () => {
+  isEdit.value = false
+  inputValue.value = props.value.toString()
+}
+
+const handleBlur = () => {
+  isEdit.value = false
+  inputValue.value = props.value.toString()
 }
 </script>
 
