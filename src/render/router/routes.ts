@@ -1,6 +1,5 @@
 import {RouteRecordRaw} from 'vue-router'
 
-const view1 = () => import('@render/views/examples/view1.vue')
 const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
 const ocr = () => import('@render/views/ocr/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
@@ -42,11 +41,6 @@ export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         redirect: '/cjJob/index',
-    },
-    {
-        path: '/examples',
-        name: routeName.home,
-        component: view1,
     },
     {
         name: routeName.ldDecrypt,
