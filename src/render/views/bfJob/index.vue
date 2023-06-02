@@ -1,125 +1,132 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
-    <n-alert title="说明" type="default" :show-icon="false">
-      清除任务的写法基本相同，目前只支持中台的TBDS-hive表
-    </n-alert>
-    <n-card style="margin-top: 10px" :content-style="{paddingTop:0,paddingBottom:0}">
-      <n-tabs type="line" animated>
-        <n-tab-pane name="1" tab="简易模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="3" :x-gap="12">
-              <n-form-item-gi  label="表名" path="tableName">
-                <n-input v-model:value="formModel.tableName" placeholder="输入表名"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi  label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    :consistent-menu-width="false"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi  label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions" :consistent-menu-width="false"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
+  <n-layout class="m-2">
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
+      <n-alert title="说明" type="default" :show-icon="false">
+        备份任务的写法基本相同，这里只需这个表单的信息即可生成对应的备份任务JSON<br>
+        目前只能用于两张表皆是中台TBDS-hive表
+      </n-alert>
+      <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
+        <n-tabs type="line" animated>
+          <n-tab-pane name="1" tab="简易模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="3" :x-gap="12">
+                <n-form-item-gi label="表名" path="tableName">
+                  <n-input v-model:value="formModel.tableName" placeholder="输入表名"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      :consistent-menu-width="false"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions" :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
+              </n-grid>
+            </n-form>
 
-            </n-grid>
-          </n-form>
+          </n-tab-pane>
+          <n-tab-pane name="2" tab="自定义模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="4" :x-gap="12">
+                <n-form-item-gi :span="4" label="工作流名称" path="name">
+                  <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="来源表" path="sourceTable">
+                  <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="目标表" path="targetTable">
+                  <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="告警邮箱" path="email">
+                  <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="描述" path="description">
+                  <n-input v-model:value="formModel.description" placeholder="输入描述"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+              </n-grid>
+            </n-form>
+          </n-tab-pane>
+        </n-tabs>
 
-        </n-tab-pane>
-        <n-tab-pane name="2" tab="自定义模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="4" :x-gap="12">
-              <n-form-item-gi :span="4" label="工作流名称" path="name">
-                <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="来源表" path="sourceTable">
-                <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="目标表" path="targetTable">
-                <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="告警邮箱" path="email">
-                <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="描述" path="description">
-                <n-input v-model:value="formModel.description" placeholder="输入描述"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-            </n-grid>
-          </n-form>
-        </n-tab-pane>
-      </n-tabs>
-
-    </n-card>
-    <n-space justify="center" align="center" style="margin-top: 10px">
-      <n-button type="primary" style="width: 120px" @click="generate">生成</n-button>
-      <n-button :disabled="resRef === ''" style="width: 120px" @click="copyText(resRef)">
-        复制结果
-      </n-button>
-      <n-divider :vertical="true"/>
-      <n-button type="primary" :disabled="resRef === ''" style="width: 120px" @click="addWorkFlow" :loading="isLoading">
-        执行
-      </n-button>
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <n-icon size="16">
-            <QuestionCircleTwotone/>
-          </n-icon>
-        </template>
-        直接在中台创建此任务
-      </n-tooltip>
-
-    </n-space>
-    <n-input
-        style="margin-top: 10px"
-        v-model:value="resRef"
-        type="textarea"
-        placeholder=""
-    />
-  </n-scrollbar>
+      </n-card>
+      <n-space justify="center" align="center" class="mt-2">
+        <n-button type="primary" class="w-28" @click="generate">生成</n-button>
+        <n-button :disabled="resRef === ''" class="w-28" @click="copyText(resRef)">
+          复制结果
+        </n-button>
+        <n-divider :vertical="true"/>
+        <n-button type="primary" :disabled="resRef === ''" class="w-28" @click="addWorkFlow"
+                  :loading="isLoading"
+        >
+          执行
+        </n-button>
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-icon size="16">
+              <QuestionCircleTwotone/>
+            </n-icon>
+          </template>
+          直接在中台创建此任务
+        </n-tooltip>
+      </n-space>
+      <n-input
+          class="mt-2"
+          v-model:value="resRef"
+          type="textarea"
+          placeholder=""
+          :autosize="{
+        minRows: 6,
+        maxRows: 6
+      }"
+      />
+    </n-scrollbar>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
@@ -153,6 +160,16 @@ const formModel = ref({
   description: '',
   tableName: ''
 })
+
+const previewRef = ref('')
+watch(
+    [() => formModel.value.projectId, () => formModel.value.tableName],
+    async ([projectId, tableName]) => {
+      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+      previewRef.value = `工作流名称：bf_${projectAbbr}_${tableName}`
+      formModel.value.name = `bf_${projectAbbr}_${tableName}`
+    }
+)
 const rules = {
   name: {
     required: true,
@@ -186,16 +203,6 @@ const rules = {
   }
 }
 
-const previewRef = ref('')
-watch(
-    [() => formModel.value.projectId, () => formModel.value.tableName],
-    async ([projectId, tableName]) => {
-      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
-      previewRef.value = `工作流名称：qc_${projectAbbr}_${tableName}`
-      formModel.value.name = `qc_${projectAbbr}_${tableName}`
-    }
-)
-
 const resRef = ref('');
 
 // 输出模型
@@ -221,7 +228,7 @@ let outputModel = {
           taskDefKey: "sjkf682c3b9355843e29a95df2246cca414"
         },
         sparkConfig: {
-          saveMode: "overwrite"
+          saveMode: "append"
         },
         sql: "",
         id: "sjkf682c3b9355843e29a95df2246cca414",
@@ -248,9 +255,8 @@ const generate = (e: MouseEvent) => {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
       if (formModel.value.sourceTable === '' || formModel.value.targetTable === '') {
-        const tableName = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
-        formModel.value.sourceTable = tableName
-        formModel.value.targetTable = tableName
+        formModel.value.sourceTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
+        formModel.value.targetTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_ods`
       }
 
       outputModel.modelJson = outputModel.modelJson.replace(/sourceTable/g, `${formModel.value.sourceTable}`).replace(/targetTable/g, `${formModel.value.targetTable}`)
@@ -265,7 +271,7 @@ const generate = (e: MouseEvent) => {
       outputModel.email = formModel.value.email
       outputModel.description = formModel.value.description
 
-      outputModel.dataDevBizVo.sparkSqlDtoList[0].sql = `INSERT INTO ` + `${formModel.value.targetTable}` + ' SELECT * FROM ' + `${formModel.value.sourceTable}` + ' WHERE 1 = 0'
+      outputModel.dataDevBizVo.sparkSqlDtoList[0].sql = `INSERT INTO ` + `${formModel.value.targetTable}` + ' SELECT * FROM ' + `${formModel.value.sourceTable}`
       outputModel.dataDevBizVo.sparkSqlDtoList[0].sourceTable = [`${formModel.value.sourceTable}`]
       outputModel.dataDevBizVo.sparkSqlDtoList[0].targetTable = formModel.value.targetTable
 
@@ -290,6 +296,7 @@ const addWorkFlow = () => {
   })
 }
 </script>
+
 
 <style scoped>
 

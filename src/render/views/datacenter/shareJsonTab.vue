@@ -266,12 +266,12 @@ const generate = () => {
 
       paramsModel.readerModel.tableName = formModel.value.sourceTableName
       // paramsModel.readerModel.datasourceId = formModel.value.sourceDataSourceId
-      paramsModel.readerModel.columns = (await get_columns(paramsModel.readerModel.datasourceId, formModel.value.sourceTableName))
+      paramsModel.readerModel.columns = (await get_columns(paramsModel.readerModel.datasourceId, formModel.value.sourceTableName,true))
 
       paramsModel.writerModel.fromTableName = formModel.value.targetTableName
       paramsModel.writerModel.preSql = `truncate table ${formModel.value.targetTableName}`
       // paramsModel.writerModel.datasourceId = formModel.value.targetDataSourceId
-      paramsModel.writerModel.columns = (await get_columns(paramsModel.writerModel.datasourceId, formModel.value.targetTableName))
+      paramsModel.writerModel.columns = (await get_columns(paramsModel.writerModel.datasourceId, formModel.value.targetTableName,true))
       paramsModel.writerModel.ftpColums = Array(paramsModel.writerModel.columns.length).fill(0).map((_, index) => index)
 
       paramsModel.initReaderModel = paramsModel.readerModel.columns

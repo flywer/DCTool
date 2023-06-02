@@ -21,8 +21,7 @@
             :options="datasourceOptions"
             style="width: 200px"
             :size="'small'"
-        >
-        </n-select>
+        />
         <n-input v-model:value="targetTableRef.tableName"
                  placeholder=""
                  readonly style="width: 200px"

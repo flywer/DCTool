@@ -3,9 +3,16 @@ import {get_job_project_list} from "@render/api/datacenter";
 import pinyin from "pinyin";
 
 export const getAbbrByProId = async (projectId: string) => {
-    let project = await find_by_project_id(projectId)
     let projectAbbr = ''
     let tableAbbr = ''
+    if (projectId === '') {
+        return {
+            projectAbbr,
+            tableAbbr
+        }
+    }
+
+    let project = await find_by_project_id(projectId)
 
     if (project == null) {
         const project1 = (await get_job_project_list()).find(project => project.id == projectId)

@@ -16,38 +16,42 @@
           ref="validJsonFormRef"
           inline
           :size="'small'"
-          :model="validJsonFormModel"
+          :model="formModel"
           :rules="validJsonRules"
           label-placement="left"
       >
         <n-grid :cols="4" :x-gap="12">
           <n-form-item-gi :span="2" label="工作流名称" path="name">
-            <n-input v-model:value="validJsonFormModel.name" placeholder="输入工作流名称"
+            <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
                      @keydown.enter.prevent
                      :readonly="jobNameLockRef"
             >
               <template #suffix>
-                <n-button text type="default" ghost
-                          @click="jobNameLockRef = !jobNameLockRef"
-                          title="工作流名称是否跟随项目与表名变化"
-                >
-                  <n-icon>
-                    <LockOutlined v-show="jobNameLockRef"/>
-                    <UnlockOutlined v-show="!jobNameLockRef"/>
-                  </n-icon>
-                </n-button>
+                <n-tooltip trigger="hover">
+                  <template #trigger>
+                    <n-button text type="default" ghost
+                              @click="jobNameLockRef = !jobNameLockRef"
+                    >
+                      <n-icon>
+                        <LockOutlined v-show="jobNameLockRef"/>
+                        <UnlockOutlined v-show="!jobNameLockRef"/>
+                      </n-icon>
+                    </n-button>
+                  </template>
+                  工作流名称是否跟随项目与表名变化
+                </n-tooltip>
               </template>
             </n-input>
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="表名" path="tableName">
-            <n-input v-model:value="validJsonFormModel.tableName" placeholder=""
+            <n-input v-model:value="formModel.tableName" placeholder=""
                      @keydown.enter.prevent
                      @update:value="onUpdateJobName"
             />
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="项目" path="projectId">
             <n-select
-                v-model:value="validJsonFormModel.projectId"
+                v-model:value="formModel.projectId"
                 placeholder="选择项目"
                 :options="projectIdOptions"
                 filterable
@@ -56,16 +60,16 @@
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="责任人" path="personId">
             <n-select
-                v-model:value="validJsonFormModel.personId"
+                v-model:value="formModel.personId"
                 placeholder="选择责任人"
                 :options="personIdOptions"
             />
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="告警邮箱" path="email">
-            <n-input v-model:value="validJsonFormModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
+            <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="描述" path="description">
-            <n-input v-model:value="validJsonFormModel.description" placeholder="输入描述"
+            <n-input v-model:value="formModel.description" placeholder="输入描述"
                      @keydown.enter.prevent
             />
           </n-form-item-gi>
@@ -134,7 +138,7 @@ const validJsonResRef = ref('');
 
 const validJsonFormRef = ref<FormInst | null>(null);
 
-const validJsonFormModel = ref({
+const formModel = ref({
   name: '',
   projectId: '',
   projectName: '',
@@ -171,13 +175,13 @@ const validJsonTrans = (e: MouseEvent) => {
     validJsonFormRef.value?.validate(async (errors) => {
       if (!errors) {
         let paramJson = JSON.parse(validJsonInputRef.value)
-        paramJson.name = validJsonFormModel.value.name;
-        paramJson.projectId = validJsonFormModel.value.projectId
-        paramJson.projectName = projectIdOptions.find(option => option.value === validJsonFormModel.value.projectId).label
-        paramJson.personId = validJsonFormModel.value.personId
-        paramJson.personName = personIdOptions.find(option => option.value === validJsonFormModel.value.personId).label
-        paramJson.email = validJsonFormModel.value.email
-        paramJson.description = validJsonFormModel.value.description
+        paramJson.name = formModel.value.name;
+        paramJson.projectId = formModel.value.projectId
+        paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
+        paramJson.personId = formModel.value.personId
+        paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label
+        paramJson.email = formModel.value.email
+        paramJson.description = formModel.value.description
 
         const oldSourceTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
         const oldAimTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName
@@ -185,9 +189,9 @@ const validJsonTrans = (e: MouseEvent) => {
 
         const {tableAbbr} = await getAbbrByProId(paramJson.projectId);
 
-        const newSourceTableName = `di_${tableAbbr}_${validJsonFormModel.value.tableName}_temp_ods`
-        const newAimTableName = `di_${tableAbbr}_${validJsonFormModel.value.tableName}_right_dwd`
-        const newWrongTableName = `di_${tableAbbr}_${validJsonFormModel.value.tableName}_error_dwd`
+        const newSourceTableName = `di_${tableAbbr}_${formModel.value.tableName}_temp_ods`
+        const newAimTableName = `di_${tableAbbr}_${formModel.value.tableName}_right_dwd`
+        const newWrongTableName = `di_${tableAbbr}_${formModel.value.tableName}_error_dwd`
 
         paramJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = newSourceTableName
         paramJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = newAimTableName
@@ -219,12 +223,12 @@ const getBaseInfo = () => {
   let json;
   try {
     json = JSON.parse(validJsonInputRef?.value);
-    validJsonFormModel.value.name = json.name;
-    validJsonFormModel.value.projectId = json.projectId.toString();
-    validJsonFormModel.value.personId = json.personId;
-    validJsonFormModel.value.email = json.email;
-    validJsonFormModel.value.description = json.description;
-    validJsonFormModel.value.tableName = json.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName.split('_')[2]
+    formModel.value.name = json.name;
+    formModel.value.projectId = json.projectId.toString();
+    formModel.value.personId = json.personId;
+    formModel.value.email = json.email;
+    formModel.value.description = json.description;
+    formModel.value.tableName = json.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName.split('_')[2]
   } catch (e) {
     console.error(`解析 JSON 失败：${json}`, e)
   }
@@ -233,9 +237,9 @@ const getBaseInfo = () => {
 
 const onUpdateJobName = async () => {
   if (jobNameLockRef.value) {
-    const {projectAbbr} = await getAbbrByProId(validJsonFormModel.value.projectId);
+    const {projectAbbr} = await getAbbrByProId(formModel.value.projectId);
 
-    validJsonFormModel.value.name = `zj_${projectAbbr}_${validJsonFormModel.value.tableName}`
+    formModel.value.name = `zj_${projectAbbr}_${formModel.value.tableName}`
   }
 }
 

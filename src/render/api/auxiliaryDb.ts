@@ -23,3 +23,13 @@ export const find_by_project_id = async (projectId: string): Promise<ProjectInfo
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.findByProjectId, projectId))
     return data
 }
+
+export const get_auth_token = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getAuthToken))
+    return data
+}
+
+export const update_auth_token = async (token: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateAuthToken, token))
+    return data
+}

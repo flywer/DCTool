@@ -8,11 +8,14 @@ const datacenter = () => import('@render/views/datacenter/index.vue')
 
 const flattenText = () => import('@render/views/flattenText/index.vue')
 const cjJob = () => import('@render/views/cjJob/index.vue')
+const zjJob = () => import('@render/views/zjJob/index.vue')
+const bfJob = () => import('@render/views/bfJob/index.vue')
 const execSql = () => import('@render/views/execSql/index.vue')
 const sqlValid = () => import('@render/views/sqlValid/index.vue')
 const hiveSqlTrans = () => import('@render/views/datacenter/hiveSqlTab.vue')
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
-const zjJob = () => import('@render/views/zjJob/index.vue')
+
+const settings = () => import('@render/views/settings/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -22,17 +25,20 @@ export const routeName = {
     datacenter: 'datacenter',
     flattenText: 'flattenText',
     cjJob: 'cjJob',
+    zjJob: 'zjJob',
+    bfJob: 'bfJob',
     execSql: 'execSql',
     sqlValid: 'sqlValid',
     hiveSqlTrans: 'hiveSqlTrans',
     projectAbbr: 'projectAbbr',
-    zjJob:'zjJob'
+
+    settings: 'settings'
 }
 
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/datacenter/index',
+        redirect: '/cjJob/index',
     },
     {
         path: '/examples',
@@ -93,5 +99,14 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.zjJob,
         path: '/zjJob/index',
         component: zjJob
+    },{
+        name: routeName.bfJob,
+        path: '/bfJob/index',
+        component: bfJob
+    },
+    {
+        name: routeName.settings,
+        path: '/settings/index',
+        component: settings
     }
 ]

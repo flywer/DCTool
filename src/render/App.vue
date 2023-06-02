@@ -15,6 +15,7 @@ import {zhCN, dateZhCN} from 'naive-ui';
 import NaiveProvider from "@render/components/common/NaiveProvider.vue"
 import WindowBtn from "@render/components/base/WindowBar.vue";
 import MainLayout from "@render/components/base/MainLayout.vue";
+
 </script>
 
 <style scoped>

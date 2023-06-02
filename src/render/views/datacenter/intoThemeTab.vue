@@ -80,7 +80,7 @@
                 <n-select :size="'small'"
                           v-model:value="formModel.sourceDataSourceId"
                           :options="datasourceOptions"
-                          @update:value="getSourceTables"
+                          @update:value="getSourceTables('')"
                 />
               </n-form-item-gi>
               <n-form-item-gi label="表名" path="sourceTableName">
@@ -88,7 +88,9 @@
                           v-model:value="formModel.sourceTableName"
                           :options="sourceTableOptions"
                           filterable
+                          remote
                           :consistent-menu-width="false"
+                          @search="getSourceTables"
                 />
               </n-form-item-gi>
               <n-form-item-gi label="目标表" path="targetDataSourceId">
@@ -96,7 +98,7 @@
                           v-model:value="formModel.targetDataSourceId"
                           :default-value="6"
                           :options="datasourceOptions"
-                          @update:value="getTargetTables"
+                          @update:value="getTargetTables('')"
                 />
               </n-form-item-gi>
               <n-form-item-gi label="表名" path="targetTableName">
@@ -104,7 +106,9 @@
                           v-model:value="formModel.targetTableName"
                           :options="targetTableOptions"
                           filterable
+                          remote
                           :consistent-menu-width="false"
+                          @search="getTargetTables"
                 />
               </n-form-item-gi>
             </n-grid>
@@ -147,6 +151,8 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow, get_columns, get_tables} from "@render/api/datacenter";
 import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
+import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
@@ -244,23 +250,11 @@ watch(
     }
 )
 
-const getSourceTables = () => {
-  get_tables(formModel.value.sourceDataSourceId).then(res => {
-    sourceTableOptions.value = res?.map((item => ({
-          label: item,
-          value: item
-        }))
-    )
-  })
+const getSourceTables = async (query?:string) => {
+  sourceTableOptions.value = await getTablesOptions(formModel.value.sourceDataSourceId, query)
 }
-const getTargetTables = () => {
-  get_tables(formModel.value.targetDataSourceId).then(res => {
-    targetTableOptions.value = res?.map((item => ({
-          label: item,
-          value: item
-        }))
-    )
-  })
+const getTargetTables = async (query?:string) => {
+  targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId, query)
 }
 
 const removeIdCheckRef = ref(true)
@@ -283,16 +277,16 @@ const generateSql = () => {
   formRef.value?.validate(
       async (errors) => {
         if (!errors) {
-          let sourceTableColumns = (await get_columns(formModel.value.sourceDataSourceId, formModel.value.sourceTableName))
-          let targetTableColumns = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName))
+          let sourceTableColumns = (await get_columns(formModel.value.sourceDataSourceId, formModel.value.sourceTableName,true))
+          let targetTableColumns = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName,true))
           if (removeIdCheckRef.value) {
             sourceTableColumns = sourceTableColumns.filter(c => c !== 'id')
             targetTableColumns = targetTableColumns.filter(c => c !== 'id')
           }
           if (removeDiffCheckRef.value) {
             const elements = findCommonElements(sourceTableColumns, targetTableColumns);
-            sourceTableColumns = elements.updatedArr1
-            targetTableColumns = elements.updatedArr2
+            sourceTableColumns = elements.commonArr1
+            targetTableColumns = elements.commonArr2
           }
 
           insertSqlRef.value = format(`INSERT INTO ${formModel.value.targetTableName} (${targetTableColumns.join(',')})
@@ -317,32 +311,6 @@ const intersectArrays = <T>(a: T[], b: T[]): (string | T)[] => {
   const setA = new Set(a);
   const setB = new Set(b);
   return [...setA].filter(x => setB.has(x));
-}
-
-// 根据两数组的共有元素，不区分大小写，过滤原数组，并返回更新之后的原数组
-function findCommonElements(arr1: string[], arr2: string[]) {
-  const commonElements: string[] = [];
-
-  // 将arr1数组中的所有元素转换为小写字母形式，以便与arr2数组进行比较
-  const lowerCaseArr1 = arr1.map((el) => el.toLowerCase());
-
-  for (const element of arr2) {
-    // 将arr2数组中的元素转换为小写字母形式，以便与arr1数组中的元素进行比较
-    const lowerCaseElement = element.toLowerCase();
-
-    if (lowerCaseArr1.includes(lowerCaseElement)) {
-      commonElements.push(lowerCaseElement);
-    }
-  }
-
-  // 在原始数组中过滤出包含相同元素的新数组
-  const updatedArr1 = arr1.filter((el) => commonElements.includes(el.toLowerCase()));
-  const updatedArr2 = arr2.filter((el) => commonElements.includes(el.toLowerCase()));
-
-  return {
-    updatedArr1,
-    updatedArr2
-  };
 }
 
 let paramsModel = {

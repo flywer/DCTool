@@ -7,9 +7,9 @@
 <!--      <n-tab-pane name="2" tab="质检JSON生成">
         <valid-json-tab/>
       </n-tab-pane>-->
-      <n-tab-pane name="3" tab="备份JSON生成">
+<!--      <n-tab-pane name="3" tab="备份JSON生成">
         <backup-json-tab/>
-      </n-tab-pane>
+      </n-tab-pane>-->
       <n-tab-pane name="4" tab="清空JSON生成">
         <clean-json-tab/>
       </n-tab-pane>

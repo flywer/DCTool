@@ -16,7 +16,7 @@ export const get_person_list = async () => {
 // 获取所有数据源
 export const get_datasource_list = async (current: number, size: number) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.dataSourceList, current, size))
-    return data.data.records
+    return data.data?.records || []
 }
 
 // 检验insert语句
@@ -27,18 +27,18 @@ export const check_insert_sql = async (obj: any) => {
 
 // 创建新工作流
 export const add_work_flow = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.addWorkFlow, obj))
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.addWorkFlow, JSON.stringify(obj)))
     return data
 }
 
-// 获取表字段数组
-export const get_tables = async (datasourceId: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTables, datasourceId))
+// 获取库中表列表
+export const get_tables = async (datasourceId: string, tableSchema: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTables, datasourceId, tableSchema))
     return data.data
 }
 
-// 获取表字段数组
-export const get_columns = async (datasourceId: string, tableName: string) => {
+// 获取表字段数组，onlyCol:是否去除hive表中的序号与类型 0:id:int --> id
+export const get_columns = async (datasourceId: string, tableName: string, onlyCol?: boolean) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getColumns, datasourceId, tableName))
     // 遍历原数组中的每个元素，使用split()方法将其按照:分割成一个数组。
     // 取这个新数组中第二个元素（索引为1），也就是两个冒号之间的值。
@@ -47,10 +47,14 @@ export const get_columns = async (datasourceId: string, tableName: string) => {
     return data.data.map((item) => {
         if (item.indexOf(':') === -1) {
             return item;
+        } else {
+            if (onlyCol) {
+                const parts = item.split(':');
+                return parts[1];
+            } else {
+                return item;
+            }
         }
-
-        const parts = item.split(':');
-        return parts[1];
     });
 }
 
@@ -62,7 +66,7 @@ export const build_datax_json = async (obj: any) => {
 
 // 创建采集任务
 export const add_datax_job = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.addDataXJob, obj))
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.addDataXJob, JSON.stringify(obj)))
     return data
 }
 

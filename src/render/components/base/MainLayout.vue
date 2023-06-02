@@ -1,7 +1,7 @@
 <template>
   <n-layout has-sider style="margin-top: 32px;">
     <n-layout-sider
-         class="select-none"
+        class="select-none"
         collapse-mode="width"
         :collapsed-width="64"
         :width="145"
@@ -31,19 +31,38 @@
 </template>
 
 <script setup lang="ts">
+import {channels} from "@render/api/channels";
+import {useIpc} from "@render/plugins";
 import {routeName} from "@render/router";
+import {useNotification} from "naive-ui";
 import {h, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink} from "vue-router";
-import {HomeOutlined} from '@vicons/antd'
 import {AccessibleIcon} from '@vicons/fa'
 import {VisualRecognition, Svg, DataVis3, Sql} from '@vicons/carbon'
 import {LetterF, LetterH, LetterZ} from '@vicons/tabler'
 import {TextGrammarCheckmark24Regular} from '@vicons/fluent'
+import {SettingsOutline} from '@vicons/ionicons5'
 import {renderIcon} from "@render/utils/common/renderIcon";
+
+const notification = useNotification()
 
 // 菜单项
 const menuOptions: MenuOption[] = [
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.cjJob,
+              }
+            },
+            {default: () => '采集任务'}
+        ),
+    key: routeName.cjJob,
+    icon: () => h('span', 'CJ')
+  },
   {
     label: () =>
         h(
@@ -57,6 +76,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.zjJob,
     icon: () => h('span', 'ZJ')
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.bfJob,
+              }
+            },
+            {default: () => '备份任务'}
+        ),
+    key: routeName.bfJob,
+    icon: () => h('span', 'BF')
   },
   {
     label: () =>
@@ -84,7 +117,7 @@ const menuOptions: MenuOption[] = [
             {default: () => 'SQL转换'}
         ),
     key: routeName.hiveSqlTrans,
-    icon: renderIcon(LetterH)
+    icon: () => h('span', 'H')
   },
   {
     label: () =>
@@ -169,6 +202,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.projectAbbr,
     icon: renderIcon(Svg)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.settings,
+              }
+            },
+            {default: () => '应用设置'}
+        ),
+    key: routeName.settings,
+    icon: renderIcon(SettingsOutline)
   }
 ]
 
@@ -179,5 +226,15 @@ const selectedKey = ref(menuOptions[0].key)
 // 菜单是否折叠
 const collapsed = ref(false)
 
-const containerRef = ref<HTMLElement | undefined>(undefined)
+const ipc = useIpc()
+
+ipc.on(channels.datacenter.authTokenNotice, (msg: string) => {
+  notification.destroyAll()
+
+  notification.create({
+    title: "访问令牌出错",
+    content: msg,
+    type: "warning"
+  })
+})
 </script>

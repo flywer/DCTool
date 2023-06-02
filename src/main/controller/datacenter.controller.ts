@@ -1,5 +1,7 @@
+import {AppDataSource} from "@main/data-source";
+import {Dict} from "@main/entity/Dict";
 import {channels} from "@render/api/channels";
-import {Controller, IpcHandle} from "einf";
+import {Controller, IpcHandle, IpcSend} from "einf";
 import {net} from "electron";
 
 @Controller()
@@ -9,11 +11,25 @@ export class DatacenterController {
 
     private static apiUrl = 'http://19.15.97.242:19080/szrzyt/data_center/gateway';
 
-    private static authToken = 'bb34f495-6a6c-47c4-ad6a-6fcf554389df';
+    public async getAuthToken() {
+        let res
+        await AppDataSource.getRepository(Dict).findOneBy({
+            name: 'authToken'
+        }).then((data) => {
+            res = data.value
+        })
+        return res
+    }
+
+    @IpcSend(channels.datacenter.authTokenNotice)
+    public handleAuthTokenNotice() {
+        return `数据中台访问令牌已不合法，请前往设置修改令牌`
+    }
 
     @IpcHandle(channels.datacenter.jobList)
     public async handleJobList() {
         let result
+
         await this.commonGetRequest('/gather/api/jobProject/list', null)
             .then((res) => {
                 result = res;
@@ -64,6 +80,7 @@ export class DatacenterController {
     @IpcHandle(channels.datacenter.addWorkFlow)
     public async handleAddWorkFlow(params: any) {
         let result
+        params = JSON.parse(params)
         await this.commonPostRequest('/workflow/proc/add', params).then((res) => {
             result = res;
         }).catch((err) => {
@@ -87,10 +104,10 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getTables)
-    public async handleGetTables(datasourceId: string) {
+    public async handleGetTables(datasourceId: string, tableSchema: string) {
         let result
 
-        const query = `datasourceId=${datasourceId}`;
+        const query = `datasourceId=${datasourceId}&tableSchema=${tableSchema}`;
 
         await this.commonGetRequest('/gather/api/metadata/getTables', query).then((res) => {
             result = res;
@@ -103,6 +120,9 @@ export class DatacenterController {
     @IpcHandle(channels.datacenter.buildDataXJson)
     public async handleBuildDataXJson(params: any) {
         let result
+
+        params = JSON.parse(params)
+
         await this.commonPostRequest('/gather/api/dataxJson/buildJson', params).then((res) => {
             result = res;
         }).catch((err) => {
@@ -114,6 +134,7 @@ export class DatacenterController {
     @IpcHandle(channels.datacenter.addDataXJob)
     public async handleAddDataXJob(params: any) {
         let result
+        params = JSON.parse(params)
         await this.commonPostRequest('/gather/api/jobTemplate/add', params).then((res) => {
             result = res;
         }).catch((err) => {
@@ -155,13 +176,13 @@ export class DatacenterController {
         return result
     }
 
-    public commonGetRequest(url: string, query: string) {
-        return new Promise((resolve, reject) => {
+    public commonGetRequest(url: string, query: string): Promise<any> {
+        return new Promise(async (resolve, reject) => {
             const request = net.request({
                 method: 'GET',
                 url: `${DatacenterController.apiUrl}${url}?${query || ''}`
             });
-            request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
+            request.setHeader('Authorization', `bearer ${await this.getAuthToken()}`)
             //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
             let data = '';
@@ -174,6 +195,9 @@ export class DatacenterController {
                 response.on('end', () => {
                     try {
                         const res = JSON.parse(data);
+                        if (res?.res_body?.includes('4010')) {
+                            this.handleAuthTokenNotice()
+                        }
                         resolve(res);
                     } catch (err) {
                         reject(err);
@@ -189,13 +213,13 @@ export class DatacenterController {
         })
     }
 
-    public commonPostRequest(url: string, params: any) {
-        return new Promise((resolve, reject) => {
+    public commonPostRequest(url: string, params: any): Promise<any> {
+        return new Promise(async (resolve, reject) => {
             const request = net.request({
                 method: 'POST',
                 url: `${DatacenterController.apiUrl}${url}`
             });
-            request.setHeader('Authorization', `bearer ${DatacenterController.authToken}`)
+            request.setHeader('Authorization', `bearer ${await this.getAuthToken()}`)
             request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
             let data = '';
@@ -208,6 +232,9 @@ export class DatacenterController {
                 response.on('end', () => {
                     try {
                         const res = JSON.parse(data);
+                        if (res.code == '4010') {
+                            this.handleAuthTokenNotice()
+                        }
                         resolve(res);
                     } catch (err) {
                         reject(err);
