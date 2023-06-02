@@ -13,11 +13,6 @@
           <CheckmarkSharp/>
         </n-icon>
       </n-button>
-      <!--      <n-button @mousedown.prevent @click.stop="handleClose">
-              <n-icon>
-                <CloseSharp/>
-              </n-icon>
-            </n-button>-->
     </n-input-group>
     <span v-else>
       {{ value }}
@@ -27,11 +22,11 @@
 
 <script setup lang="ts">
 import {NInput} from "naive-ui";
-import {nextTick, ref} from "vue";
-import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
+import {nextTick, ref, onMounted, watch} from "vue";
+import {CheckmarkSharp} from '@vicons/ionicons5'
 
 const props = defineProps({
-  value: [String, Number],
+  value: String,
   onUpdateValue: [Function, Array]
 })
 
@@ -43,6 +38,7 @@ const inputValue = ref(props.value?.toString())
 
 const handleOnClick = () => {
   if (!isEdit.value) {
+    inputValue.value = props.value
     isEdit.value = true
     nextTick(() => {
       inputRef.value.focus()

@@ -2,34 +2,43 @@
 <template>
   <n-layout id="window-bar">
     <n-layout-content>
-      <n-space justify="end" id="btn-group">
-        <n-button-group>
-          <n-button size="tiny" :bordered=false class="window-btn" @click="window_min">
-            <n-icon style="font-size: large;">
-              <MinusOutlined/>
-            </n-icon>
-          </n-button>
-          <n-button size="tiny" :bordered=false class="window-btn" @click="window_max">
-            <n-icon style="font-size: large;">
-              <BorderOutlined/>
-            </n-icon>
-          </n-button>
-          <n-button size="tiny" :bordered=false class="window-btn close-btn" @click="window_close">
-            <template #icon>
-              <n-icon>
-                <CloseOutlined/>
-              </n-icon>
-            </template>
-          </n-button>
-        </n-button-group>
-      </n-space>
+      <n-grid :cols="2">
+        <n-gi>
+<!--          <n-space justify="start" inline>
+            <span class="ml-4" style="line-height: 32px;font-weight: bold">中台开发工具</span>
+          </n-space>-->
+        </n-gi>
+        <n-gi>
+          <n-space justify="end" class="float-right" id="btn-group" inline>
+            <n-button-group>
+              <n-button size="tiny" :bordered=false class="window-btn" @click="window_min">
+                <n-icon style="font-size: large;">
+                  <MinusOutlined/>
+                </n-icon>
+              </n-button>
+              <n-button size="tiny" :bordered=false class="window-btn" @click="window_max">
+                <n-icon style="font-size: large;">
+                  <BorderOutlined/>
+                </n-icon>
+              </n-button>
+              <n-button size="tiny" :bordered=false class="window-btn close-btn" @click="window_close">
+                <template #icon>
+                  <n-icon>
+                    <CloseOutlined/>
+                  </n-icon>
+                </template>
+              </n-button>
+            </n-button-group>
+          </n-space>
+        </n-gi>
+      </n-grid>
     </n-layout-content>
   </n-layout>
 </template>
 
 <script setup lang="ts">
 import {MinusOutlined, BorderOutlined, CloseOutlined} from "@vicons/antd";
-import {window_max,window_min,window_close} from "@render/api/window.api";
+import {window_max, window_min, window_close} from "@render/api/window.api";
 </script>
 
 <style scoped lang="less">

@@ -1,18 +1,33 @@
 <template>
-  <n-layout class="m-2">
-    <n-scrollbar class="pr-2" style="height: calc(100vh - 50px);" trigger="hover">
-      <n-alert title="说明" type="default" :show-icon="false">
-        在这里配置每个项目的缩写简称
-      </n-alert>
-      <n-data-table
-          class="mt-2 mb-2"
-          :columns="columnsRef"
-          :data="tableDataRef"
-          :pagination="false"
-          :bordered="false"
-          :size="'small'"
-          :loading="isLoading"
-      />
+  <n-layout class="mt-2 ml-2 mb-2">
+    <n-scrollbar style="height: calc(100vh - 50px);" trigger="hover">
+      <n-layout style="width: 98%">
+        <n-alert type="default" :show-icon="false">
+          在这里配置每个项目的缩写简称
+        </n-alert>
+        <n-space justify="end" class="mt-2">
+          <n-button secondary strong @click="tableDataInit">
+            刷新
+            <template #icon>
+              <n-icon>
+                <Refresh/>
+              </n-icon>
+            </template>
+          </n-button>
+        </n-space>
+        <n-data-table
+            ref="tableRef"
+            :key="(row) => row.projectId"
+            class="mt-2"
+            :columns="columnsRef"
+            :data="tableDataRef"
+            :pagination="paginationReactive"
+            :bordered="true"
+            :size="'small'"
+            :loading="isLoading"
+            :striped="true"
+        />
+      </n-layout>
     </n-scrollbar>
   </n-layout>
 
@@ -24,10 +39,12 @@ import {get_job_project_list} from "@render/api/datacenter";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
 import type {DataTableColumns} from 'naive-ui'
 import {useMessage} from 'naive-ui'
-import pinyin from "pinyin";
-import {computed, h, onMounted, ref, watch} from 'vue'
+import {computed, h, onMounted, ref, reactive} from 'vue'
+import {Refresh} from '@vicons/ionicons5'
 
 const message = useMessage()
+
+const tableRef = ref()
 
 const tableDataRef = ref([])
 
@@ -43,6 +60,20 @@ type ProjectInfo = {
 
 onMounted(async () => {
   await tableDataInit()
+})
+
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true,
+  pageSizes: [10, 20, 50],
+  onChange: async (page: number) => {
+    paginationReactive.page = page
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    paginationReactive.pageSize = pageSize
+    paginationReactive.page = 1
+  }
 })
 
 const tableDataInit = async () => {
@@ -92,7 +123,6 @@ const createColumns = ({}: {
               tableDataInit().then(() => {
                 message.success('修改成功')
               })
-
             })
           }
         })
@@ -124,10 +154,6 @@ const columnsRef = ref(createColumns({
     message.success(`Edit ${row.projectName}`)
   }
 }))
-
-const onUpdateTableData = () => {
-
-}
 
 </script>
 

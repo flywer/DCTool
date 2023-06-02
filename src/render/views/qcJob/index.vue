@@ -194,7 +194,7 @@ const rules = {
   },
   targetTable: {
     required: true,
-    trigger: [ 'change'],
+    trigger: ['change'],
     message: '请输入目标表'
   },
   projectId: {
