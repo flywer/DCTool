@@ -43,6 +43,7 @@ import {VisualRecognition, Svg, DataVis3, Sql} from '@vicons/carbon'
 import {LetterF, LetterH, LetterZ} from '@vicons/tabler'
 import {TextGrammarCheckmark24Regular} from '@vicons/fluent'
 import {SettingsOutline} from '@vicons/ionicons5'
+import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 const notification = useNotification()
@@ -97,13 +98,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.datacenter,
+                name: routeName.qcJob,
               }
             },
-            {default: () => 'JSON生成'}
+            {default: () => '清除任务'}
         ),
-    key: routeName.datacenter,
-    icon: renderIcon(DataVis3)
+    key: routeName.qcJob,
+    icon: () => h('span', 'QC')
   },
   {
     label: () =>
@@ -111,13 +112,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.hiveSqlTrans,
+                name: routeName.rkJob,
               }
             },
-            {default: () => 'SQL转换'}
+            {default: () => '入库任务'}
         ),
-    key: routeName.hiveSqlTrans,
-    icon: () => h('span', 'H')
+    key: routeName.rkJob,
+    icon: () => h('span', 'RK')
   },
   {
     label: () =>
@@ -125,12 +126,26 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.execSql,
+                name: routeName.gxJob,
               }
             },
-            {default: () => 'SQL执行'}
+            {default: () => '共享任务'}
         ),
-    key: routeName.execSql,
+    key: routeName.gxJob,
+    icon: () => h('span', 'GX')
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.sqlProcess,
+              }
+            },
+            {default: () => 'SQL处理'}
+        ),
+    key: routeName.sqlProcess,
     icon: renderIcon(Sql)
   },
   {
@@ -139,13 +154,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.sqlValid,
+                name: routeName.projectAbbr,
               }
             },
-            {default: () => 'SQL校验'}
+            {default: () => '项目简称'}
         ),
-    key: routeName.sqlValid,
-    icon: renderIcon(TextGrammarCheckmark24Regular)
+    key: routeName.projectAbbr,
+    icon: renderIcon(ProjectOutlined)
   },
   {
     label: () =>
@@ -187,20 +202,6 @@ const menuOptions: MenuOption[] = [
             {default: () => 'SVG转换'}
         ),
     key: routeName.svg,
-    icon: renderIcon(Svg)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.projectAbbr,
-              }
-            },
-            {default: () => '项目简称'}
-        ),
-    key: routeName.projectAbbr,
     icon: renderIcon(Svg)
   },
   {

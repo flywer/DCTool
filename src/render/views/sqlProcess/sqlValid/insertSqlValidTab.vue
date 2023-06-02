@@ -1,18 +1,18 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 105px);" trigger="hover">
     <n-alert title="说明" type="default" :show-icon="false">
       选择对应数据库，校验此INSERT语句语法、逻辑是否正确<br>
       由于中台限制，来源表与目标表的数据库类型必须相同，即TBDS库只能至TBDS库，MYSQL库只能至MYSQL库
     </n-alert>
     <n-input
+        class="mt-2"
         v-model:value="inputRef"
         type="textarea"
         placeholder="请输入INSERT语句"
         :clearable="true"
-        style="margin-top: 10px"
         @blur="trans"
     />
-    <n-card style="margin-top: 10px">
+    <n-card class="mt-2" :content-style="{paddingTop:'8px',paddingBottom:'8px'}">
       <div>目标表：</div>
       <n-space justify="space-around">
         <n-select
@@ -25,7 +25,7 @@
         <n-input v-model:value="targetTableRef.tableName"
                  placeholder=""
                  readonly style="width: 200px"
-                  :size="'small'"
+                 :size="'small'"
         />
       </n-space>
       <n-divider/>
@@ -37,7 +37,7 @@
                 v-model:value="sourceTableDataSourceId"
                 :options="datasourceOptions"
                 style="width: 200px"
-                 :size="'small'"
+                :size="'small'"
             />
           </n-space>
 
@@ -49,15 +49,15 @@
             <n-input :value="table" style="width: 200px"
                      placeholder=""
                      readonly
-                      :size="'small'"
+                     :size="'small'"
             />
           </n-space>
         </n-gi>
       </n-grid>
 
     </n-card>
-    <n-space justify="center" style="margin-top: 10px">
-      <n-button type="primary" style="width: 120px" @click="checkSql" :loading="isCheckRef">校验</n-button>
+    <n-space justify="center" class="mt-2">
+      <n-button type="primary" class="w-28" @click="checkSql" :loading="isCheckRef">校验</n-button>
     </n-space>
     <n-input
         v-model:value="resRef"
@@ -67,7 +67,7 @@
         minRows: 3,
         maxRows: 7
       }"
-        style="margin-top: 10px"
+        class="mt-2"
         readonly
     />
   </n-scrollbar>

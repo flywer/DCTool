@@ -4,14 +4,14 @@
       针对于无法自动生成质检JSON的表使用，给出一个完整的质检任务JSON，配置选项，即可生成同表结构的JSON
     </n-alert>
     <n-input
-        style="margin-top: 10px"
+        class="mt-2"
         v-model:value="validJsonInputRef"
         type="textarea"
         placeholder="输入原始JSON"
         :clearable="true"
         @change="getBaseInfo"
     />
-    <n-card style="margin-top: 10px" :content-style="{paddingBottom:0}">
+    <n-card class="mt-2" :content-style="{paddingBottom:0}">
       <n-form
           ref="validJsonFormRef"
           inline
@@ -76,13 +76,13 @@
         </n-grid>
       </n-form>
     </n-card>
-    <n-space justify="center" align="center" style="margin-top: 10px">
-      <n-button type="primary" style="width: 120px" @click="validJsonTrans">转换</n-button>
-      <n-button :disabled="validJsonResRef === ''" style="width: 120px" @click="copyText(validJsonResRef)">
+    <n-space justify="center" align="center" class="mt-2">
+      <n-button type="primary" class="w-28" @click="validJsonTrans">转换</n-button>
+      <n-button :disabled="validJsonResRef === ''" class="w-28" @click="copyText(validJsonResRef)">
         复制结果
       </n-button>
       <n-divider :vertical="true"/>
-      <n-button type="primary" :disabled="validJsonResRef === ''" style="width: 120px" @click="addWorkFlow"
+      <n-button type="primary" :disabled="validJsonResRef === ''" class="w-28" @click="addWorkFlow"
                 :loading="isLoading"
       >执行
       </n-button>
@@ -99,8 +99,7 @@
 
     </n-space>
     <n-input
-        class="mb-2"
-        style="margin-top: 10px"
+        class="mb-2 mt-2"
         v-model:value="validJsonResRef"
         type="textarea"
         placeholder=""
@@ -249,7 +248,7 @@ const addWorkFlow = () => {
   isLoading.value = true
   add_work_flow(JSON.parse(validJsonResRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success(res.message)
+      message.success('质检任务创建成功')
     } else {
       message.error(res.message)
     }

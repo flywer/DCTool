@@ -116,7 +116,7 @@
         >
           同时创建调度任务
         </n-checkbox>
-        <n-button type="primary" :disabled="jsonOutputRef === ''" style="width: 120px" @click="createDataXJob"
+        <n-button type="primary" :disabled="jsonOutputRef === ''" class="w-28" @click="createDataXJob"
                   :loading="isLoading"
         >
           执行
@@ -229,9 +229,6 @@
         </n-form-item-gi>
       </n-grid>
     </n-form>
-    <template #header-extra>
-      噢！
-    </template>
   </n-modal>
 </template>
 
@@ -523,7 +520,7 @@ const buildJson = () => {
           subsystemName: "采集"
         }
 
-        paramsModel.jobJson = await build_datax_json(JSON.stringify(buildJson))
+        paramsModel.jobJson = await build_datax_json(buildJson)
 
         jsonOutputRef.value = JSON.stringify(paramsModel, null, 2)
 
@@ -654,8 +651,6 @@ const createDataXJob = () => {
         if (submitCount == 1) {
           jobTemplateId = res.data
         }
-
-        console.log(jobTemplateId)
 
         await add_sched_task(SchedTaskJson).then(res => {
           if (res.code == 0) {

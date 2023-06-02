@@ -45,7 +45,7 @@ ipc.on('reply-msg', (msg: string) => {
       />
     </n-gi>
     <n-gi>
-      <div style="margin-top: 10px">
+      <div class="mt-2">
         <n-input v-model="msg" type="text" placeholder="发送消息给主进程" style="width: 200px"/>
         <n-button style="margin-left: 20px" @click="sendMsg">
           发送

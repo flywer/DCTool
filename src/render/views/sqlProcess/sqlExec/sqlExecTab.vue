@@ -1,10 +1,23 @@
 <template>
-  <n-layout style="margin: 10px 10px 0 10px">
-    <n-scrollbar style="height: calc(100vh - 42px); padding-right: 10px;" trigger="hover">
+  <n-layout >
+    <n-scrollbar  class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
       <n-alert title="说明" type="default" :show-icon="false">
-        校验SQL是否正确
+        只可用于执行
+        <n-tooltip trigger="hover">
+          <template #trigger>
+              <n-text type="success">DML</n-text>
+          </template>
+          常见的DML语句包括INSERT、UPDATE、DELETE等
+        </n-tooltip>
+        、
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-text type="success">DDL</n-text>
+          </template>
+          常见的DDL语句包括CREATE、ALTER、DROP等
+        </n-tooltip>
       </n-alert>
-      <n-card style="margin-top: 10px" :content-style="{paddingBottom:0}">
+      <n-card class="mt-2" :content-style="{paddingBottom:0}">
         <n-form ref="formRef"
                 inline
                 :size="'small'"
@@ -32,25 +45,27 @@
           </n-grid>
         </n-form>
       </n-card>
-      <n-space justify="center" align="center" style="margin-top: 10px">
-        <n-button type="primary" style="width: 120px" @click="exec" :loading="isLoading">校验</n-button>
+
+      <n-space justify="center" align="center" class="mt-2">
+        <n-button type="primary" class="w-28" @click="exec" :loading="isLoading">执行</n-button>
       </n-space>
 
       <n-input
-          v-show="resRef.length > 0"
-          style="margin-top: 10px"
+          v-show="resRef.length>0"
+          class="mt-2"
           v-model:value="resRef"
           type="textarea"
           placeholder=""
           :autosize="true"
           readonly
       />
+
     </n-scrollbar>
   </n-layout>
 </template>
 
-<script setup lang="ts">
-import {exec_sql, sql_valid} from "@render/api/datacenter";
+<script lang="ts" setup>
+import {exec_sql} from "@render/api/datacenter";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {FormInst, useMessage} from "naive-ui";
 import {ref} from "vue";
@@ -79,8 +94,16 @@ const rules = {
 }
 
 let paramModel = {
-  id: '',
-  sql: ''
+  sourceId: '',
+  dbType: '',
+  sourceName: '',
+  dataTierCode: '',
+  dataTierName: '',
+  namedJson: '',
+  datamodelTableFieldsVoList: [],
+  lifeCycle: '1',
+  ddlSql: '',
+  tableName: 'execSql'
 }
 
 const resRef = ref('');
@@ -91,15 +114,16 @@ const exec = () => {
   isLoading.value = true
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      paramModel.id = formModel.value.dataSourceId
-      paramModel.sql = formModel.value.sql.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ')
+      paramModel.sourceId = formModel.value.dataSourceId
+      paramModel.dbType = datasourceOptions.find(option => option.value === formModel.value.dataSourceId).datasource as string
+      paramModel.ddlSql = formModel.value.sql.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ')
 
-      await sql_valid(paramModel).then((res) => {
-        if (res.code == 0) {
-          message.success('校验成功')
+      await exec_sql(paramModel).then((res) => {
+        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
+          message.success('执行成功')
         } else {
-          message.error('校验失败，具体看返回结果')
-          resRef.value = res.msg
+          message.error('执行失败，具体看返回结果')
+          resRef.value = res.message.replace(/建表失败，/g, '')
         }
 
       }).finally(() => {
@@ -110,6 +134,8 @@ const exec = () => {
     }
   })
 }
+
+
 </script>
 
 <style scoped>

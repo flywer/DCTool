@@ -10,9 +10,9 @@
       }"
         :clearable="true"
     />
-    <n-space justify="center" style="margin-top: 10px">
+    <n-space justify="center" class="mt-2">
       <n-button type="primary" style="width: 80px" @click="trans">确认</n-button>
-      <n-button :disabled="resValue === ''" style="width: 120px" @click="copyText(resValue)">
+      <n-button :disabled="resValue === ''" class="w-28" @click="copyText(resValue)">
         复制结果
       </n-button>
     </n-space>
@@ -20,10 +20,16 @@
       <n-text>扁平化：</n-text>
     </n-space>
 
-    <n-input :value="resValue" type="textarea" :autosize="{
+    <n-input
+        :value="resValue"
+        type="textarea"
+        :autosize="{
         minRows: 3,
         maxRows: 3
-      }" style="margin-top: 10px" placeholder="" readonly
+      }"
+        class="mt-2"
+        placeholder=""
+        readonly
     ></n-input>
   </n-layout>
 </template>

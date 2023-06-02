@@ -60,7 +60,7 @@ export const get_columns = async (datasourceId: string, tableName: string, onlyC
 
 // 获取dataXJobJson
 export const build_datax_json = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.buildDataXJson, obj))
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.buildDataXJson, JSON.stringify(obj)))
     return data.data
 }
 

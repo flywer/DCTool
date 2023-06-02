@@ -1,135 +1,154 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
-    <n-alert title="说明" type="default" :show-icon="false">
-      清除任务的写法基本相同，目前只支持中台的TBDS-hive表
-    </n-alert>
-    <n-card style="margin-top: 10px" :content-style="{paddingTop:0,paddingBottom:0}">
-      <n-tabs type="line" animated>
-        <n-tab-pane name="1" tab="简易模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="3" :x-gap="12">
-              <n-form-item-gi  label="表名" path="tableName">
-                <n-input v-model:value="formModel.tableName" placeholder="输入表名"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi  label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    :consistent-menu-width="false"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi  label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions" :consistent-menu-width="false"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
+  <n-layout class="m-2">
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
+      <n-alert title="说明" type="default" :show-icon="false">
+        清除任务的写法基本相同，目前只支持中台的TBDS-hive表
+      </n-alert>
+      <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
+        <n-tabs type="line" animated>
+          <n-tab-pane name="1" tab="简易模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="3" :x-gap="12">
+                <n-form-item-gi label="表名" path="tableName">
+                  <n-input v-model:value="formModel.tableName" placeholder="输入表名"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      :consistent-menu-width="false"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions" :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
 
-            </n-grid>
-          </n-form>
+              </n-grid>
+            </n-form>
 
-        </n-tab-pane>
-        <n-tab-pane name="2" tab="自定义模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="4" :x-gap="12">
-              <n-form-item-gi :span="4" label="工作流名称" path="name">
-                <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="来源表" path="sourceTable">
-                <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="目标表" path="targetTable">
-                <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="告警邮箱" path="email">
-                <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
-              </n-form-item-gi>
-              <n-form-item-gi :span="2" label="描述" path="description">
-                <n-input v-model:value="formModel.description" placeholder="输入描述"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-            </n-grid>
-          </n-form>
-        </n-tab-pane>
-      </n-tabs>
+          </n-tab-pane>
+          <n-tab-pane name="2" tab="自定义模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="4" :x-gap="12">
+                <n-form-item-gi :span="4" label="工作流名称" path="name">
+                  <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="来源表" path="sourceTable">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.sourceTable"
+                            :options="sourceTableOptions"
+                            filterable
+                            remote
+                            @search="handleSourceTableSearch"
+                            :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="目标表" path="targetTable">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.targetTable"
+                            :options="targetTableOptions"
+                            filterable
+                            remote
+                            @search="handleTargetTableSearch"
+                            :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="告警邮箱" path="email">
+                  <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="描述" path="description">
+                  <n-input v-model:value="formModel.description" placeholder="输入描述"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+              </n-grid>
+            </n-form>
+          </n-tab-pane>
+        </n-tabs>
 
-    </n-card>
-    <n-space justify="center" align="center" style="margin-top: 10px">
-      <n-button type="primary" style="width: 120px" @click="generate">生成</n-button>
-      <n-button :disabled="resRef === ''" style="width: 120px" @click="copyText(resRef)">
-        复制结果
-      </n-button>
-      <n-divider :vertical="true"/>
-      <n-button type="primary" :disabled="resRef === ''" style="width: 120px" @click="addWorkFlow" :loading="isLoading">
-        执行
-      </n-button>
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <n-icon size="16">
-            <QuestionCircleTwotone/>
-          </n-icon>
-        </template>
-        直接在中台创建此任务
-      </n-tooltip>
+      </n-card>
+      <n-space justify="center" align="center" class="mt-2">
+        <n-button type="primary" class="w-28" @click="generate">生成</n-button>
+        <n-button :disabled="resRef === ''" class="w-28" @click="copyText(resRef)">
+          复制结果
+        </n-button>
+        <n-divider :vertical="true"/>
+        <n-button type="primary" :disabled="resRef === ''" class="w-28" @click="addWorkFlow"
+                  :loading="isLoading"
+        >
+          执行
+        </n-button>
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-icon size="16">
+              <QuestionCircleTwotone/>
+            </n-icon>
+          </template>
+          直接在中台创建此任务
+        </n-tooltip>
 
-    </n-space>
-    <n-input
-        style="margin-top: 10px"
-        v-model:value="resRef"
-        type="textarea"
-        placeholder=""
-    />
-  </n-scrollbar>
+      </n-space>
+      <n-input
+          class="mt-2"
+          v-model:value="resRef"
+          type="textarea"
+          placeholder=""
+          :autosize="{
+        minRows: 6,
+        maxRows: 6
+      }"
+      />
+    </n-scrollbar>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
-import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {FormInst, useMessage} from "naive-ui";
-import {ref, watch} from "vue";
+import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {onMounted, ref, watch} from "vue";
 import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
@@ -141,6 +160,15 @@ const copyText = async (text) => {
   await toClipboard(text);
   message.success('复制成功')
 }
+
+const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
+const targetTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
+
+onMounted(async () => {
+  await projectIdOptionsUpdate()
+  sourceTableOptions.value = await getTablesOptions('6')
+  targetTableOptions.value = await getTablesOptions('6')
+})
 
 const formRef = ref<FormInst | null>(null);
 const formModel = ref({
@@ -156,32 +184,32 @@ const formModel = ref({
 const rules = {
   name: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入工作流名称'
   },
   sourceTable: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['change'],
     message: '请输入来源表'
   },
   targetTable: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: [ 'change'],
     message: '请输入目标表'
   },
   projectId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择项目'
   },
   personId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择责任人'
   },
   tableName: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['input'],
     message: '请输入表名'
   }
 }
@@ -282,12 +310,20 @@ const addWorkFlow = () => {
   isLoading.value = true
   add_work_flow(outputModel).then((res) => {
     if (res.code == 200) {
-      message.success(res.message)
+      message.success('清除任务创建成功')
     } else {
       message.error(res.message)
     }
     isLoading.value = false
   })
+}
+
+const handleSourceTableSearch = async (query: string) => {
+  sourceTableOptions.value = await getTablesOptions('6', query)
+}
+
+const handleTargetTableSearch = async (query: string) => {
+  targetTableOptions.value = await getTablesOptions('6', query)
 }
 </script>
 

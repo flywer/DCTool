@@ -1,24 +1,24 @@
 <template>
-  <n-layout style="margin: 10px 10px 0 10px">
-    <n-scrollbar style="height: calc(100vh - 42px); padding-right: 10px;" trigger="hover">
+  <n-layout>
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px); " trigger="hover">
       <n-alert title="说明" type="default" :show-icon="false">
         因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句，注意decimal类型没有自动转换，可自行手动改为varchar或者string
       </n-alert>
       <n-input
-          style="margin-top: 10px"
+          class="mt-2"
           v-model:value="hiveSqlInputRef"
           type="textarea"
           placeholder="输入MYSQL建表语句"
           :clearable="true"
       />
-      <n-space justify="center" style="margin-top: 10px">
-        <n-button type="primary" style="width: 120px" @click="hiveSqlTrans">转换</n-button>
-        <n-button :disabled="hiveSqlResRef === ''" style="width: 120px" @click="copyText(hiveSqlResRef)">
+      <n-space justify="center" class="mt-2">
+        <n-button type="primary" class="w-28" @click="hiveSqlTrans">转换</n-button>
+        <n-button :disabled="hiveSqlResRef === ''" class="w-28" @click="copyText(hiveSqlResRef)">
           复制结果
         </n-button>
       </n-space>
       <n-input
-          style="margin-top: 10px"
+          class="mt-2"
           v-model:value="hiveSqlResRef"
           type="textarea"
           placeholder=""

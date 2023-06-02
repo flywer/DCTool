@@ -57,9 +57,6 @@
                   />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="来源表" path="sourceTable">
-<!--                  <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
-                           @keydown.enter.prevent
-                  />-->
                   <n-select :size="'small'"
                         v-model:value="formModel.sourceTable"
                         :options="sourceTableOptions"
@@ -70,9 +67,6 @@
               />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="目标表" path="targetTable">
-<!--                  <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
-                           @keydown.enter.prevent
-                  />-->
                   <n-select :size="'small'"
                         v-model:value="formModel.targetTable"
                         :options="targetTableOptions"
@@ -225,7 +219,7 @@ const rules = {
   },
   tableName: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['input'],
     message: '请输入表名'
   }
 }
@@ -315,7 +309,7 @@ const addWorkFlow = () => {
   isLoading.value = true
   add_work_flow(outputModel).then((res) => {
     if (res.code == 200) {
-      message.success(res.message)
+      message.success('备份任务创建成功')
     } else {
       message.error(res.message)
     }

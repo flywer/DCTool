@@ -10,17 +10,22 @@
       }"
         :clearable="true"
     />
-    <n-space justify="center" style="margin-top: 10px">
-      <n-button style="width: 120px" @click="submit">确认</n-button>
+    <n-space justify="center" class="mt-2">
+      <n-button class="w-28" @click="submit">确认</n-button>
     </n-space>
     <n-space style="margin-top: 20px;">
       <n-text>base64编码：</n-text>
     </n-space>
 
-    <n-input :value="base64Value" type="textarea" :autosize="{
+    <n-input :value="base64Value"
+             type="textarea"
+             :autosize="{
         minRows: 2,
         maxRows: 7
-      }" style="margin-top: 10px" placeholder=""  readonly
+      }"
+             class="mt-2"
+             placeholder=""
+             readonly
     ></n-input>
   </n-layout>
 </template>

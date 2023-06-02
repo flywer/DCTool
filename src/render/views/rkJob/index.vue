@@ -1,150 +1,157 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
-    <n-alert title="说明" type="default" :show-icon="false">
-      入主题库的入库任务生成
-    </n-alert>
-    <n-card style="margin-top: 10px;" :content-style="{paddingTop:0,paddingBottom:0}">
-      <n-tabs type="line" animated>
-        <n-tab-pane name="1" tab="简易模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="3" :x-gap="12">
-              <n-form-item-gi label="表名" path="tableName">
-                <n-input v-model:value="formModel.tableName" placeholder="输入表名"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    :consistent-menu-width="false"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions" :consistent-menu-width="false"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
-            </n-grid>
-          </n-form>
-        </n-tab-pane>
-        <n-tab-pane name="2" tab="自定义模式">
-          <n-form ref="formRef"
-                  inline
-                  :size="'small'"
-                  :model="formModel"
-                  :rules="rules"
-                  label-placement="left"
-          >
-            <n-grid :cols="2" :x-gap="12">
-              <n-form-item-gi :span="4" label="工作流名称" path="name">
-                <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="项目" path="projectId">
-                <n-select
-                    v-model:value="formModel.projectId"
-                    placeholder="选择项目"
-                    :options="projectIdOptions"
-                    filterable
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="责任人" path="personId">
-                <n-select
-                    v-model:value="formModel.personId"
-                    placeholder="选择责任人"
-                    :options="personIdOptions"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="告警邮箱" path="email">
-                <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
-              </n-form-item-gi>
-              <n-form-item-gi label="描述" path="description">
-                <n-input v-model:value="formModel.description" placeholder="输入描述"
-                         @keydown.enter.prevent
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="来源表" path="sourceDataSourceId">
-                <n-select :size="'small'"
-                          v-model:value="formModel.sourceDataSourceId"
-                          :options="datasourceOptions"
-                          @update:value="getSourceTables('')"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="表名" path="sourceTableName">
-                <n-select :size="'small'"
-                          v-model:value="formModel.sourceTableName"
-                          :options="sourceTableOptions"
-                          filterable
-                          remote
-                          :consistent-menu-width="false"
-                          @search="getSourceTables"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="目标表" path="targetDataSourceId">
-                <n-select :size="'small'"
-                          v-model:value="formModel.targetDataSourceId"
-                          :default-value="6"
-                          :options="datasourceOptions"
-                          @update:value="getTargetTables('')"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi label="表名" path="targetTableName">
-                <n-select :size="'small'"
-                          v-model:value="formModel.targetTableName"
-                          :options="targetTableOptions"
-                          filterable
-                          remote
-                          :consistent-menu-width="false"
-                          @search="getTargetTables"
-                />
-              </n-form-item-gi>
-            </n-grid>
+  <n-layout class="m-2">
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
+      <n-alert title="说明" type="default" :show-icon="false">
+        入主题库的入库任务生成
+      </n-alert>
+      <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
+        <n-tabs type="line" animated>
+          <n-tab-pane name="1" tab="简易模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="3" :x-gap="12">
+                <n-form-item-gi label="表名" path="tableName">
+                  <n-input v-model:value="formModel.tableName" placeholder="输入表名"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      :consistent-menu-width="false"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions" :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
+              </n-grid>
+            </n-form>
+          </n-tab-pane>
+          <n-tab-pane name="2" tab="自定义模式">
+            <n-form ref="formRef"
+                    inline
+                    :size="'small'"
+                    :model="formModel"
+                    :rules="rules"
+                    label-placement="left"
+            >
+              <n-grid :cols="2" :x-gap="12">
+                <n-form-item-gi :span="4" label="工作流名称" path="name">
+                  <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="项目" path="projectId">
+                  <n-select
+                      v-model:value="formModel.projectId"
+                      placeholder="选择项目"
+                      :options="projectIdOptions"
+                      filterable
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="责任人" path="personId">
+                  <n-select
+                      v-model:value="formModel.personId"
+                      placeholder="选择责任人"
+                      :options="personIdOptions"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="告警邮箱" path="email">
+                  <n-input v-model:value="formModel.email" placeholder="输入告警邮箱" @keydown.enter.prevent/>
+                </n-form-item-gi>
+                <n-form-item-gi label="描述" path="description">
+                  <n-input v-model:value="formModel.description" placeholder="输入描述"
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="来源库" path="sourceDataSourceId">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.sourceDataSourceId"
+                            :options="datasourceOptions"
+                            @update:value="getSourceTables('')"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="来源表" path="sourceTableName">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.sourceTableName"
+                            :options="sourceTableOptions"
+                            filterable
+                            remote
+                            :consistent-menu-width="false"
+                            @search="getSourceTables"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="目标库" path="targetDataSourceId">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.targetDataSourceId"
+                            :default-value="6"
+                            :options="datasourceOptions"
+                            @update:value="getTargetTables('')"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi label="目标表" path="targetTableName">
+                  <n-select :size="'small'"
+                            v-model:value="formModel.targetTableName"
+                            :options="targetTableOptions"
+                            filterable
+                            remote
+                            :consistent-menu-width="false"
+                            @search="getTargetTables"
+                  />
+                </n-form-item-gi>
+              </n-grid>
 
-          </n-form>
-        </n-tab-pane>
-      </n-tabs>
-    </n-card>
-    <n-space justify="center" align="center" style="margin-top: 10px">
-      <n-checkbox v-model:checked="removeIdCheckRef">
-        去除id字段
-      </n-checkbox>
-      <n-checkbox v-model:checked="removeDiffCheckRef">
-        去除不同名称字段
-      </n-checkbox>
-      <n-divider :vertical="true"/>
-      <n-button type="primary" style="width: 120px" @click="generateSql" :loading="isGenerating">SQL生成</n-button>
-      <n-button :disabled="insertSqlRef === ''" style="width: 120px" @click="copyText(insertSqlRef)">
-        复制结果
-      </n-button>
-    </n-space>
-    <n-input
-        v-model:value="insertSqlRef"
-        type="textarea"
-        placeholder=""
-        style="margin-top: 10px"
-        readonly
-    />
-    <n-space justify="center" align="center" style="margin-top: 10px">
-      <n-button type="primary" :disabled="insertSqlRef === ''" style="width: 120px" @click="addWorkFlow"
-                :loading="isLoading"
-      >
-        执行
-      </n-button>
-    </n-space>
-  </n-scrollbar>
+            </n-form>
+          </n-tab-pane>
+        </n-tabs>
+      </n-card>
+      <n-space justify="center" align="center" class="mt-2">
+        <n-checkbox v-model:checked="removeIdCheckRef">
+          去除id字段
+        </n-checkbox>
+        <n-checkbox v-model:checked="removeDiffCheckRef">
+          去除不同名称字段
+        </n-checkbox>
+        <n-divider :vertical="true"/>
+        <n-button type="primary" class="w-28" @click="generateSql" :loading="isGenerating">SQL生成</n-button>
+        <n-button :disabled="insertSqlRef === ''" class="w-28" @click="copyText(insertSqlRef)">
+          复制结果
+        </n-button>
+      </n-space>
+      <n-input
+          v-model:value="insertSqlRef"
+          type="textarea"
+          placeholder=""
+          class="mt-2"
+          readonly
+      />
+      <n-space justify="center" align="center" class="mt-2">
+        <n-button
+            type="primary"
+            :disabled="insertSqlRef === ''"
+            class="w-28"
+            @click="addWorkFlow"
+            :loading="isLoading"
+        >
+          执行
+        </n-button>
+      </n-space>
+
+    </n-scrollbar>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
@@ -191,43 +198,43 @@ const formModel = ref({
 const rules = {
   name: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入工作流名称'
   },
   projectId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择项目'
   },
   personId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择责任人'
   },
   sourceDataSourceId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['change'],
     message: '请选择来源库'
   },
   sourceTableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
-    message: '请输入来源表'
+    trigger: ['change'],
+    message: '请选择来源表'
   },
   targetDataSourceId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['change'],
     message: '请选择目标库'
   },
   targetTableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
-    message: '请输入目标表'
+    trigger: ['change'],
+    message: '请选择目标表'
   },
   tableName: {
     key: 'table',
@@ -250,10 +257,10 @@ watch(
     }
 )
 
-const getSourceTables = async (query?:string) => {
+const getSourceTables = async (query?: string) => {
   sourceTableOptions.value = await getTablesOptions(formModel.value.sourceDataSourceId, query)
 }
-const getTargetTables = async (query?:string) => {
+const getTargetTables = async (query?: string) => {
   targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId, query)
 }
 
@@ -277,8 +284,8 @@ const generateSql = () => {
   formRef.value?.validate(
       async (errors) => {
         if (!errors) {
-          let sourceTableColumns = (await get_columns(formModel.value.sourceDataSourceId, formModel.value.sourceTableName,true))
-          let targetTableColumns = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName,true))
+          let sourceTableColumns = (await get_columns(formModel.value.sourceDataSourceId, formModel.value.sourceTableName, true))
+          let targetTableColumns = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName, true))
           if (removeIdCheckRef.value) {
             sourceTableColumns = sourceTableColumns.filter(c => c !== 'id')
             targetTableColumns = targetTableColumns.filter(c => c !== 'id')
@@ -388,7 +395,7 @@ const addWorkFlow = () => {
 
           add_work_flow(paramsModel).then((res) => {
             if (res.code == 200) {
-              message.success(res.message)
+              message.success('入库任务创建成功')
             } else {
               message.error(res.message)
             }

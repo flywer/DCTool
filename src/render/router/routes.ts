@@ -4,17 +4,18 @@ const view1 = () => import('@render/views/examples/view1.vue')
 const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
 const ocr = () => import('@render/views/ocr/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
-const datacenter = () => import('@render/views/datacenter/index.vue')
-
 const flattenText = () => import('@render/views/flattenText/index.vue')
 const cjJob = () => import('@render/views/cjJob/index.vue')
 const zjJob = () => import('@render/views/zjJob/index.vue')
 const bfJob = () => import('@render/views/bfJob/index.vue')
-const execSql = () => import('@render/views/execSql/index.vue')
-const sqlValid = () => import('@render/views/sqlValid/index.vue')
-const hiveSqlTrans = () => import('@render/views/datacenter/hiveSqlTab.vue')
+const qcJob = () => import('@render/views/qcJob/index.vue')
+const rkJob = () => import('@render/views/rkJob/index.vue')
+const gxJob = () => import('@render/views/gxJob/index.vue')
+const execSql = () => import('@render/views/sqlProcess/sqlExec/sqlExecTab.vue')
+const sqlValid = () => import('@render/views/sqlProcess/sqlValid/sqlValidTab.vue')
+const hiveSqlTrans = () => import('@render/views/sqlProcess/sqlTrans/sqlTransTab.vue')
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
-
+const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
 
 export const routeName = {
@@ -22,16 +23,18 @@ export const routeName = {
     ldDecrypt: 'ldDecrypt',
     ocr: 'ocr',
     svg: 'svg',
-    datacenter: 'datacenter',
     flattenText: 'flattenText',
     cjJob: 'cjJob',
     zjJob: 'zjJob',
     bfJob: 'bfJob',
+    qcJob: 'qcJob',
+    rkJob: 'rkJob',
+    gxJob: 'gxJob',
     execSql: 'execSql',
     sqlValid: 'sqlValid',
+    sqlProcess: 'sqlProcess',
     hiveSqlTrans: 'hiveSqlTrans',
     projectAbbr: 'projectAbbr',
-
     settings: 'settings'
 }
 
@@ -59,11 +62,6 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.svg,
         path: '/svg/index',
         component: svg
-    },
-    {
-        name: routeName.datacenter,
-        path: '/datacenter/index',
-        component: datacenter
     },
     {
         name: routeName.flattenText,
@@ -99,7 +97,7 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.zjJob,
         path: '/zjJob/index',
         component: zjJob
-    },{
+    }, {
         name: routeName.bfJob,
         path: '/bfJob/index',
         component: bfJob
@@ -108,5 +106,25 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.settings,
         path: '/settings/index',
         component: settings
+    },
+    {
+        name: routeName.qcJob,
+        path: '/qcJob/index',
+        component: qcJob
+    },
+    {
+        name: routeName.rkJob,
+        path: '/rkJob/index',
+        component: rkJob
+    },
+    {
+        name: routeName.gxJob,
+        path: '/gxJob/index',
+        component: gxJob
+    },
+    {
+        name: routeName.sqlProcess,
+        path: '/sqlProcess/index',
+        component: sqlProcess
     }
 ]
