@@ -57,14 +57,30 @@
                   />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="来源表" path="sourceTable">
-                  <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
+<!--                  <n-input v-model:value="formModel.sourceTable" placeholder="输入来源表"
                            @keydown.enter.prevent
-                  />
+                  />-->
+                  <n-select :size="'small'"
+                        v-model:value="formModel.sourceTable"
+                        :options="sourceTableOptions"
+                        filterable
+                        remote
+                        @search="handleSourceTableSearch"
+                        :consistent-menu-width="false"
+              />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="目标表" path="targetTable">
-                  <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
+<!--                  <n-input v-model:value="formModel.targetTable" placeholder="输入目标表"
                            @keydown.enter.prevent
-                  />
+                  />-->
+                  <n-select :size="'small'"
+                        v-model:value="formModel.targetTable"
+                        :options="targetTableOptions"
+                        filterable
+                        remote
+                        @search="handleTargetTableSearch"
+                        :consistent-menu-width="false"
+              />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="项目" path="projectId">
                   <n-select
@@ -132,11 +148,12 @@
 <script setup lang="ts">
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
-import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {FormInst, useMessage} from "naive-ui";
-import {ref, watch} from "vue";
+import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {onMounted, ref, watch} from "vue";
 import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
@@ -148,6 +165,16 @@ const copyText = async (text) => {
   await toClipboard(text);
   message.success('复制成功')
 }
+
+const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
+const targetTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
+
+
+onMounted(async () => {
+  await projectIdOptionsUpdate()
+  sourceTableOptions.value = await getTablesOptions('6')
+  targetTableOptions.value = await getTablesOptions('6')
+})
 
 const formRef = ref<FormInst | null>(null);
 const formModel = ref({
@@ -173,27 +200,27 @@ watch(
 const rules = {
   name: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入工作流名称'
   },
   sourceTable: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['change'],
     message: '请输入来源表'
   },
   targetTable: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['change'],
     message: '请输入目标表'
   },
   projectId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择项目'
   },
   personId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择责任人'
   },
   tableName: {
@@ -294,6 +321,15 @@ const addWorkFlow = () => {
     }
     isLoading.value = false
   })
+}
+
+
+const handleSourceTableSearch = async (query: string) => {
+  sourceTableOptions.value = await getTablesOptions('6', query)
+}
+
+const handleTargetTableSearch = async (query: string) => {
+  targetTableOptions.value = await getTablesOptions('6', query)
 }
 </script>
 
