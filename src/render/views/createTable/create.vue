@@ -1,7 +1,7 @@
 <template>
-  <!--  <n-alert title="说明" type="default" :show-icon="false">
-
-    </n-alert>-->
+  <n-alert title="说明" type="default" :show-icon="false">
+    建表若出现服务器内部错误的问题，需要自行去中台删除该表然后重建，这是中台的问题
+  </n-alert>
   <n-card class="mt-2" :content-style="{paddingBottom:0}">
     <n-form ref="formRef"
             inline
@@ -554,7 +554,6 @@ const dwbCreate = async (tableAbbr, tableSql) => {
     console.log(paramsJson.ddlSql)
   } else {
     paramsJson.ddlSql = `CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`
-
   }
 
   createStatus.value.dwb.isCreating = true
@@ -563,6 +562,9 @@ const dwbCreate = async (tableAbbr, tableSql) => {
   create_table(paramsJson).then((res) => {
     createStatus.value.dwb.isSuccess = res.success && res.code == 200;
     createStatus.value.dwb.msg = res.message
+    if (!createStatus.value.dwb.isSuccess) {
+      console.log(res)
+    }
   }).finally(() => createStatus.value.dwb.isCreating = false)
 }
 
@@ -578,7 +580,7 @@ const addFieldsToSql = (sql: string): string => {
     return sql;
   }
   const preSql = sql.slice(0, index); // 获取cd_batch字段前面的sql语句
-  const postSql = sql.slice(index).replace('cd_batch VARCHAR(50) COMMENT \'批次号\'',''); // 获取cd_batch字段后面的sql语句
+  const postSql = sql.slice(index).replace('cd_batch VARCHAR(50) COMMENT \'批次号\'', ''); // 获取cd_batch字段后面的sql语句
   const newFields = `cd_batch VARCHAR(50) COMMENT '批次号',
     ${fieldStr}`;
   return `${preSql} ${newFields} ${postSql}`;// 拼接新增字段后的完整sql语句
