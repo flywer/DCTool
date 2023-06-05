@@ -8,6 +8,7 @@ const cjJob = () => import('@render/views/cjJob/index.vue')
 const zjJob = () => import('@render/views/zjJob/index.vue')
 const bfJob = () => import('@render/views/bfJob/index.vue')
 const qcJob = () => import('@render/views/qcJob/index.vue')
+const rhJob = () => import('@render/views/rhJob/index.vue')
 const rkJob = () => import('@render/views/rkJob/index.vue')
 const gxJob = () => import('@render/views/gxJob/index.vue')
 const execSql = () => import('@render/views/sqlProcess/sqlExec/sqlExecTab.vue')
@@ -30,6 +31,7 @@ export const routeName = {
     qcJob: 'qcJob',
     rkJob: 'rkJob',
     gxJob: 'gxJob',
+    rhJob: 'rhJob',
     execSql: 'execSql',
     sqlValid: 'sqlValid',
     sqlProcess: 'sqlProcess',
@@ -127,5 +129,15 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.createTable,
         path: '/createTable/index',
         component: createTable
+    },
+    {
+        name: routeName.createTable,
+        path: '/createTable/index',
+        component: createTable
+    },
+    {
+        name: routeName.rhJob,
+        path: '/rhJob/index',
+        component: rhJob
     }
 ]

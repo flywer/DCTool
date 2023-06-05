@@ -98,13 +98,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.qcJob,
+                name: routeName.rhJob,
               }
             },
-            {default: () => '清除任务'}
+            {default: () => '融合任务'}
         ),
-    key: routeName.qcJob,
-    icon: () => h('span', 'QC')
+    key: routeName.rhJob,
+    icon: () => h('span', 'RH')
   },
   {
     label: () =>
@@ -119,6 +119,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.rkJob,
     icon: () => h('span', 'RK')
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.qcJob,
+              }
+            },
+            {default: () => '清除任务'}
+        ),
+    key: routeName.qcJob,
+    icon: () => h('span', 'QC')
   },
   {
     label: () =>

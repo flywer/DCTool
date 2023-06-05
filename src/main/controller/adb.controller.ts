@@ -57,6 +57,9 @@ export class AdbController {
 
     @IpcHandle(channels.auxiliaryDb.getTableSql)
     public async handleGetTableSql(obj: any) {
+        if (typeof obj !== 'undefined') {
+            obj = JSON.parse(obj)
+        }
         return await AppDataSource.manager.find(TableSql, {
             where: [
                 {

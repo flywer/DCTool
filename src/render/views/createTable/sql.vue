@@ -154,7 +154,8 @@ const createColumns = (): DataTableColumns<TableSql> => {
     {
       title: '表名简称',
       key: 'tableName',
-      width: '10%'
+      width: '10%',
+      align: 'center',
     },
     {
       title: '表名注释',
@@ -169,7 +170,8 @@ const createColumns = (): DataTableColumns<TableSql> => {
     }, {
       title: '操作',
       key: 'actions',
-      width: '20%',
+      width: '15%',
+      align: 'center',
       render(row) {
         return h(
             NButton,
@@ -195,9 +197,9 @@ const columnsRef = ref(createColumns())
 
 const paginationReactive = reactive({
   page: 1,
-  pageSize: 8,
+  pageSize: 9,
   showSizePicker: true,
-  pageSizes: [8, 20, 50],
+  pageSizes: [9, 20, 50],
   onChange: async (page: number) => {
     paginationReactive.page = page
   },
@@ -248,7 +250,6 @@ const search = (v) => {
     comment: v,
     sql: v
   }).then((res) => {
-    console.log(res)
     tableDataRef.value = res
   })
 }
