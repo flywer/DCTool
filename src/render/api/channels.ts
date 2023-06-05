@@ -29,7 +29,8 @@ export const channels = reactive({
         addSchedTask: 'datacenter/addSchedTask',
         execSql: 'datacenter/execSql',
         sqlValid: 'datacenter/sqlValid',
-        authTokenNotice:'datacenter/authTokenNotice',
+        authTokenNotice: 'datacenter/authTokenNotice',
+        createTable: 'datacenter/createTable',
 
     },
     auxiliaryDb: {
@@ -38,6 +39,9 @@ export const channels = reactive({
         findByProjectId: 'auxiliaryDb/findByProjectId',
         getAuthToken: 'auxiliaryDb/getAuthToken',
         updateAuthToken: 'auxiliaryDb/updateAuthToken',
+        getTableSql: 'auxiliaryDb/getTableSql',
+        updateTableSql: 'auxiliaryDb/updateTableSql',
+
     }
 
 })

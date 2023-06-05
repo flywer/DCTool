@@ -325,7 +325,7 @@ onMounted(async () => {
 const onUpdateJobName = async () => {
   if (jobNameLockRef.value) {
     const {projectAbbr} = await getAbbrByProId(formModel.value.projectId);
-    formModel.value.name = `zj_${projectAbbr}_${formModel.value.tableName}`
+    formModel.value.name = `cj_${projectAbbr}_${formModel.value.tableName}`
   }
 }
 

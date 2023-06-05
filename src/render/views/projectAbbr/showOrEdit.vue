@@ -7,6 +7,7 @@
           v-model:value="inputValue"
           @blur="handleBlur"
           @keyup.enter="handleChange"
+          :spellcheck="false"
       />
       <n-button @mousedown.prevent @click.stop="handleChange">
         <n-icon>
@@ -42,6 +43,7 @@ const handleOnClick = () => {
     isEdit.value = true
     nextTick(() => {
       inputRef.value.focus()
+      inputRef.value.select()
     })
   }
 }

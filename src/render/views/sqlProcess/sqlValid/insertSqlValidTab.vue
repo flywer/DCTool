@@ -1,5 +1,5 @@
 <template>
-  <n-scrollbar class="pr-2" style="height: calc(100vh - 105px);" trigger="hover">
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 158px);" trigger="hover">
     <n-alert title="说明" type="default" :show-icon="false">
       选择对应数据库，校验此INSERT语句语法、逻辑是否正确<br>
       由于中台限制，来源表与目标表的数据库类型必须相同，即TBDS库只能至TBDS库，MYSQL库只能至MYSQL库

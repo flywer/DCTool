@@ -85,3 +85,8 @@ export const sql_valid = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.sqlValid, obj))
     return data
 }
+
+export const create_table = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.createTable, JSON.stringify(obj)))
+    return data
+}

@@ -1,5 +1,6 @@
 import "reflect-metadata"
 import {Dict} from "@main/entity/Dict";
+import {TableSql} from "@main/entity/TableSql";
 import { DataSource } from "typeorm"
 import { ProjectInfo } from "./entity/ProjectInfo"
 
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
     database: "ap_dev_sjzt",
     synchronize: true,
     logging: false,
-    entities: [ProjectInfo,Dict],
+    entities: [ProjectInfo,Dict,TableSql],
     migrations: [],
     subscribers: [],
 })

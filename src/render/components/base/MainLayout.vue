@@ -140,6 +140,20 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
+                name: routeName.createTable,
+              }
+            },
+            {default: () => '中台建表'}
+        ),
+    key: routeName.createTable,
+    icon: () => h('span', 'CT')
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
                 name: routeName.sqlProcess,
               }
             },

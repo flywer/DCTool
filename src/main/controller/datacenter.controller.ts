@@ -176,6 +176,18 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.createTable)
+    public async handleCreateTable(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest('/datawork/datamodelTables/save', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({

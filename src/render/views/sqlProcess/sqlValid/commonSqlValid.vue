@@ -1,47 +1,49 @@
 <template>
-  <n-alert title="说明" type="default" :show-icon="false">
-    校验SQL是否正确
-  </n-alert>
-  <n-card class="mt-2" :content-style="{paddingBottom:0}">
-    <n-form ref="formRef"
-            inline
-            :size="'small'"
-            :model="formModel"
-            :rules="rules"
-            label-placement="left"
-    >
-      <n-grid :cols="1" :x-gap="12">
-        <n-form-item-gi label="数据源" path="dataSourceId">
-          <n-select
-              v-model:value="formModel.dataSourceId"
-              :options="datasourceOptions"
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 158px); " trigger="hover">
+    <n-alert title="说明" type="default" :show-icon="false">
+      校验SQL是否正确
+    </n-alert>
+    <n-card class="mt-2" :content-style="{paddingBottom:0}">
+      <n-form ref="formRef"
+              inline
               :size="'small'"
-          />
-        </n-form-item-gi>
-        <n-form-item-gi path="sql">
-          <n-input
-              v-model:value="formModel.sql"
-              type="textarea"
-              placeholder="输入SQL语句"
-              :clearable="true"
-              :autosize=" {  minRows: 5,maxRows:14 }"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-  </n-card>
-  <n-space justify="center" align="center" class="mt-2">
-    <n-button type="primary" class="w-28" @click="exec" :loading="isLoading">校验</n-button>
-  </n-space>
-  <n-input
-      v-show="resRef.length > 0"
-      class="mt-2"
-      v-model:value="resRef"
-      type="textarea"
-      placeholder=""
-      :autosize="true"
-      readonly
-  />
+              :model="formModel"
+              :rules="rules"
+              label-placement="left"
+      >
+        <n-grid :cols="1" :x-gap="12">
+          <n-form-item-gi label="数据源" path="dataSourceId">
+            <n-select
+                v-model:value="formModel.dataSourceId"
+                :options="datasourceOptions"
+                :size="'small'"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi path="sql">
+            <n-input
+                v-model:value="formModel.sql"
+                type="textarea"
+                placeholder="输入SQL语句"
+                :clearable="true"
+                :autosize=" {  minRows: 5,maxRows:14 }"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
+    </n-card>
+    <n-space justify="center" align="center" class="mt-2">
+      <n-button type="primary" class="w-28" @click="exec" :loading="isLoading">校验</n-button>
+    </n-space>
+    <n-input
+        v-show="resRef.length > 0"
+        class="mt-2"
+        v-model:value="resRef"
+        type="textarea"
+        placeholder=""
+        :autosize="true"
+        readonly
+    />
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts">
@@ -93,6 +95,7 @@ const exec = () => {
       await sql_valid(paramModel).then((res) => {
         if (res.code == 0) {
           message.success('校验成功')
+          resRef.value = ''
         } else {
           message.error('校验失败，具体看返回结果')
           resRef.value = res.msg

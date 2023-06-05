@@ -16,6 +16,7 @@ const hiveSqlTrans = () => import('@render/views/sqlProcess/sqlTrans/sqlTransTab
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
 const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
+const createTable = () => import('@render/views/createTable/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -34,6 +35,7 @@ export const routeName = {
     sqlProcess: 'sqlProcess',
     hiveSqlTrans: 'hiveSqlTrans',
     projectAbbr: 'projectAbbr',
+    createTable: 'createTable',
     settings: 'settings'
 }
 
@@ -120,5 +122,10 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.sqlProcess,
         path: '/sqlProcess/index',
         component: sqlProcess
+    },
+    {
+        name: routeName.createTable,
+        path: '/createTable/index',
+        component: createTable
     }
 ]

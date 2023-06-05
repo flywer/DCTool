@@ -1,8 +1,10 @@
 import {AppDataSource} from "@main/data-source";
 import {Dict} from "@main/entity/Dict";
 import {ProjectInfo} from "@main/entity/ProjectInfo";
+import {TableSql} from "@main/entity/TableSql";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
+import {Like} from "typeorm";
 
 @Controller()
 export class AdbController {
@@ -51,5 +53,27 @@ export class AdbController {
         });
         dict.value = token
         return await AppDataSource.manager.save(dict)
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getTableSql)
+    public async handleGetTableSql(obj: any) {
+        return await AppDataSource.manager.find(TableSql, {
+            where: [
+                {
+                    tableName: Like(`%${obj?.tableName || ''}%`)
+                },
+                {
+                    comment: Like(`%${obj?.comment || ''}%`)
+                },
+                {
+                    sql: Like(`%${obj?.sql || ''}%`)
+                }
+            ]
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateTableSql)
+    public async handleUpdateTableSql(obj: any) {
+        return await AppDataSource.getRepository(TableSql).save(obj)
     }
 }
