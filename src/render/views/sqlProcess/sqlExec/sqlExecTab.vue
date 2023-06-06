@@ -1,11 +1,11 @@
 <template>
-  <n-layout >
-    <n-scrollbar  class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
+  <n-layout>
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
       <n-alert title="说明" type="default" :show-icon="false">
         只可用于执行
         <n-tooltip trigger="hover">
           <template #trigger>
-              <n-text type="success">DML</n-text>
+            <n-text type="success">DML</n-text>
           </template>
           常见的DML语句包括INSERT、UPDATE、DELETE等
         </n-tooltip>
@@ -40,6 +40,7 @@
                   placeholder="输入SQL语句"
                   :clearable="true"
                   :autosize=" {  minRows: 5,maxRows:14 }"
+                  @keydown.tab.prevent="insertTab"
               />
             </n-form-item-gi>
           </n-grid>
@@ -121,6 +122,7 @@ const exec = () => {
       await exec_sql(paramModel).then((res) => {
         if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
           message.success('执行成功')
+          resRef.value = ''
         } else {
           message.error('执行失败，具体看返回结果')
           resRef.value = res.message.replace(/建表失败，/g, '')
@@ -135,7 +137,17 @@ const exec = () => {
   })
 }
 
+const insertTab = (event: KeyboardEvent) => {
+  const textarea = event.target as HTMLTextAreaElement;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
 
+  // Insert tab character
+  formModel.value.sql = formModel.value.sql.substring(0, start) + '\t' + formModel.value.sql.substring(end);
+
+  // Put cursor at right position again
+  textarea.selectionStart = textarea.selectionEnd = start + 1;
+}
 </script>
 
 <style scoped>

@@ -26,6 +26,7 @@
                 placeholder="输入SQL语句"
                 :clearable="true"
                 :autosize=" {  minRows: 5,maxRows:14 }"
+                @keydown.tab.prevent="insertTab"
             />
           </n-form-item-gi>
         </n-grid>
@@ -49,6 +50,7 @@
 <script setup lang="ts">
 import {exec_sql, sql_valid} from "@render/api/datacenter";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
+import {insertTab} from "@render/utils/common/insertTab";
 
 import {FormInst, useMessage} from "naive-ui";
 import {ref} from "vue";
@@ -108,6 +110,18 @@ const exec = () => {
       console.log(errors)
     }
   })
+}
+
+const insertTab = (event: KeyboardEvent) => {
+  const textarea = event.target as HTMLTextAreaElement;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+
+  // Insert tab character
+  formModel.value.sql = formModel.value.sql.substring(0, start) + '\t' + formModel.value.sql.substring(end);
+
+  // Put cursor at right position again
+  textarea.selectionStart = textarea.selectionEnd = start + 1;
 }
 </script>
 
