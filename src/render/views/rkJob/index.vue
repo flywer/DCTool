@@ -239,7 +239,7 @@ const rules = {
   tableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入表名'
   },
 }

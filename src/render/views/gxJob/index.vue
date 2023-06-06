@@ -160,48 +160,48 @@ const formModel = ref({
 const rules = {
   name: {
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入工作流名称'
   },
   projectId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择项目'
   },
   personId: {
     required: true,
-    trigger: ['blur', 'change'],
+    trigger: ['change'],
     message: '请选择责任人'
   },
   sourceDataSourceId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请选择来源库'
   },
   sourceTableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入来源表'
   },
   targetDataSourceId: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请选择目标库'
   },
   targetTableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入目标表'
   },
   tableName: {
     key: 'table',
     required: true,
-    trigger: ['blur', 'input'],
+    trigger: ['input'],
     message: '请输入表名'
   },
 }
