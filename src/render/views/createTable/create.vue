@@ -66,94 +66,95 @@
 
   <n-space justify="center" align="center" class="mt-2">
     <n-button type="primary" class="w-28" @click="createTables">创建表</n-button>
-
   </n-space>
 
-  <n-list>
-    <template #header>
-      执行状态
-    </template>
+  <n-card class="mt-2">
+    <n-list>
+      <template #header>
+        执行状态
+      </template>
 
-    <n-list-item v-if="createStatus.tempOds.tableName !==''">
-      <n-space class="pl-2">
-        <n-spin :size="14" v-if="createStatus.tempOds.isCreating"/>
-        <div>{{ createStatus.tempOds.tableName }}</div>
-        <n-space v-if="!createStatus.tempOds.isCreating">
-          <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempOds.isSuccess">
-            <CheckmarkSharp/>
-          </n-icon>
-          <n-icon :size="20" color="rgb(205 19 19)" v-else>
-            <CloseSharp/>
-          </n-icon>
-          {{ createStatus.tempOds.msg }}
+      <n-list-item v-if="createStatus.tempOds.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.tempOds.isCreating"/>
+          <div>{{ createStatus.tempOds.tableName }}</div>
+          <n-space v-if="!createStatus.tempOds.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempOds.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.tempOds.msg }}
+          </n-space>
         </n-space>
-      </n-space>
-    </n-list-item>
+      </n-list-item>
 
-    <n-list-item v-if="createStatus.ods.tableName !==''">
-      <n-space class="pl-2">
-        <n-spin :size="14" v-if="createStatus.ods.isCreating"/>
-        <div>{{ createStatus.ods.tableName }}</div>
-        <n-space v-if="!createStatus.ods.isCreating">
-          <n-icon :size="20" color="#0e7a0d" v-if="createStatus.ods.isSuccess">
-            <CheckmarkSharp/>
-          </n-icon>
-          <n-icon :size="20" color="rgb(205 19 19)" v-else>
-            <CloseSharp/>
-          </n-icon>
-          {{ createStatus.ods.msg }}
+      <n-list-item v-if="createStatus.ods.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.ods.isCreating"/>
+          <div>{{ createStatus.ods.tableName }}</div>
+          <n-space v-if="!createStatus.ods.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.ods.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.ods.msg }}
+          </n-space>
         </n-space>
-      </n-space>
-    </n-list-item>
+      </n-list-item>
 
-    <n-list-item v-if="createStatus.rightDwd.tableName !==''">
-      <n-space class="pl-2">
-        <n-spin :size="14" v-if="createStatus.rightDwd.isCreating"/>
-        <div>{{ createStatus.rightDwd.tableName }}</div>
-        <n-space v-if="!createStatus.rightDwd.isCreating">
-          <n-icon :size="20" color="#0e7a0d" v-if="createStatus.rightDwd.isSuccess">
-            <CheckmarkSharp/>
-          </n-icon>
-          <n-icon :size="20" color="rgb(205 19 19)" v-else>
-            <CloseSharp/>
-          </n-icon>
-          {{ createStatus.rightDwd.msg }}
+      <n-list-item v-if="createStatus.rightDwd.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.rightDwd.isCreating"/>
+          <div>{{ createStatus.rightDwd.tableName }}</div>
+          <n-space v-if="!createStatus.rightDwd.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.rightDwd.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.rightDwd.msg }}
+          </n-space>
         </n-space>
-      </n-space>
-    </n-list-item>
+      </n-list-item>
 
-    <n-list-item v-if="createStatus.errorDwd.tableName !==''">
-      <n-space class="pl-2">
-        <n-spin :size="14" v-if="createStatus.errorDwd.isCreating"/>
-        <div>{{ createStatus.errorDwd.tableName }}</div>
-        <n-space v-if="!createStatus.errorDwd.isCreating">
-          <n-icon :size="20" color="#0e7a0d" v-if="createStatus.errorDwd.isSuccess">
-            <CheckmarkSharp/>
-          </n-icon>
-          <n-icon :size="20" color="rgb(205 19 19)" v-else>
-            <CloseSharp/>
-          </n-icon>
-          {{ createStatus.errorDwd.msg }}
+      <n-list-item v-if="createStatus.errorDwd.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.errorDwd.isCreating"/>
+          <div>{{ createStatus.errorDwd.tableName }}</div>
+          <n-space v-if="!createStatus.errorDwd.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.errorDwd.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.errorDwd.msg }}
+          </n-space>
         </n-space>
-      </n-space>
-    </n-list-item>
+      </n-list-item>
 
-    <n-list-item v-if="createStatus.dwb.tableName !==''">
-      <n-space class="pl-2">
-        <n-spin :size="14" v-if="createStatus.dwb.isCreating"/>
-        <div>{{ createStatus.dwb.tableName }}</div>
-        <n-space v-if="!createStatus.dwb.isCreating">
-          <n-icon :size="20" color="#0e7a0d" v-if="createStatus.dwb.isSuccess">
-            <CheckmarkSharp/>
-          </n-icon>
-          <n-icon :size="20" color="rgb(205 19 19)" v-else>
-            <CloseSharp/>
-          </n-icon>
-          {{ createStatus.dwb.msg }}
+      <n-list-item v-if="createStatus.dwb.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.dwb.isCreating"/>
+          <div>{{ createStatus.dwb.tableName }}</div>
+          <n-space v-if="!createStatus.dwb.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.dwb.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.dwb.msg }}
+          </n-space>
         </n-space>
-      </n-space>
-    </n-list-item>
-  </n-list>
+      </n-list-item>
+    </n-list>
+  </n-card>
 </template>
 
 <script setup lang="ts">
@@ -551,7 +552,6 @@ const dwbCreate = async (tableAbbr, tableSql) => {
 
   if (formModel.value.hasOptCol) {
     paramsJson.ddlSql = format(addFieldsToSql(`CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`))
-    console.log(paramsJson.ddlSql)
   } else {
     paramsJson.ddlSql = `CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`
   }
