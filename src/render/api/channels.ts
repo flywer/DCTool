@@ -41,6 +41,8 @@ export const channels = reactive({
         updateAuthToken: 'auxiliaryDb/updateAuthToken',
         getTableSql: 'auxiliaryDb/getTableSql',
         updateTableSql: 'auxiliaryDb/updateTableSql',
+        getRhJson: 'auxiliaryDb/getRhJson',
+        updateRhJson:  'auxiliaryDb/updateRhJson',
 
     }
 

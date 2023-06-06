@@ -1,5 +1,6 @@
 import {AppDataSource} from "@main/data-source";
 import {Dict} from "@main/entity/Dict";
+import {JobJson} from "@main/entity/JobJson";
 import {ProjectInfo} from "@main/entity/ProjectInfo";
 import {TableSql} from "@main/entity/TableSql";
 import {channels} from "@render/api/channels";
@@ -78,5 +79,39 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.updateTableSql)
     public async handleUpdateTableSql(obj: any) {
         return await AppDataSource.getRepository(TableSql).save(obj)
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getRhJson)
+    public async handleGetJobJson(tableName?: string) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'rhJson'],
+            where: {
+                tableName: Like(`%${tableName || ''}%`)
+            }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateRhJson)
+    public async handleUpdateRhJson(obj: any) {
+        obj = JSON.parse(obj)
+        if (obj.id === null) {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .insert()
+                .into(JobJson)
+                .values([{
+                    rhJson: obj.json,
+                    tableName: obj.tableName
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .update(JobJson)
+                .set({
+                    rhJson: obj.json,
+                    tableName: obj.tableName
+                })
+                .where("id = :id", {id: obj.id})
+                .execute()
+        }
     }
 }

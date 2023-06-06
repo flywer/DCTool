@@ -1,6 +1,6 @@
 <template>
   <n-alert type="default" :show-icon="false">
-    此处为融合前的原始数据表结构
+    融合JSON管理
   </n-alert>
   <n-space justify="end" class="mt-2">
     <n-input
@@ -40,7 +40,6 @@
       :loading="isLoading"
       :striped="true"
   />
-
   <n-modal
       v-model:show="showModalRef"
       :mask-closable="false"
@@ -59,20 +58,17 @@
         :size="'small'"
     >
       <n-grid :cols="2" :x-gap="4">
-        <n-form-item-gi label="表名" path="tableName">
-          <n-input v-model:value="modalFormModel.tableName" placeholder="输入表名"
-                   @keydown.enter.prevent
+        <n-form-item-gi span="12" label="表名" path="tableName">
+          <n-input
+              v-model:value="modalFormModel.tableName"
+              placeholder="输入表名"
+              @keydown.enter.prevent
           />
         </n-form-item-gi>
-        <n-form-item-gi label="注释" path="comment">
-          <n-input v-model:value="modalFormModel.comment" placeholder="输入注释"
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="12" label="建表语句" path="sql">
+        <n-form-item-gi :span="12" label="任务JSON" path="json">
           <n-input
               class="mt-2"
-              v-model:value="modalFormModel.sql"
+              v-model:value="modalFormModel.json"
               type="textarea"
               placeholder=""
               :autosize="{ minRows: 7, maxRows: 14 }"
@@ -89,82 +85,31 @@
 </template>
 
 <script setup lang="ts">
-import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb";
-import {DataTableColumns, useMessage, NButton, FormInst} from "naive-ui";
-import {h, onMounted, reactive, ref} from "vue";
+import {removeIds} from "@render/utils/datacenter/removeIds";
+import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
+import {get_rh_json, get_table_sql, update_rh_json, update_table_sql} from "@render/api/auxiliaryDb";
+import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
+import {h, onMounted, reactive, ref} from "vue";
 
-type TableSql = {
+type RhJson = {
   id: number
   tableName: string
-  comment: string
-  sql: string
+  json: string
 }
 
-const message = useMessage()
-
-const tableDataRef = ref([])
-
-const isLoading = ref(true)
-
-const showModalRef = ref(false)
-
-let modalTitle = '';
-
-const modalFormRef = ref<FormInst | null>(null);
-
-const modalFormModel = ref({
-  id: null,
-  tableName: '',
-  comment: '',
-  sql: ''
-})
-
-const modalFormRules = {
-  tableName: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入表名'
-  },
-  comment: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入注释'
-  },
-  sql: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入建表SQL'
-  }
-}
-
-onMounted(() => {
-  tableDataInit()
-})
-
-const tableDataInit = () => {
-  isLoading.value = true
-  get_table_sql().then((res) => {
-    tableDataRef.value = res
-  }).finally(() => isLoading.value = false)
-}
-
-const createColumns = (): DataTableColumns<TableSql> => {
+const createColumns = (): DataTableColumns<RhJson> => {
   return [
     {
       title: '表名简称',
       key: 'tableName',
       width: '10%',
       align: 'center',
+      sortOrder: 'ascend'
     },
     {
-      title: '表名注释',
-      key: 'comment',
-      width: '30%'
-    },
-    {
-      title: 'SQL',
-      key: 'sql',
+      title: 'JSON',
+      key: 'json',
       width: '30%',
       ellipsis: true
     }, {
@@ -179,10 +124,9 @@ const createColumns = (): DataTableColumns<TableSql> => {
               size: 'small',
               onClick: () => {
                 showModalRef.value = true
-                modalTitle = `${row.tableName}(${row.comment})`
+                modalTitle = `${row.tableName}`
                 modalFormModel.value.tableName = row.tableName
-                modalFormModel.value.comment = row.comment
-                modalFormModel.value.sql = row.sql
+                modalFormModel.value.json = row.json
                 modalFormModel.value.id = row.id
               }
             },
@@ -209,6 +153,58 @@ const paginationReactive = reactive({
   }
 })
 
+const message = useMessage()
+
+const tableDataRef = ref([])
+
+const isLoading = ref(true)
+
+const showModalRef = ref(false)
+
+let modalTitle = '';
+
+const modalFormRef = ref<FormInst | null>(null);
+
+const modalFormModel = ref({
+  id: null,
+  tableName: '',
+  json: ''
+})
+
+const modalFormRules = {
+  tableName: {
+    required: true,
+    trigger: ['input'],
+    message: '请输入表名'
+  },
+  comment: {
+    required: true,
+    trigger: ['input'],
+    message: '请输入注释'
+  },
+  json: {
+    required: true,
+    trigger: ['input'],
+    message: '请输入任务JSON'
+  }
+}
+
+onMounted(() => {
+  tableDataInit()
+})
+
+const tableDataInit = () => {
+  isLoading.value = true
+  get_rh_json().then((res) => {
+    tableDataRef.value = res.map(
+        (v => ({
+          id: v.id,
+          tableName: v.tableName,
+          json: v.rhJson
+        })))
+  }).finally(() => isLoading.value = false)
+}
+
 const onNegativeClick = () => {
   showModalRef.value = false
 }
@@ -219,7 +215,26 @@ const onPositiveClick = () => {
 
   modalFormRef.value?.validate((errors) => {
     if (!errors) {
-      update_table_sql(modalFormModel.value).then(() => {
+      let jobJson = JSON.parse(modalFormModel.value.json)
+      jobJson.name = ''
+      jobJson.email = ''
+      jobJson.description = ''
+      jobJson.personId = ''
+      jobJson.personName = ''
+      jobJson.projectId = ''
+      jobJson.projectName = ''
+      jobJson.dependencyProjectName = ''
+      jobJson.dependencyWorkflowName = ''
+      jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
+
+      const tableAbbr = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')[1]
+      if (tableAbbr !== 'depart') {
+        modalFormModel.value.json = JSON.stringify(jobJson, null, 2).replaceAll(tableAbbr, 'depart')
+      }
+
+      modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
+
+      update_rh_json(modalFormModel.value).then(() => {
         message.success('保存成功')
         tableDataInit()
         showModalRef.value = false;
@@ -240,20 +255,20 @@ const add = () => {
   modalFormModel.value = {
     id: null,
     tableName: '',
-    comment: '',
-    sql: ''
+    json: ''
   }
 
   showModalRef.value = true
 }
 
 const search = (v) => {
-  get_table_sql({
-    tableName: v,
-    comment: v,
-    sql: v
-  }).then((res) => {
-    tableDataRef.value = res
+  get_rh_json(v).then((res) => {
+    tableDataRef.value = res.map(
+        (v => ({
+          id: v.id,
+          tableName: v.tableName,
+          json: v.rhJson
+        })))
   })
 }
 
