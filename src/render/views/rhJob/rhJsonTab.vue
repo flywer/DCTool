@@ -1,7 +1,7 @@
 <template>
-  <n-alert type="default" :show-icon="false">
+<!--  <n-alert type="default" :show-icon="false">
     融合JSON管理
-  </n-alert>
+  </n-alert>-->
   <n-space justify="end" class="mt-2">
     <n-input
         placeholder="搜索"
@@ -141,9 +141,9 @@ const columnsRef = ref(createColumns())
 
 const paginationReactive = reactive({
   page: 1,
-  pageSize: 9,
+  pageSize: 10,
   showSizePicker: true,
-  pageSizes: [9, 20, 50],
+  pageSizes: [10, 20, 50],
   onChange: async (page: number) => {
     paginationReactive.page = page
   },

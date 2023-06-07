@@ -1,7 +1,7 @@
 <template>
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px); " trigger="hover">
-      <n-alert title="说明" type="default" :show-icon="false">
+      <n-alert  type="default" :show-icon="false">
         因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句，注意decimal类型没有自动转换，可自行手动改为varchar或者string
       </n-alert>
       <n-input

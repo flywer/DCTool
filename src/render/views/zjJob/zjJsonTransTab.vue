@@ -1,6 +1,6 @@
 <template>
   <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
-    <n-alert title="说明" type="default" :show-icon="false">
+    <n-alert   type="default" :show-icon="false">
       针对于无法自动生成质检JSON的表使用，给出一个完整的质检任务JSON，配置选项，即可生成同表结构的JSON
     </n-alert>
     <n-input

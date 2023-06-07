@@ -1,6 +1,6 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 158px); " trigger="hover">
-    <n-alert title="说明" type="default" :show-icon="false">
+    <n-alert  type="default" :show-icon="false">
       校验SQL是否正确
     </n-alert>
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -25,7 +25,7 @@
                 type="textarea"
                 placeholder="输入SQL语句"
                 :clearable="true"
-                :autosize=" {  minRows: 5,maxRows:14 }"
+                :autosize=" {  minRows: 5,maxRows:12 }"
                 @keydown.tab.prevent="insertTab"
             />
           </n-form-item-gi>
@@ -48,9 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import {exec_sql, sql_valid} from "@render/api/datacenter";
+import {sql_valid} from "@render/api/datacenter";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
-import {insertTab} from "@render/utils/common/insertTab";
 
 import {FormInst, useMessage} from "naive-ui";
 import {ref} from "vue";

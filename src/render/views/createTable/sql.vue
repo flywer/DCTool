@@ -1,6 +1,6 @@
 <template>
   <n-alert type="default" :show-icon="false">
-    此处为融合前的原始数据表结构
+    此处为<b>融合前</b>的原始数据表结构
   </n-alert>
   <n-space justify="end" class="mt-2">
     <n-input

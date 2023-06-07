@@ -1,5 +1,5 @@
 <template>
-  <n-alert title="说明" type="default" :show-icon="false">
+  <n-alert  type="default" :show-icon="false">
     建表若出现服务器内部错误的问题，需要自行去中台删除该表然后重建，这是中台的问题
   </n-alert>
   <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -56,6 +56,9 @@
               </n-checkbox>
               <n-checkbox value="dwb">
                 DWB层融合表
+              </n-checkbox>
+              <n-checkbox value="temp_dwb">
+                DWB层融合临时表
               </n-checkbox>
             </n-space>
           </n-checkbox-group>
@@ -153,6 +156,22 @@
           </n-space>
         </n-space>
       </n-list-item>
+
+      <n-list-item v-if="createStatus.tempDwb.tableName !==''">
+        <n-space class="pl-2">
+          <n-spin :size="14" v-if="createStatus.tempDwb.isCreating"/>
+          <div>{{ createStatus.tempDwb.tableName }}</div>
+          <n-space v-if="!createStatus.tempDwb.isCreating">
+            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempDwb.isSuccess">
+              <CheckmarkSharp/>
+            </n-icon>
+            <n-icon :size="20" color="rgb(205 19 19)" v-else>
+              <CloseSharp/>
+            </n-icon>
+            {{ createStatus.tempDwb.msg }}
+          </n-space>
+        </n-space>
+      </n-list-item>
     </n-list>
   </n-card>
 </template>
@@ -180,7 +199,8 @@ const formModel = ref({
     "ods",
     "right_dwd",
     "error_dwd",
-    "dwb"
+    "dwb",
+    "temp_dwb"
   ]
 })
 
@@ -241,6 +261,12 @@ const createStatusInitData = {
     isSuccess: false,
     tableName: '',
     msg: ''
+  },
+  tempDwb: {
+    isCreating: false,
+    isSuccess: false,
+    tableName: '',
+    msg: ''
   }
 }
 
@@ -274,6 +300,10 @@ const createTables = () => {
 
       if (formModel.value.tableGroupValue.find(item => item === 'dwb')[0]) {
         await dwbCreate(tableAbbr, tableSql)
+      }
+
+      if (formModel.value.tableGroupValue.find(item => item === 'temp_dwb')[0]) {
+        await tempDwbCreate(tableAbbr, tableSql)
       }
 
     } else {
@@ -549,6 +579,62 @@ const dwbCreate = async (tableAbbr, tableSql) => {
   ])
 
   paramsJson.tableName = `df_${tableAbbr}_${tableSql.tableName}_dwb`
+
+  if (formModel.value.hasOptCol) {
+    paramsJson.ddlSql = format(addFieldsToSql(`CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`))
+  } else {
+    paramsJson.ddlSql = `CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`
+  }
+
+  createStatus.value.dwb.isCreating = true
+  createStatus.value.dwb.tableName = paramsJson.tableName
+
+  create_table(paramsJson).then((res) => {
+    createStatus.value.dwb.isSuccess = res.success && res.code == 200;
+    createStatus.value.dwb.msg = res.message
+    if (!createStatus.value.dwb.isSuccess) {
+      console.log(res)
+    }
+  }).finally(() => createStatus.value.dwb.isCreating = false)
+}
+const tempDwbCreate = async (tableAbbr, tableSql) => {
+  let paramsJson = cloneDeep(paramsModel)
+
+  paramsJson.namedJson = JSON.stringify([
+    {
+      id: 1,
+      table: "更新方式",
+      key: "DF",
+      value: "全量表",
+      saveValue: null,
+      flagUser: 1
+    },
+    {
+      id: '1638446496908140546',
+      table: "组织机构",
+      key: tableAbbr,
+      value: (await find_by_project_id(formModel.value.projectId)).projectName.replace(/行政行为/g, '').replace(/数据归集/g, ''),
+      saveValue: null,
+      flagUser: 1
+    }, {
+      id: '2',
+      table: "自定义内容",
+      key: `${tableSql.tableName}_temp`,
+      value: null,
+      saveValue: null,
+      flagUser: 0,
+      selectList: []
+    }, {
+      id: "1640177719367512066",
+      table: "数据层级",
+      key: "DWB",
+      value: "基础数据层",
+      saveValue: null,
+      flagUser: 1,
+    }
+  ])
+
+  paramsJson.tableName = `df_${tableAbbr}_${tableSql.tableName}_temp_dwb`
 
   if (formModel.value.hasOptCol) {
     paramsJson.ddlSql = format(addFieldsToSql(`CREATE TABLE ${paramsJson.tableName} ${tableSql.sql}`))

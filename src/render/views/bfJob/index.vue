@@ -1,8 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-      <n-alert title="说明" type="default" :show-icon="false">
-        备份任务的写法基本相同，这里只需这个表单的信息即可生成对应的备份任务JSON<br>
+      <n-alert  type="default" :show-icon="false">
         目前只能用于两张表皆是中台TBDS-hive表
       </n-alert>
       <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
