@@ -39,9 +39,9 @@ import {h, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink} from "vue-router";
 import {AccessibleIcon} from '@vicons/fa'
-import {VisualRecognition, Svg, DataVis3, Sql} from '@vicons/carbon'
-import {LetterF, LetterH, LetterZ} from '@vicons/tabler'
-import {TextGrammarCheckmark24Regular} from '@vicons/fluent'
+import {Svg, Sql} from '@vicons/carbon'
+import {LetterF} from '@vicons/tabler'
+import {AppsListDetail20Filled} from '@vicons/fluent'
 import {SettingsOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
@@ -50,6 +50,20 @@ const notification = useNotification()
 
 // 菜单项
 const menuOptions: MenuOption[] = [
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.projectMgt,
+              }
+            },
+            {default: () => '任务管理'}
+        ),
+    key: routeName.projectMgt,
+    icon: renderIcon(AppsListDetail20Filled)
+  },
   {
     label: () =>
         h(

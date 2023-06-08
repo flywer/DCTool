@@ -188,6 +188,150 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getWorkflowPage)
+    public async handleGetWorkflowPage(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest('/workflow/proc/page', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getCjJobPage)
+    public async handleGetCjJobPage(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest('/gather/api/jobTemplate/findPage', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getSchedJobPage)
+    public async handleGetSchedJobPage(current: number, size: number, blurry: string) {
+        let result
+
+        const query = `current=${current}&size=${size}&blurry=${blurry}&subsystemName=%E9%87%87%E9%9B%86`;
+
+        await this.commonGetRequest('/gather/api/job/pageList', query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.cjJobStart)
+    public async handleCjJobStart(id: string) {
+        let result
+
+        const query = `id=${id}&subsystemName=%E9%87%87%E9%9B%86`;
+
+        await this.commonGetRequest('/gather/api/job/start', query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.cjJobStop)
+    public async handleCjJobStop(id: string) {
+        let result
+
+        const query = `id=${id}&subsystemName=%E9%87%87%E9%9B%86`;
+
+        await this.commonGetRequest('/gather/api/job/stop', query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.workflowActive)
+    public async handleWorkflowActive(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest('/workflow/proc/activate', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.cjJobRun)
+    public async handleCjJobRun(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest('/gather/api/job/trigger', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.cjJobDelete)
+    public async handleCjJobDelete(id: any) {
+        let result
+        const params = {
+            subsystemName: "采集"
+        }
+        await this.commonPostRequest(`/gather/api/jobTemplate/remove/${id}`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.workflowRun)
+    public async handleWorkflowRun(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest(`/workflow/proc-inst/start`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.schedJobDelete)
+    public async handleSchedJobDelete(id: string) {
+        let result
+
+        const query = `subsystemName=%E9%87%87%E9%9B%86`;
+
+        await this.commonGetRequest(`/gather/api/job/remove/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.workflowDelete)
+    public async handleWorkflowDelete(id: string) {
+        let result
+
+        const query = ``;
+
+        await this.commonGetRequest(`/workflow/proc/delete/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({

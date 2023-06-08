@@ -76,17 +76,79 @@ export const add_sched_task = async (obj: any) => {
     return data
 }
 
+// 执行sql
 export const exec_sql = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.execSql, obj))
     return data
 }
 
+// sql校验
 export const sql_valid = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.sqlValid, obj))
     return data
 }
 
+// 创建表
 export const create_table = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.createTable, JSON.stringify(obj)))
+    return data
+}
+
+export const get_workflow_page = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getWorkflowPage, JSON.stringify(obj)))
+    return data
+}
+
+export const get_cj_job_page = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobPage, JSON.stringify(obj)))
+    return data
+}
+
+export const get_sched_job_page = async (current: number, size: number, blurry: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getSchedJobPage, current, size, blurry))
+    return data
+}
+export const workflow_active = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowActive, JSON.stringify(obj)))
+    return data
+}
+export const cj_job_start = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobStart, id))
+    return data
+}
+
+export const cj_job_stop = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobStop, id))
+    return data
+}
+
+//采集任务执行
+export const cj_job_run = async ({
+                                     jobId,
+                                     subsystemName
+                                 }) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobRun, JSON.stringify({
+        jobId,
+        subsystemName
+    })))
+    return data
+}
+
+export const cj_job_delete = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobDelete, id))
+    return data
+}
+
+export const sched_job_delete = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.schedJobDelete, id))
+    return data
+}
+
+export const workflow_run = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowRun, JSON.stringify(obj)))
+    return data
+}
+export const workflow_delete = async (id: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowDelete, id))
     return data
 }

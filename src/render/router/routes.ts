@@ -11,6 +11,7 @@ const qcJob = () => import('@render/views/qcJob/index.vue')
 const rhJob = () => import('@render/views/rhJob/index.vue')
 const rkJob = () => import('@render/views/rkJob/index.vue')
 const gxJob = () => import('@render/views/gxJob/index.vue')
+const projectMgt = () => import('@render/views/projectMgt/index.vue')
 const execSql = () => import('@render/views/sqlProcess/sqlExec/sqlExecTab.vue')
 const sqlValid = () => import('@render/views/sqlProcess/sqlValid/sqlValidTab.vue')
 const hiveSqlTrans = () => import('@render/views/sqlProcess/sqlTrans/sqlTransTab.vue')
@@ -38,13 +39,14 @@ export const routeName = {
     hiveSqlTrans: 'hiveSqlTrans',
     projectAbbr: 'projectAbbr',
     createTable: 'createTable',
-    settings: 'settings'
+    settings: 'settings',
+    projectMgt: 'projectMgt'
 }
 
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/cjJob/index',
+        redirect: '/projectMgt/index',
     },
     {
         name: routeName.ldDecrypt,
@@ -139,5 +141,10 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.rhJob,
         path: '/rhJob/index',
         component: rhJob
+    },
+    {
+        name: routeName.projectMgt,
+        path: '/projectMgt/index',
+        component: projectMgt
     }
 ]

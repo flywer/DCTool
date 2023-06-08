@@ -31,6 +31,17 @@ export const channels = reactive({
         sqlValid: 'datacenter/sqlValid',
         authTokenNotice: 'datacenter/authTokenNotice',
         createTable: 'datacenter/createTable',
+        getWorkflowPage: 'datacenter/getWorkflowPage',
+        getCjJobPage: 'datacenter/getCjJobPage',
+        getSchedJobPage: 'datacenter/getSchedJobPage',
+        workflowActive: 'datacenter/workflowActive',
+        cjJobStart: 'datacenter/cjJobStart',
+        cjJobStop: 'datacenter/cjJobStop',
+        cjJobRun: 'datacenter/cjJobRun',
+        schedJobDelete:'datacenter/schedJobDelete',
+        cjJobDelete: 'datacenter/cjJobDelete',
+        workflowRun: 'datacenter/workflowRun',
+        workflowDelete: 'datacenter/workflowDelete',
 
     },
     auxiliaryDb: {
@@ -43,6 +54,7 @@ export const channels = reactive({
         updateTableSql: 'auxiliaryDb/updateTableSql',
         getRhJson: 'auxiliaryDb/getRhJson',
         updateRhJson:  'auxiliaryDb/updateRhJson',
+        getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
 
     }
 

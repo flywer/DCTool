@@ -1,7 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-      <n-alert  type="default" :show-icon="false">
+      <n-alert type="default" :show-icon="false">
         采集任务生成，默认同名映射
       </n-alert>
       <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -137,38 +137,10 @@
           type="textarea"
           placeholder=""
           readonly
+          :autosize="{
+            minRows:5,maxRows:16
+          }"
       />
-      <!--
-            <n-card class="mt-2">
-              <n-layout>
-                <n-grid x-gap="0" :cols="3">
-                  <n-gi class="source-columns">
-                    <n-data-table
-                        :columns="sourceTableColumns"
-                        :data="sourceTableColumnsRef"
-                        :bordered="true"
-                        :size="'small'"
-                    />
-
-                  </n-gi>
-
-                  <n-gi class="bg-white">
-                    <div class="light-green"/>
-                  </n-gi>
-                  <n-gi class="target-columns">
-                    <n-data-table
-                        :columns="targetTableColumns"
-                        :data="targetTableColumnsRef"
-                        :bordered="true"
-                        :size="'small'"
-                    />
-
-                  </n-gi>
-                </n-grid>
-              </n-layout>
-            </n-card>
-      -->
-
 
     </n-scrollbar>
   </n-layout>
@@ -194,7 +166,7 @@
       <n-grid :cols="7" :x-gap="4">
         <n-form-item-gi label="秒" path="sec" :label-style="{margin:'0 auto'}">
           <n-input class="text-center" v-model:value="cronFormModel.sec" placeholder=""
-                   @keydown.enter.prevent
+                   @keydown.enter.prevent readonly
           />
         </n-form-item-gi>
         <n-form-item-gi label="分" path="min" :label-style="{margin:'0 auto'}">

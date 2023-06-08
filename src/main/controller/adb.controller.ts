@@ -40,6 +40,13 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getProjectByProAbbr)
+    public async handleGetProjectByProAbbr(projectAbbr: string) {
+        return await AppDataSource.getRepository(ProjectInfo).findOneBy({
+            projectAbbr: projectAbbr
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.getAuthToken)
     public async handleGetAuthToken() {
         return await AppDataSource.getRepository(Dict).findOneBy({
@@ -61,18 +68,26 @@ export class AdbController {
         if (typeof obj !== 'undefined') {
             obj = JSON.parse(obj)
         }
+        let queryVar = []
+
+        if (obj?.tableName !== undefined) {
+            queryVar.push({
+                tableName: Like(`%${obj?.tableName || ''}%`)
+            })
+        }
+        if (obj?.comment !== undefined) {
+            queryVar.push({
+                comment: Like(`%${obj?.comment || ''}%`)
+            })
+        }
+        if (obj?.sql !== undefined) {
+            queryVar.push({
+                sql: Like(`%${obj?.sql || ''}%`)
+            })
+        }
+
         return await AppDataSource.manager.find(TableSql, {
-            where: [
-                {
-                    tableName: Like(`%${obj?.tableName || ''}%`)
-                },
-                {
-                    comment: Like(`%${obj?.comment || ''}%`)
-                },
-                {
-                    sql: Like(`%${obj?.sql || ''}%`)
-                }
-            ]
+            where: queryVar
         })
     }
 

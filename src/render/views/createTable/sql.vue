@@ -248,6 +248,9 @@ const add = () => {
 }
 
 const search = (v) => {
+  if (v == undefined) {
+    v = ''
+  }
   get_table_sql({
     tableName: v,
     comment: v,
