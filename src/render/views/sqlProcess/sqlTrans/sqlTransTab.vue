@@ -2,7 +2,7 @@
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px); " trigger="hover">
       <n-alert  type="default" :show-icon="false">
-        因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句，注意decimal类型没有自动转换，可自行手动改为varchar或者string
+        因为数据中台建表语句的特殊性，现可将原有的MYSQL建表语句转换为TBDS的建表语句
       </n-alert>
       <n-input
           class="mt-2"
@@ -76,6 +76,7 @@ const hiveSqlTrans = () => {
       .replace(/date/gi, 'DATE') // date 格式化
       .replace(/not null|null/gi, '') // 删除无法识别的关键词
       .replace(/int(\(.*\))?/gi, 'INT') // int无需长度
+      .replace(/decimal(\(.*\))?/gi, 'STRING') // decimal转换
       .replace(/;.*'/g, '\'') // 清除多余注释
       .replace(";", " ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' STORED AS ORC ") // 添加hive建表语句
       .replace(/\n\s*\n/g, '\n')// 删除多余空行

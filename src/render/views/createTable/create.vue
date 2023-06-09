@@ -301,9 +301,9 @@ const createTables = () => {
         await dwbCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'temp_dwb')[0]) {
+/*       if (formModel.value.tableGroupValue.find(item => item === 'temp_dwb')[0]) {
         await tempDwbCreate(tableAbbr, tableSql)
-      }
+      } */
 
     } else {
       console.log(errors)
