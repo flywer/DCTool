@@ -1,6 +1,6 @@
 <template>
   <n-scrollbar style="height: calc(100vh - 105px); padding-right: 10px" trigger="hover">
-    <n-alert   type="default" :show-icon="false">
+    <n-alert type="default" :show-icon="false">
       针对于无法自动生成质检JSON的表使用，给出一个完整的质检任务JSON，配置选项，即可生成同表结构的JSON
     </n-alert>
     <n-input
@@ -175,6 +175,7 @@ const validJsonTrans = (e: MouseEvent) => {
     validJsonFormRef.value?.validate(async (errors) => {
       if (!errors) {
         let paramJson = JSON.parse(validJsonInputRef.value)
+        console.log(paramJson)
         paramJson.name = formModel.value.name;
         paramJson.projectId = formModel.value.projectId
         paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
@@ -184,6 +185,7 @@ const validJsonTrans = (e: MouseEvent) => {
         paramJson.description = formModel.value.description
 
         const oldSourceTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+        const oldTableAbbr = oldSourceTableName.split('_')[1]
         const oldAimTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName
         const oldWrongTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName
 
@@ -204,6 +206,10 @@ const validJsonTrans = (e: MouseEvent) => {
               return obj
             }
         )
+
+        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = JSON.parse(JSON.stringify(paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList).replaceAll(oldTableAbbr, tableAbbr))
+
+        console.log(paramJson)
 
         // 去除多于属性的JSON对象
         const json = removeIds(paramJson)

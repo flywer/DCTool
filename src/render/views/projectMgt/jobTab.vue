@@ -3,7 +3,7 @@
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto  h-8 mb-2">
         <div class="float-left leading-8 font-bold text-base">
-          <n-skeleton v-if="isTableLoading" :width="360"  size="small"/>
+          <n-skeleton v-if="isTableLoading" :width="360" size="small"/>
           <span v-else>{{ title }}</span>
         </div>
         <n-space inline class="float-right">
@@ -149,7 +149,7 @@ import {
   workflow_active, sched_job_delete, cj_job_delete, workflow_run, workflow_delete
 } from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/formatDate";
-import {DataTableColumns, NButton, useMessage, NSpace, NTag, FormInst, useNotification} from "naive-ui";
+import {DataTableColumns, NButton, useMessage, NSpace, NTag, FormInst, useNotification, NPopconfirm} from "naive-ui";
 import {h, onMounted, reactive, ref, watch} from "vue";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
@@ -445,13 +445,18 @@ const createColumns = (): DataTableColumns<Job> => {
                     }
                   },
                   {default: () => '配置'}),
-              h(NButton, {
-                    size: 'small',
-                    onClick: () => {
-                      cjJobDelete(row.id)
-                    }
-                  },
-                  {default: () => '删除'})
+              h(NPopconfirm, {
+                positiveText: '确定',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                  cjJobDelete(row.id)
+                },
+              }, {
+                trigger: () => {
+                  return h(NButton, {size: 'small'}, {default: () => '删除'})
+                },
+                default: () => '确定要删除吗？'
+              }),
             ]
             break
           case  1: // 任务停用
@@ -471,13 +476,18 @@ const createColumns = (): DataTableColumns<Job> => {
                       }
                     },
                     {default: () => '执行'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        cjJobDelete(row.id)
-                      }
-                    },
-                    {default: () => '删除'})
+                h(NPopconfirm, {
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: () => {
+                    cjJobDelete(row.id)
+                  },
+                }, {
+                  trigger: () => {
+                    return h(NButton, {size: 'small'}, {default: () => '删除'})
+                  },
+                  default: () => '确定要删除吗？'
+                }),
               ]
             } else {
               container.children = [
@@ -496,13 +506,18 @@ const createColumns = (): DataTableColumns<Job> => {
                       }
                     },
                     {default: () => '执行'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        workflowDelete(row.id)
-                      }
-                    },
-                    {default: () => '删除'})
+                h(NPopconfirm, {
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: () => {
+                    workflowDelete(row.id)
+                  },
+                }, {
+                  trigger: () => {
+                    return h(NButton, {size: 'small'}, {default: () => '删除'})
+                  },
+                  default: () => '确定要删除吗？'
+                }),
               ]
             }
             break
@@ -523,14 +538,19 @@ const createColumns = (): DataTableColumns<Job> => {
                       }
                     },
                     {default: () => '执行'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: async () => {
-                        await cjJobStop(row.id)
-                        await cjJobDelete(row.id)
-                      }
-                    },
-                    {default: () => '删除'})
+                h(NPopconfirm, {
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: async () => {
+                    await cjJobStop(row.id)
+                    await cjJobDelete(row.id)
+                  },
+                }, {
+                  trigger: () => {
+                    return h(NButton, {size: 'small'}, {default: () => '删除'})
+                  },
+                  default: () => '确定要删除吗？'
+                }),
               ]
             } else {
               container.children = [
@@ -548,13 +568,19 @@ const createColumns = (): DataTableColumns<Job> => {
                       }
                     },
                     {default: () => '执行'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        workflowDelete(row.id)
-                      }
-                    },
-                    {default: () => '删除'})
+                h(NPopconfirm, {
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: async () => {
+                    await workflowActive(row.id, '02')
+                    await workflowDelete(row.id)
+                  },
+                }, {
+                  trigger: () => {
+                    return h(NButton, {size: 'small'}, {default: () => '删除'})
+                  },
+                  default: () => '确定要删除吗？'
+                }),
               ]
             }
             break
