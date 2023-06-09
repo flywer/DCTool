@@ -111,6 +111,7 @@
 <script setup lang="ts">
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -207,7 +208,18 @@ const validJsonTrans = (e: MouseEvent) => {
             }
         )
 
-        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = JSON.parse(JSON.stringify(paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList).replaceAll(oldTableAbbr, tableAbbr))
+        //替换关联表里的表名，但关联的是基础数据的不用替换
+        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.forEach((field: any) => {
+          field.ruleList.forEach((rule: any) => {
+            if (rule.customSqlKey != undefined) {
+              rule.customSqlKey = rule.customSqlKey.replaceAll(oldTableAbbr, tableAbbr);
+            }
+            if (rule.fromTableDataTable != undefined && !isBasicTable(rule.fromTableDataTable)) {
+              rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, tableAbbr);
+              rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, tableAbbr);
+            }
+          });
+        });
 
         console.log(paramJson)
 

@@ -1,7 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-      <n-alert  type="default" :show-icon="false">
+      <n-alert type="default" :show-icon="false">
         目前只能用于两张表皆是中台TBDS-hive表
       </n-alert>
       <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
@@ -57,23 +57,23 @@
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="来源表" path="sourceTable">
                   <n-select :size="'small'"
-                        v-model:value="formModel.sourceTable"
-                        :options="sourceTableOptions"
-                        filterable
-                        remote
-                        @search="handleSourceTableSearch"
-                        :consistent-menu-width="false"
-              />
+                            v-model:value="formModel.sourceTable"
+                            :options="sourceTableOptions"
+                            filterable
+                            remote
+                            @search="handleSourceTableSearch"
+                            :consistent-menu-width="false"
+                  />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="目标表" path="targetTable">
                   <n-select :size="'small'"
-                        v-model:value="formModel.targetTable"
-                        :options="targetTableOptions"
-                        filterable
-                        remote
-                        @search="handleTargetTableSearch"
-                        :consistent-menu-width="false"
-              />
+                            v-model:value="formModel.targetTable"
+                            :options="targetTableOptions"
+                            filterable
+                            remote
+                            @search="handleTargetTableSearch"
+                            :consistent-menu-width="false"
+                  />
                 </n-form-item-gi>
                 <n-form-item-gi :span="2" label="项目" path="projectId">
                   <n-select
@@ -129,10 +129,7 @@
           v-model:value="resRef"
           type="textarea"
           placeholder=""
-          :autosize="{
-        minRows: 6,
-        maxRows: 6
-      }"
+          :autosize="{ minRows: 6, maxRows: 16 }"
       />
     </n-scrollbar>
   </n-layout>
@@ -161,7 +158,6 @@ const copyText = async (text) => {
 
 const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const targetTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
-
 
 onMounted(async () => {
   await projectIdOptionsUpdate()
@@ -274,10 +270,9 @@ const generate = (e: MouseEvent) => {
   e.preventDefault()
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      if (formModel.value.sourceTable === '' || formModel.value.targetTable === '') {
-        formModel.value.sourceTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
-        formModel.value.targetTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_ods`
-      }
+
+      formModel.value.sourceTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
+      formModel.value.targetTable = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_ods`
 
       outputModel.modelJson = outputModel.modelJson.replace(/sourceTable/g, `${formModel.value.sourceTable}`).replace(/targetTable/g, `${formModel.value.targetTable}`)
 
@@ -315,7 +310,6 @@ const addWorkFlow = () => {
     isLoading.value = false
   })
 }
-
 
 const handleSourceTableSearch = async (query: string) => {
   sourceTableOptions.value = await getTablesOptions('6', query)

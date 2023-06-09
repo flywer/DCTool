@@ -131,10 +131,7 @@
           v-model:value="resRef"
           type="textarea"
           placeholder=""
-          :autosize="{
-        minRows: 6,
-        maxRows: 6
-      }"
+          :autosize="{ minRows: 6, maxRows: 16 }"
       />
     </n-scrollbar>
   </n-layout>
@@ -275,11 +272,9 @@ const generate = (e: MouseEvent) => {
   e.preventDefault()
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      if (formModel.value.sourceTable === '' || formModel.value.targetTable === '') {
-        const tableName = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
-        formModel.value.sourceTable = tableName
-        formModel.value.targetTable = tableName
-      }
+      const tableName = `di_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr}_${formModel.value.tableName}_temp_ods`
+      formModel.value.sourceTable = tableName
+      formModel.value.targetTable = tableName
 
       outputModel.modelJson = outputModel.modelJson.replace(/sourceTable/g, `${formModel.value.sourceTable}`).replace(/targetTable/g, `${formModel.value.targetTable}`)
 
