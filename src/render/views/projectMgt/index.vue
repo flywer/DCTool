@@ -48,12 +48,13 @@
             <n-tab-pane name="1" tab="数据归集任务">
               <job-tab :node="curNode" :tree-Data="data"/>
             </n-tab-pane>
-<!--            <n-tab-pane name="2" tab="中台相关表">
-
-            </n-tab-pane>
-            <n-tab-pane name="3" tab="执行日志">
+<!--            <n-tab-pane name="2" tab="执行日志">
 
             </n-tab-pane>-->
+            <n-tab-pane name="3" tab="中台相关表">
+              <project-tables-tab :node="curNode" :tree-Data="data"/>
+            </n-tab-pane>
+
           </n-tabs>
         </n-layout-content>
       </n-layout>
@@ -66,6 +67,7 @@ import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
 import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
+import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {h, onMounted, reactive, ref} from 'vue'
 import {DataTableColumns, NButton, TreeOption} from 'naive-ui'
 import {Refresh, Search} from '@vicons/ionicons5'

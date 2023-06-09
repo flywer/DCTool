@@ -1,6 +1,13 @@
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
+export type CommonQueryParam = {
+    current: number,
+    size: number,
+    blurry: string,
+    subsystemName: '采集'
+}
+
 // 获取项目列表
 export const get_job_project_list = async () => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.jobList))
@@ -99,7 +106,7 @@ export const get_workflow_page = async (obj: any) => {
     return data
 }
 
-export const get_cj_job_page = async (obj: any) => {
+export const get_cj_job_page = async (obj: CommonQueryParam) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobPage, JSON.stringify(obj)))
     return data
 }
@@ -150,5 +157,32 @@ export const workflow_run = async (obj: any) => {
 }
 export const workflow_delete = async (id: string) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowDelete, id))
+    return data
+}
+
+export type GetTablesInfoApiType = {
+    size: number,
+    page: number,
+    sourceId: number,
+    likeValue: string
+}
+
+export const get_tables_info = async (obj: GetTablesInfoApiType) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTablesInfo, JSON.stringify(obj)))
+    return data
+}
+
+export const table_preview = async (datasourceId: number, tableName: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.tablePreview, datasourceId, tableName))
+    return data
+}
+
+export const table_delete = async (id: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.tableDelete, id))
+    return data
+}
+
+export const get_cj_job_log = async (obj: CommonQueryParam) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobLog, JSON.stringify(obj)))
     return data
 }

@@ -2,7 +2,10 @@
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto  h-8 mb-2">
-        <span class="float-left leading-8 font-bold text-base">{{ title }}</span>
+        <div class="float-left leading-8 font-bold text-base">
+          <n-skeleton v-if="isTableLoading" :width="360"  size="small"/>
+          <span v-else>{{ title }}</span>
+        </div>
         <n-space inline class="float-right">
           <n-button secondary strong @click="tableDataInit">
             刷新
@@ -15,7 +18,6 @@
         </n-space>
       </div>
       <n-data-table
-          ref="tableRef"
           :key="(row) => row.id"
           class="mt-2"
           :columns="columnsRef"
@@ -464,9 +466,8 @@ const createColumns = (): DataTableColumns<Job> => {
                     {default: () => '启用'}),
                 h(NButton, {
                       size: 'small',
-                      onClick: async () => {
-                        await cjJobStart(row.id)
-                        await cjJobRun(row.id)
+                      onClick: () => {
+                        cjJobRun(row.id)
                       }
                     },
                     {default: () => '执行'}),

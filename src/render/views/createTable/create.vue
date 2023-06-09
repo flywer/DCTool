@@ -57,8 +57,8 @@
               <n-checkbox value="dwb">
                 DWB层融合表
               </n-checkbox>
-              <n-checkbox value="temp_dwb">
-                DWB层融合临时表
+              <n-checkbox value="temp_dwb" disabled>
+                DWB层融合临时表（启用）
               </n-checkbox>
             </n-space>
           </n-checkbox-group>
@@ -199,8 +199,7 @@ const formModel = ref({
     "ods",
     "right_dwd",
     "error_dwd",
-    "dwb",
-    "temp_dwb"
+    "dwb"
   ]
 })
 

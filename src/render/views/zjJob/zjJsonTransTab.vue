@@ -103,6 +103,7 @@
         v-model:value="validJsonResRef"
         type="textarea"
         placeholder=""
+        :autosize="{minRows:4,maxRows:10}"
     />
   </n-scrollbar>
 </template>

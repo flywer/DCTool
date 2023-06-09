@@ -304,6 +304,30 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getTablesInfo)
+    public async handleGetTablesInfo(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest(`/datawork/datamodelTables/page`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getCjJobLog)
+    public async handleGetCjJobLog(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest(`/gateway/gather/api/log/pageList`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     @IpcHandle(channels.datacenter.schedJobDelete)
     public async handleSchedJobDelete(id: string) {
         let result
@@ -325,6 +349,34 @@ export class DatacenterController {
         const query = ``;
 
         await this.commonGetRequest(`/workflow/proc/delete/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.tablePreview)
+    public async handleTablePreview(datasourceId: number, tableName: string) {
+        let result
+
+        const query = `datasourceId=${datasourceId}&tableName=${tableName}&subsystemName=%E9%87%87%E9%9B%86`;
+
+        await this.commonGetRequest(`/gather/api/metadata/getDataTen`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.tableDelete)
+    public async handleTableDelete(id: string) {
+        let result
+
+        const query = ``;
+
+        await this.commonGetRequest(`/datawork/datamodelTables/delete/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);
