@@ -200,7 +200,6 @@ const tableDataInit = () => {
           tableName: v.tableName,
           json: v.zjJson
         })))
-    console.log(tableDataRef.value)
   }).finally(() => isLoading.value = false)
 }
 
