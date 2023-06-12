@@ -97,12 +97,24 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getRhJson)
-    public async handleGetJobJson(tableName?: string) {
+    public async handleGetRhJobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({
             select: ['id', 'tableName', 'rhJson'],
             where: {
                 tableName: Like(`%${tableName || ''}%`)
-            }
+            },
+            order: {orderNum: 'asc'}
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getZjJson)
+    public async handleGetZjJobJson(tableName?: string) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'zjJson'],
+            where: {
+                tableName: Like(`%${tableName || ''}%`)
+            },
+            order: {orderNum: 'asc'}
         })
     }
 
@@ -123,6 +135,30 @@ export class AdbController {
                 .update(JobJson)
                 .set({
                     rhJson: obj.json,
+                    tableName: obj.tableName
+                })
+                .where("id = :id", {id: obj.id})
+                .execute()
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateZjJson)
+    public async handleUpdateZjJson(obj: any) {
+        obj = JSON.parse(obj)
+        if (obj.id === null) {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .insert()
+                .into(JobJson)
+                .values([{
+                    zjJson: obj.json,
+                    tableName: obj.tableName
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .update(JobJson)
+                .set({
+                    zjJson: obj.json,
                     tableName: obj.tableName
                 })
                 .where("id = :id", {id: obj.id})

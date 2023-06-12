@@ -74,9 +74,11 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_rh_json} from "@render/api/auxiliaryDb";
+import {find_by_project_id, get_zj_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
+import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
@@ -123,12 +125,12 @@ const rules = {
 }
 
 onMounted(() => {
-  get_rh_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => item.rhJson != null ).map(
+  get_zj_json().then((res) => {
+    tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
         (v => ({
           label: `${v.tableName}`,
           value: v.id.toString(),
-          json: v.rhJson,
+          json: v.zjJson,
         }))
     ) || []
   })
@@ -144,14 +146,15 @@ const generate = () => {
       let tableName = (tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).label as string).toLowerCase()
 
       const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
-      paramJson.name = `rh_${projectAbbr}_${tableName}`
 
+      paramJson.name = `zj_${projectAbbr}_${tableName}`;
       paramJson.projectId = formModel.value.projectId
-      paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label as string
+      paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
       paramJson.personId = formModel.value.personId
-      paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label as string
+      paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label
 
-      const tableAbbr = (await find_by_project_id(formModel.value.projectId))?.tableAbbr || ''
+      const {tableAbbr} = await getAbbrByProId(paramJson.projectId);
+
       paramJson = JSON.parse(JSON.stringify(paramJson).replaceAll('depart', tableAbbr))
       paramJson = JSON.parse(updateSjkUUID(removeIds(paramJson)))
 

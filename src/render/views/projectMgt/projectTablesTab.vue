@@ -25,9 +25,6 @@
           :loading="isTableLoading"
           :striped="true"
       >
-        <template #empty>
-          <span style="color: rgba(194, 194, 194, 1)">未选择项目对应表</span>
-        </template>
       </n-data-table>
 
     </n-scrollbar>
@@ -159,7 +156,7 @@ const tableDataInit = async () => {
     page: 1,
     sourceId: 6,
     likeValue: queryParam.value
-  })).data.records
+  })).data.records || []
 
   isTableLoading.value = false
 }

@@ -1,7 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-tabs type="line" animated>
-      <n-tab-pane name="1" tab="生成任务">
+      <n-tab-pane name="1" tab="任务生成">
         <create-rh-job-tab/>
       </n-tab-pane>
       <n-tab-pane name="2" tab="JSON管理">

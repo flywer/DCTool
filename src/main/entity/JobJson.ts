@@ -14,4 +14,14 @@ export class JobJson {
         nullable: true
     })
     rhJson: string
+
+    @Column({
+        type: "longtext",
+        name: 'zj_json',
+        nullable: true
+    })
+    zjJson: string
+
+    @Column({name: 'order_num'})
+    orderNum: number
 }

@@ -169,6 +169,7 @@ export type GetTablesInfoApiType = {
 
 export const get_tables_info = async (obj: GetTablesInfoApiType) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getTablesInfo, JSON.stringify(obj)))
+    console.log(data)
     return data
 }
 

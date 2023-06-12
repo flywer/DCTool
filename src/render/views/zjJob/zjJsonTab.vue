@@ -1,7 +1,4 @@
 <template>
-  <!--  <n-alert type="default" :show-icon="false">
-      融合JSON管理
-    </n-alert>-->
   <n-space justify="end" class="mt-2">
     <n-input
         placeholder="搜索"
@@ -85,20 +82,21 @@
 </template>
 
 <script setup lang="ts">
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
-import {get_rh_json, get_table_sql, update_rh_json, update_table_sql} from "@render/api/auxiliaryDb";
+import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb";
 import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
-type RhJson = {
+type ZjJson = {
   id: number
   tableName: string
   json: string
 }
 
-const createColumns = (): DataTableColumns<RhJson> => {
+const createColumns = (): DataTableColumns<ZjJson> => {
   return [
     {
       title: '表名简称',
@@ -195,13 +193,14 @@ onMounted(() => {
 
 const tableDataInit = () => {
   isLoading.value = true
-  get_rh_json().then((res) => {
+  get_zj_json().then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.rhJson
+          json: v.zjJson
         })))
+    console.log(tableDataRef.value)
   }).finally(() => isLoading.value = false)
 }
 
@@ -225,16 +224,46 @@ const onPositiveClick = () => {
       jobJson.projectName = ''
       jobJson.dependencyProjectName = null
       jobJson.dependencyWorkflowName = null
+      jobJson.schedulingMode = 0
+      jobJson.crontab = ''
       jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
 
-      const tableAbbr = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')[1]
-      if (tableAbbr !== 'depart') {
-        modalFormModel.value.json = JSON.stringify(jobJson, null, 2).replaceAll(tableAbbr, 'depart')
-      }
+      const oldTableAbbr = jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName.split('_')[1]
+
+      jobJson.modelJson = jobJson.modelJson.replaceAll(oldTableAbbr, 'depart')
+
+      const newSourceTableName = `di_depart_${modalFormModel.value.tableName.toLowerCase()}_temp_ods`
+      const newAimTableName = `di_depart_${modalFormModel.value.tableName.toLowerCase()}_right_dwd`
+      const newWrongTableName = `di_depart_${modalFormModel.value.tableName.toLowerCase()}_error_dwd`
+
+      jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.map(obj => {
+            obj.field = obj.field.replace(jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName, newSourceTableName);
+            return obj
+          }
+      )
+
+      jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = newSourceTableName
+      jobJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = newAimTableName
+      jobJson.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName = newWrongTableName
+
+      //替换关联表里的表名，但关联的是基础数据的不用替换
+      jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.forEach((field: any) => {
+        field.ruleList.forEach((rule: any) => {
+          if (rule.customSqlKey != undefined) {
+            rule.customSqlKey = rule.customSqlKey.replaceAll(oldTableAbbr, 'depart');
+          }
+          if (rule.fromTableDataTable != undefined && !isBasicTable(rule.fromTableDataTable)) {
+            rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, 'depart');
+            rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, 'depart');
+          }
+        });
+      });
+
+      modalFormModel.value.json = JSON.stringify(jobJson, null, 2)
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 
-      update_rh_json(modalFormModel.value).then(() => {
+      update_zj_json(modalFormModel.value).then(() => {
         message.success('保存成功')
         tableDataInit()
         showModalRef.value = false;
@@ -262,12 +291,12 @@ const add = () => {
 }
 
 const search = (v) => {
-  get_rh_json(v).then((res) => {
+  get_zj_json(v).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.rhJson
+          json: v.zjJson
         })))
   })
 }

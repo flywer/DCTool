@@ -221,8 +221,6 @@ const validJsonTrans = (e: MouseEvent) => {
           });
         });
 
-        console.log(paramJson)
-
         // 去除多于属性的JSON对象
         const json = removeIds(paramJson)
 

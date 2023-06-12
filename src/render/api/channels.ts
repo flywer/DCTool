@@ -59,6 +59,8 @@ export const channels = reactive({
         getRhJson: 'auxiliaryDb/getRhJson',
         updateRhJson: 'auxiliaryDb/updateRhJson',
         getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
+        getZjJson: 'auxiliaryDb/getZjJson',
+        updateZjJson:'auxiliaryDb/updateZjJson',
 
     }
 

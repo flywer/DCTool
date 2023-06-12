@@ -60,3 +60,13 @@ export const update_rh_json = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateRhJson, JSON.stringify(obj)))
     return data
 }
+
+export const get_zj_json = async (tableName?: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getZjJson, tableName))
+    return data
+}
+
+export const update_zj_json = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateZjJson, JSON.stringify(obj)))
+    return data
+}
