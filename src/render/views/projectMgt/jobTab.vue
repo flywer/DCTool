@@ -1,7 +1,7 @@
 <template>
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
-      <div class="w-auto  h-8 mb-2">
+      <div class="w-auto h-8 mb-2">
         <div class="float-left leading-8 font-bold text-base">
           <n-skeleton v-if="isTableLoading" :width="360" size="small"/>
           <span v-else>{{ title }}</span>
@@ -19,7 +19,7 @@
       </div>
       <n-data-table
           :key="(row) => row.id"
-          class="mt-2"
+          class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
           :pagination="paginationReactive"
@@ -140,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_project_by_pro_abbr, get_table_sql, update_table_sql} from "@render/api/auxiliaryDb";
+import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
 import {
   add_sched_task, cj_job_start, cj_job_stop, cj_job_run,
   get_cj_job_page,
@@ -148,9 +148,10 @@ import {
   get_workflow_page,
   workflow_active, sched_job_delete, cj_job_delete, workflow_run, workflow_delete
 } from "@render/api/datacenter";
+import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/formatDate";
 import {DataTableColumns, NButton, useMessage, NSpace, NTag, FormInst, useNotification, NPopconfirm} from "naive-ui";
-import {h, onMounted, reactive, ref, watch} from "vue";
+import {h, onMounted, reactive, ref, watch, computed} from "vue";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
 import {uuid} from "vue3-uuid";
@@ -158,9 +159,22 @@ import {uuid} from "vue3-uuid";
 const message = useMessage()
 const notification = useNotification()
 
-const props = defineProps({
-  node: [String, undefined],
-  treeData: Object
+const projectTree = useProjectTreeStore()
+
+// 创建计算属性来获取 Pinia 存储中的值
+const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+
+watch(defaultSelectedKeys, (newValue) => {
+  if (newValue[0] != null) {
+    const segments = newValue[0].split('-');
+    const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
+    if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
+      queryParam.value.projectId = segments[segments.length - 2]
+      queryParam.value.tableAbbr = segments[segments.length - 1]
+
+      tableDataInit()
+    }
+  }
 })
 
 // region 数据表
@@ -178,27 +192,14 @@ const getAllSchedJobInfo = async (param?: string) => {
 }
 
 onMounted(() => {
-  if (props.node == null) {
-    queryParam.value.projectId = '6'
-    queryParam.value.tableAbbr = 'G1010'
-  } else {
-    const segments = props.node.split('-');
-    queryParam.value.projectId = segments[segments.length - 2]
-    queryParam.value.tableAbbr = segments[segments.length - 1]
-  }
-
-  tableDataInit()
-})
-
-watch(props, (newValue) => {
-  if (newValue.node != null) {
-    const segments = newValue.node.split('-');
+  const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
+  const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
+  if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
     queryParam.value.projectId = segments[segments.length - 2]
     queryParam.value.tableAbbr = segments[segments.length - 1]
 
     tableDataInit()
   }
-
 })
 
 type Job = {

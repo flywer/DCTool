@@ -28,31 +28,33 @@
             </template>
           </n-input>
           <n-tree
+              ref="tree"
               class="mt-2 pr-2"
               block-line
-              :data="data"
+              :data="useProjectTreeStore().treeNodes"
               expand-on-click
               selectable
               :pattern="pattern"
               :show-irrelevant-nodes="!filterNode"
-              :node-props="nodeProps"
               virtual-scroll
               @load="handleLoad"
               style="height: calc(100vh - 150px);"
-              :default-expanded-keys="['-1']"
-              :default-selected-keys="['0-6-G1010']"
+              :default-expanded-keys="useProjectTreeStore().defaultExpandedKeys"
+              :default-selected-keys="useProjectTreeStore().defaultSelectedKeys"
+              @update:expandedKeys="handleExpandedKeys"
+              @update:selectedKeys="handleSelectedKeys"
           />
         </n-layout-sider>
         <n-layout-content content-style="padding: 12px;border-left: 1px solid rgb(237 237 237)">
           <n-tabs type="line" animated>
             <n-tab-pane name="1" tab="数据归集任务">
-              <job-tab :node="curNode" :tree-Data="data"/>
+              <job-tab/>
             </n-tab-pane>
-<!--            <n-tab-pane name="2" tab="执行日志">
+            <!--            <n-tab-pane name="2" tab="执行日志">
 
-            </n-tab-pane>-->
+                        </n-tab-pane>-->
             <n-tab-pane name="3" tab="中台相关表">
-              <project-tables-tab :node="curNode" :tree-Data="data"/>
+              <project-tables-tab/>
             </n-tab-pane>
 
           </n-tabs>
@@ -63,181 +65,33 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter";
+import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
-import {h, onMounted, reactive, ref} from 'vue'
-import {DataTableColumns, NButton, TreeOption} from 'naive-ui'
-import {Refresh, Search} from '@vicons/ionicons5'
+import {onMounted, ref} from 'vue'
+import {NButton, TreeOption, TreeInst} from 'naive-ui'
+import {Search} from '@vicons/ionicons5'
 import {Filter, FilterOff} from '@vicons/tabler'
+
+const tree = ref<TreeInst | null>(null)
 
 const basicTableAbbrs = ['g1010', 'g1020', 'y2010', 'y2020', 'y2030', 'y3010', 'y4010', 'z2010', 'z2020',
   'z2030', 'z2050', 'z3010', 'f2010', 'f2010', 'f2020', 'f1010', 'f1011', 'f1012', 'f1016', 'f3010', 'f3011',
   'd1010', 'd1020', 'd1030', 'd1040']
 
-const pattern = ref('')
+const pattern = ref()
 
 const filterNode = ref(false)
 
-// 当前选中节点
-const curNode = ref(null)
-
-const data = ref<TreeOption[]>([
-  {
-    label: '全省数据归集',
-    key: '-1',
-    children: [{
-      label: '基础数据归集',
-      key: '0',
-      children: [
-        {
-          label: '广东省司法厅数据归集',
-          key: '0-6',
-          children: [
-            {
-              label: 'G1010',
-              key: '0-6-G1010',
-              isLeaf: true
-            }, {
-              label: 'G1020',
-              key: '0-6-G1020',
-              isLeaf: true
-            }, {
-              label: 'Z2010',
-              key: '0-6-Z2010',
-              isLeaf: true
-            }, {
-              label: 'Z2020',
-              key: '0-6-Z2020',
-              isLeaf: true
-            }, {
-              label: 'Z2030',
-              key: '0-6-Z2030',
-              isLeaf: true
-            }, {
-              label: 'Z2050',
-              key: '0-6-Z2050',
-              isLeaf: true
-            }, {
-              label: 'Z3010',
-              key: '0-6-Z3010',
-              isLeaf: true
-            }, {
-              label: 'Y2010',
-              key: '0-6-Y2010',
-              isLeaf: true
-            }, {
-              label: 'Y2020',
-              key: '0-6-Y2020',
-              isLeaf: true
-            }, {
-              label: 'Y2030',
-              key: '0-6-Y2030',
-              isLeaf: true
-            }, {
-              label: 'Y3010',
-              key: '0-6-Y3010',
-              isLeaf: true
-            }, {
-              label: 'Y4010',
-              key: '0-6-Y4010',
-              isLeaf: true
-            },
-          ]
-        },
-        {
-          label: '广东省政务服务数据管理局数据归集',
-          key: '0-11',
-          children: [
-            {
-              label: 'F1010',
-              key: '0-11-F1010',
-              isLeaf: true
-            }, {
-              label: 'F1011',
-              key: '0-11-F1011',
-              isLeaf: true
-            }, {
-              label: 'F1012',
-              key: '0-11-F1012',
-              isLeaf: true
-            }, {
-              label: 'F1016',
-              key: '0-11-F1016',
-              isLeaf: true
-            },
-            {
-              label: 'F2010',
-              key: '0-11-F2010',
-              isLeaf: true
-            }, {
-              label: 'F2020',
-              key: '0-11-F2020',
-              isLeaf: true
-            },
-          ]
-        },
-        {
-          label: '广东省市场监督管理局数据归集',
-          key: '0-5',
-          children: [
-            {
-              label: 'F3010',
-              key: '0-5-F3010',
-              isLeaf: true
-            }, {
-              label: 'F3011',
-              key: '0-5-F3011',
-              isLeaf: true
-            },
-            {
-              label: 'D1010',
-              key: '0-5-D1010',
-              isLeaf: true
-            }, {
-              label: 'D1020',
-              key: '0-5-D1020',
-              isLeaf: true
-            }, {
-              label: 'D1030',
-              key: '0-5-D1030',
-              isLeaf: true
-            }, {
-              label: 'D1040',
-              key: '0-5-D1040',
-              isLeaf: true
-            }
-          ]
-        }
-      ]
-    },
-      {
-        label: '行为数据归集',
-        key: '1',
-        children: [
-          {
-            label: '省直行为数据',
-            key: '1-0',
-            isLeaf: false
-          },
-          {
-            label: '地市行为数据',
-            key: '1-1',
-            isLeaf: false
-          }
-        ]
-      },
-      {
-        label: '其他',
-        key: '2'
-      }]
-  }
-])
-
 onMounted(() => {
+  useProjectTreeStore().projectTreeInit()
   projectIdOptionsUpdate()
+
+  // 初始化滚动到选中的节点上
+  tree.value.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})
 })
 
 const handleLoad = (node: TreeOption) => {
@@ -322,17 +176,12 @@ const handleLoad = (node: TreeOption) => {
   })
 }
 
-const nodeProps = ({option}: { option: TreeOption }) => {
-  return {
-    onClick() {
-      if (option.isLeaf) {
-        curNode.value = option.key
-      }
-    },
-    onContextmenu(e: MouseEvent): void {
-      e.preventDefault()
-    }
-  }
+const handleExpandedKeys = (keys: Array<string>) => {
+  useProjectTreeStore().defaultExpandedKeys = keys as string[]
+}
+
+const handleSelectedKeys = (keys: Array<string>) => {
+  useProjectTreeStore().defaultSelectedKeys = keys as string[]
 }
 
 </script>

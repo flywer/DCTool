@@ -1,7 +1,7 @@
 <template>
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
-      <div class="w-auto  h-8 mb-2">
+      <div class="w-auto h-8 mb-2">
         <n-space inline class="float-right">
           <n-button secondary strong @click="tableDataInit">
             刷新
@@ -16,7 +16,7 @@
 
       <n-data-table
           :key="(row) => row.id"
-          class="mt-2"
+          class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
           :pagination="paginationReactive"
@@ -97,22 +97,36 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, update_table_sql} from "@render/api/auxiliaryDb";
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter";
-import {datasourceOptions} from "@render/typings/datacenterOptions";
+import {useProjectTreeStore} from "@render/stores/projectTree";
 import {Refresh} from '@vicons/ionicons5'
-import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm, useMessage, useNotification} from "naive-ui";
-import {h, onMounted, reactive, ref, watch} from "vue";
+import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm, useMessage} from "naive-ui";
+import {h, onMounted, reactive, ref, watch, computed} from "vue";
 
 const message = useMessage()
-const notification = useNotification()
-
-const props = defineProps({
-  node: [String, undefined],
-  treeData: Object
-})
 
 const queryParam = ref('')
+
+const projectTree = useProjectTreeStore()
+
+// 创建计算属性来获取 Pinia 存储中的值
+const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+
+watch(defaultSelectedKeys, async (newValue) => {
+  if (newValue[0] != null) {
+    const segments = newValue[0].split('-');
+    const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
+    if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
+      const projectId = segments[segments.length - 2]
+      const project = (await find_by_project_id(projectId))
+      queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
+
+      await tableDataInit()
+    }
+
+  }
+})
 
 type Table = {
   id: string
@@ -122,24 +136,12 @@ type Table = {
 }
 
 onMounted(async () => {
-  if (props.node == null) {
-    queryParam.value = 'ssft_g1010'
-  } else {
-    const segments = props.node.split('-');
+  const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
+  const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
+  if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
     const projectId = segments[segments.length - 2]
     const project = (await find_by_project_id(projectId))
     queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
-  }
-  await tableDataInit()
-})
-
-watch(props, async (newValue) => {
-  if (newValue.node != null) {
-    const segments = props.node.split('-');
-    const projectId = segments[segments.length - 2]
-    const project = (await find_by_project_id(projectId))
-    queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
-
     await tableDataInit()
   }
 })

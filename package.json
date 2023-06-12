@@ -1,6 +1,6 @@
 {
   "name": "n1tool",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "",
   "main": "dist/main/index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "jsonfile": "^6.1.0",
     "lodash-es": "^4.17.21",
     "mysql2": "^2.3.3",
+    "pinia": "^2.1.3",
     "pinyin": "^3.0.0-alpha.5",
     "reflect-metadata": "^0.1.13",
     "sql-formatter": "^12.2.1",
