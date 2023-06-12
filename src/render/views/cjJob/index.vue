@@ -205,6 +205,7 @@
 </template>
 
 <script setup lang="ts">
+import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_datax_job, add_sched_task, add_work_flow, build_datax_json, get_columns} from "@render/api/datacenter";
 import {
   datasourceOptions,
@@ -274,6 +275,15 @@ const rules = {
     message: '请选择责任人'
   }
 }
+
+watch(
+    [() => formModel.value.projectId, () => formModel.value.tableName],
+    async ([projectId, tableName]) => {
+      formModel.value.targetTableName = `di_${(await find_by_project_id(projectId))?.tableAbbr || ''}_${tableName}_temp_ods`
+      targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId, formModel.value.targetTableName)
+    }
+)
+
 
 const jobNameLockRef = ref(true)
 
@@ -627,6 +637,8 @@ const createDataXJob = () => {
         await add_sched_task(SchedTaskJson).then(res => {
           if (res.code == 0) {
             message.success('调度任务创建成功')
+            submitCount = 0;
+            jobTemplateId = null
           } else {
             notification.create({
               title: '调度任务创建失败',
