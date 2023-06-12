@@ -6,6 +6,7 @@
     <n-input
         placeholder="搜索"
         @update:value="search"
+        @keydown.enter="search"
     >
       <template #prefix>
         <n-icon :component="Search"/>
@@ -60,7 +61,7 @@
     >
       <n-grid :cols="2" :x-gap="4">
         <n-form-item-gi label="表名" path="tableName">
-          <n-input v-model:value="modalFormModel.tableName" placeholder="输入表名"
+          <n-input v-model:value.trim="modalFormModel.tableName" placeholder="输入表名"
                    @keydown.enter.prevent
           />
         </n-form-item-gi>
@@ -219,6 +220,7 @@ const onPositiveClick = () => {
 
   modalFormRef.value?.validate((errors) => {
     if (!errors) {
+      modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
       update_table_sql(modalFormModel.value).then(() => {
         message.success('保存成功')
         tableDataInit()
@@ -248,13 +250,20 @@ const add = () => {
 }
 
 const search = (v) => {
+  let param = ''
   if (v == undefined) {
-    v = ''
+    param = ''
+  }
+  if (typeof v == "string") {
+    param = v
+  }
+  if (typeof v == "object") {
+    param = v.target.value
   }
   get_table_sql({
-    tableName: v,
-    comment: v,
-    sql: v
+    tableName: param,
+    comment: param,
+    sql: param
   }).then((res) => {
     tableDataRef.value = res
   })

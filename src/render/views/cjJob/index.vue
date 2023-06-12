@@ -281,9 +281,9 @@ watch(
     async ([projectId, tableName]) => {
       formModel.value.targetTableName = `di_${(await find_by_project_id(projectId))?.tableAbbr || ''}_${tableName}_temp_ods`
       targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId, formModel.value.targetTableName)
+      targetTableColumnsRef.value = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName))
     }
 )
-
 
 const jobNameLockRef = ref(true)
 
