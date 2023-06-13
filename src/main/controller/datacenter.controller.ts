@@ -189,7 +189,7 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getWorkflowPage)
-    public async handleGetWorkflowPage(params: any) {
+    public async handleGetWorkflowPage(params: string) {
         let result
         params = JSON.parse(params)
         await this.commonPostRequest('/workflow/proc/page', params).then((res) => {

@@ -141,6 +141,7 @@
 
 <script setup lang="ts">
 import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
+import {create_cron_job} from "@render/api/cron";
 import {
   add_sched_task, cj_job_start, cj_job_stop, cj_job_run,
   get_cj_job_page,
@@ -473,7 +474,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 h(NButton, {
                       size: 'small',
                       onClick: () => {
-                        cjJobRun(row.id)
+                        cjJobRun(row)
                       }
                     },
                     {default: () => '执行'}),
@@ -535,7 +536,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 h(NButton, {
                       size: 'small',
                       onClick: () => {
-                        cjJobRun(row.id)
+                        cjJobRun(row)
                       }
                     },
                     {default: () => '执行'}),
@@ -687,6 +688,8 @@ const workflowRun = (v: Job) => {
     } else {
       message.error(res.message)
     }
+  }).then(() => {
+    create_cron_job(v.jobName)
   })
 }
 
@@ -725,8 +728,8 @@ const cjJobStop = (id) => {
   })
 }
 
-const cjJobRun = (id) => {
-  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id).id
+const cjJobRun = (row: Job) => {
+  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == row.id).id
   cj_job_run({
     jobId: schedJobId,
     subsystemName: "采集"

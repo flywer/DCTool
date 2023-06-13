@@ -45,8 +45,8 @@ export const channels = reactive({
         getTablesInfo: 'datacenter/getTablesInfo',
         tablePreview: 'datacenter/tablePreview',
         tableDelete: 'datacenter/tableDelete',
-        getCjJobLog:'datacenter/getCjJobLog',
-        createValidConfig:'datacenter/createValidConfig',
+        getCjJobLog: 'datacenter/getCjJobLog',
+        createValidConfig: 'datacenter/createValidConfig',
 
     },
     auxiliaryDb: {
@@ -61,8 +61,12 @@ export const channels = reactive({
         updateRhJson: 'auxiliaryDb/updateRhJson',
         getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
         getZjJson: 'auxiliaryDb/getZjJson',
-        updateZjJson:'auxiliaryDb/updateZjJson',
+        updateZjJson: 'auxiliaryDb/updateZjJson',
 
+    },
+    cron: {
+        createCronJob: 'cron/createCronJob',
+        datacenterCronJobInit: 'cron/datacenterCronJobInit',
     }
 
 })
