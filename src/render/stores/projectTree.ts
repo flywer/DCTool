@@ -6,7 +6,7 @@ export const useProjectTreeStore = defineStore({
     id: 'projectTree',
     state: () => ({
         treeNodes: [] as TreeOption[],
-        defaultExpandedKeys: ['-1'] as string[],
+        defaultExpandedKeys: ['-1', '0', '0-6'] as string[],
         defaultSelectedKeys: ['0-6-G1010'] as string[]
     }),
     actions: {
@@ -173,7 +173,7 @@ export const useProjectTreeStore = defineStore({
         },
         defaultExpandedKeysInit() {
             if (isEmpty(this.defaultExpandedKeys)) {
-                this.defaultExpandedKeys = ['-1']
+                this.defaultExpandedKeys = ['-1', '0', '0-6']
             }
         },
         defaultSelectedKeysInit() {
