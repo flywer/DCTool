@@ -255,6 +255,9 @@ const onPositiveClick = () => {
             rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, 'depart');
             rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, 'depart');
           }
+          if (rule.customSql != undefined) {
+            rule.customSql = convertCustomSqlTableName(rule.customSql, oldTableAbbr, 'depart')
+          }
         });
       });
 
@@ -274,6 +277,25 @@ const onPositiveClick = () => {
     isSaving.value = false
   })
 
+}
+
+const convertCustomSqlTableName = (sql: string, oldTableAbbr: string, newTableAbbr: string) => {
+  // 定义正则表达式匹配规则，匹配 xzzf_ods. 后面的表名
+  const pattern = /(?<=xzzf_ods\.)\w+/g;
+
+  let newSql = sql
+
+  // 使用正则表达式匹配字符串中的所有表名，并打印结果
+  let match;
+  while ((match = pattern.exec(sql)) !== null) {
+    if (!isBasicTable(match[0])) {
+      const tableName = match[0].replaceAll(oldTableAbbr, newTableAbbr) //转为通用表名
+      console.log(match[0], tableName)
+      newSql = newSql.replaceAll(match[0], tableName)//替换此表名
+    }
+  }
+  console.log(newSql)
+  return newSql
 }
 
 const add = () => {

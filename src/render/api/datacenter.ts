@@ -186,3 +186,8 @@ export const get_cj_job_log = async (obj: CommonQueryParam) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobLog, JSON.stringify(obj)))
     return data
 }
+
+export const create_valid_config = async (obj: CommonQueryParam) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.createValidConfig, JSON.stringify(obj)))
+    return data
+}

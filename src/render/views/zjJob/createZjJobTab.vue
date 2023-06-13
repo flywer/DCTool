@@ -77,7 +77,6 @@
 import {find_by_project_id, get_zj_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
-import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -171,13 +170,12 @@ const addWorkFlow = () => {
   isAdding.value = true
   add_work_flow(JSON.parse(jonJsonRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success('融合任务创建成功')
+      message.success('质检任务创建成功')
     } else {
       message.error(res.message)
     }
   }).finally(() => isAdding.value = false)
 }
-
 </script>
 
 <style scoped>

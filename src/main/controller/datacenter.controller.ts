@@ -328,6 +328,18 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.createValidConfig)
+    public async handleCreateValidConfig(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest(`/qaportal/dwInspectionPortalConfig/add`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     @IpcHandle(channels.datacenter.schedJobDelete)
     public async handleSchedJobDelete(id: string) {
         let result

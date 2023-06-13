@@ -1,3 +1,4 @@
+//通过表明判断此表是否为基础表
 export const isBasicTable = (tableName: string) => {
     const tableAbbr = tableName.split('_')[2]
     if (tableAbbr != undefined) {
