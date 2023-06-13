@@ -153,7 +153,7 @@ const generate = () => {
       paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label
 
       const {tableAbbr} = await getAbbrByProId(paramJson.projectId);
-
+      console.log(tableAbbr)
       paramJson = JSON.parse(JSON.stringify(paramJson).replaceAll('depart', tableAbbr))
       paramJson = JSON.parse(updateSjkUUID(removeIds(paramJson)))
 

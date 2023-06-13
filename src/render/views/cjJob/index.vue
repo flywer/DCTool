@@ -206,7 +206,7 @@
 
 <script setup lang="ts">
 import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {add_datax_job, add_sched_task, add_work_flow, build_datax_json, get_columns} from "@render/api/datacenter";
+import {add_datax_job, add_sched_task, build_datax_json, get_columns} from "@render/api/datacenter";
 import {
   datasourceOptions,
   personIdOptions,
@@ -218,8 +218,9 @@ import {
 } from "@render/utils/datacenter/findCommonElements";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {isEmpty} from "lodash-es";
 import {FormInst, SelectGroupOption, SelectOption, useMessage, useNotification} from "naive-ui";
-import {h, onMounted, ref, watch} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {LockOutlined, UnlockOutlined} from '@vicons/antd'
 import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
@@ -424,95 +425,100 @@ let paramsModel = {
 
 const buildJson = () => {
   isBuildingRef.value = true
-  formRef.value?.validate(async (errors) => {
-    if (!errors) {
-      const newSourceTable = findCommonElementsByArr2(sourceTableColumnsRef.value, targetTableColumnsRef.value, true)
+  if (!isEmpty(targetTableColumnsRef.value)) {
+    formRef.value?.validate(async (errors) => {
+      if (!errors) {
+        const newSourceTable = findCommonElementsByArr2(sourceTableColumnsRef.value, targetTableColumnsRef.value, true)
 
-      const indexes = newSourceTable
-          .map((item, i) => item === null ? i : -1)
-          .filter(i => i !== -1);
+        const indexes = newSourceTable
+            .map((item, i) => item === null ? i : -1)
+            .filter(i => i !== -1);
 
-      if (indexes.length > 0) {
-        // 有 NULL 则说明目标表有字段没有被对应上
-        notification.create({
-          title: "字段对应失败",
-          content: `目标表有字段无法在来源表找到对应字段：${targetTableColumnsRef.value.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
-          type: "error"
-        })
+        if (indexes.length > 0) {
+          // 有 NULL 则说明目标表有字段没有被对应上
+          notification.create({
+            title: "字段对应失败",
+            content: `目标表有字段无法在来源表找到对应字段：${targetTableColumnsRef.value.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
+            type: "error"
+          })
+        } else {
+          paramsModel.jobDesc = formModel.value.name
+          paramsModel.projectId = formModel.value.projectId
+
+          paramsModel.readerId = formModel.value.sourceDataSourceId
+          paramsModel.writerId = formModel.value.targetDataSourceId
+          paramsModel.mappingType = "the-same-name"
+
+          let path = ''
+          for (let i = 0; i < targetTableColumnsRef.value.length; i++) {
+            path += `M0,${72 + (48 * i)}.0 L100,${72 + (48 * i)}.0`
+          }
+          paramsModel.path = path
+
+          paramsModel.gatherMethod = '2'
+          paramsModel.incrementType = '2'
+          paramsModel.incrementType = '2'
+          paramsModel.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
+          paramsModel.incStartTime = "1971-01-01 00:00:00"
+          paramsModel.replaceParamType = "yyyy-MM-dd HH:mm:ss"
+
+          paramsModel.readerModel.datasourceType = 'mysql'
+          paramsModel.readerModel.datasourceId = formModel.value.sourceDataSourceId
+          paramsModel.readerModel.readerFieldDelimiter = ','
+          paramsModel.readerModel.tableName = formModel.value.sourceTableName
+          paramsModel.readerModel.whereParams = "cd_time >= ${lastTime} and cd_time < ${currentTime}"
+          paramsModel.readerModel.columns = newSourceTable
+
+          paramsModel.writerModel.datasourceType = 'tbds-hive'
+          paramsModel.writerModel.datasourceId = formModel.value.targetDataSourceId
+          paramsModel.writerModel.fromTableName = formModel.value.targetTableName
+          paramsModel.writerModel.writerFileName = formModel.value.targetTableName
+          paramsModel.writerModel.writerPath = `/apps/hive/warehouse/xzzf_ods.db/${formModel.value.targetTableName}`
+          paramsModel.writerModel.columns = targetTableColumnsRef.value
+          paramsModel.writerModel.ftpColums = Array(targetTableColumnsRef.value.length).fill(0).map((_, index) => index)
+
+          paramsModel.initReaderModel = sourceTableColumnsRef.value
+          paramsModel.initWriterModel = targetTableColumnsRef.value
+
+          let buildJson = {
+            readerDatasourceId: paramsModel.readerId,
+            readerTables: [paramsModel.readerModel.tableName],
+            readerColumns: paramsModel.readerModel.columns,
+            writerDatasourceId: paramsModel.writerId,
+            writerTables: [paramsModel.writerModel.fromTableName],
+            writerColumns: paramsModel.writerModel.columns,
+            rdbmsReader: {
+              whereParams: paramsModel.readerModel.whereParams
+            },
+            hiveWriter: {
+              datasourceType: paramsModel.writerModel.datasourceType,
+              datasourceId: paramsModel.writerModel.datasourceId,
+              fromTableName: paramsModel.writerModel.fromTableName,
+              writerFileName: paramsModel.writerModel.writerFileName,
+              writeFieldDelimiter: paramsModel.writerModel.writeFieldDelimiter,
+              writeMode: paramsModel.writerModel.writeMode,
+              writerFileType: paramsModel.writerModel.writerFileType,
+              writerDefaultFS: paramsModel.writerModel.writerDefaultFS,
+              writerPath: paramsModel.writerModel.writerPath,
+            },
+            subsystemName: "采集"
+          }
+
+          paramsModel.jobJson = await build_datax_json(buildJson)
+
+          jsonOutputRef.value = JSON.stringify(paramsModel, null, 2)
+
+        }
       } else {
-        paramsModel.jobDesc = formModel.value.name
-        paramsModel.projectId = formModel.value.projectId
-
-        paramsModel.readerId = formModel.value.sourceDataSourceId
-        paramsModel.writerId = formModel.value.targetDataSourceId
-        paramsModel.mappingType = "the-same-name"
-
-        let path = ''
-        for (let i = 0; i < targetTableColumnsRef.value.length; i++) {
-          path += `M0,${72 + (48 * i)}.0 L100,${72 + (48 * i)}.0`
-        }
-        paramsModel.path = path
-
-        paramsModel.gatherMethod = '2'
-        paramsModel.incrementType = '2'
-        paramsModel.incrementType = '2'
-        paramsModel.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
-        paramsModel.incStartTime = "1971-01-01 00:00:00"
-        paramsModel.replaceParamType = "yyyy-MM-dd HH:mm:ss"
-
-        paramsModel.readerModel.datasourceType = 'mysql'
-        paramsModel.readerModel.datasourceId = formModel.value.sourceDataSourceId
-        paramsModel.readerModel.readerFieldDelimiter = ','
-        paramsModel.readerModel.tableName = formModel.value.sourceTableName
-        paramsModel.readerModel.whereParams = "cd_time >= ${lastTime} and cd_time < ${currentTime}"
-        paramsModel.readerModel.columns = newSourceTable
-
-        paramsModel.writerModel.datasourceType = 'tbds-hive'
-        paramsModel.writerModel.datasourceId = formModel.value.targetDataSourceId
-        paramsModel.writerModel.fromTableName = formModel.value.targetTableName
-        paramsModel.writerModel.writerFileName = formModel.value.targetTableName
-        paramsModel.writerModel.writerPath = `/apps/hive/warehouse/xzzf_ods.db/${formModel.value.targetTableName}`
-        paramsModel.writerModel.columns = targetTableColumnsRef.value
-        paramsModel.writerModel.ftpColums = Array(targetTableColumnsRef.value.length).fill(0).map((_, index) => index)
-
-        paramsModel.initReaderModel = sourceTableColumnsRef.value
-        paramsModel.initWriterModel = targetTableColumnsRef.value
-
-        let buildJson = {
-          readerDatasourceId: paramsModel.readerId,
-          readerTables: [paramsModel.readerModel.tableName],
-          readerColumns: paramsModel.readerModel.columns,
-          writerDatasourceId: paramsModel.writerId,
-          writerTables: [paramsModel.writerModel.fromTableName],
-          writerColumns: paramsModel.writerModel.columns,
-          rdbmsReader: {
-            whereParams: paramsModel.readerModel.whereParams
-          },
-          hiveWriter: {
-            datasourceType: paramsModel.writerModel.datasourceType,
-            datasourceId: paramsModel.writerModel.datasourceId,
-            fromTableName: paramsModel.writerModel.fromTableName,
-            writerFileName: paramsModel.writerModel.writerFileName,
-            writeFieldDelimiter: paramsModel.writerModel.writeFieldDelimiter,
-            writeMode: paramsModel.writerModel.writeMode,
-            writerFileType: paramsModel.writerModel.writerFileType,
-            writerDefaultFS: paramsModel.writerModel.writerDefaultFS,
-            writerPath: paramsModel.writerModel.writerPath,
-          },
-          subsystemName: "采集"
-        }
-
-        paramsModel.jobJson = await build_datax_json(buildJson)
-
-        jsonOutputRef.value = JSON.stringify(paramsModel, null, 2)
-
+        console.log(errors)
       }
-    } else {
-      console.log(errors)
-    }
-  }).finally(() => [
-    isBuildingRef.value = false
-  ])
+    }).finally(() => [
+      isBuildingRef.value = false
+    ])
+  } else {
+    message.warning("目标表不存在")
+      isBuildingRef.value = false
+  }
 
 }
 

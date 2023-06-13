@@ -87,7 +87,8 @@ export class AdbController {
         }
 
         return await AppDataSource.manager.find(TableSql, {
-            where: queryVar
+            where: queryVar,
+            order: {tableName: 'asc'}
         })
     }
 

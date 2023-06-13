@@ -38,7 +38,7 @@ export const getAbbrByProId = async (projectId: string) => {
             , {
                 style: pinyin.STYLE_FIRST_LETTER,
             }).join('')
-        tableAbbr = project?.projectAbbr || pinyin(
+        tableAbbr = project?.tableAbbr || pinyin(
             project.projectName.replaceAll(/行政行为/g, 'xzxw')
                 .replaceAll(/数据归集/g, '')
                 .replaceAll(/广东/g, '')

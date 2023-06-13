@@ -1,7 +1,6 @@
 // import {ocr} from "@main/ocr";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
-import {dialog} from "electron";
 
 @Controller()
 export class OcrController {
