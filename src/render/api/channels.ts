@@ -47,6 +47,7 @@ export const channels = reactive({
         tableDelete: 'datacenter/tableDelete',
         getCjJobLog: 'datacenter/getCjJobLog',
         createValidConfig: 'datacenter/createValidConfig',
+        getValidConfigPage:'datacenter/getValidConfigPage',
 
     },
     auxiliaryDb: {

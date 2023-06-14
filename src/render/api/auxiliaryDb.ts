@@ -27,7 +27,6 @@ export const find_by_project_id = async (projectId: string): Promise<ProjectInfo
 // 通过项目简称查找项目
 export const get_project_by_pro_abbr = async (projectAbbr: string) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByProAbbr, projectAbbr))
-    console.log(data)
     return data
 }
 

@@ -143,22 +143,41 @@
 import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
 import {create_cron_job} from "@render/api/cron";
 import {
-  add_sched_task, cj_job_start, cj_job_stop, cj_job_run,
+  add_sched_task,
+  cj_job_delete,
+  cj_job_run,
+  cj_job_start,
+  cj_job_stop,
   get_cj_job_page,
-  get_sched_job_page,
+  get_sched_job_page, get_valid_config_page,
   get_workflow_page,
-  workflow_active, sched_job_delete, cj_job_delete, workflow_run, workflow_delete
+  sched_job_delete,
+  workflow_active,
+  workflow_delete,
+  workflow_run
 } from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/formatDate";
-import {DataTableColumns, NButton, useMessage, NSpace, NTag, FormInst, useNotification, NPopconfirm} from "naive-ui";
-import {h, onMounted, reactive, ref, watch, computed} from "vue";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
+import {isEmpty} from "lodash-es";
+import {
+  DataTableColumns,
+  FormInst,
+  NButton,
+  NPopconfirm,
+  NSpace,
+  NTag,
+  useMessage,
+  useNotification,
+  useDialog
+} from "naive-ui";
+import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {uuid} from "vue3-uuid";
 
 const message = useMessage()
 const notification = useNotification()
+const dialog = useDialog()
 
 const projectTree = useProjectTreeStore()
 
@@ -436,89 +455,42 @@ const createColumns = (): DataTableColumns<Job> => {
         switch (row.status) {
           case 0:// 未配置调度任务的采集任务
             container.children = [
-              h(NButton, {
-                    size: 'small',
-                    onClick: () => {
-                      addSchedJobModalFormModelInit(row)
-                      showModalRef.value = true
-                      modalTitle = '创建调度任务'
-                      formSelect.value = select
-                      formSelect.value.addSchedJob = true
-                    }
-                  },
-                  {default: () => '配置'}),
-              h(NPopconfirm, {
-                positiveText: '确定',
-                negativeText: '取消',
-                onPositiveClick: () => {
-                  cjJobDelete(row.id)
-                },
-              }, {
-                trigger: () => {
-                  return h(NButton, {size: 'small'}, {default: () => '删除'})
-                },
-                default: () => '确定要删除吗？'
+              showButton('配置', async () => {
+                await addSchedJobModalFormModelInit(row)
+                showModalRef.value = true
+                modalTitle = '创建调度任务'
+                formSelect.value = select
+                formSelect.value.addSchedJob = true
+              }),
+              showConfirmation('删除', async () => {
+                await cjJobDelete(row.id)
               }),
             ]
             break
           case  1: // 任务停用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        cjJobStart(row.id)
-                      }
-                    },
-                    {default: () => '启用'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        cjJobRun(row)
-                      }
-                    },
-                    {default: () => '执行'}),
-                h(NPopconfirm, {
-                  positiveText: '确定',
-                  negativeText: '取消',
-                  onPositiveClick: () => {
-                    cjJobDelete(row.id)
-                  },
-                }, {
-                  trigger: () => {
-                    return h(NButton, {size: 'small'}, {default: () => '删除'})
-                  },
-                  default: () => '确定要删除吗？'
+                showButton('启用', async () => {
+                  cjJobStart(row.id)
+                }),
+                showConfirmation('执行', async () => {
+                  cjJobRun(row)
+                }),
+                showConfirmation('删除', async () => {
+                  await cjJobDelete(row.id)
                 }),
               ]
             } else {
               container.children = [
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        workflowActive(row.id, '01')
-                      }
-                    },
-                    {default: () => '启用'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: async () => {
-                        await workflowActive(row.id, '01')
-                        await workflowRun(row)
-                      }
-                    },
-                    {default: () => '执行'}),
-                h(NPopconfirm, {
-                  positiveText: '确定',
-                  negativeText: '取消',
-                  onPositiveClick: () => {
-                    workflowDelete(row.id)
-                  },
-                }, {
-                  trigger: () => {
-                    return h(NButton, {size: 'small'}, {default: () => '删除'})
-                  },
-                  default: () => '确定要删除吗？'
+                showButton('启用', async () => {
+                  workflowActive(row.id, '01')
+                }),
+                showConfirmation('执行', async () => {
+                  await workflowActive(row.id, '01')
+                  await workflowRun(row)
+                }),
+                showConfirmation('删除', async () => {
+                  await workflowDelete(row.id)
                 }),
               ]
             }
@@ -526,62 +498,28 @@ const createColumns = (): DataTableColumns<Job> => {
           case 2:// 任务启用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        cjJobStop(row.id)
-                      }
-                    },
-                    {default: () => '停用'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        cjJobRun(row)
-                      }
-                    },
-                    {default: () => '执行'}),
-                h(NPopconfirm, {
-                  positiveText: '确定',
-                  negativeText: '取消',
-                  onPositiveClick: async () => {
-                    await cjJobStop(row.id)
-                    await cjJobDelete(row.id)
-                  },
-                }, {
-                  trigger: () => {
-                    return h(NButton, {size: 'small'}, {default: () => '删除'})
-                  },
-                  default: () => '确定要删除吗？'
+                showButton('停用', async () => {
+                  cjJobStop(row.id)
+                }),
+                showConfirmation('执行', async () => {
+                  cjJobRun(row)
+                }),
+                showConfirmation('删除', async () => {
+                  await cjJobStop(row.id)
+                  await cjJobDelete(row.id)
                 }),
               ]
             } else {
               container.children = [
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        workflowActive(row.id, '02')
-                      }
-                    },
-                    {default: () => '停用'}),
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        workflowRun(row)
-                      }
-                    },
-                    {default: () => '执行'}),
-                h(NPopconfirm, {
-                  positiveText: '确定',
-                  negativeText: '取消',
-                  onPositiveClick: async () => {
-                    await workflowActive(row.id, '02')
-                    await workflowDelete(row.id)
-                  },
-                }, {
-                  trigger: () => {
-                    return h(NButton, {size: 'small'}, {default: () => '删除'})
-                  },
-                  default: () => '确定要删除吗？'
+                showButton('停用', async () => {
+                  workflowActive(row.id, '02')
+                }),
+                showConfirmation('执行', async () => {
+                  workflowRun(row)
+                }),
+                showConfirmation('删除', async () => {
+                  await workflowActive(row.id, '02')
+                  await workflowDelete(row.id)
                 }),
               ]
             }
@@ -609,6 +547,31 @@ const createColumns = (): DataTableColumns<Job> => {
       }
     }
   ]
+}
+
+const showButton = (text, onClick) => {
+  return h(NButton, {
+        size: 'small',
+        onClick: async () => {
+          await onClick()
+        }
+      },
+      {default: () => text})
+}
+
+const showConfirmation = (text, onPositiveClick) => {
+  return h(NPopconfirm, {
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      await onPositiveClick();
+    },
+  }, {
+    trigger: () => {
+      return h(NButton, {size: 'small'}, {default: () => text})
+    },
+    default: () => `确定要${text}吗？`
+  });
 }
 
 const columnsRef = ref(createColumns())
@@ -674,23 +637,69 @@ const workflowActive = (id: string, type: '01' | '02') => {
   })
 }
 
-const workflowRun = (v: Job) => {
-  const param = {
-    businessKey: uuid.v4(),
-    code: v.code,
-    createBy: v.createBy,
-    creator: v.createBy
-  }
-  workflow_run(param).then(res => {
-    if (res.code == 200) {
-      message.success(res.message)
-      tableDataInit()
-    } else {
-      message.error(res.message)
+const workflowRun = async (v: Job) => {
+
+  let canRun = true
+
+  if (v.type === '数据质检任务') {
+    let configParam = {
+      page: 1,
+      size: 1,
+      likeName: '',
+      orders: [
+        {
+          asc: true,
+          column: "table_name"
+        }
+      ],
+      likeType: 0
     }
-  }).then(() => {
-    create_cron_job(v.jobName)
-  })
+
+    const project = await get_project_by_pro_abbr(v.jobName.split("_")[1])
+
+    configParam.likeName = `di_${project.tableAbbr}_${v.jobName.split("_")[2]}_temp_ods`
+
+    get_valid_config_page(configParam).then(res => {
+      //
+      if (isEmpty(res.data.records) || res.data.records[0].tableName != 'configParam.likeName') {
+        dialog.warning({
+          title: '警告',
+          content: `检测到未在质量门户对[${configParam.likeName}]进行配置，是否继续执行质检？`,
+          positiveText: '确定',
+          negativeText: '取消',
+          onPositiveClick: () => {
+            canRun = true
+          },
+          onNegativeClick: () => {
+            canRun = false
+          }
+        })
+      } else {
+        canRun = true
+      }
+    })
+
+  }
+
+  if (canRun) {
+    const param = {
+      businessKey: uuid.v4(),
+      code: v.code,
+      createBy: v.createBy,
+      creator: v.createBy
+    }
+    workflow_run(param).then(res => {
+      if (res.code == 200) {
+        message.success(res.message)
+        tableDataInit()
+      } else {
+        message.error(res.message)
+      }
+    }).then(() => {
+      create_cron_job(v.jobName)
+    })
+  }
+
 }
 
 const workflowDelete = (id) => {
