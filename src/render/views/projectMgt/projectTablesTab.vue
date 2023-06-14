@@ -34,15 +34,17 @@
       v-model:show="showPreviewModalRef"
       :mask-closable="true"
       :closable="true"
-      preset="dialog"
-      role="dialog"
+      preset="card"
+      role="card"
       :show-icon="false"
       :title="modalTitle"
       :size="'small'"
       style="width: calc(100vw - 100px);"
   >
+
     <n-data-table
-        class="mt-4"
+        style="overflow: auto"
+        class="mt-2 mb-2"
         :key="(row) => row.id"
         :columns="previewColsRef"
         :data="previewTableDataRef"
@@ -51,8 +53,8 @@
         :striped="true"
         :loading="isPreviewTableLoading"
         :max-height="450"
-        scroll-x="4500"
     />
+
   </n-modal>
 
 
@@ -189,52 +191,50 @@ const createColumns = (): DataTableColumns<Table> => {
         return h(NSpace, {
           justify: 'center'
         }, [
-          h(NButton, {
-            size: 'small',
-            onClick: () => {
-              tablePreview(row)
-            }
-          }, {default: () => '预览'}),
+          showButton('预览', () => {
+            tablePreview(row)
+          }),
           /*  h(NButton, {
              size: 'small',
              onClick: () => {
                updateTableComment(row)
              }
            }, {default: () => '修改表注解'}), */
-          h(NPopconfirm, {
-            positiveText: '确定',
-            negativeText: '取消',
-            onPositiveClick: () => {
-              tableTruncate(row)
-            },
-            onNegativeClick: () => {
-
-            }
-          }, {
-            trigger: () => {
-              return h(NButton, {size: 'small'}, {default: () => '清空'})
-            },
-            default: () => '确定要清空此表吗？'
-          }),
-          h(NPopconfirm, {
-            positiveText: '确定',
-            negativeText: '取消',
-            onPositiveClick: () => {
-              tableDelete(row)
-            },
-            onNegativeClick: () => {
-
-            }
-          }, {
-            trigger: () => {
-              return h(NButton, {size: 'small'}, {default: () => '删除'})
-            },
-            default: () => '确定要删除吗？'
-          }),
+          showConfirmation('清空', () => [
+            tableTruncate(row)
+          ]),
+          showConfirmation('删除', () => [
+            tableDelete(row)
+          ])
         ],)
       }
     }
   ]
+}
+
+const showButton = (text, onClick) => {
+  return h(NButton, {
+        size: 'small',
+        onClick: async () => {
+          await onClick()
+        }
+      },
+      {default: () => text})
+}
+
+const showConfirmation = (text, onPositiveClick) => {
+  return h(NPopconfirm, {
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      await onPositiveClick();
+    },
+  }, {
+    trigger: () => {
+      return h(NButton, {size: 'small'}, {default: () => text})
+    },
+    default: () => `确定要${text}吗？`
+  });
 }
 
 const columnsRef = ref(createColumns())
@@ -260,6 +260,10 @@ let modalTitle = '';
 
 const previewColsRef = ref([])
 
+const tableHeadCol = ref([])
+
+const tableRows = ref([])
+
 const previewTableDataRef = ref([])
 
 const isPreviewTableLoading = ref(false)
@@ -271,12 +275,16 @@ const tablePreview = (row) => {
   modalTitle = row.tableName
 
   table_preview(6, row.tableName).then(res => {
-    if (res.code == 0) {
+    if (res.code == 200) {
       if (res.data.length != 0) {
+
+        tableHeadCol.value = res.data[0]
+        tableRows.value = res.data.slice(1)
+
         // 创建表头
-        previewColsRef.value = Object.keys(res.data[0]).map((key) => ({
-          title: key.split('.')[1],
-          key: key.split('.')[1],
+        previewColsRef.value = res.data[0].map((col) => ({
+          title: col,
+          key: col,
           // fixed: key.split('.')[1] === 'id' ? 'left' : false
           width: '200px',
           ellipsis: {
@@ -285,20 +293,20 @@ const tablePreview = (row) => {
         }));
 
         // 处理数据
-        previewTableDataRef.value = res.data.map((item) =>
+        previewTableDataRef.value = res.data.slice(1).map((item) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
         )
 
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.map((item) =>
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
         ));
       }
     } else {
-      message.error(res.msg)
+      message.error(res.message)
     }
   }).finally(() => isPreviewTableLoading.value = false)
 

@@ -52,16 +52,16 @@ export class CronController {
                                     let jobRes = ''
                                     switch (res.data.records[0].status) {
                                         case '1':// 启用
-                                            jobRes = '执行成功'
+                                            jobRes = '✔️ 执行成功'
                                             break
                                         case '2':// 停用
                                             jobRes = '任务已停用'
                                             break
                                         case '3':// 异常
-                                            jobRes = '任务异常'
+                                            jobRes = '❌ 任务异常'
                                             break
                                         case '5':// 未反馈
-                                            jobRes = '任务未反馈'
+                                            jobRes = '❔ 任务未反馈'
                                             break
                                     }
 

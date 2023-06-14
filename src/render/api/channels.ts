@@ -48,6 +48,7 @@ export const channels = reactive({
         getCjJobLog: 'datacenter/getCjJobLog',
         createValidConfig: 'datacenter/createValidConfig',
         getValidConfigPage:'datacenter/getValidConfigPage',
+        workflowList: 'datacenter/workflowList',
 
     },
     auxiliaryDb: {

@@ -196,3 +196,8 @@ export const get_valid_config_page = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getValidConfigPage, JSON.stringify(obj)))
     return data
 }
+
+export const get_workflow_log = async (id: string, size: number, page: number) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowList, id, size, page))
+    return data
+}

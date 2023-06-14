@@ -7,26 +7,38 @@
 
       <n-layout has-sider style="height: calc(100vh - 92px);">
         <n-layout-sider content-style="padding: 12px;overflow:hidden">
-          <n-input v-model:value="pattern" placeholder="搜索">
-            <template #prefix>
-              <n-icon :component="Search"/>
-            </template>
-            <template #suffix>
-              <n-tooltip trigger="hover">
-                <template #trigger>
-                  <n-button text type="default" ghost
-                            @click="filterNode = !filterNode"
-                  >
-                    <n-icon>
-                      <Filter v-show="filterNode"/>
-                      <FilterOff v-show="!filterNode"/>
-                    </n-icon>
-                  </n-button>
+          <n-grid :cols="6" :x-gap="8">
+            <n-gi :span="5">
+              <n-input v-model:value="pattern" placeholder="搜索">
+                <template #prefix>
+                  <n-icon :component="Search"/>
                 </template>
-                是否过滤无关节点
-              </n-tooltip>
-            </template>
-          </n-input>
+                <template #suffix>
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <n-button text type="default" ghost
+                                @click="filterNode = !filterNode"
+                      >
+                        <n-icon>
+                          <Filter v-show="filterNode"/>
+                          <FilterOff v-show="!filterNode"/>
+                        </n-icon>
+                      </n-button>
+                    </template>
+                    是否过滤无关节点
+                  </n-tooltip>
+                </template>
+              </n-input>
+            </n-gi>
+            <n-gi :span="1">
+              <n-button @click="handleTreeNodeInit">
+                <n-icon>
+                  <Refresh/>
+                </n-icon>
+              </n-button>
+            </n-gi>
+          </n-grid>
+
           <n-tree
               ref="tree"
               class="mt-2 pr-2"
@@ -73,7 +85,7 @@ import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {onMounted, ref} from 'vue'
 import {NButton, TreeOption, TreeInst} from 'naive-ui'
-import {Search} from '@vicons/ionicons5'
+import {Search, Refresh} from '@vicons/ionicons5'
 import {Filter, FilterOff} from '@vicons/tabler'
 
 const tree = ref<TreeInst | null>(null)
@@ -93,6 +105,11 @@ onMounted(() => {
   // 初始化滚动到选中的节点上
   tree.value.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})
 })
+
+const handleTreeNodeInit = () => {
+  useProjectTreeStore().$reset()
+  useProjectTreeStore().treeNodesInit()
+}
 
 const handleLoad = (node: TreeOption) => {
   return new Promise<void>(async (resolve) => {
@@ -183,6 +200,7 @@ const handleExpandedKeys = (keys: Array<string>) => {
 const handleSelectedKeys = (keys: Array<string>) => {
   useProjectTreeStore().defaultSelectedKeys = keys as string[]
 }
+
 
 </script>
 

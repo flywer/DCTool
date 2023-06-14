@@ -384,9 +384,9 @@ export class DatacenterController {
     public async handleTablePreview(datasourceId: number, tableName: string) {
         let result
 
-        const query = `datasourceId=${datasourceId}&tableName=${tableName}&subsystemName=%E9%87%87%E9%9B%86`;
+        const query = `id=${datasourceId}&tableName=${tableName}&limitNum=10`;
 
-        await this.commonGetRequest(`/gather/api/metadata/getDataTen`, query).then((res) => {
+        await this.commonGetRequest(`/datawork/dataSource/getLimitNum`, query).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);
@@ -401,6 +401,20 @@ export class DatacenterController {
         const query = ``;
 
         await this.commonGetRequest(`/datawork/datamodelTables/delete/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.workflowList)
+    public async handleWorkflowList(id: string, size: number, page: number) {
+        let result
+
+        const query = `procInfoId=${id}&size=${size}&page=${page}`;
+
+        await this.commonGetRequest(`/workflow/workflow-log/list`, query).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);

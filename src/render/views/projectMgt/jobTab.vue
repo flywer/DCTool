@@ -149,7 +149,7 @@ import {
   cj_job_start,
   cj_job_stop,
   get_cj_job_page,
-  get_sched_job_page, get_valid_config_page,
+  get_sched_job_page, get_valid_config_page, get_workflow_log,
   get_workflow_page,
   sched_job_delete,
   workflow_active,
@@ -227,14 +227,13 @@ type Job = {
   type: string
   jobName: string
   // 0:采集任务未配置；1:任务停用；2:任务启用；3:任务运行中；4:任务异常；5:任务未反馈
-  status: number,
+  status: number
   // 1:依赖调度；2:定时调度
-  schedMode: number,
-  cron: string,
+  schedMode: number
+  cron: string
+  lastExecTime: string
   nextExecTime: string
-
   createBy: string
-
   code?: string
 }
 
@@ -303,6 +302,7 @@ const tableDataInit = async () => {
           cron: (() => {
             return allSchedJobInfoRef.value.find(item => item.jobTemplateId == v.id)?.jobCron || null
           })(),
+          lastExecTime: v.triggerLastTime || '--',
           nextExecTime: cjJobGetNextExecTime(v.id),
           createBy: null
         }))
@@ -314,49 +314,57 @@ const tableDataInit = async () => {
       status: null,
       procName: `${projectAbbr}_${queryParam.value.tableAbbr}`
     })).data.records
-        .map((v): Job => ({
-          id: v.id,
-          jobName: v.procName,
-          type: (() => {
-            switch (v.procName.split('_')[0]) {
-              case 'zj':
-                return '数据质检任务'
-              case 'bf':
-                return '数据备份任务'
-              case 'qc':
-                return '数据清除任务'
-              case 'rh':
-                return '数据融合任务'
-              case 'rk':
-                return '数据入库任务'
-              default :
-                return '未知任务'
-            }
-          })(),
-          status: (() => {
-            switch (v.status) {
-              case '1':// 启用
-                return 2
-              case '2':// 停用
-                return 1
-              case '3':// 异常
-                return 4
-              case '4':// 运行中
-                return 3
-              case '5':// 未反馈
-                return 5
-              default :
-                return v.status as number
-            }
-          })(),
-          schedMode: v.schedulingMode,
-          cron: v.crontab == '' ? null : v.crontab,
-          nextExecTime: zjJobGetNextExecTime(v),
-          createBy: v.createBy,
-          code: v.procCode
-        }))
 
-    jobs.push(...cjJobs, ...workflowJobs)
+    let newJobs = []
+
+    for (const v of workflowJobs) {
+      const job = {
+        id: v.id,
+        jobName: v.procName,
+        type: (() => {
+          switch (v.procName.split('_')[0]) {
+            case 'zj':
+              return '数据质检任务'
+            case 'bf':
+              return '数据备份任务'
+            case 'qc':
+              return '数据清除任务'
+            case 'rh':
+              return '数据融合任务'
+            case 'rk':
+              return '数据入库任务'
+            default :
+              return '未知任务'
+          }
+        })(),
+        status: (() => {
+          switch (v.status) {
+            case '1':// 启用
+              return 2
+            case '2':// 停用
+              return 1
+            case '3':// 异常
+              return 4
+            case '4':// 运行中
+              return 3
+            case '5':// 未反馈
+              return 5
+            default :
+              return v.status as number
+          }
+        })(),
+        schedMode: v.schedulingMode,
+        cron: v.crontab == '' ? null : v.crontab,
+        lastExecTime: await workflowJobGetLastExecTime(v),
+        nextExecTime: workflowJobGetNextExecTime(v),
+        createBy: v.createBy,
+        code: v.procCode
+      }
+
+      newJobs.push(job)
+    }
+
+    jobs.push(...cjJobs, ...newJobs)
   } else {
     tableDataRef.value = []
   }
@@ -371,7 +379,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '15%'
+      width: '13%'
     },
     {
       title: '任务类型',
@@ -437,14 +445,19 @@ const createColumns = (): DataTableColumns<Job> => {
       }
     },
     {
+      title: '上次执行时间',
+      key: 'lastExecTime',
+      width: '16%'
+    },
+    {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '15%'
+      width: '16%'
     },
     {
       title: '操作',
       key: 'actions',
-      width: '25%',
+      width: '20%',
       align: 'center',
       render(row) {
 
@@ -639,8 +652,6 @@ const workflowActive = (id: string, type: '01' | '02') => {
 
 const workflowRun = async (v: Job) => {
 
-  let canRun = true
-
   if (v.type === '数据质检任务') {
     let configParam = {
       page: 1,
@@ -659,47 +670,45 @@ const workflowRun = async (v: Job) => {
 
     configParam.likeName = `di_${project.tableAbbr}_${v.jobName.split("_")[2]}_temp_ods`
 
-    get_valid_config_page(configParam).then(res => {
-      //
-      if (isEmpty(res.data.records) || res.data.records[0].tableName != 'configParam.likeName') {
-        dialog.warning({
-          title: '警告',
-          content: `检测到未在质量门户对[${configParam.likeName}]进行配置，是否继续执行质检？`,
-          positiveText: '确定',
-          negativeText: '取消',
-          onPositiveClick: () => {
-            canRun = true
-          },
-          onNegativeClick: () => {
-            canRun = false
-          }
-        })
-      } else {
-        canRun = true
-      }
-    })
+    const records = (await get_valid_config_page(configParam)).data.records
 
-  }
-
-  if (canRun) {
-    const param = {
-      businessKey: uuid.v4(),
-      code: v.code,
-      createBy: v.createBy,
-      creator: v.createBy
+    if (isEmpty(records) || records[0].tableName != configParam.likeName) {
+      dialog.warning({
+        title: '警告',
+        content: `检测到未在质量门户对[${configParam.likeName}]进行配置，是否继续执行质检？`,
+        positiveText: '确定',
+        negativeText: '取消',
+        onPositiveClick: () => {
+          workflowJobStart(v)
+        }
+      })
+    } else {
+      workflowJobStart(v)
     }
-    workflow_run(param).then(res => {
-      if (res.code == 200) {
-        message.success(res.message)
-        tableDataInit()
-      } else {
-        message.error(res.message)
-      }
-    }).then(() => {
-      create_cron_job(v.jobName)
-    })
+
+  } else {
+    workflowJobStart(v)
   }
 
+}
+
+const workflowJobStart = (v: Job) => {
+  const param = {
+    businessKey: uuid.v4(),
+    code: v.code,
+    createBy: v.createBy,
+    creator: v.createBy
+  }
+  workflow_run(param).then(res => {
+    if (res.code == 200) {
+      message.success(res.message)
+      tableDataInit()
+    } else {
+      message.error(res.message)
+    }
+  }).then(() => {
+    create_cron_job(v.jobName)
+  })
 }
 
 const workflowDelete = (id) => {
@@ -798,7 +807,7 @@ const cjJobGetNextExecTime = (jobId: any) => {
   }
 }
 
-const zjJobGetNextExecTime = (v) => {
+const workflowJobGetNextExecTime = (v) => {
   if (v.schedulingMode == 2) {
     const interval = parseExpression(convertToSixFields(v.crontab));
     return formatDate(interval.next().toDate())
@@ -808,6 +817,15 @@ const zjJobGetNextExecTime = (v) => {
     return '未配置调度任务'
   }
 }
+
+const workflowJobGetLastExecTime = async (v) => {
+  const res = await get_workflow_log(v.id, 1, 1);
+  if (!isEmpty(res.data.records)) {
+    return res.data.records[0].startTime;
+  } else {
+    return '--';
+  }
+};
 
 // endregion
 

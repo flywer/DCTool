@@ -176,7 +176,7 @@ const validJsonTrans = (e: MouseEvent) => {
     validJsonFormRef.value?.validate(async (errors) => {
       if (!errors) {
         let paramJson = JSON.parse(validJsonInputRef.value)
-        console.log(paramJson)
+
         paramJson.name = formModel.value.name;
         paramJson.projectId = formModel.value.projectId
         paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
