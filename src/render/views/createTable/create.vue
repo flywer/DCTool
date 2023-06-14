@@ -281,23 +281,23 @@ const createTables = () => {
       const tableAbbr = (await find_by_project_id(formModel.value.projectId))?.tableAbbr
       const tableSql = tableNameOptions.value.find(option => option.value === formModel.value.tableSqlId)
 
-      if (formModel.value.tableGroupValue.find(item => item === 'temp_ods')[0]) {
+      if (formModel.value.tableGroupValue.find(item => item === 'temp_ods') != undefined) {
         await tempOdsCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'ods')[0]) {
+      if (formModel.value.tableGroupValue.find(item => item === 'ods') != undefined) {
         await odsCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'right_dwd')[0]) {
+      if (formModel.value.tableGroupValue.find(item => item === 'right_dwd') != undefined) {
         await rightDwdCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'error_dwd')[0]) {
+      if (formModel.value.tableGroupValue.find(item => item === 'error_dwd') != undefined) {
         await errorDwdCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'dwb')[0]) {
+      if (formModel.value.tableGroupValue.find(item => item === 'dwb') != undefined) {
         await dwbCreate(tableAbbr, tableSql)
       }
 

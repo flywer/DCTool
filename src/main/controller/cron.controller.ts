@@ -27,14 +27,16 @@ export class CronController {
             dcJobNames = JSON.parse(buffer.toString())
         }
 
-        dcJobNames.forEach(jobName => {
+        let filterJobs = [] //要删除的任务名
+
+        for (const jobName of dcJobNames) {
             const datacenter = new DatacenterController()
-            datacenter.handleGetWorkflowPage(JSON.stringify({
+            await datacenter.handleGetWorkflowPage(JSON.stringify({
                 page: 1,
                 procName: jobName,
                 size: 1,
                 status: '4'
-            })).then(res => {
+            })).then(async res => {
                 //若此任务处于运行中，则开启监听
                 if (!isEmpty(res.data.records) && res.data.records[0].procName == jobName) {
                     log.info(`${jobName} 监听任务已默认开启`)
@@ -87,12 +89,14 @@ export class CronController {
 
                     job.start()
                 } else {
-                    const filter = dcJobNames.filter((item) => item !== jobName);
-                    jsonfileWrite(filePath, filter, {spaces: 2})
+
+                    filterJobs.push(jobName)
                 }
             })
-        })
+        }
 
+        const filter = dcJobNames.filter((item) => !filterJobs.includes(item));
+        jsonfileWrite(filePath, filter, {spaces: 2})
     }
 
     @IpcHandle(channels.cron.createCronJob)
@@ -157,16 +161,16 @@ export class CronController {
                         let jobRes = ''
                         switch (res.data.records[0].status) {
                             case '1':// 启用
-                                jobRes = '执行成功'
+                                jobRes = '✔️ 执行成功'
                                 break
                             case '2':// 停用
                                 jobRes = '任务已停用'
                                 break
                             case '3':// 异常
-                                jobRes = '任务异常'
+                                jobRes = '❌ 任务异常'
                                 break
                             case '5':// 未反馈
-                                jobRes = '任务未反馈'
+                                jobRes = '❔ 任务未反馈'
                                 break
                         }
 
