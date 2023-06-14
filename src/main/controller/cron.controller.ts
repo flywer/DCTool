@@ -38,7 +38,7 @@ export class CronController {
                 status: '4'
             })).then(async res => {
                 //若此任务处于运行中，则开启监听
-                if (!isEmpty(res.data.records) && res.data.records[0].procName == jobName) {
+                if (res != undefined && !isEmpty(res.data.records) && res.data.records[0].procName == jobName) {
                     log.info(`${jobName} 监听任务已默认开启`)
                     let job = new CronJob(
                         '*/1 * * * * *',
