@@ -422,6 +422,20 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.workflowRerun)
+    public async handleWorkflowRerun(id: string, type: number) {
+        let result
+
+        const query = `type=${type}`;
+
+        await this.commonGetRequest(`workflow/proc/rerun/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({

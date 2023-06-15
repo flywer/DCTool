@@ -153,7 +153,7 @@ import {
   get_workflow_page,
   sched_job_delete,
   workflow_active,
-  workflow_delete,
+  workflow_delete, workflow_rerun,
   workflow_run
 } from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
@@ -543,15 +543,11 @@ const createColumns = (): DataTableColumns<Job> => {
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
 
             } else {
-              /* container.children = [
-                h(NButton, {
-                      size: 'small',
-                      onClick: () => {
-                        message.info('重跑')
-                      }
-                    },
-                    {default: () => '重跑'})
-              ] */
+              container.children = [
+                showConfirmation('重跑', async () => {
+                  workflowReRun(row)
+                })
+              ]
             }
             break
         }
@@ -700,6 +696,20 @@ const workflowJobStart = (v: Job) => {
     creator: v.createBy
   }
   workflow_run(param).then(res => {
+    if (res.code == 200) {
+      message.success(res.message)
+      tableDataInit()
+    } else {
+      message.error(res.message)
+    }
+  }).then(() => {
+    create_cron_job(v.jobName)
+  })
+}
+
+const workflowReRun = (v: Job) => {
+
+  workflow_rerun(v.id, 2).then(res => {
     if (res.code == 200) {
       message.success(res.message)
       tableDataInit()

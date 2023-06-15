@@ -49,6 +49,7 @@ export const channels = reactive({
         createValidConfig: 'datacenter/createValidConfig',
         getValidConfigPage:'datacenter/getValidConfigPage',
         workflowList: 'datacenter/workflowList',
+        workflowRerun: 'datacenter/workflowRerun',
 
     },
     auxiliaryDb: {

@@ -201,3 +201,8 @@ export const get_workflow_log = async (id: string, size: number, page: number) =
     const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowList, id, size, page))
     return data
 }
+
+export const workflow_rerun = async (id: string, type: number) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowRerun, id, type))
+    return data
+}
