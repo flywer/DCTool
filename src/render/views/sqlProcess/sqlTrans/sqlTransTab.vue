@@ -22,6 +22,7 @@
           v-model:value="hiveSqlResRef"
           type="textarea"
           placeholder=""
+          :autosize="{minRows:4,maxRows:16}"
       />
     </n-scrollbar>
   </n-layout>
@@ -30,7 +31,7 @@
 <script setup lang="ts">
 import {ref} from "vue";
 import useClipboard from 'vue-clipboard3';
-import {useMessage, FormInst} from 'naive-ui'
+import {useMessage} from 'naive-ui'
 
 const message = useMessage()
 

@@ -68,7 +68,6 @@ export class CronController {
                                     }
 
                                     const filter = dcJobNames.filter((item) => item !== jobName);
-
                                     jsonfileWrite(filePath, filter, {spaces: 2})
 
                                     let jobEndNotice = new Notification({
@@ -185,7 +184,6 @@ export class CronController {
                         }
 
                         const filter = dcJobNames.filter((item) => item !== jobName);
-                        console.log(filter)
                         jsonfileWrite(filePath, filter, {spaces: 2})
 
                         let jobEndNotice = new Notification({
