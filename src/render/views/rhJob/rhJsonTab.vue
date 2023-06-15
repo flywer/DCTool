@@ -4,8 +4,10 @@
     </n-alert>-->
   <n-space justify="end" class="mt-2">
     <n-input
+        v-model:value="searchValueRef"
         placeholder="搜索"
         @update:value="search"
+        clearable
     >
       <template #prefix>
         <n-icon :component="Search"/>
@@ -88,9 +90,11 @@
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
-import {get_rh_json, get_table_sql, update_rh_json, update_table_sql} from "@render/api/auxiliaryDb";
+import {get_rh_json, update_rh_json} from "@render/api/auxiliaryDb";
 import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
+
+const searchValueRef = ref('')
 
 type RhJson = {
   id: number
@@ -195,7 +199,7 @@ onMounted(() => {
 
 const tableDataInit = () => {
   isLoading.value = true
-  get_rh_json().then((res) => {
+  get_rh_json(searchValueRef.value).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,

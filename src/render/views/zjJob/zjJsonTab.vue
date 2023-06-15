@@ -1,8 +1,10 @@
 <template>
   <n-space justify="end" class="mt-2">
     <n-input
+        v-model:value="searchValueRef"
         placeholder="搜索"
         @update:value="search"
+        clearable
     >
       <template #prefix>
         <n-icon :component="Search"/>
@@ -89,6 +91,8 @@ import {Refresh, Add, Search} from '@vicons/ionicons5'
 import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb";
 import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
+
+const searchValueRef = ref('')
 
 type ZjJson = {
   id: number
@@ -193,7 +197,7 @@ onMounted(() => {
 
 const tableDataInit = () => {
   isLoading.value = true
-  get_zj_json().then((res) => {
+  get_zj_json(searchValueRef.value).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
@@ -290,11 +294,9 @@ const convertCustomSqlTableName = (sql: string, oldTableAbbr: string, newTableAb
   while ((match = pattern.exec(sql)) !== null) {
     if (!isBasicTable(match[0])) {
       const tableName = match[0].replaceAll(oldTableAbbr, newTableAbbr) //转为通用表名
-      console.log(match[0], tableName)
       newSql = newSql.replaceAll(match[0], tableName)//替换此表名
     }
   }
-  console.log(newSql)
   return newSql
 }
 
