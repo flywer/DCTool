@@ -435,6 +435,7 @@ const buildJson = () => {
             .filter(i => i !== -1);
 
         if (indexes.length > 0) {
+          jsonOutputRef.value = ''
           // 有 NULL 则说明目标表有字段没有被对应上
           notification.create({
             title: "字段对应失败",
@@ -517,7 +518,7 @@ const buildJson = () => {
     ])
   } else {
     message.warning("目标表不存在")
-      isBuildingRef.value = false
+    isBuildingRef.value = false
   }
 
 }

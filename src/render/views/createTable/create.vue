@@ -58,7 +58,7 @@
                 DWB层融合表
               </n-checkbox>
               <n-checkbox value="temp_dwb" disabled>
-                DWB层融合临时表（启用）
+                DWB层融合临时表
               </n-checkbox>
             </n-space>
           </n-checkbox-group>
