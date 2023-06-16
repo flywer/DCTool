@@ -3,6 +3,7 @@ import {Dict} from "@main/entity/Dict";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from "einf";
 import {net} from "electron";
+import log from 'electron-log'
 
 @Controller()
 export class DatacenterController {
@@ -44,6 +45,22 @@ export class DatacenterController {
     public async handlePersonList() {
         let result
         await this.commonPostRequest('/services/am-usrc/usrc/user/sm-list', {}).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.login)
+    public async handleLogin() {
+        let result
+        await this.commonPostRequest('services/am-uaa/uaa/auth/login', {
+            username: 'admin',
+            password: 'efK8+UmtAmmDbcK16wJgKMgJO4ROZPXi4ahnqrr0ALN2MZUBuJx8aFsBMnz4vzZxEj4WQrXNCaGeuncQvng7mA==',
+            code: '2883',
+            key: '8b816100f53a49f9b94d7867d225e7c0'
+        }).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);
@@ -460,6 +477,7 @@ export class DatacenterController {
                         }
                         resolve(res);
                     } catch (err) {
+                        log.error(data)
                         reject(err);
                     }
                 });
@@ -497,6 +515,7 @@ export class DatacenterController {
                         }
                         resolve(res);
                     } catch (err) {
+                        log.error(data)
                         reject(err);
                     }
                 });

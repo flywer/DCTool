@@ -47,9 +47,10 @@ export const channels = reactive({
         tableDelete: 'datacenter/tableDelete',
         getCjJobLog: 'datacenter/getCjJobLog',
         createValidConfig: 'datacenter/createValidConfig',
-        getValidConfigPage:'datacenter/getValidConfigPage',
+        getValidConfigPage: 'datacenter/getValidConfigPage',
         workflowList: 'datacenter/workflowList',
         workflowRerun: 'datacenter/workflowRerun',
+        login: 'datacenter/login',
 
     },
     auxiliaryDb: {
@@ -70,6 +71,9 @@ export const channels = reactive({
     cron: {
         createCronJob: 'cron/createCronJob',
         datacenterCronJobInit: 'cron/datacenterCronJobInit',
+    },
+    app: {
+        relaunch: 'app/relaunch'
     }
 
 })
