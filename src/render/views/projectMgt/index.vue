@@ -137,60 +137,75 @@ const handleLoad = (node: TreeOption) => {
         isLeaf: false
       })) as TreeOption[]
     } else {
-      const projectId = node.key.toString().split('-')[2]
-      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
-      if (projectAbbr !== '') {
-
-        //工作流任务
-        const workflowJobs = (await get_workflow_page({
-          page: 1,
-          size: 10000,
-          status: null,
-          procName: projectAbbr
-        })).data.records.filter(element => element.projectId == projectId).map((v) => ({
-          tableAbbr: v.procName.split('_')[2]
-        })).filter((obj, index, array) => {
-          return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
-        })
-
-        // 采集任务
-        const cjJobs = (await get_cj_job_page({
-          current: 1,
-          size: 10000,
-          blurry: projectAbbr,
-          subsystemName: "采集"
-        })).data.records.map((v) => ({
-          tableAbbr: v.jobDesc.split('_')[2]
-        })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
-          return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
-        })
-
-        //调度任务
-        const SchedJobs = (await get_sched_job_page(
-            1,
-            10000,
-            projectAbbr,
-        )).data.records.map((v) => ({
-          tableAbbr: v.jobContent.split('_')[2]
-        })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
-          return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
-        })
-
-        const newArr = Array.from(new Set([...workflowJobs, ...cjJobs, ...SchedJobs])).filter((obj, index, array) => {
-          return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
-        })
-
-        node.children = newArr.map((v) => ({
-          label: v.tableAbbr.toUpperCase(),
-          key: `${node.key}-${v.tableAbbr}`,
-          isLeaf: true
-        })) as TreeOption[]
-      } else {
-        node.children = []
-      }
+      // node.children = await getExistTableProject(node)
+      node.children = setDefaultActionTable(node)
     }
     resolve()
   })
+}
+
+//通过节点key获取此项目下所有已存在的表名
+const getExistTableProject = async (node: TreeOption) => {
+  const projectId = node.key.toString().split('-')[2]
+  const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+  if (projectAbbr !== '') {
+
+    //工作流任务
+    const workflowJobs = (await get_workflow_page({
+      page: 1,
+      size: 10000,
+      status: null,
+      procName: projectAbbr
+    })).data.records.filter(element => element.projectId == projectId).map((v) => ({
+      tableAbbr: v.procName.split('_')[2]
+    })).filter((obj, index, array) => {
+      return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
+    })
+
+    // 采集任务
+    const cjJobs = (await get_cj_job_page({
+      current: 1,
+      size: 10000,
+      blurry: projectAbbr,
+      subsystemName: "采集"
+    })).data.records.map((v) => ({
+      tableAbbr: v.jobDesc.split('_')[2]
+    })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
+      return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
+    })
+
+    //调度任务
+    const SchedJobs = (await get_sched_job_page(
+        1,
+        10000,
+        projectAbbr,
+    )).data.records.map((v) => ({
+      tableAbbr: v.jobContent.split('_')[2]
+    })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
+      return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
+    })
+
+    const newArr = Array.from(new Set([...workflowJobs, ...cjJobs, ...SchedJobs])).filter((obj, index, array) => {
+      return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
+    })
+
+    return newArr.map((v) => ({
+      label: v.tableAbbr.toUpperCase(),
+      key: `${node.key}-${v.tableAbbr}`,
+      isLeaf: true
+    })) as TreeOption[]
+  }
+}
+
+const setDefaultActionTable = (node: TreeOption): TreeOption[] => {
+  const tables = ['c1010', 'c2010', 'c2011', 'c2020', 'c2030', 'c2040', 'c2050', 'c2051', 'c2060', 'c2070', 'c2080', 'c2100', 'c2090', 'c3010', 'c3011', 'c3020', 'c3030', 'c3040', 'c4010', 'c4110', 'c6010', 'c6020', 'c6030', 'c6040', 'c7090']
+
+  return tables.map((v): TreeOption => ({
+    label: v.toUpperCase(),
+    key: `${node.key}-${v}`,
+    isLeaf: true
+  }))
+
 }
 
 const handleExpandedKeys = (keys: Array<string>) => {

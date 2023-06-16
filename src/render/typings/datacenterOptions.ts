@@ -19,17 +19,36 @@ export const projectIdOptionsUpdate = async () => {
 }
 
 // 负责人
-export const personIdOptions: Array<SelectOption | SelectGroupOption> = (await get_person_list())?.map(
+export let personIdOptions: Array<SelectOption | SelectGroupOption> = (await get_person_list())?.map(
     (v => ({
         label: `${v.name}(${v.username})`,
         value: v.id
     }))
 ) || []
 
-export const datasourceOptions: Array<SelectOption | SelectGroupOption> = (await get_datasource_list(1, 100))?.map(
+export const personIdOptionsUpdate = async () => {
+    personIdOptions = (await get_person_list())?.map(
+        (v => ({
+            label: `${v.name}(${v.username})`,
+            value: v.id
+        }))
+    ) || []
+}
+
+export let datasourceOptions: Array<SelectOption | SelectGroupOption> = (await get_datasource_list(1, 100))?.map(
     (v => ({
         label: v.datasourceName,
         value: v.id.toString(),
         datasource: v.datasource
     }))
 ) || []
+
+export const datasourceOptionsUpdate = async () => {
+    datasourceOptions = (await get_datasource_list(1, 100))?.map(
+        (v => ({
+            label: v.datasourceName,
+            value: v.id.toString(),
+            datasource: v.datasource
+        }))
+    ) || []
+}

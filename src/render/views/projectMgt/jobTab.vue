@@ -131,6 +131,41 @@
 
     </n-form>
 
+    <n-form
+        v-if="formSelect.createCjJob"
+        class="mt-4"
+        ref="cjJobModalFormRef"
+        :model="cjJobModalFormModel"
+        :rules="cjJobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="工作流名称" path="name">
+          <n-input v-model:value="cjJobModalFormModel.name" placeholder=""
+                   readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="来源表" path="sourceTableName">
+          <n-select :size="'small'"
+                    v-model:value="cjJobModalFormModel.sourceTableName"
+                    :options="sourceTableOptions"
+                    filterable
+                    remote
+                    @search="handleSourceTableSearch"
+                    @update:value="handleSourceTableUpdate"
+                    :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="目标表" path="targetTableName">
+          <n-input :size="'small'"
+                   v-model:value="cjJobModalFormModel.targetTableName"
+                   readonly
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+
+
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
@@ -148,7 +183,7 @@ import {
   cj_job_run,
   cj_job_start,
   cj_job_stop,
-  get_cj_job_page,
+  get_cj_job_page, get_columns,
   get_sched_job_page, get_valid_config_page, get_workflow_log,
   get_workflow_page,
   sched_job_delete,
@@ -158,6 +193,8 @@ import {
 } from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/formatDate";
+import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
+import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
 import {isEmpty} from "lodash-es";
@@ -170,7 +207,7 @@ import {
   NTag,
   useMessage,
   useNotification,
-  useDialog
+  useDialog, SelectOption, SelectGroupOption
 } from "naive-ui";
 import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {uuid} from "vue3-uuid";
@@ -201,7 +238,7 @@ watch(defaultSelectedKeys, (newValue) => {
 
 const queryParam = ref({
   projectId: null,
-  tableAbbr: null
+  tableAbbr: null //此为表名的最简化，比如di_ssft_z2010_temp_ods 则为z2010
 })
 
 const title = ref('')
@@ -211,7 +248,7 @@ const getAllSchedJobInfo = async (param?: string) => {
   allSchedJobInfoRef.value = (await get_sched_job_page(1, 10000, param || '')).data.records
 }
 
-onMounted(() => {
+onMounted(async () => {
   const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
   const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
   if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
@@ -220,13 +257,14 @@ onMounted(() => {
 
     tableDataInit()
   }
+
 })
 
 type Job = {
   id: string
   type: string
   jobName: string
-  // 0:采集任务未配置；1:任务停用；2:任务启用；3:任务运行中；4:任务异常；5:任务未反馈
+  // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
   status: number
   // 1:依赖调度；2:定时调度
   schedMode: number
@@ -267,7 +305,7 @@ const tableDataInit = async () => {
   const projectAbbr = project?.projectAbbr || '';
   if (projectAbbr !== '') {
     // 采集任务
-    const cjJobs = (await get_cj_job_page({
+    let dataXJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
       blurry: `${projectAbbr}_${queryParam.value.tableAbbr}`,
@@ -306,6 +344,36 @@ const tableDataInit = async () => {
           nextExecTime: cjJobGetNextExecTime(v.id),
           createBy: null
         }))
+
+    // 若不存在采集任务
+    if (!dataXJobs.some(job => job.type === '数据采集任务')) {
+      dataXJobs.push({
+        id: null,
+        jobName: `cj_${projectAbbr}_${queryParam.value.tableAbbr}`,
+        status: -1,
+        type: '数据采集任务',
+        schedMode: 2,
+        cron: null,
+        lastExecTime: '--',
+        nextExecTime: '未配置调度任务',
+        createBy: null
+      })
+    }
+
+    // 若不存在共享任务
+    if (!dataXJobs.some(job => job.type === '数据共享任务')) {
+      dataXJobs.push({
+        id: null,
+        jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr}`,
+        status: -1,
+        type: '数据共享任务',
+        schedMode: 2,
+        cron: null,
+        lastExecTime: '--',
+        nextExecTime: '未配置调度任务',
+        createBy: null
+      })
+    }
 
     //工作流任务
     const workflowJobs = (await get_workflow_page({
@@ -364,7 +432,10 @@ const tableDataInit = async () => {
       newJobs.push(job)
     }
 
-    jobs.push(...cjJobs, ...newJobs)
+    // 添加未创建的任务
+    newJobs = pushUnExistJobs(newJobs, projectAbbr)
+
+    jobs.push(...dataXJobs, ...newJobs)
   } else {
     tableDataRef.value = []
   }
@@ -374,12 +445,88 @@ const tableDataInit = async () => {
   isTableLoading.value = false
 }
 
+const pushUnExistJobs = (newJobs: any[], projectAbbr: string) => {
+
+  if (!newJobs.some(job => job.type === '数据质检任务')) {
+    newJobs.push({
+      id: null,
+      jobName: `zj_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      status: -1,
+      type: '数据质检任务',
+      schedMode: 0,
+      cron: null,
+      lastExecTime: '--',
+      nextExecTime: '未配置调度任务',
+      createBy: null
+    })
+  }
+
+  if (!newJobs.some(job => job.type === '数据备份任务')) {
+    newJobs.push({
+      id: null,
+      jobName: `bf_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      status: -1,
+      type: '数据备份任务',
+      schedMode: 0,
+      cron: null,
+      lastExecTime: '--',
+      nextExecTime: '未配置调度任务',
+      createBy: null
+    })
+  }
+
+  if (!newJobs.some(job => job.type === '数据清除任务')) {
+    newJobs.push({
+      id: null,
+      jobName: `qc_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      status: -1,
+      type: '数据清除任务',
+      schedMode: 0,
+      cron: null,
+      lastExecTime: '--',
+      nextExecTime: '未配置调度任务',
+      createBy: null
+    })
+  }
+
+  if (!newJobs.some(job => job.type === '数据融合任务')) {
+    newJobs.push({
+      id: null,
+      jobName: `rh_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      status: -1,
+      type: '数据融合任务',
+      schedMode: 0,
+      cron: null,
+      lastExecTime: '--',
+      nextExecTime: '未配置调度任务',
+      createBy: null
+    })
+  }
+
+  if (!newJobs.some(job => job.type === '数据入库任务')) {
+    newJobs.push({
+      id: null,
+      jobName: `rk_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      status: -1,
+      type: '数据入库任务',
+      schedMode: 0,
+      cron: null,
+      lastExecTime: '--',
+      nextExecTime: '未配置调度任务',
+      createBy: null
+    })
+  }
+
+  return newJobs
+
+}
+
 const createColumns = (): DataTableColumns<Job> => {
   return [
     {
       title: '任务名',
       key: 'jobName',
-      width: '13%'
+      width: '15%'
     },
     {
       title: '任务类型',
@@ -392,56 +539,66 @@ const createColumns = (): DataTableColumns<Job> => {
       width: '8%',
       align: 'center',
       render(row) {
-        if (row.status == 0) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                color: {
-                  color: '#ffc062',
-                  textColor: 'white'
-                }
-              },
-              {default: () => '未配置'})
-        } else if (row.status == 1) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                type: 'default'
-              },
-              {default: () => '停用'})
-        } else if (row.status == 2) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                type: 'info'
-              },
-              {default: () => '启用'})
-        } else if (row.status == 3) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                type: 'success'
-              },
-              {default: () => '运行中'})
-        } else if (row.status == 4) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                type: 'error'
-              },
-              {default: () => '异常'})
-        } else if (row.status == 5) {
-          return h(NTag, {
-                size: 'small',
-                bordered: false,
-                color: {
-                  color: '#8eafd3',
-                  textColor: 'white'
-                }
-              },
-              {default: () => '未反馈'})
+        switch (row.status) {
+          case -1:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  color: {
+                    color: '#797979',
+                    textColor: 'white'
+                  }
+                },
+                {default: () => '未创建'})
+          case 0:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  color: {
+                    color: '#ffc062',
+                    textColor: 'white'
+                  }
+                },
+                {default: () => '未配置'})
+          case 1:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  type: 'default'
+                },
+                {default: () => '停用'})
+          case 2:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  type: 'info'
+                },
+                {default: () => '启用'})
+          case 3:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  type: 'success'
+                },
+                {default: () => '运行中'})
+          case 4:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  type: 'error'
+                },
+                {default: () => '异常'})
+          case 5:
+            return h(NTag, {
+                  size: 'small',
+                  bordered: false,
+                  color: {
+                    color: '#8eafd3',
+                    textColor: 'white'
+                  }
+                },
+                {default: () => '未反馈'})
         }
-
       }
     },
     {
@@ -466,6 +623,32 @@ const createColumns = (): DataTableColumns<Job> => {
         })
 
         switch (row.status) {
+          case -1:// 未创建的任务
+            container.children = [showButton('创建', async () => {
+              const project = (await find_by_project_id(queryParam.value.projectId))
+              switch (row.type) {
+                case '数据采集任务':
+                  await createCjJobModalInit(project, row)
+                  showModalRef.value = true
+                  modalTitle = '创建采集任务'
+                  formSelect.value = select
+                  formSelect.value.createCjJob = true
+                  break
+                case '数据共享任务':
+                  break
+                case '数据质检任务':
+                  break
+                case '数据融合任务':
+                  break
+                case '数据备份任务':
+                  break
+                case '数据清除数据':
+                  break
+                case '数据入库任务':
+                  break
+              }
+            })]
+            break
           case 0:// 未配置调度任务的采集任务
             container.children = [
               showButton('配置', async () => {
@@ -846,7 +1029,8 @@ const showModalRef = ref(false)
 let modalTitle = '';
 
 const select = {
-  addSchedJob: false
+  addSchedJob: false,
+  createCjJob: false
 }
 
 const formSelect = ref(select)
@@ -923,6 +1107,28 @@ const addSchedJobModalFormRules = {
   }
 }
 
+const cjJobModalFormRef = ref<FormInst | null>(null);
+const cjJobModalFormModel = ref<CjFormModelType>({
+  name: '',
+  sourceDataSourceId: '7',
+  sourceTableName: '',
+  targetDataSourceId: '6',
+  targetTableName: '',
+  projectId: ''
+})
+const cjJobModalFormRules = {
+  sourceTableName: {
+    required: true,
+    trigger: ['change'],
+    message: '选择来源表'
+  },
+}
+
+const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
+
+const sourceTableColumnsRef = ref([])
+const targetTableColumnsRef = ref([])
+
 const addSchedJobModalFormModelInit = async (v) => {
   addSchedJobModalFormModel.value.jobContent = v.jobName
   addSchedJobModalFormModel.value.jobDesc = v.jobName
@@ -935,12 +1141,11 @@ const onNegativeClick = () => {
 }
 
 const isSaving = ref(false)
-const onPositiveClick = () => {
+const onPositiveClick = async () => {
   isSaving.value = true
   if (formSelect.value.addSchedJob) {
     addSchedJobModalFormRef.value?.validate(async (errors) => {
       if (!errors) {
-
         const {
           projectName,
           sec,
@@ -962,6 +1167,7 @@ const onPositiveClick = () => {
           if (res.code == 0) {
             message.success('调度任务创建成功')
             showModalRef.value = false
+            formSelect.value.addSchedJob = false
             tableDataInit()
           } else {
             notification.create({
@@ -978,7 +1184,49 @@ const onPositiveClick = () => {
       }
     }).finally(() => isSaving.value = false)
   }
+  if (formSelect.value.createCjJob) {
+    targetTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.targetDataSourceId, cjJobModalFormModel.value.targetTableName))
 
+    if (!isEmpty(targetTableColumnsRef.value)) {
+      cjJobModalFormRef.value?.validate(async (errors) => {
+        if (!errors) {
+          createCjJob({
+            name: cjJobModalFormModel.value.name,
+            sourceTableName: cjJobModalFormModel.value.sourceTableName,
+            targetTableName: cjJobModalFormModel.value.targetTableName,
+            projectId: cjJobModalFormModel.value.projectId,
+            sourceDataSourceId: '7',
+            targetDataSourceId: '6'
+          }, sourceTableColumnsRef.value, targetTableColumnsRef.value)
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createCjJob = false
+          tableDataInit()
+        } else {
+          console.log(errors)
+        }
+      })
+    } else {
+      window.$message.warning("目标表不存在")
+      isSaving.value = false
+    }
+
+  }
+}
+
+const createCjJobModalInit = async (project, row: Job) => {
+  sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
+  cjJobModalFormModel.value.name = row.jobName
+  cjJobModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${queryParam.value.tableAbbr}_temp_ods`
+  cjJobModalFormModel.value.projectId = project.projectId
+}
+
+const handleSourceTableSearch = async (query: string) => {
+  sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId, query)
+}
+
+const handleSourceTableUpdate = async () => {
+  sourceTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.sourceDataSourceId, cjJobModalFormModel.value.sourceTableName))
 }
 
 // endregion

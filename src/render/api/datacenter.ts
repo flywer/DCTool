@@ -108,7 +108,6 @@ export const get_workflow_page = async (obj: any) => {
 
 export const get_cj_job_page = async (obj: CommonQueryParam) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobPage, JSON.stringify(obj)))
-    console.log(data)
     return data
 }
 

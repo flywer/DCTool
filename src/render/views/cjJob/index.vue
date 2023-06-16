@@ -12,7 +12,7 @@
                 :rules="rules"
                 label-placement="left"
         >
-          <n-grid :cols="4" :x-gap="12">
+          <n-grid :cols="5" :x-gap="12">
             <n-form-item-gi :span="2" label="工作流名称" path="name">
               <n-input v-model:value="formModel.name" placeholder="输入工作流名称"
                        @keydown.enter.prevent
@@ -35,7 +35,7 @@
                 </template>
               </n-input>
             </n-form-item-gi>
-            <n-form-item-gi :span="2" label="表名" path="tableName">
+            <n-form-item-gi :span="1" label="表名" path="tableName">
               <n-input v-model:value="formModel.tableName" placeholder=""
                        @keydown.enter.prevent
                        @update:value="onUpdateJobName"
@@ -51,14 +51,6 @@
                   :consistent-menu-width="false"
               />
             </n-form-item-gi>
-            <n-form-item-gi :span="2" label="责任人" path="personId">
-              <n-select
-                  v-model:value="formModel.personId"
-                  placeholder="选择责任人"
-                  :options="personIdOptions"
-                  :consistent-menu-width="false"
-              />
-            </n-form-item-gi>
             <n-form-item-gi :span="2" label="来源库" path="sourceDataSourceId">
               <n-select
                   v-model:value="formModel.sourceDataSourceId"
@@ -67,7 +59,7 @@
                   disabled
               />
             </n-form-item-gi>
-            <n-form-item-gi :span="2" label="来源表" path="sourceTableName">
+            <n-form-item-gi :span="3" label="来源表" path="sourceTableName">
               <n-select :size="'small'"
                         v-model:value="formModel.sourceTableName"
                         :options="sourceTableOptions"
@@ -86,7 +78,7 @@
                   disabled
               />
             </n-form-item-gi>
-            <n-form-item-gi :span="2" label="目标表" path="targetTableName">
+            <n-form-item-gi :span="3" label="目标表" path="targetTableName">
               <n-select :size="'small'"
                         v-model:value="formModel.targetTableName"
                         :options="targetTableOptions"
@@ -208,8 +200,7 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_datax_job, add_sched_task, build_datax_json, get_columns} from "@render/api/datacenter";
 import {
-  datasourceOptions,
-  personIdOptions,
+  datasourceOptions, datasourceOptionsUpdate,
   projectIdOptions,
   projectIdOptionsUpdate
 } from "@render/typings/datacenterOptions";
@@ -244,7 +235,6 @@ const formModel = ref({
   targetDataSourceId: '6',
   targetTableName: '',
   projectId: '',
-  personId: '',
   email: '',
   description: '',
   tableName: ''
@@ -269,11 +259,6 @@ const rules = {
     required: true,
     trigger: ['change'],
     message: '请选择项目'
-  },
-  personId: {
-    required: true,
-    trigger: ['change'],
-    message: '请选择责任人'
   }
 }
 
@@ -300,7 +285,7 @@ const jsonOutputRef = ref('')
 
 onMounted(async () => {
   await projectIdOptionsUpdate()
-
+  datasourceOptionsUpdate()
   sourceTableOptions.value = await getTablesOptions(formModel.value.sourceDataSourceId)
   targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId)
 })
@@ -504,7 +489,7 @@ const buildJson = () => {
             },
             subsystemName: "采集"
           }
-
+          console.log(buildJson)
           paramsModel.jobJson = await build_datax_json(buildJson)
 
           jsonOutputRef.value = JSON.stringify(paramsModel, null, 2)
