@@ -56,7 +56,6 @@ export const createRhJob = async (formModel: RhFormModelType) => {
     const paramsJson = await buildRhJson(formModel, JSON.parse(templateJsonStr));
 
     if (paramsJson != null) {
-        console.log(paramsJson)
         add_work_flow(paramsJson).then((res) => {
             if (res.code == 200) {
                 window.$message.success('融合任务创建成功')

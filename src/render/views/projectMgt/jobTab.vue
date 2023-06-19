@@ -262,6 +262,38 @@
       </n-grid>
     </n-form>
 
+    <n-form
+        v-if="formSelect.createQcJob"
+        class="mt-4"
+        ref="qcJobModalFormRef"
+        :model="qcJobModalFormModel"
+        :rules="qcJobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="表名" path="tableName">
+          <n-input
+              v-model:value="qcJobModalFormModel.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="项目" path="projectName">
+          <n-input
+              v-model:value="qcJobModalFormModel.projectName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="责任人" path="personId">
+          <n-select
+              v-model:value="qcJobModalFormModel.personId"
+              placeholder="选择责任人"
+              :options="personIdOptions"
+              :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
@@ -293,6 +325,7 @@ import {formatDate} from "@render/utils/common/formatDate";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
 import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
 import {createZjJob} from "@render/utils/datacenter/zjJob";
 import {Refresh} from '@vicons/ionicons5'
@@ -321,14 +354,14 @@ const projectTree = useProjectTreeStore()
 // 创建计算属性来获取 Pinia 存储中的值
 const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
 
-watch(defaultSelectedKeys, (newValue) => {
+watch(defaultSelectedKeys, async (newValue) => {
   if (newValue[0] != null) {
     const segments = newValue[0].split('-');
     const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
     if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
       queryParam.value.projectId = segments[segments.length - 2]
       queryParam.value.tableAbbr = segments[segments.length - 1]
-
+      projectRef.value = await find_by_project_id(queryParam.value.projectId)
       tableDataInit()
     }
   }
@@ -348,13 +381,15 @@ const getAllSchedJobInfo = async (param?: string) => {
   allSchedJobInfoRef.value = (await get_sched_job_page(1, 10000, param || '')).data.records
 }
 
+const projectRef = ref(null)
+
 onMounted(async () => {
   const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
   const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
   if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
     queryParam.value.projectId = segments[segments.length - 2]
     queryParam.value.tableAbbr = segments[segments.length - 1]
-
+    projectRef.value = await find_by_project_id(queryParam.value.projectId)
     tableDataInit()
   }
 
@@ -752,7 +787,10 @@ const createColumns = (): DataTableColumns<Job> => {
                   formSelect.value.createBfJob = true
                   break
                 case '数据清除任务':
-                  window.$message.info("敬请期待")
+                  await createQcJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建清除任务'
+                  formSelect.value.createQcJob = true
                   break
                 case '数据入库任务':
                   window.$message.info("敬请期待")
@@ -1145,6 +1183,7 @@ const formSelect = ref({
   createZjJob: false,
   createBfJob: false,
   createRhJob: false,
+  createQcJob: false,
 })
 
 const onNegativeClick = () => {
@@ -1158,6 +1197,7 @@ const onModelAfterLeave = () => {
     createZjJob: false,
     createBfJob: false,
     createRhJob: false,
+    createQcJob: false,
   }
 }
 
@@ -1283,6 +1323,22 @@ const onPositiveClick = async () => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.createRhJob = false
+          tableDataInit()
+        })
+      } else {
+        console.log(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+  if (formSelect.value.createQcJob) {
+    qcJobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        createQcJob(qcJobModalFormModel.value).then(() => {
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createQcJob = false
           tableDataInit()
         })
       } else {
@@ -1493,6 +1549,31 @@ const createRhJobModalInit = (project) => {
   rhJobModalFormModel.value.projectId = queryParam.value.projectId
   rhJobModalFormModel.value.projectName = project.projectName
 }
+//endregion
+
+//region 创建清除任务
+const qcJobModalFormRef = ref<FormInst | null>(null);
+
+const qcJobModalFormModel = ref({
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+const qcJobModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  }
+}
+
+const createQcJobModalInit = (project) => {
+  qcJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+  qcJobModalFormModel.value.projectId = queryParam.value.projectId
+  qcJobModalFormModel.value.projectName = project.projectName
+}
+
 //endregion
 </script>
 
