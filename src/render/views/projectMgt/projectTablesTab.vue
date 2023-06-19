@@ -155,12 +155,14 @@ const tableDataRef = ref([])
 const tableDataInit = async () => {
   isTableLoading.value = true
 
-  tableDataRef.value = (await get_tables_info({
-    size: 10000,
-    page: 1,
-    sourceId: 6,
-    likeValue: queryParam.value
-  })).data.records || []
+  if (queryParam.value.length > 0) {
+    tableDataRef.value = (await get_tables_info({
+      size: 10000,
+      page: 1,
+      sourceId: 6,
+      likeValue: queryParam.value
+    })).data.records || []
+  }
 
   isTableLoading.value = false
 }
@@ -200,12 +202,12 @@ const createColumns = (): DataTableColumns<Table> => {
                updateTableComment(row)
              }
            }, {default: () => '修改表注解'}), */
-          showConfirmation('清空', () => [
+          showConfirmation('清空', () => {
             tableTruncate(row)
-          ]),
-          showConfirmation('删除', () => [
+          }),
+          showConfirmation('删除', () => {
             tableDelete(row)
-          ])
+          })
         ],)
       }
     }

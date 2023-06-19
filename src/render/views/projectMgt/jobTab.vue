@@ -667,8 +667,6 @@ const createColumns = (): DataTableColumns<Job> => {
                   modalTitle = '创建采集任务'
                   formSelect.value.createCjJob = true
                   break
-                case '数据共享任务':
-                  break
                 case '数据质检任务':
                   await createZjJobModalInit(project)
                   showModalRef.value = true
@@ -676,12 +674,19 @@ const createColumns = (): DataTableColumns<Job> => {
                   formSelect.value.createZjJob = true
                   break
                 case '数据融合任务':
+                  window.$message.info("敬请期待")
                   break
                 case '数据备份任务':
+                  window.$message.info("敬请期待")
                   break
-                case '数据清除数据':
+                case '数据清除任务':
+                  window.$message.info("敬请期待")
                   break
                 case '数据入库任务':
+                  window.$message.info("敬请期待")
+                  break
+                case '数据共享任务':
+                  window.$message.info("敬请期待")
                   break
               }
             })]
