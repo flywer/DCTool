@@ -65,6 +65,11 @@ export const get_zj_json = async (tableName?: string) => {
     return data
 }
 
+export const get_zj_json_by_id = async (id: number) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getZjJsonById, id))
+    return data
+}
+
 export const update_zj_json = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateZjJson, JSON.stringify(obj)))
     return data

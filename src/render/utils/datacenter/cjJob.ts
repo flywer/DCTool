@@ -10,7 +10,7 @@ export type CjFormModelType = {
     projectId: string
 }
 
-let paramsModel = {
+let paramsJson = {
     readerModel: {
         datasourceType: "mysql",
         datasourceId: '8',
@@ -119,80 +119,80 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
 
         return null
     } else {
-        paramsModel.jobDesc = formModel.name
-        paramsModel.projectId = formModel.projectId
+        paramsJson.jobDesc = formModel.name
+        paramsJson.projectId = formModel.projectId
 
-        paramsModel.readerId = formModel.sourceDataSourceId
-        paramsModel.writerId = formModel.targetDataSourceId
-        paramsModel.mappingType = "the-same-name"
+        paramsJson.readerId = formModel.sourceDataSourceId
+        paramsJson.writerId = formModel.targetDataSourceId
+        paramsJson.mappingType = "the-same-name"
 
         let path = ''
         for (let i = 0; i < targetTableColumns.length; i++) {
             path += `M0,${72 + (48 * i)}.0 L100,${72 + (48 * i)}.0`
         }
-        paramsModel.path = path
+        paramsJson.path = path
 
-        paramsModel.gatherMethod = '2'
-        paramsModel.incrementType = '2'
-        paramsModel.incrementType = '2'
-        paramsModel.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
-        paramsModel.incStartTime = "1971-01-01 00:00:00"
-        paramsModel.replaceParamType = "yyyy-MM-dd HH:mm:ss"
+        paramsJson.gatherMethod = '2'
+        paramsJson.incrementType = '2'
+        paramsJson.incrementType = '2'
+        paramsJson.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
+        paramsJson.incStartTime = "1971-01-01 00:00:00"
+        paramsJson.replaceParamType = "yyyy-MM-dd HH:mm:ss"
 
-        paramsModel.readerModel.datasourceType = 'mysql'
-        paramsModel.readerModel.datasourceId = formModel.sourceDataSourceId
-        paramsModel.readerModel.readerFieldDelimiter = ','
-        paramsModel.readerModel.tableName = formModel.sourceTableName
-        paramsModel.readerModel.whereParams = "cd_time >= ${lastTime} and cd_time < ${currentTime}"
-        paramsModel.readerModel.columns = newSourceTable
+        paramsJson.readerModel.datasourceType = 'mysql'
+        paramsJson.readerModel.datasourceId = formModel.sourceDataSourceId
+        paramsJson.readerModel.readerFieldDelimiter = ','
+        paramsJson.readerModel.tableName = formModel.sourceTableName
+        paramsJson.readerModel.whereParams = "cd_time >= ${lastTime} and cd_time < ${currentTime}"
+        paramsJson.readerModel.columns = newSourceTable
 
-        paramsModel.writerModel.datasourceType = 'tbds-hive'
-        paramsModel.writerModel.datasourceId = formModel.targetDataSourceId
-        paramsModel.writerModel.fromTableName = formModel.targetTableName
-        paramsModel.writerModel.writerFileName = formModel.targetTableName
-        paramsModel.writerModel.writerPath = `/apps/hive/warehouse/xzzf_ods.db/${formModel.targetTableName}`
-        paramsModel.writerModel.columns = targetTableColumns
-        paramsModel.writerModel.ftpColums = Array(targetTableColumns.length).fill(0).map((_, index) => index)
+        paramsJson.writerModel.datasourceType = 'tbds-hive'
+        paramsJson.writerModel.datasourceId = formModel.targetDataSourceId
+        paramsJson.writerModel.fromTableName = formModel.targetTableName
+        paramsJson.writerModel.writerFileName = formModel.targetTableName
+        paramsJson.writerModel.writerPath = `/apps/hive/warehouse/xzzf_ods.db/${formModel.targetTableName}`
+        paramsJson.writerModel.columns = targetTableColumns
+        paramsJson.writerModel.ftpColums = Array(targetTableColumns.length).fill(0).map((_, index) => index)
 
-        paramsModel.initReaderModel = sourceTableColumns
-        paramsModel.initWriterModel = targetTableColumns
+        paramsJson.initReaderModel = sourceTableColumns
+        paramsJson.initWriterModel = targetTableColumns
 
         let buildJson = {
-            readerDatasourceId: paramsModel.readerId,
-            readerTables: [paramsModel.readerModel.tableName],
-            readerColumns: paramsModel.readerModel.columns,
-            writerDatasourceId: paramsModel.writerId,
-            writerTables: [paramsModel.writerModel.fromTableName],
-            writerColumns: paramsModel.writerModel.columns,
+            readerDatasourceId: paramsJson.readerId,
+            readerTables: [paramsJson.readerModel.tableName],
+            readerColumns: paramsJson.readerModel.columns,
+            writerDatasourceId: paramsJson.writerId,
+            writerTables: [paramsJson.writerModel.fromTableName],
+            writerColumns: paramsJson.writerModel.columns,
             rdbmsReader: {
-                whereParams: paramsModel.readerModel.whereParams
+                whereParams: paramsJson.readerModel.whereParams
             },
             hiveWriter: {
-                datasourceType: paramsModel.writerModel.datasourceType,
-                datasourceId: paramsModel.writerModel.datasourceId,
-                fromTableName: paramsModel.writerModel.fromTableName,
-                writerFileName: paramsModel.writerModel.writerFileName,
-                writeFieldDelimiter: paramsModel.writerModel.writeFieldDelimiter,
-                writeMode: paramsModel.writerModel.writeMode,
-                writerFileType: paramsModel.writerModel.writerFileType,
-                writerDefaultFS: paramsModel.writerModel.writerDefaultFS,
-                writerPath: paramsModel.writerModel.writerPath,
+                datasourceType: paramsJson.writerModel.datasourceType,
+                datasourceId: paramsJson.writerModel.datasourceId,
+                fromTableName: paramsJson.writerModel.fromTableName,
+                writerFileName: paramsJson.writerModel.writerFileName,
+                writeFieldDelimiter: paramsJson.writerModel.writeFieldDelimiter,
+                writeMode: paramsJson.writerModel.writeMode,
+                writerFileType: paramsJson.writerModel.writerFileType,
+                writerDefaultFS: paramsJson.writerModel.writerDefaultFS,
+                writerPath: paramsJson.writerModel.writerPath,
             },
             subsystemName: "采集"
         }
 
         console.log(buildJson)
 
-        paramsModel.jobJson = await build_datax_json(buildJson)
+        paramsJson.jobJson = await build_datax_json(buildJson)
 
-        return paramsModel
+        return paramsJson
     }
 }
 
 export const createCjJob = (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
     const param = buildCjJobJson(formModel, sourceTableColumns, targetTableColumns)
     if (param != null) {
-        add_datax_job(paramsModel).then(async (res) => {
+        add_datax_job(paramsJson).then(async (res) => {
             if (res.code == 0) {
                 window.$message.success('采集任务创建成功')
             } else {

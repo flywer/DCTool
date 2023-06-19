@@ -44,6 +44,7 @@
       :show-icon="false"
       :title="modalTitle"
       :size="'small'"
+      @afterLeave="onModelAfterLeave"
   >
 
     <n-form
@@ -165,6 +166,37 @@
       </n-grid>
     </n-form>
 
+    <n-form
+        v-if="formSelect.createZjJob"
+        class="mt-4"
+        ref="zjJobModalFormRef"
+        :model="zjJobModalFormModel"
+        :rules="zjJobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="表名" path="tableName">
+          <n-input
+              v-model:value="zjJobModalFormModel.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="项目" path="projectName">
+          <n-input
+              v-model:value="zjJobModalFormModel.projectName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="责任人" path="personId">
+          <n-select
+              v-model:value="zjJobModalFormModel.personId"
+              placeholder="选择责任人"
+              :options="personIdOptions"
+              :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
 
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
@@ -192,9 +224,11 @@ import {
   workflow_run
 } from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
+import {personIdOptions} from "@render/typings/datacenterOptions";
 import {formatDate} from "@render/utils/common/formatDate";
 import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {createZjJob} from "@render/utils/datacenter/zjJob";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
 import {isEmpty} from "lodash-es";
@@ -631,12 +665,15 @@ const createColumns = (): DataTableColumns<Job> => {
                   await createCjJobModalInit(project, row)
                   showModalRef.value = true
                   modalTitle = '创建采集任务'
-                  formSelect.value = select
                   formSelect.value.createCjJob = true
                   break
                 case '数据共享任务':
                   break
                 case '数据质检任务':
+                  await createZjJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建质检任务'
+                  formSelect.value.createZjJob = true
                   break
                 case '数据融合任务':
                   break
@@ -655,7 +692,6 @@ const createColumns = (): DataTableColumns<Job> => {
                 await addSchedJobModalFormModelInit(row)
                 showModalRef.value = true
                 modalTitle = '创建调度任务'
-                formSelect.value = select
                 formSelect.value.addSchedJob = true
               }),
               showConfirmation('删除', async () => {
@@ -1022,18 +1058,126 @@ const workflowJobGetLastExecTime = async (v) => {
 
 // endregion
 
-// region 新增调度任务
-
 const showModalRef = ref(false)
 
 let modalTitle = '';
 
 const select = {
   addSchedJob: false,
-  createCjJob: false
+  createCjJob: false,
+  createZjJob: false
 }
 
 const formSelect = ref(select)
+
+const onNegativeClick = () => {
+  showModalRef.value = false
+}
+
+const onModelAfterLeave = () => {
+  formSelect.value = {
+    addSchedJob: false,
+    createCjJob: false,
+    createZjJob: false
+  }
+}
+
+const isSaving = ref(false)
+
+const onPositiveClick = async () => {
+  isSaving.value = true
+  if (formSelect.value.addSchedJob) {
+    addSchedJobModalFormRef.value?.validate(async (errors) => {
+      if (!errors) {
+        const {
+          projectName,
+          sec,
+          min,
+          hour,
+          day,
+          month,
+          week,
+          year,
+          ...newAddSchedJobModalFormModel
+        } = {
+          ...addSchedJobModalFormModel.value,
+          retry: parseInt(addSchedJobModalFormModel.value.retry),
+          executorFailRetryCount: addSchedJobModalFormModel.value.executorFailRetryCount.toString(),
+          jobCron: `${addSchedJobModalFormModel.value.sec} ${addSchedJobModalFormModel.value.min} ${addSchedJobModalFormModel.value.hour} ${addSchedJobModalFormModel.value.day} ${addSchedJobModalFormModel.value.month} ${addSchedJobModalFormModel.value.week} ${addSchedJobModalFormModel.value.year}`
+        };
+
+        await add_sched_task(newAddSchedJobModalFormModel).then(res => {
+          if (res.code == 0) {
+            message.success('调度任务创建成功')
+            showModalRef.value = false
+            formSelect.value.addSchedJob = false
+            tableDataInit()
+          } else {
+            notification.create({
+              title: '调度任务创建失败',
+              content: res.msg + '，请重新配置CRON表达式',
+              type: "warning"
+            })
+            console.log(res)
+          }
+        })
+
+      } else {
+        console.log(errors)
+      }
+    }).finally(() => isSaving.value = false)
+  }
+  if (formSelect.value.createCjJob) {
+    targetTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.targetDataSourceId, cjJobModalFormModel.value.targetTableName))
+
+    if (!isEmpty(targetTableColumnsRef.value)) {
+      cjJobModalFormRef.value?.validate((errors) => {
+        if (!errors) {
+          createCjJob({
+            name: cjJobModalFormModel.value.name,
+            sourceTableName: cjJobModalFormModel.value.sourceTableName,
+            targetTableName: cjJobModalFormModel.value.targetTableName,
+            projectId: cjJobModalFormModel.value.projectId,
+            sourceDataSourceId: '7',
+            targetDataSourceId: '6'
+          }, sourceTableColumnsRef.value, targetTableColumnsRef.value)
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createCjJob = false
+          tableDataInit()
+        } else {
+          console.log(errors)
+          isSaving.value = false
+        }
+      })
+    } else {
+      window.$message.warning("目标表不存在")
+      isSaving.value = false
+    }
+  }
+  if (formSelect.value.createZjJob) {
+    zjJobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        createZjJob({
+          projectId: zjJobModalFormModel.value.projectId,
+          personId: zjJobModalFormModel.value.personId,
+          tableName: zjJobModalFormModel.value.tableName
+        })
+
+        isSaving.value = false
+        showModalRef.value = false
+        formSelect.value.createZjJob = false
+        tableDataInit()
+      } else {
+        console.log(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+}
+
+// region 新增调度任务
 
 const addSchedJobModalFormRef = ref<FormInst | null>(null);
 
@@ -1107,6 +1251,17 @@ const addSchedJobModalFormRules = {
   }
 }
 
+const addSchedJobModalFormModelInit = async (v) => {
+  addSchedJobModalFormModel.value.jobContent = v.jobName
+  addSchedJobModalFormModel.value.jobDesc = v.jobName
+  addSchedJobModalFormModel.value.jobTemplateId = v.id
+  addSchedJobModalFormModel.value.projectName = (await get_project_by_pro_abbr(v.jobName.split("_")[1]))?.projectName || '未知项目'
+}
+
+// endregion
+
+// region 创建采集任务
+
 const cjJobModalFormRef = ref<FormInst | null>(null);
 const cjJobModalFormModel = ref<CjFormModelType>({
   name: '',
@@ -1129,91 +1284,6 @@ const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const sourceTableColumnsRef = ref([])
 const targetTableColumnsRef = ref([])
 
-const addSchedJobModalFormModelInit = async (v) => {
-  addSchedJobModalFormModel.value.jobContent = v.jobName
-  addSchedJobModalFormModel.value.jobDesc = v.jobName
-  addSchedJobModalFormModel.value.jobTemplateId = v.id
-  addSchedJobModalFormModel.value.projectName = (await get_project_by_pro_abbr(v.jobName.split("_")[1]))?.projectName || '未知项目'
-}
-
-const onNegativeClick = () => {
-  showModalRef.value = false
-}
-
-const isSaving = ref(false)
-const onPositiveClick = async () => {
-  isSaving.value = true
-  if (formSelect.value.addSchedJob) {
-    addSchedJobModalFormRef.value?.validate(async (errors) => {
-      if (!errors) {
-        const {
-          projectName,
-          sec,
-          min,
-          hour,
-          day,
-          month,
-          week,
-          year,
-          ...newAddSchedJobModalFormModel
-        } = {
-          ...addSchedJobModalFormModel.value,
-          retry: parseInt(addSchedJobModalFormModel.value.retry),
-          executorFailRetryCount: addSchedJobModalFormModel.value.executorFailRetryCount.toString(),
-          jobCron: `${addSchedJobModalFormModel.value.sec} ${addSchedJobModalFormModel.value.min} ${addSchedJobModalFormModel.value.hour} ${addSchedJobModalFormModel.value.day} ${addSchedJobModalFormModel.value.month} ${addSchedJobModalFormModel.value.week} ${addSchedJobModalFormModel.value.year}`
-        };
-
-        await add_sched_task(newAddSchedJobModalFormModel).then(res => {
-          if (res.code == 0) {
-            message.success('调度任务创建成功')
-            showModalRef.value = false
-            formSelect.value.addSchedJob = false
-            tableDataInit()
-          } else {
-            notification.create({
-              title: '调度任务创建失败',
-              content: res.msg + '，请重新配置CRON表达式',
-              type: "warning"
-            })
-            console.log(res)
-          }
-        })
-
-      } else {
-        console.log(errors)
-      }
-    }).finally(() => isSaving.value = false)
-  }
-  if (formSelect.value.createCjJob) {
-    targetTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.targetDataSourceId, cjJobModalFormModel.value.targetTableName))
-
-    if (!isEmpty(targetTableColumnsRef.value)) {
-      cjJobModalFormRef.value?.validate(async (errors) => {
-        if (!errors) {
-          createCjJob({
-            name: cjJobModalFormModel.value.name,
-            sourceTableName: cjJobModalFormModel.value.sourceTableName,
-            targetTableName: cjJobModalFormModel.value.targetTableName,
-            projectId: cjJobModalFormModel.value.projectId,
-            sourceDataSourceId: '7',
-            targetDataSourceId: '6'
-          }, sourceTableColumnsRef.value, targetTableColumnsRef.value)
-          isSaving.value = false
-          showModalRef.value = false
-          formSelect.value.createCjJob = false
-          tableDataInit()
-        } else {
-          console.log(errors)
-        }
-      })
-    } else {
-      window.$message.warning("目标表不存在")
-      isSaving.value = false
-    }
-
-  }
-}
-
 const createCjJobModalInit = async (project, row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
   cjJobModalFormModel.value.name = row.jobName
@@ -1229,9 +1299,33 @@ const handleSourceTableUpdate = async () => {
   sourceTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.sourceDataSourceId, cjJobModalFormModel.value.sourceTableName))
 }
 
-// endregion
+//endregion
 
+//region 创建质检任务
 
+const zjJobModalFormRef = ref<FormInst | null>(null);
+
+const zjJobModalFormModel = ref({
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+const zjJobModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  }
+}
+
+const createZjJobModalInit = (project) => {
+  zjJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+  zjJobModalFormModel.value.projectId = queryParam.value.projectId
+  zjJobModalFormModel.value.projectName = project.projectName
+}
+
+//endregion
 </script>
 
 <style scoped>

@@ -119,6 +119,16 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getZjJsonById)
+    public async handleGetZjJobJsonById(id: number) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'zjJson'],
+            where: {
+                id: id
+            }
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.updateRhJson)
     public async handleUpdateRhJson(obj: any) {
         obj = JSON.parse(obj)

@@ -5,7 +5,10 @@ export class TableSql {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({name: 'table_name'})
+    @Column({
+        name: 'table_name',
+        unique: true
+    })
     tableName: string
 
     @Column()
