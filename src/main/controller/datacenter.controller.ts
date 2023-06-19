@@ -2,7 +2,7 @@ import {AppDataSource} from "@main/data-source";
 import {Dict} from "@main/entity/Dict";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from "einf";
-import {net} from "electron";
+import {dialog, net} from "electron";
 import log from 'electron-log'
 
 @Controller()
@@ -14,11 +14,22 @@ export class DatacenterController {
 
     public async getAuthToken() {
         let res
-        await AppDataSource.getRepository(Dict).findOneBy({
-            name: 'authToken'
-        }).then((data) => {
-            res = data.value
-        })
+        try {
+            await AppDataSource.getRepository(Dict).findOneBy({
+                name: 'authToken'
+            }).then((data) => {
+                res = data.value
+            })
+        } catch (e) {
+            log.error(e)
+            dialog.showMessageBox({
+                type: 'error',
+                title: '数据库连接错误',
+                message: `无法连接到辅助库，中台辅助功能无法使用，查看VPN是否连接正常`,
+                buttons: ['ok']
+            })
+            res = null
+        }
         return res
     }
 
@@ -459,35 +470,41 @@ export class DatacenterController {
                 method: 'GET',
                 url: `${DatacenterController.apiUrl}${url}?${query || ''}`
             });
-            request.setHeader('Authorization', `bearer ${await this.getAuthToken()}`)
-            //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-            let data = '';
+            const authToken = await this.getAuthToken()
 
-            request.on('response', (response) => {
-                response.on('data', (chunk) => {
-                    data += chunk;
-                });
+            if (authToken != null) {
+                request.setHeader('Authorization', `bearer ${authToken}`)
+                //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-                response.on('end', () => {
-                    try {
-                        const res = JSON.parse(data);
-                        if (res?.res_body?.includes('4010')) {
-                            this.handleAuthTokenNotice()
+                let data = '';
+
+                request.on('response', (response) => {
+                    response.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
+                    response.on('end', () => {
+                        try {
+                            const res = JSON.parse(data);
+                            if (res?.res_body?.includes('4010')) {
+                                this.handleAuthTokenNotice()
+                            }
+                            resolve(res);
+                        } catch (err) {
+                            log.error(data)
+                            reject(err);
                         }
-                        resolve(res);
-                    } catch (err) {
-                        log.error(data)
-                        reject(err);
-                    }
+                    });
                 });
-            });
 
-            request.on('error', (err) => {
-                reject(err);
-            });
+                request.on('error', (err) => {
+                    reject(err);
+                });
 
-            request.end();
+                request.end();
+            }
+
         })
     }
 
@@ -497,37 +514,43 @@ export class DatacenterController {
                 method: 'POST',
                 url: `${DatacenterController.apiUrl}${url}`
             });
-            request.setHeader('Authorization', `bearer ${await this.getAuthToken()}`)
-            request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-            let data = '';
+            const authToken = await this.getAuthToken()
+            if (authToken != null) {
+                request.setHeader('Authorization', `bearer ${authToken}`)
+                request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-            request.on('response', (response) => {
-                response.on('data', (chunk) => {
-                    data += chunk;
-                });
+                let data = '';
 
-                response.on('end', () => {
-                    try {
-                        const res = JSON.parse(data);
-                        if (res.code == '4010') {
-                            this.handleAuthTokenNotice()
+                request.on('response', (response) => {
+                    response.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
+                    response.on('end', () => {
+                        try {
+                            const res = JSON.parse(data);
+                            if (res.code == '4010') {
+                                this.handleAuthTokenNotice()
+                            }
+                            resolve(res);
+                        } catch (err) {
+                            log.error(data)
+                            reject(err);
                         }
-                        resolve(res);
-                    } catch (err) {
-                        log.error(data)
-                        reject(err);
-                    }
+                    });
                 });
-            });
 
-            request.on('error', (err) => {
-                reject(err);
-            });
+                request.on('error', (err) => {
+                    reject(err);
+                });
 
-            request.write(JSON.stringify(params))
+                request.write(JSON.stringify(params))
 
-            request.end();
+                request.end();
+            }
+
         })
+
     }
 }
