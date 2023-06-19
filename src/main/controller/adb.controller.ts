@@ -108,6 +108,16 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getRhJsonById)
+    public async handleGetRhJobJsonById(id: number) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'rhJson'],
+            where: {
+                id: id
+            }
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.getZjJson)
     public async handleGetZjJobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({

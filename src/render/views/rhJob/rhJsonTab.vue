@@ -227,13 +227,20 @@ const onPositiveClick = () => {
       jobJson.personName = ''
       jobJson.projectId = ''
       jobJson.projectName = ''
-      jobJson.dependencyProjectName = null
-      jobJson.dependencyWorkflowName = null
+      jobJson.dependencyProjectName = ""
+      jobJson.dependencyProjectId = null
+      jobJson.dependencyWorkflowName = ""
+      jobJson.dependencyWorkflowId = null
+      jobJson.schedulingMode = 0
       jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
+
+      console.log(jobJson)
 
       const tableAbbr = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')[1]
       if (tableAbbr !== 'depart') {
         modalFormModel.value.json = JSON.stringify(jobJson, null, 2).replaceAll(tableAbbr, 'depart')
+      } else {
+        modalFormModel.value.json = JSON.stringify(jobJson, null, 2)
       }
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()

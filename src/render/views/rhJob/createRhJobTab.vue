@@ -74,11 +74,10 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_rh_json} from "@render/api/auxiliaryDb";
+import {get_rh_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
-import {removeIds} from "@render/utils/datacenter/removeIds";
-import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
+import {buildRhJson} from "@render/utils/datacenter/rhJob";
 import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
 import {onMounted, ref} from "vue";
 import useClipboard from "vue-clipboard3";
@@ -124,7 +123,7 @@ const rules = {
 
 onMounted(() => {
   get_rh_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => item.rhJson != null ).map(
+    tableNameOptions.value = res?.filter(item => item.rhJson != null).map(
         (v => ({
           label: `${v.tableName}`,
           value: v.id.toString(),
@@ -143,17 +142,12 @@ const generate = () => {
       let paramJson = JSON.parse(tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).json as string)
       let tableName = (tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).label as string).toLowerCase()
 
-      const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
-      paramJson.name = `rh_${projectAbbr}_${tableName}`
-
-      paramJson.projectId = formModel.value.projectId
-      paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label as string
-      paramJson.personId = formModel.value.personId
-      paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label as string
-
-      const tableAbbr = (await find_by_project_id(formModel.value.projectId))?.tableAbbr || ''
-      paramJson = JSON.parse(JSON.stringify(paramJson).replaceAll('depart', tableAbbr))
-      paramJson = JSON.parse(updateSjkUUID(removeIds(paramJson)))
+      paramJson = await buildRhJson({
+        jobJsonId: formModel.value.jobJsonId,
+        personId: formModel.value.personId,
+        projectId: formModel.value.projectId,
+        tableName: tableName
+      }, paramJson)
 
       jonJsonRef.value = JSON.stringify(paramJson, null, 2)
     } else {

@@ -55,6 +55,11 @@ export const get_rh_json = async (tableName?: string) => {
     return data
 }
 
+export const get_rh_json_by_id = async (id: number) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getRhJsonById, id))
+    return data
+}
+
 export const update_rh_json = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateRhJson, JSON.stringify(obj)))
     return data

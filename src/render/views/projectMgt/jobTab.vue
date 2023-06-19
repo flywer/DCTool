@@ -198,6 +198,70 @@
       </n-grid>
     </n-form>
 
+    <n-form
+        v-if="formSelect.createBfJob"
+        class="mt-4"
+        ref="bfJobModalFormRef"
+        :model="bfJobModalFormModel"
+        :rules="bfJobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="表名" path="tableName">
+          <n-input
+              v-model:value="bfJobModalFormModel.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="项目" path="projectName">
+          <n-input
+              v-model:value="bfJobModalFormModel.projectName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="责任人" path="personId">
+          <n-select
+              v-model:value="bfJobModalFormModel.personId"
+              placeholder="选择责任人"
+              :options="personIdOptions"
+              :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+
+    <n-form
+        v-if="formSelect.createRhJob"
+        class="mt-4"
+        ref="rhJobModalFormRef"
+        :model="rhJobModalFormModel"
+        :rules="rhJobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="表名" path="tableName">
+          <n-input
+              v-model:value="rhJobModalFormModel.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="项目" path="projectName">
+          <n-input
+              v-model:value="rhJobModalFormModel.projectName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="责任人" path="personId">
+          <n-select
+              v-model:value="rhJobModalFormModel.personId"
+              placeholder="选择责任人"
+              :options="personIdOptions"
+              :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
@@ -226,8 +290,10 @@ import {
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {formatDate} from "@render/utils/common/formatDate";
+import {createBfJob} from "@render/utils/datacenter/bfJob";
 import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {createRhJob} from "@render/utils/datacenter/rhJob";
 import {createZjJob} from "@render/utils/datacenter/zjJob";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from 'cron-parser';
@@ -674,10 +740,16 @@ const createColumns = (): DataTableColumns<Job> => {
                   formSelect.value.createZjJob = true
                   break
                 case '数据融合任务':
-                  window.$message.info("敬请期待")
+                  await createRhJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建融合任务'
+                  formSelect.value.createRhJob = true
                   break
                 case '数据备份任务':
-                  window.$message.info("敬请期待")
+                  await createBfJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建备份任务'
+                  formSelect.value.createBfJob = true
                   break
                 case '数据清除任务':
                   window.$message.info("敬请期待")
@@ -1067,13 +1139,13 @@ const showModalRef = ref(false)
 
 let modalTitle = '';
 
-const select = {
+const formSelect = ref({
   addSchedJob: false,
   createCjJob: false,
-  createZjJob: false
-}
-
-const formSelect = ref(select)
+  createZjJob: false,
+  createBfJob: false,
+  createRhJob: false,
+})
 
 const onNegativeClick = () => {
   showModalRef.value = false
@@ -1083,7 +1155,9 @@ const onModelAfterLeave = () => {
   formSelect.value = {
     addSchedJob: false,
     createCjJob: false,
-    createZjJob: false
+    createZjJob: false,
+    createBfJob: false,
+    createRhJob: false,
   }
 }
 
@@ -1132,6 +1206,7 @@ const onPositiveClick = async () => {
       }
     }).finally(() => isSaving.value = false)
   }
+
   if (formSelect.value.createCjJob) {
     targetTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.targetDataSourceId, cjJobModalFormModel.value.targetTableName))
 
@@ -1160,6 +1235,7 @@ const onPositiveClick = async () => {
       isSaving.value = false
     }
   }
+
   if (formSelect.value.createZjJob) {
     zjJobModalFormRef.value?.validate((errors) => {
       if (!errors) {
@@ -1180,6 +1256,43 @@ const onPositiveClick = async () => {
     })
   }
 
+  if (formSelect.value.createBfJob) {
+    bfJobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        createBfJob(bfJobModalFormModel.value).then(() => {
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createBfJob = false
+          tableDataInit()
+        })
+      } else {
+        console.log(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+  if (formSelect.value.createRhJob) {
+    rhJobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        createRhJob({
+          projectId: rhJobModalFormModel.value.projectId,
+          personId: rhJobModalFormModel.value.personId,
+          tableName: rhJobModalFormModel.value.tableName
+        }).then(() => {
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createRhJob = false
+          tableDataInit()
+        })
+      } else {
+        console.log(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+  isSaving.value = false
 }
 
 // region 新增调度任务
@@ -1330,6 +1443,56 @@ const createZjJobModalInit = (project) => {
   zjJobModalFormModel.value.projectName = project.projectName
 }
 
+//endregion
+
+//region 创建备份任务
+
+const bfJobModalFormRef = ref<FormInst | null>(null);
+
+const bfJobModalFormModel = ref({
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+const bfJobModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  }
+}
+
+const createBfJobModalInit = (project) => {
+  bfJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+  bfJobModalFormModel.value.projectId = queryParam.value.projectId
+  bfJobModalFormModel.value.projectName = project.projectName
+}
+
+//endregion
+
+//region 创建融合任务
+const rhJobModalFormRef = ref<FormInst | null>(null);
+
+const rhJobModalFormModel = ref({
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+const rhJobModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  }
+}
+
+const createRhJobModalInit = (project) => {
+  rhJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+  rhJobModalFormModel.value.projectId = queryParam.value.projectId
+  rhJobModalFormModel.value.projectName = project.projectName
+}
 //endregion
 </script>
 

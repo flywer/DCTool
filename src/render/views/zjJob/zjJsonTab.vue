@@ -227,6 +227,8 @@ const onPositiveClick = () => {
       jobJson.projectName = ''
       jobJson.dependencyProjectName = null
       jobJson.dependencyWorkflowName = null
+      jobJson.dependencyProjectId = null
+      jobJson.dependencyWorkflowId = null
       jobJson.schedulingMode = 0
       jobJson.crontab = ''
       jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))

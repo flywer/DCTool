@@ -1,7 +1,6 @@
 import {find_by_project_id, get_zj_json, get_zj_json_by_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
-import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 
@@ -11,19 +10,20 @@ export type ZjFormModelType = {
     projectId: string,
     tableName?: string
 }
-const buildZjJobJson = async (formModel: ZjFormModelType, templateJson: any, tableName: string) => {
+const buildZjJobJson = async (formModel: ZjFormModelType, templateJson: any) => {
     if (templateJson != null) {
-        const projectAbbr = (await find_by_project_id(formModel.projectId))?.projectAbbr || ''
 
-        templateJson.name = `zj_${projectAbbr}_${tableName.toLowerCase()}`;
+        const project = await find_by_project_id(formModel.projectId)
+
+        const projectAbbr = project?.projectAbbr || ''
+
+        templateJson.name = `zj_${projectAbbr}_${formModel.tableName.toLowerCase()}`;
         templateJson.projectId = formModel.projectId
         templateJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label
         templateJson.personId = formModel.personId
         templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label
 
-        const {tableAbbr} = await getAbbrByProId(templateJson.projectId);
-
-        templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', tableAbbr))
+        templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', project.tableAbbr))
         templateJson = JSON.parse(updateSjkUUID(removeIds(templateJson)))
     }
     return templateJson
@@ -48,7 +48,7 @@ export const createZjJob = async (formModel: ZjFormModelType) => {
         }
     }
 
-    const paramsJson = await buildZjJobJson(formModel, JSON.parse(templateJsonStr), formModel.tableName);
+    const paramsJson = await buildZjJobJson(formModel, JSON.parse(templateJsonStr));
 
     if (paramsJson != null) {
         add_work_flow(paramsJson).then((res) => {
