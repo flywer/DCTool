@@ -1,40 +1,49 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px); " trigger="hover">
-      <n-alert type="default" :show-icon="false">
-        共享采集任务生成
-      </n-alert>
-      <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
-        <n-tabs type="line" animated>
-          <n-tab-pane name="1" tab="简易模式">
-            <n-form ref="formRef"
-                    inline
-                    :size="'small'"
-                    :model="formModel"
-                    :rules="rules"
-                    label-placement="left"
-            >
-              <n-grid :cols="2" :x-gap="12">
-                <n-form-item-gi label="表名" path="tableName">
-                  <n-input v-model:value="formModel.tableName" placeholder="输入表名"
-                           @keydown.enter.prevent
-                  />
-                </n-form-item-gi>
-                <n-form-item-gi label="项目" path="projectId">
-                  <n-select
-                      v-model:value="formModel.projectId"
-                      placeholder="选择项目"
-                      :options="projectIdOptions"
-                      :consistent-menu-width="false"
-                      filterable
-                  />
-                </n-form-item-gi>
-                <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
-              </n-grid>
-            </n-form>
-          </n-tab-pane>
-          <!-- <n-tab-pane name="2" tab="自定义模式"> </n-tab-pane>-->
-        </n-tabs>
+      <n-card class="mt-2" :content-style="{paddingBottom:0}">
+        <n-form ref="formRef"
+                inline
+                :size="'small'"
+                :model="formModel"
+                :rules="rules"
+                label-placement="left"
+        >
+          <n-grid :cols="3" :x-gap="12">
+            <n-form-item-gi label="数据类型" path="dataType">
+              <n-radio-group v-model:value="formModel.dataType">
+                <n-radio-button
+                    :key="1"
+                    :value="1"
+                    label="基础数据"
+                />
+                <n-radio-button
+                    :key="2"
+                    :value="2"
+                    label="行为数据"
+                />
+              </n-radio-group>
+            </n-form-item-gi>
+
+
+            <n-form-item-gi label="表名" path="tableName">
+              <n-input v-model:value="formModel.tableName" placeholder="输入表名"
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi label="项目" path="projectId">
+              <n-select
+                  v-model:value="formModel.projectId"
+                  placeholder="选择项目"
+                  :options="projectIdOptions"
+                  :consistent-menu-width="false"
+                  filterable
+                  :disabled="formModel.dataType===2"
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="4" v-show="previewRef.length>0"> {{ previewRef }}</n-form-item-gi>
+          </n-grid>
+        </n-form>
       </n-card>
       <n-space justify="center" align="center" class="mt-2">
         <n-button type="primary" class="w-28" @click="generate">JSON生成</n-button>
@@ -48,7 +57,10 @@
         >
           同时创建调度任务
         </n-checkbox>
-        <n-button type="primary" :disabled="dataXJsonRef === ''" class="w-28" @click="createDataXJob"
+        <n-button class="w-28"
+                  type="primary"
+                  :disabled="dataXJsonRef === ''"
+                  @click="createDataXJob"
                   :loading="isLoading"
         >
           执行
@@ -58,13 +70,14 @@
       <n-input
           v-model:value="dataXJsonRef"
           type="textarea"
-          placeholder="采集任务JSON"
+          placeholder=""
           class="mt-2"
           readonly
-          :autosize="{minRows:3,maxRows:16}"
+          :autosize="{minRows:6,maxRows:18}"
       />
     </n-scrollbar>
   </n-layout>
+
   <n-modal
       v-model:show="showModalRef"
       :mask-closable="false"
@@ -129,24 +142,15 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_datax_job, add_sched_task} from "@render/api/datacenter";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {buildGxJson} from "@render/utils/datacenter/gxJob";
-import {FormInst, useMessage, useNotification} from "naive-ui";
+import {isEmpty} from "lodash-es";
+import {FormInst} from "naive-ui";
 import {ref, watch} from "vue";
-import useClipboard from "vue-clipboard3";
-
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const notification = useNotification()
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
-
 const formRef = ref<FormInst | null>(null);
 
 const formModel = ref({
+  dataType: 1,
   name: '',
   projectId: '',
   personId: '',
@@ -210,13 +214,20 @@ const rules = {
 
 const previewRef = ref('')
 watch(
-    [() => formModel.value.projectId, () => formModel.value.tableName],
-    async ([projectId, tableName]) => {
-      const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
-      formModel.value.name = `gx_${projectAbbr}_${tableName}`
+    [() => formModel.value.projectId, () => formModel.value.tableName, () => formModel.value.dataType],
+    async ([projectId, tableName, dataType]) => {
+      tableName = tableName.toLowerCase()
+      if (dataType == 1) {
+        const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
+        formModel.value.name = `gx_${projectAbbr}_${tableName}`
+      } else {
+        formModel.value.projectId = '27'
+        const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
+        formModel.value.name = `gx_${projectAbbr}_${tableName}`
+      }
       formModel.value.sourceTableName = `sztk_${tableName}`
       formModel.value.targetTableName = `gdsztk_${tableName}`
-      previewRef.value = `工作流名称：gx_${projectAbbr}_${tableName}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
+      previewRef.value = `工作流名称：${formModel.value.name}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
 
     }
 )
@@ -227,7 +238,21 @@ const generate = () => {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
 
-      dataXJsonRef.value = JSON.stringify(await buildGxJson(formModel.value), null, 2)
+      const json = await buildGxJson(formModel.value);
+
+      if (isEmpty(json.readerModel.columns)) {
+        window.$message.warning('来源表不存在')
+        dataXJsonRef.value = ''
+        return 0
+      }
+
+      if (isEmpty(json.writerModel.columns)) {
+        window.$message.warning('目标表不存在')
+        dataXJsonRef.value = ''
+        return 0
+      }
+
+      dataXJsonRef.value = JSON.stringify(json, null, 2)
 
     } else {
       console.error(errors)
@@ -324,7 +349,7 @@ const createDataXJob = () => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;
       if (res.code == 0) {
-        message.success('采集任务创建成功')
+        window.$message.success('采集任务创建成功')
       }
       if (addSchedTaskCheck.value) {
         const {
@@ -359,9 +384,9 @@ const createDataXJob = () => {
 
         await add_sched_task(SchedTaskJson).then(res => {
           if (res.code == 0) {
-            message.success('调度任务创建成功')
+            window.$message.success('调度任务创建成功')
           } else {
-            notification.create({
+            window.$notification.create({
               title: '调度任务创建失败',
               content: res.msg + '，请重新配置CRON表达式',
               type: "warning"
@@ -371,7 +396,7 @@ const createDataXJob = () => {
         })
       }
     } else {
-      message.error(res.msg)
+      window.$message.error(res.msg)
       console.log(res)
     }
     isLoading.value = false

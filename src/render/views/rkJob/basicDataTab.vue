@@ -94,28 +94,14 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow, get_columns} from "@render/api/datacenter";
 import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
-import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {isEmpty} from "lodash-es";
-import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {FormInst} from "naive-ui";
 import {ref, watch} from 'vue'
 import {format} from 'sql-formatter';
-import useClipboard from "vue-clipboard3";
-
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
-
-const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
-
-const targetTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
 const formRef = ref<FormInst | null>(null);
 
@@ -186,29 +172,21 @@ const previewRef = ref('')
 watch(
     [() => formModel.value.projectId, () => formModel.value.tableName, () => formModel.value.dataType],
     async ([projectId, tableName, dataType]) => {
-
       tableName = tableName.toLowerCase()
-
       if (dataType == 1) {
         const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
         formModel.value.name = `rk_${projectAbbr}_${tableName}`
         formModel.value.sourceTableName = `df_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr || ''}_${tableName}_dwb`
       } else {
         formModel.value.projectId = '26'
-        formModel.value.name = `rk_${tableName}`
+        const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
+        formModel.value.name = `rk_${projectAbbr}_${tableName}`
         formModel.value.sourceTableName = `sztk_${tableName}_dm`
       }
       formModel.value.targetTableName = `sztk_${tableName}`
       previewRef.value = `工作流名称：${formModel.value.name}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
     }
 )
-
-const getSourceTables = async (query?: string) => {
-  sourceTableOptions.value = await getTablesOptions(formModel.value.sourceDataSourceId, query)
-}
-const getTargetTables = async (query?: string) => {
-  targetTableOptions.value = await getTablesOptions(formModel.value.targetDataSourceId, query)
-}
 
 const removeIdCheckRef = ref(true)
 const removeDiffCheckRef = ref(true)
@@ -348,9 +326,9 @@ const addWorkFlow = () => {
 
           add_work_flow(paramsModel).then((res) => {
             if (res.code == 200) {
-              message.success('入库任务创建成功')
+              window.$message.success('入库任务创建成功')
             } else {
-              message.error(res.message)
+              window.$message.error(res.message)
             }
             isLoading.value = false
           }).catch(() => {
