@@ -7,7 +7,8 @@ export const useProjectTreeStore = defineStore({
     state: () => ({
         treeNodes: [] as TreeOption[],
         defaultExpandedKeys: ['-1', '0', '0-6'] as string[],
-        defaultSelectedKeys: ['0-6-G1010'] as string[]
+        defaultSelectedKeys: ['0-6-G1010'] as string[],
+        isBasicData: true //此项目是否为基础数据项目，否则为行为数据项目
     }),
     actions: {
         projectTreeInit() {

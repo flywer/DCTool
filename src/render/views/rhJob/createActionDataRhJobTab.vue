@@ -154,8 +154,8 @@ onMounted(() => {
 
 const isGenerating = ref(false)
 
-const singleTableJsonRef = ref(null)
-const multiTableJsonRef = ref(null)
+const singleTableJsonRef = ref('')
+const multiTableJsonRef = ref('')
 
 const generate = () => {
   isGenerating.value = true

@@ -294,6 +294,39 @@
       </n-grid>
     </n-form>
 
+    <n-form
+        v-if="formSelect.createRh2Job"
+        class="mt-4"
+        ref="rh2JobModalFormRef"
+        :model="rh2JobModalFormModel"
+        :rules="rh2JobModalFormRules"
+        :size="'small'"
+    >
+      <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="表名" path="tableName">
+          <n-input
+              v-model:value="rh2JobModalFormModel.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="项目" path="projectName">
+          <n-input
+              v-model:value="rh2JobModalFormModel.projectName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="4" label="责任人" path="personId">
+          <n-select
+              v-model:value="rh2JobModalFormModel.personId"
+              placeholder="选择责任人"
+              :options="personIdOptions"
+              :consistent-menu-width="false"
+          />
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+
+
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
@@ -358,6 +391,9 @@ const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
 watch(defaultSelectedKeys, async (newValue) => {
   if (newValue[0] != null) {
     const segments = newValue[0].split('-');
+
+    projectTree.isBasicData = segments[0] === '0'
+
     const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
     if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
       queryParam.value.projectId = segments[segments.length - 2]
@@ -444,7 +480,7 @@ const tableDataInit = async () => {
     let dataXJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
-      blurry: `cj_${projectAbbr}_${queryParam.value.tableAbbr}`,
+      blurry: `${projectAbbr}_${queryParam.value.tableAbbr}`,
       subsystemName: "采集"
     })).data.records
         .map((v): Job => ({
@@ -496,20 +532,10 @@ const tableDataInit = async () => {
       })
     }
 
-    /*     // 若不存在共享任务
-        if (!dataXJobs.some(job => job.type === '数据共享任务')) {
-          dataXJobs.push({
-            id: null,
-            jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr}`,
-            status: -1,
-            type: '数据共享任务',
-            schedMode: 2,
-            cron: null,
-            lastExecTime: '--',
-            nextExecTime: '未配置调度任务',
-            createBy: null
-          })
-        } */
+    // 行为数据的共享任务不显示
+    if (!projectTree.isBasicData) {
+      dataXJobs = dataXJobs.filter(job => job.type !== '数据共享任务')
+    }
 
     //工作流任务
     const workflowJobs = (await get_workflow_page({
@@ -535,6 +561,10 @@ const tableDataInit = async () => {
               return '数据清除任务'
             case 'rh':
               return '数据融合任务'
+            case 'rh1':
+              return '单表融合任务'
+            case 'rh2':
+              return '多表融合任务'
             case 'rk':
               return '数据入库任务'
             default :
@@ -625,18 +655,48 @@ const pushUnExistJobs = (newJobs: any[], projectAbbr: string) => {
     })
   }
 
-  if (!newJobs.some(job => job.type === '数据融合任务')) {
-    newJobs.push({
-      id: null,
-      jobName: `rh_${projectAbbr}_${queryParam.value.tableAbbr}`,
-      status: -1,
-      type: '数据融合任务',
-      schedMode: 0,
-      cron: null,
-      lastExecTime: '--',
-      nextExecTime: '未配置调度任务',
-      createBy: null
-    })
+  if (projectTree.isBasicData) {
+    if (!newJobs.some(job => job.type === '数据融合任务')) {
+      newJobs.push({
+        id: null,
+        jobName: `rh_${projectAbbr}_${queryParam.value.tableAbbr}`,
+        status: -1,
+        type: '数据融合任务',
+        schedMode: 0,
+        cron: null,
+        lastExecTime: '--',
+        nextExecTime: '未配置调度任务',
+        createBy: null
+      })
+    }
+  } else {
+    if (!newJobs.some(job => job.type === '单表融合任务')) {
+      newJobs.push({
+        id: null,
+        jobName: `rh1_${projectAbbr}_${queryParam.value.tableAbbr}`,
+        status: -1,
+        type: '单表融合任务',
+        schedMode: 0,
+        cron: null,
+        lastExecTime: '--',
+        nextExecTime: '未配置调度任务',
+        createBy: null
+      })
+    }
+
+    if (!newJobs.some(job => job.type === '多表融合任务')) {
+      newJobs.push({
+        id: null,
+        jobName: `rh2_${projectAbbr}_${queryParam.value.tableAbbr}`,
+        status: -1,
+        type: '多表融合任务',
+        schedMode: 0,
+        cron: null,
+        lastExecTime: '--',
+        nextExecTime: '未配置调度任务',
+        createBy: null
+      })
+    }
   }
 
   if (!newJobs.some(job => job.type === '数据入库任务')) {
@@ -782,6 +842,18 @@ const createColumns = (): DataTableColumns<Job> => {
                     modalTitle = '创建融合任务'
                     formSelect.value.createRhJob = true
                     break
+                  case '单表融合任务':
+                    await createRhJobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建单表融合任务'
+                    formSelect.value.createRhJob = true
+                    break
+                  case '多表融合任务':
+                    await createRh2JobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建多表融合任务'
+                    formSelect.value.createRh2Job = true
+                    break
                   case '数据备份任务':
                     await createBfJobModalInit(project)
                     showModalRef.value = true
@@ -845,7 +917,7 @@ const createColumns = (): DataTableColumns<Job> => {
               ]
             } else {
               container.children = [
-                showButton('启用', async () => {
+                showButton('启用', () => {
                   workflowActive(row.id, '01')
                 }),
                 showConfirmation('执行', async () => {
@@ -874,10 +946,10 @@ const createColumns = (): DataTableColumns<Job> => {
               ]
             } else {
               container.children = [
-                showButton('停用', async () => {
+                showButton('停用', () => {
                   workflowActive(row.id, '02')
                 }),
-                showConfirmation('执行', async () => {
+                showConfirmation('执行', () => {
                   workflowRun(row)
                 }),
                 showConfirmation('删除', async () => {
@@ -950,40 +1022,31 @@ const paginationReactive = reactive({
 })
 
 // 自定义比较函数
+// 如果两个元素的开头部分都不在规定顺序中，那么它们将按照字母表顺序排列。
+// 如果一个元素的开头部分不在规定顺序中，而另一个元素是有序的，则将未排序的元素排在已排序的元素之后。
+// 最后，对于两个都在规定顺序中的元素，按照它们在 order 数组中的下标大小来排列。
 const compare = (a, b) => {
-  const jobNameA = a.jobName.slice(0, 2);
-  const jobNameB = b.jobName.slice(0, 2);
+  const order = ["cj", "zj", "bf", "rh", "rh1", "rh2", "rk", "qc", "gx"];
+  const aIndex = order.indexOf(a.jobName.split("_")[0]);
+  const bIndex = order.indexOf(b.jobName.split("_")[0]);
 
-  if (jobNameA === "cj") return -1;
-  if (jobNameB === "cj") return 1;
-
-  if (jobNameA === "zj") return -1;
-  if (jobNameB === "zj") return 1;
-
-  if (jobNameA === "bf") return -1;
-  if (jobNameB === "bf") return 1;
-
-  if (jobNameA === "rh") return -1;
-  if (jobNameB === "rh") return 1;
-
-  if (jobNameA === "rk") return -1;
-  if (jobNameB === "rk") return 1;
-
-  if (jobNameA === "qc") return -1;
-  if (jobNameB === "qc") return 1;
-
-  if (jobNameA === "gx") return -1;
-  if (jobNameB === "gx") return 1;
-
-  return 0;
+  if (aIndex === -1 && bIndex === -1) {
+    return a.jobName.localeCompare(b.jobName);
+  } else if (aIndex === -1) {
+    return 1;
+  } else if (bIndex === -1) {
+    return -1;
+  } else {
+    return aIndex - bIndex;
+  }
 }
 
 /**
  * @param id: 任务ID
  * @param type: 01：启用， 02：停用
  **/
-const workflowActive = (id: string, type: '01' | '02') => {
-  workflow_active({
+const workflowActive = async (id: string, type: '01' | '02') => {
+  await workflow_active({
     id: id,
     type: type
   }).then((res) => {
@@ -991,7 +1054,8 @@ const workflowActive = (id: string, type: '01' | '02') => {
       message.success(type == '01' ? '启用成功' : '停用成功')
       tableDataInit()
     } else {
-      message.error(res.msg)
+      message.error(res.msg, res.message)
+      console.log(res)
     }
   })
 }
@@ -1021,7 +1085,7 @@ const workflowRun = async (v: Job) => {
     if (isEmpty(records) || records[0].tableName != configParam.likeName) {
       dialog.warning({
         title: '警告',
-        content: `检测到未在质量门户对[${configParam.likeName}]进行配置，是否继续执行质检？`,
+        content: `检测到未在【质量门户】对[${configParam.likeName}]进行配置，是否继续执行质检？`,
         positiveText: '确定',
         negativeText: '取消',
         onPositiveClick: () => {
@@ -1077,7 +1141,7 @@ const workflowDelete = (id) => {
       message.success(res.data)
       tableDataInit()
     } else {
-      message.success("删除失败")
+      message.error("删除失败")
     }
   })
 }
@@ -1199,6 +1263,7 @@ const formSelect = ref({
   createZjJob: false,
   createBfJob: false,
   createRhJob: false,
+  createRh2Job: false,
   createQcJob: false,
 })
 
@@ -1213,6 +1278,7 @@ const onModelAfterLeave = () => {
     createZjJob: false,
     createBfJob: false,
     createRhJob: false,
+    createRh2Job: false,
     createQcJob: false,
   }
 }
@@ -1335,10 +1401,30 @@ const onPositiveClick = async () => {
           projectId: rhJobModalFormModel.value.projectId,
           personId: rhJobModalFormModel.value.personId,
           tableName: rhJobModalFormModel.value.tableName
-        }, false, false).then(() => {
+        }, projectTree.isBasicData, false).then(() => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.createRhJob = false
+          tableDataInit()
+        })
+      } else {
+        console.log(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+  if (formSelect.value.createRh2Job) {
+    rh2JobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        createRhJob({
+          projectId: rh2JobModalFormModel.value.projectId,
+          personId: rh2JobModalFormModel.value.personId,
+          tableName: rh2JobModalFormModel.value.tableName
+        }, projectTree.isBasicData, true).then(() => {
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createRh2Job = false
           tableDataInit()
         })
       } else {
@@ -1543,7 +1629,7 @@ const createBfJobModalInit = (project) => {
 
 //endregion
 
-//region 创建融合任务
+//region 创建单表融合任务
 const rhJobModalFormRef = ref<FormInst | null>(null);
 
 const rhJobModalFormModel = ref({
@@ -1564,6 +1650,30 @@ const createRhJobModalInit = (project) => {
   rhJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   rhJobModalFormModel.value.projectId = queryParam.value.projectId
   rhJobModalFormModel.value.projectName = project.projectName
+}
+//endregion
+
+//region 创建单表融合任务
+const rh2JobModalFormRef = ref<FormInst | null>(null);
+
+const rh2JobModalFormModel = ref({
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+const rh2JobModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  }
+}
+
+const createRh2JobModalInit = (project) => {
+  rh2JobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+  rh2JobModalFormModel.value.projectId = queryParam.value.projectId
+  rh2JobModalFormModel.value.projectName = project.projectName
 }
 //endregion
 

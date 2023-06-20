@@ -98,7 +98,7 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getRhJson)
-    public async handleGetRh1JobJson(tableName?: string) {
+    public async handleGetRhJobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({
             select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
             where: {
@@ -109,7 +109,7 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getRhJsonById)
-    public async handleGetRh1JobJsonById(id: number) {
+    public async handleGetRhJobJsonById(id: number) {
         return await AppDataSource.getRepository(JobJson).find({
             select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
             where: {

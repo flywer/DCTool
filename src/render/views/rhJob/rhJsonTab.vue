@@ -319,7 +319,6 @@ const search = (v) => {
           rh1Json: v.rh1Json,
           rh2Json: v.rh2Json
         })))
-    console.log(tableDataRef.value)
   })
 }
 

@@ -53,15 +53,24 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
 
     if (formModel.jobJsonId != undefined) {
         const jobJson = await get_rh_json_by_id(Number(formModel.jobJsonId));
+        if (isMultiTableJson) {
+            templateJsonStr = jobJson?.rh2Json || null;
+        } else {
+            templateJsonStr = jobJson?.rh1Json || null;
+        }
 
-        templateJsonStr = jobJson?.rhJson || null;
         formModel.tableName = jobJson?.tableName.toLowerCase() || null;
     } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
 
         const jobJson = await get_rh_json(formModel.tableName)
+
         if (jobJson.length > 0) {
             // 若不知道jsonId则使用tableName获取json
-            templateJsonStr = jobJson[0]?.rhJson || null;
+            if (isMultiTableJson) {
+                templateJsonStr = jobJson[0]?.rh2Json || null;
+            } else {
+                templateJsonStr = jobJson[0]?.rh1Json || null;
+            }
         } else {
             templateJsonStr = null;
         }
