@@ -57,17 +57,22 @@ export const channels = reactive({
         getProjectInfo: 'auxiliaryDb/getProjectInfo',
         updateProjectInfo: 'auxiliaryDb/updateProjectInfo',
         findByProjectId: 'auxiliaryDb/findByProjectId',
+        getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
+
         getAuthToken: 'auxiliaryDb/getAuthToken',
         updateAuthToken: 'auxiliaryDb/updateAuthToken',
+
         getTableSql: 'auxiliaryDb/getTableSql',
         updateTableSql: 'auxiliaryDb/updateTableSql',
+
         getRhJson: 'auxiliaryDb/getRhJson',
-        updateRhJson: 'auxiliaryDb/updateRhJson',
-        getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
-        getZjJson: 'auxiliaryDb/getZjJson',
-        updateZjJson: 'auxiliaryDb/updateZjJson',
-        getZjJsonById: 'auxiliaryDb/getZjJsonById',
         getRhJsonById: 'auxiliaryDb/getRhJsonById',
+        updateRh1Json: 'auxiliaryDb/updateRh1Json',
+        updateRh2Json: 'auxiliaryDb/updateRh2Json',
+
+        getZjJson: 'auxiliaryDb/getZjJson',
+        getZjJsonById: 'auxiliaryDb/getZjJsonById',
+        updateZjJson: 'auxiliaryDb/updateZjJson',
 
     },
     cron: {

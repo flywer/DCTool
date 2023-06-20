@@ -1,7 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px); " trigger="hover">
-      <n-alert  type="default" :show-icon="false">
+      <n-alert type="default" :show-icon="false">
         共享采集任务生成
       </n-alert>
       <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
@@ -61,6 +61,7 @@
           placeholder="采集任务JSON"
           class="mt-2"
           readonly
+          :autosize="{minRows:3,maxRows:16}"
       />
     </n-scrollbar>
   </n-layout>
@@ -126,8 +127,9 @@
 
 <script lang="ts" setup>
 import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {add_datax_job, add_sched_task, build_datax_json, get_columns} from "@render/api/datacenter";
+import {add_datax_job, add_sched_task} from "@render/api/datacenter";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
+import {buildGxJson} from "@render/utils/datacenter/gxJob";
 import {FormInst, useMessage, useNotification} from "naive-ui";
 import {ref, watch} from "vue";
 import useClipboard from "vue-clipboard3";
@@ -220,178 +222,18 @@ watch(
 )
 
 const dataXJsonRef = ref('')
-const schedTaskJsonRef = ref('')
-// const addSchedTaskCheckRef = ref(true)
-let paramsModel = {
-  readerModel: {
-    datasourceType: "mysql",
-    datasourceId: '8',
-    path: '',
-    tableName: "",
-    columns: []
-  },
-  writerModel: {
-    datasourceType: "mysql",
-    datasourceId: '11',
-    fromTableName: '',
-    preSql: '',
-    columns: [],
-    ftpColums: []
-  },
-  initReaderModel: [],
-  initWriterModel: [],
-  writerId: '11',
-  readerId: '8',
-  mappingType: 'the-same-row',
-  path: '',
-  dynamicPath: '',
-  dynamicPathData: "[]",
-  jobJson: {
-    job: {
-      content: [
-        {
-          reader: {
-            parameter: {
-              password: '',
-              column: [],
-              connection: [
-                {
-                  jdbcUrl: [],
-                  table: []
-                }
-              ],
-              splitPk: null,
-              username: ''
-            },
-            name: ''
-          },
-          writer: {
-            parameter: {
-              postSql: null,
-              password: '',
-              column: [],
-              connection: [
-                {
-                  jdbcUrl: [],
-                  table: []
-                }
-              ],
-              username: '',
-              preSql: []
-            },
-            name: ''
-          }
-        }
-      ],
-      setting: {
-        errorLimit: {
-          record: 0,
-          percentage: 0.02
-        },
-        speed: {
-          byte: 10485760,
-          channel: 3
-        }
-      }
-    }
-  },
-  jobDesc: '',
-  autoVerifyRecord: 0,
-  gatherMethod: "1",
-  incrementType: "0",
-  projectId: '6',
-  gatherSource: "业务系统库",
-  subsystemName: "采集"
-}
 
 const generate = () => {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      paramsModel.jobDesc = formModel.value.name
-      paramsModel.projectId = formModel.value.projectId
 
-      paramsModel.readerModel.tableName = formModel.value.sourceTableName
-      // paramsModel.readerModel.datasourceId = formModel.value.sourceDataSourceId
-      paramsModel.readerModel.columns = (await get_columns(paramsModel.readerModel.datasourceId, formModel.value.sourceTableName, true))
-
-      paramsModel.writerModel.fromTableName = formModel.value.targetTableName
-      paramsModel.writerModel.preSql = `truncate table ${formModel.value.targetTableName}`
-      // paramsModel.writerModel.datasourceId = formModel.value.targetDataSourceId
-      paramsModel.writerModel.columns = (await get_columns(paramsModel.writerModel.datasourceId, formModel.value.targetTableName, true))
-      paramsModel.writerModel.ftpColums = Array(paramsModel.writerModel.columns.length).fill(0).map((_, index) => index)
-
-      paramsModel.initReaderModel = paramsModel.readerModel.columns
-      paramsModel.initWriterModel = paramsModel.writerModel.columns
-
-      // paramsModel.readerId = formModel.value.sourceDataSourceId
-      // paramsModel.writerId = formModel.value.targetDataSourceId
-
-      let path = ''
-      for (let i = 0; i < paramsModel.readerModel.columns.length; i++) {
-        path += `M0,${72 + (48 * i)}.0 L100,${72 + (48 * i)}.0`
-      }
-      paramsModel.path = path
-
-      let buildJson = {
-        readerDatasourceId: paramsModel.readerId,
-        readerTables: [paramsModel.readerModel.tableName],
-        readerColumns: paramsModel.readerModel.columns,
-        writerDatasourceId: paramsModel.writerId,
-        writerTables: [paramsModel.writerModel.fromTableName],
-        writerColumns: paramsModel.writerModel.columns,
-        rdbmsReader: {},
-        rdbmsWriter: {
-          preSql: paramsModel.writerModel.preSql
-        },
-        subsystemName: "采集"
-      }
-
-      paramsModel.jobJson = await build_datax_json(buildJson)
-
-      dataXJsonRef.value = JSON.stringify(paramsModel, null, 2)
+      dataXJsonRef.value = JSON.stringify(await buildGxJson(formModel.value), null, 2)
 
     } else {
       console.error(errors)
     }
   })
 }
-
-const isCreatingDataXJob = ref(false)
-
-/*
-const createDataXJob = async () => {
-  isCreatingDataXJob.value = true
-  await add_datax_job(paramsModel).then((async res => {
-    if (res.code == 0) {
-      message.success('共享任务创建成功')
-
-      //  if (addSchedTaskCheckRef.value) {
-      let SchedTaskJson = {
-        jobType: "大数据采集",
-        jobContent: paramsModel.jobDesc,
-        glueType: "DATAX",
-        projectId: paramsModel.projectId,
-        jobCron: "* 10 2,14 ? * * *",
-        jobDesc: paramsModel.jobDesc,
-        jobGroup: 2,
-        retry: 0,
-        executorFailRetryCount: '0',
-        jobTemplateId: res.data,
-        subsystemName: "采集"
-      }
-
-      schedTaskJsonRef.value = JSON.stringify(SchedTaskJson, null, 2)
-
-      //    }
-
-    } else {
-      message.error(res.msg)
-    }
-  })).finally(() => {
-    isCreatingDataXJob.value = false
-  })
-}
-*/
 
 const isLoading = ref(false)
 
@@ -477,6 +319,7 @@ let jobTemplateId = null
 
 const createDataXJob = () => {
   isLoading.value = true
+  const paramsModel = JSON.parse(dataXJsonRef.value)
   add_datax_job(paramsModel).then(async (res) => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;

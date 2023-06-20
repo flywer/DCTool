@@ -60,8 +60,13 @@ export const get_rh_json_by_id = async (id: number) => {
     return data
 }
 
-export const update_rh_json = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateRhJson, JSON.stringify(obj)))
+export const update_rh1_json = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateRh1Json, JSON.stringify(obj)))
+    return data
+}
+
+export const update_rh2_json = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateRh2Json, JSON.stringify(obj)))
     return data
 }
 

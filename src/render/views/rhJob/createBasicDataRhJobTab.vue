@@ -52,7 +52,7 @@
       </n-button>
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-icon size="16">
+          <n-icon size="16" style="line-height: 32px">
             <QuestionCircleTwotone/>
           </n-icon>
         </template>
@@ -77,20 +77,13 @@
 import {get_rh_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {buildRhJson} from "@render/utils/datacenter/rhJob";
-import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
-import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
 const tableNameOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
 const jonJsonRef = ref('')
@@ -123,11 +116,11 @@ const rules = {
 
 onMounted(() => {
   get_rh_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => item.rhJson != null).map(
+    tableNameOptions.value = res?.filter(item => item.rh1Json != null && isBasicTable(item.tableName)).map(
         (v => ({
           label: `${v.tableName}`,
           value: v.id.toString(),
-          json: v.rhJson,
+          json: v.rh1Json,
         }))
     ) || []
   })
@@ -147,7 +140,7 @@ const generate = () => {
         personId: formModel.value.personId,
         projectId: formModel.value.projectId,
         tableName: tableName
-      }, paramJson)
+      }, paramJson, true)
 
       jonJsonRef.value = JSON.stringify(paramJson, null, 2)
     } else {
@@ -162,9 +155,9 @@ const addWorkFlow = () => {
   isAdding.value = true
   add_work_flow(JSON.parse(jonJsonRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success('融合任务创建成功')
+      window.$message.success('融合任务创建成功')
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   }).finally(() => isAdding.value = false)
 }

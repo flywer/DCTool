@@ -89,7 +89,7 @@
       <div class="mt-1">
         <n-tooltip trigger="hover">
           <template #trigger>
-            <n-icon size="16">
+            <n-icon size="16" style="line-height: 32px">
               <QuestionCircleTwotone/>
             </n-icon>
           </template>

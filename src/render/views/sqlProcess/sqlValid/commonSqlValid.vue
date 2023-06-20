@@ -97,7 +97,9 @@ const exec = () => {
         if (res.code == 0) {
           message.success('校验成功')
           resRef.value = ''
-        } else {
+        } else if(res.code == 401){
+            message.error('此Token无权')
+        }else {
           message.error('校验失败，具体看返回结果')
           resRef.value = res.msg
         }

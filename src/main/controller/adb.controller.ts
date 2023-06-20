@@ -98,9 +98,9 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getRhJson)
-    public async handleGetRhJobJson(tableName?: string) {
+    public async handleGetRh1JobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'rhJson'],
+            select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
             where: {
                 tableName: Like(`%${tableName || ''}%`)
             },
@@ -109,9 +109,9 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getRhJsonById)
-    public async handleGetRhJobJsonById(id: number) {
+    public async handleGetRh1JobJsonById(id: number) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'rhJson'],
+            select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
             where: {
                 id: id
             }
@@ -139,15 +139,15 @@ export class AdbController {
         })
     }
 
-    @IpcHandle(channels.auxiliaryDb.updateRhJson)
-    public async handleUpdateRhJson(obj: any) {
+    @IpcHandle(channels.auxiliaryDb.updateRh1Json)
+    public async handleUpdateRh1Json(obj: any) {
         obj = JSON.parse(obj)
         if (obj.id === null) {
             return await AppDataSource.getRepository(JobJson).createQueryBuilder()
                 .insert()
                 .into(JobJson)
                 .values([{
-                    rhJson: obj.json,
+                    rh1Json: obj.json,
                     tableName: obj.tableName
                 }])
                 .execute()
@@ -155,7 +155,31 @@ export class AdbController {
             return await AppDataSource.getRepository(JobJson).createQueryBuilder()
                 .update(JobJson)
                 .set({
-                    rhJson: obj.json,
+                    rh1Json: obj.json,
+                    tableName: obj.tableName
+                })
+                .where("id = :id", {id: obj.id})
+                .execute()
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateRh2Json)
+    public async handleUpdateRh2Json(obj: any) {
+        obj = JSON.parse(obj)
+        if (obj.id === null) {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .insert()
+                .into(JobJson)
+                .values([{
+                    rh2Json: obj.json,
+                    tableName: obj.tableName
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .update(JobJson)
+                .set({
+                    rh2Json: obj.json,
                     tableName: obj.tableName
                 })
                 .where("id = :id", {id: obj.id})

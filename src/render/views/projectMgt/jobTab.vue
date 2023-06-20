@@ -325,6 +325,7 @@ import {formatDate} from "@render/utils/common/formatDate";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
 import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
 import {createZjJob} from "@render/utils/datacenter/zjJob";
@@ -443,7 +444,7 @@ const tableDataInit = async () => {
     let dataXJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
-      blurry: `${projectAbbr}_${queryParam.value.tableAbbr}`,
+      blurry: `cj_${projectAbbr}_${queryParam.value.tableAbbr}`,
       subsystemName: "采集"
     })).data.records
         .map((v): Job => ({
@@ -495,20 +496,20 @@ const tableDataInit = async () => {
       })
     }
 
-    // 若不存在共享任务
-    if (!dataXJobs.some(job => job.type === '数据共享任务')) {
-      dataXJobs.push({
-        id: null,
-        jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr}`,
-        status: -1,
-        type: '数据共享任务',
-        schedMode: 2,
-        cron: null,
-        lastExecTime: '--',
-        nextExecTime: '未配置调度任务',
-        createBy: null
-      })
-    }
+    /*     // 若不存在共享任务
+        if (!dataXJobs.some(job => job.type === '数据共享任务')) {
+          dataXJobs.push({
+            id: null,
+            jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr}`,
+            status: -1,
+            type: '数据共享任务',
+            schedMode: 2,
+            cron: null,
+            lastExecTime: '--',
+            nextExecTime: '未配置调度任务',
+            createBy: null
+          })
+        } */
 
     //工作流任务
     const workflowJobs = (await get_workflow_page({
@@ -759,47 +760,62 @@ const createColumns = (): DataTableColumns<Job> => {
 
         switch (row.status) {
           case -1:// 未创建的任务
-            container.children = [showButton('创建', async () => {
-              const project = (await find_by_project_id(queryParam.value.projectId))
-              switch (row.type) {
-                case '数据采集任务':
-                  await createCjJobModalInit(project, row)
-                  showModalRef.value = true
-                  modalTitle = '创建采集任务'
-                  formSelect.value.createCjJob = true
-                  break
-                case '数据质检任务':
-                  await createZjJobModalInit(project)
-                  showModalRef.value = true
-                  modalTitle = '创建质检任务'
-                  formSelect.value.createZjJob = true
-                  break
-                case '数据融合任务':
-                  await createRhJobModalInit(project)
-                  showModalRef.value = true
-                  modalTitle = '创建融合任务'
-                  formSelect.value.createRhJob = true
-                  break
-                case '数据备份任务':
-                  await createBfJobModalInit(project)
-                  showModalRef.value = true
-                  modalTitle = '创建备份任务'
-                  formSelect.value.createBfJob = true
-                  break
-                case '数据清除任务':
-                  await createQcJobModalInit(project)
-                  showModalRef.value = true
-                  modalTitle = '创建清除任务'
-                  formSelect.value.createQcJob = true
-                  break
-                case '数据入库任务':
-                  window.$message.info("敬请期待")
-                  break
-                case '数据共享任务':
-                  window.$message.info("敬请期待")
-                  break
-              }
-            })]
+            if (row.type != '数据共享任务') {
+              container.children = [showButton('创建', async () => {
+                const project = (await find_by_project_id(queryParam.value.projectId))
+                switch (row.type) {
+                  case '数据采集任务':
+                    await createCjJobModalInit(project, row)
+                    showModalRef.value = true
+                    modalTitle = '创建采集任务'
+                    formSelect.value.createCjJob = true
+                    break
+                  case '数据质检任务':
+                    await createZjJobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建质检任务'
+                    formSelect.value.createZjJob = true
+                    break
+                  case '数据融合任务':
+                    await createRhJobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建融合任务'
+                    formSelect.value.createRhJob = true
+                    break
+                  case '数据备份任务':
+                    await createBfJobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建备份任务'
+                    formSelect.value.createBfJob = true
+                    break
+                  case '数据清除任务':
+                    await createQcJobModalInit(project)
+                    showModalRef.value = true
+                    modalTitle = '创建清除任务'
+                    formSelect.value.createQcJob = true
+                    break
+                  case '数据入库任务':
+                    window.$message.info("敬请期待")
+                    break
+                }
+              })]
+            } else {
+              container.children = [showConfirmation('创建', async () => {
+                const project = (await find_by_project_id(queryParam.value.projectId))
+                const tableName = queryParam.value.tableAbbr.toString().toLowerCase()
+
+                createGxJob({
+                  name: `gx_${project.projectAbbr}_${tableName}`,
+                  sourceTableName: `sztk_${tableName}`,
+                  targetTableName: `gdsztk_${tableName}`,
+                  projectId: project.projectId
+                }).then(() => {
+                  tableDataInit()
+                })
+
+              })]
+            }
+
             break
           case 0:// 未配置调度任务的采集任务
             container.children = [
@@ -1319,7 +1335,7 @@ const onPositiveClick = async () => {
           projectId: rhJobModalFormModel.value.projectId,
           personId: rhJobModalFormModel.value.personId,
           tableName: rhJobModalFormModel.value.tableName
-        }).then(() => {
+        }, false, false).then(() => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.createRhJob = false

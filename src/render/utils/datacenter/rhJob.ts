@@ -15,26 +15,40 @@ export type RhFormModelType = {
     tableName?: string
 }
 
-export const buildRhJson = async (formModel: RhFormModelType, templateJson: any) => {
+/**
+ * @param formModel
+ * @param templateJson
+ * @param isBasicData 是否为基础数据
+ * @param isMultiTableJson 是否为多表融合JSON
+ **/
+export const buildRhJson = async (formModel: RhFormModelType, templateJson: any, isBasicData: boolean, isMultiTableJson: boolean) => {
 
-    const project = await find_by_project_id(formModel.projectId)
+    if (templateJson != null) {
+        const project = await find_by_project_id(formModel.projectId)
 
-    const projectAbbr = project?.projectAbbr || ''
+        const projectAbbr = project?.projectAbbr || ''
 
-    templateJson.name = `rh_${projectAbbr}_${formModel.tableName.toLowerCase()}`
+        if (isBasicData) {
+            templateJson.name = `rh_${projectAbbr}_${formModel.tableName.toLowerCase()}`
+        } else if (isMultiTableJson) {
+            templateJson.name = `rh2_${projectAbbr}_${formModel.tableName.toLowerCase()}`
+        } else {
+            templateJson.name = `rh1_${projectAbbr}_${formModel.tableName.toLowerCase()}`
+        }
 
-    templateJson.projectId = formModel.projectId
-    templateJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label as string
-    templateJson.personId = formModel.personId
-    templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
+        templateJson.projectId = formModel.projectId
+        templateJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label as string
+        templateJson.personId = formModel.personId
+        templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
 
-    templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', project.tableAbbr))
-    templateJson = JSON.parse(updateSjkUUID(removeIds(templateJson)))
+        templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', project.tableAbbr))
+        templateJson = JSON.parse(updateSjkUUID(removeIds(templateJson)))
+    }
 
     return templateJson
 }
 
-export const createRhJob = async (formModel: RhFormModelType) => {
+export const createRhJob = async (formModel: RhFormModelType, isBasicData: boolean, isMultiTableJson: boolean) => {
     let templateJsonStr
 
     if (formModel.jobJsonId != undefined) {
@@ -53,7 +67,7 @@ export const createRhJob = async (formModel: RhFormModelType) => {
         }
     }
 
-    const paramsJson = await buildRhJson(formModel, JSON.parse(templateJsonStr));
+    const paramsJson = await buildRhJson(formModel, JSON.parse(templateJsonStr), isBasicData, isMultiTableJson);
 
     if (paramsJson != null) {
         add_work_flow(paramsJson).then((res) => {

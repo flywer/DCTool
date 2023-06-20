@@ -1,7 +1,4 @@
 <template>
-  <!--  <n-alert type="default" :show-icon="false">
-      融合JSON管理
-    </n-alert>-->
   <n-space justify="end" class="mt-2">
     <n-input
         v-model:value="searchValueRef"
@@ -13,14 +10,14 @@
         <n-icon :component="Search"/>
       </template>
     </n-input>
-    <n-button secondary strong @click="add">
-      新增
-      <template #icon>
-        <n-icon>
-          <Add/>
-        </n-icon>
-      </template>
-    </n-button>
+    <!--    <n-button secondary strong @click="add">
+          新增
+          <template #icon>
+            <n-icon>
+              <Add/>
+            </n-icon>
+          </template>
+        </n-button>-->
     <n-button secondary strong @click="tableDataInit">
       刷新
       <template #icon>
@@ -89,9 +86,9 @@
 <script setup lang="ts">
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {Refresh, Add, Search} from '@vicons/ionicons5'
-import {get_rh_json, update_rh_json} from "@render/api/auxiliaryDb";
-import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
+import {Refresh, Search} from '@vicons/ionicons5'
+import {get_rh_json, update_rh1_json, update_rh2_json} from "@render/api/auxiliaryDb";
+import {DataTableColumns, FormInst, NButton, NSpace, useMessage} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const searchValueRef = ref('')
@@ -99,7 +96,8 @@ const searchValueRef = ref('')
 type RhJson = {
   id: number
   tableName: string
-  json: string
+  rh1Json: string
+  rh2Json: string
 }
 
 const createColumns = (): DataTableColumns<RhJson> => {
@@ -112,30 +110,58 @@ const createColumns = (): DataTableColumns<RhJson> => {
       sortOrder: 'ascend'
     },
     {
-      title: 'JSON',
-      key: 'json',
-      width: '30%',
+      title: '单表融合JSON',
+      key: 'rh1Json',
+      width: '25%',
       ellipsis: true
-    }, {
+    },
+    {
+      title: '多表融合JSON',
+      key: 'rh2Json',
+      width: '25%',
+      ellipsis: true
+    },
+    {
       title: '操作',
       key: 'actions',
-      width: '15%',
+      width: '30%',
       align: 'center',
       render(row) {
-        return h(
-            NButton,
-            {
-              size: 'small',
-              onClick: () => {
-                showModalRef.value = true
-                modalTitle = `${row.tableName}`
-                modalFormModel.value.tableName = row.tableName
-                modalFormModel.value.json = row.json
-                modalFormModel.value.id = row.id
-              }
+        return h(NSpace, {
+              justify: 'center'
             },
-            {default: () => '查看'}
-        )
+            [h(
+                NButton,
+                {
+                  size: 'small',
+                  onClick: () => {
+                    showModalRef.value = true
+                    modalTitle = `${row.tableName}`
+                    modalFormModel.value.tableName = row.tableName
+                    modalFormModel.value.json = row.rh1Json
+                    modalFormModel.value.id = row.id
+                    modalFormModel.value.type = 1
+                  }
+                },
+                {default: () => '查看单表融合JSON'}
+            ),
+              h(
+                  NButton,
+                  {
+                    size: 'small',
+                    onClick: () => {
+                      showModalRef.value = true
+                      modalTitle = `${row.tableName}`
+                      modalFormModel.value.tableName = row.tableName
+                      modalFormModel.value.json = row.rh2Json
+                      modalFormModel.value.id = row.id
+                      modalFormModel.value.type = 2
+                    }
+                  },
+                  {default: () => '查看多表融合JSON'}
+              )
+            ])
+
       }
     }
   ]
@@ -172,7 +198,9 @@ const modalFormRef = ref<FormInst | null>(null);
 const modalFormModel = ref({
   id: null,
   tableName: '',
-  json: ''
+  json: '',
+  // 1为单表 2为多表
+  type: 1 | 2
 })
 
 const modalFormRules = {
@@ -204,7 +232,8 @@ const tableDataInit = () => {
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.rhJson
+          rh1Json: v.rh1Json,
+          rh2Json: v.rh2Json
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -220,7 +249,6 @@ const onPositiveClick = () => {
   modalFormRef.value?.validate((errors) => {
     if (!errors) {
       let jobJson = JSON.parse(modalFormModel.value.json)
-      jobJson.name = ''
       jobJson.email = ''
       jobJson.description = ''
       jobJson.personId = ''
@@ -234,9 +262,10 @@ const onPositiveClick = () => {
       jobJson.schedulingMode = 0
       jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
 
-      console.log(jobJson)
+      // 表名中的项目缩写
+      const tableAbbr = jobJson.name.split('_')[1]
+      jobJson.name = ''
 
-      const tableAbbr = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')[1]
       if (tableAbbr !== 'depart') {
         modalFormModel.value.json = JSON.stringify(jobJson, null, 2).replaceAll(tableAbbr, 'depart')
       } else {
@@ -245,11 +274,20 @@ const onPositiveClick = () => {
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 
-      update_rh_json(modalFormModel.value).then(() => {
-        message.success('保存成功')
-        tableDataInit()
-        showModalRef.value = false;
-      })
+      if (modalFormModel.value.type == 1) {
+        update_rh1_json(modalFormModel.value).then(() => {
+          message.success('保存成功')
+          tableDataInit()
+          showModalRef.value = false;
+        })
+      } else {
+        update_rh2_json(modalFormModel.value).then(() => {
+          message.success('保存成功')
+          tableDataInit()
+          showModalRef.value = false;
+        })
+      }
+
     } else {
       console.log(errors)
     }
@@ -259,7 +297,7 @@ const onPositiveClick = () => {
 
 }
 
-const add = () => {
+/* const add = () => {
 
   modalTitle = '新增';
 
@@ -270,7 +308,7 @@ const add = () => {
   }
 
   showModalRef.value = true
-}
+} */
 
 const search = (v) => {
   get_rh_json(v).then((res) => {
@@ -278,8 +316,10 @@ const search = (v) => {
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.rhJson
+          rh1Json: v.rh1Json,
+          rh2Json: v.rh2Json
         })))
+    console.log(tableDataRef.value)
   })
 }
 
