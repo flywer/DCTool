@@ -126,20 +126,6 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.rkJob,
-              }
-            },
-            {default: () => '入库任务'}
-        ),
-    key: routeName.rkJob,
-    icon: () => h('span', 'RK')
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
                 name: routeName.qcJob,
               }
             },
@@ -147,6 +133,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.qcJob,
     icon: () => h('span', 'QC')
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.rkJob,
+              }
+            },
+            {default: () => '入库任务'}
+        ),
+    key: routeName.rkJob,
+    icon: () => h('span', 'RK')
   },
   {
     label: () =>

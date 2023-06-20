@@ -601,6 +601,11 @@ const tableDataInit = async () => {
     // 添加未创建的任务
     newJobs = pushUnExistJobs(newJobs, projectAbbr)
 
+    // 行为数据的共享任务不显示
+    if (!projectTree.isBasicData) {
+      newJobs = newJobs.filter(job => job.type !== '数据入库任务')
+    }
+
     jobs.push(...dataXJobs, ...newJobs)
   } else {
     tableDataRef.value = []
@@ -1026,7 +1031,7 @@ const paginationReactive = reactive({
 // 如果一个元素的开头部分不在规定顺序中，而另一个元素是有序的，则将未排序的元素排在已排序的元素之后。
 // 最后，对于两个都在规定顺序中的元素，按照它们在 order 数组中的下标大小来排列。
 const compare = (a, b) => {
-  const order = ["cj", "zj", "bf", "rh", "rh1", "rh2", "rk", "qc", "gx"];
+  const order = ["cj", "zj", "bf", "rh", "rh1", "rh2", "qc", "rk", "gx"];
   const aIndex = order.indexOf(a.jobName.split("_")[0]);
   const bIndex = order.indexOf(b.jobName.split("_")[0]);
 

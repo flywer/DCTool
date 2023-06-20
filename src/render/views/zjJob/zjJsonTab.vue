@@ -10,14 +10,14 @@
         <n-icon :component="Search"/>
       </template>
     </n-input>
-    <n-button secondary strong @click="add">
+<!--    <n-button secondary strong @click="add">
       新增
       <template #icon>
         <n-icon>
           <Add/>
         </n-icon>
       </template>
-    </n-button>
+    </n-button>-->
     <n-button secondary strong @click="tableDataInit">
       刷新
       <template #icon>
@@ -87,7 +87,7 @@
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {Refresh, Add, Search} from '@vicons/ionicons5'
+import {Refresh, Search} from '@vicons/ionicons5'
 import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb";
 import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
