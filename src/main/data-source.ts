@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
     username: "root",
     password: "Beidas0ft",
     database: "ap_dev_sjzt",
-    synchronize: true,
+    synchronize: false,
     logging: false,
     entities: [ProjectInfo, Dict, TableSql, JobJson],
     migrations: [],
