@@ -41,12 +41,8 @@
 <script setup lang="ts">
 import {app_relaunch} from "@render/api/app.api";
 import {get_auth_token, update_auth_token} from "@render/api/auxiliaryDb";
-import {useDialog, useMessage} from "naive-ui";
 import {nextTick, onMounted, ref} from "vue";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
-
-const message = useMessage()
-const dialog = useDialog()
 
 const authTokenRef = ref('')
 const authTokenIsEdit = ref(false)
@@ -73,7 +69,7 @@ const handleUpdateAuthToken = () => {
   authTokenIsUpdating.value = true
   update_auth_token(authTokenRef.value).then(() => {
     authTokenIsEdit.value = false
-    dialog.success({
+    window.$dialog.success({
       title:'更新成功',
       content: '是否立即重启应用？',
       positiveText: '确定',

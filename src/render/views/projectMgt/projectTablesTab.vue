@@ -103,10 +103,8 @@ import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {Refresh} from '@vicons/ionicons5'
-import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm, useMessage} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, reactive, ref, watch, computed} from "vue";
-
-const message = useMessage()
 
 const queryParam = ref('')
 
@@ -308,7 +306,7 @@ const tablePreview = (row) => {
         ));
       }
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   }).finally(() => isPreviewTableLoading.value = false)
 
@@ -399,11 +397,11 @@ const onPositiveClick = () => {
       await exec_sql(paramModel).then((res) => {
         console.log(res)
         if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          message.success('执行成功')
+          window.$message.success('执行成功')
           showUpdateModalRef.value = false
           tableDataInit()
         } else {
-          message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
+          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
         }
       }).finally(() => {
         isSaving.value = false
@@ -421,10 +419,10 @@ const onPositiveClick = () => {
 const tableDelete = (row: Table) => {
   table_delete(row.id).then(res => {
     if (res.code == 200) {
-      message.success("删除成功")
+      window.$message.success("删除成功")
       tableDataInit()
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   })
 }
@@ -438,10 +436,10 @@ const tableTruncate = async (row: Table) => {
   await exec_sql(paramModel).then((res) => {
     console.log(res)
     if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-      message.success('执行成功')
+      window.$message.success('执行成功')
       showUpdateModalRef.value = false
     } else {
-      message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
+      window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
     }
   })
 }

@@ -29,13 +29,8 @@
 </template>
 
 <script setup lang="ts">
+import {copyText} from "@render/utils/common/clipboard";
 import {ref} from "vue";
-import useClipboard from 'vue-clipboard3';
-import {useMessage} from 'naive-ui'
-
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
 
 const hiveSqlInputRef = ref('');
 
@@ -91,11 +86,6 @@ const hiveSqlTrans = () => {
     return ' ';
   });
 
-}
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
 }
 </script>
 

@@ -10,14 +10,14 @@
         <n-icon :component="Search"/>
       </template>
     </n-input>
-<!--    <n-button secondary strong @click="add">
-      新增
-      <template #icon>
-        <n-icon>
-          <Add/>
-        </n-icon>
-      </template>
-    </n-button>-->
+    <!--    <n-button secondary strong @click="add">
+          新增
+          <template #icon>
+            <n-icon>
+              <Add/>
+            </n-icon>
+          </template>
+        </n-button>-->
     <n-button secondary strong @click="tableDataInit">
       刷新
       <template #icon>
@@ -89,7 +89,7 @@ import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb";
-import {DataTableColumns, FormInst, NButton, useMessage} from "naive-ui";
+import {DataTableColumns, FormInst, NButton} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const searchValueRef = ref('')
@@ -154,8 +154,6 @@ const paginationReactive = reactive({
     paginationReactive.page = 1
   }
 })
-
-const message = useMessage()
 
 const tableDataRef = ref([])
 
@@ -272,7 +270,7 @@ const onPositiveClick = () => {
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 
       update_zj_json(modalFormModel.value).then(() => {
-        message.success('保存成功')
+        window.$message.success('保存成功')
         tableDataInit()
         showModalRef.value = false;
       })

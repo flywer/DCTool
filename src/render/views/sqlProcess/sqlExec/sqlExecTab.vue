@@ -68,10 +68,8 @@
 <script lang="ts" setup>
 import {exec_sql} from "@render/api/datacenter";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
-import {FormInst, useMessage} from "naive-ui";
+import {FormInst} from "naive-ui";
 import {ref} from "vue";
-
-const message = useMessage()
 
 const formRef = ref<FormInst | null>(null);
 
@@ -121,10 +119,10 @@ const exec = () => {
 
       await exec_sql(paramModel).then((res) => {
         if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          message.success('执行成功')
+          window.$message.success('执行成功')
           resRef.value = ''
         } else {
-          message.error('执行失败，具体看返回结果')
+          window.$message.error('执行失败，具体看返回结果')
           resRef.value = res.message.replace(/建表失败，/g, '')
         }
 

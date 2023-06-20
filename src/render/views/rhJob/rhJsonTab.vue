@@ -88,7 +88,7 @@ import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {get_rh_json, update_rh1_json, update_rh2_json} from "@render/api/auxiliaryDb";
-import {DataTableColumns, FormInst, NButton, NSpace, useMessage} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const searchValueRef = ref('')
@@ -183,8 +183,6 @@ const paginationReactive = reactive({
   }
 })
 
-const message = useMessage()
-
 const tableDataRef = ref([])
 
 const isLoading = ref(true)
@@ -276,13 +274,13 @@ const onPositiveClick = () => {
 
       if (modalFormModel.value.type == 1) {
         update_rh1_json(modalFormModel.value).then(() => {
-          message.success('保存成功')
+          window.$message.success('保存成功')
           tableDataInit()
           showModalRef.value = false;
         })
       } else {
         update_rh2_json(modalFormModel.value).then(() => {
-          message.success('保存成功')
+          window.$message.success('保存成功')
           tableDataInit()
           showModalRef.value = false;
         })

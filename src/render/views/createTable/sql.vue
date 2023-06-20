@@ -91,7 +91,7 @@
 
 <script setup lang="ts">
 import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb";
-import {DataTableColumns, useMessage, NButton, FormInst} from "naive-ui";
+import {DataTableColumns, NButton, FormInst} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
 
@@ -101,8 +101,6 @@ type TableSql = {
   comment: string
   sql: string
 }
-
-const message = useMessage()
 
 const tableDataRef = ref([])
 
@@ -222,7 +220,7 @@ const onPositiveClick = () => {
     if (!errors) {
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
       update_table_sql(modalFormModel.value).then(() => {
-        message.success('保存成功')
+        window.$message.success('保存成功')
         tableDataInit()
         showModalRef.value = false;
       })

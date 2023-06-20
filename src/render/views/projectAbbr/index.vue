@@ -38,11 +38,9 @@ import {get_project_info, update_project_info} from "@render/api/auxiliaryDb";
 import {get_job_project_list} from "@render/api/datacenter";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
 import type {DataTableColumns} from 'naive-ui'
-import {useMessage} from 'naive-ui'
-import {computed, h, onMounted, ref, reactive} from 'vue'
+import { h, onMounted, ref, reactive} from 'vue'
 import {Refresh} from '@vicons/ionicons5'
 
-const message = useMessage()
 
 const tableRef = ref()
 
@@ -121,7 +119,7 @@ const createColumns = ({}: {
             tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
             update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
               tableDataInit().then(() => {
-                message.success('修改成功')
+                window.$message.success('修改成功')
               })
             })
           }
@@ -139,7 +137,7 @@ const createColumns = ({}: {
             tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
             update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
               tableDataInit().then(() => {
-                message.success('修改成功')
+                window.$message.success('修改成功')
               })
             })
           }
@@ -151,7 +149,7 @@ const createColumns = ({}: {
 
 const columnsRef = ref(createColumns({
   edit(row: ProjectInfo) {
-    message.success(`Edit ${row.projectName}`)
+    window.$message.success(`Edit ${row.projectName}`)
   }
 }))
 

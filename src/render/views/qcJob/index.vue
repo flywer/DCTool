@@ -141,21 +141,12 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {buildQcJson} from "@render/utils/datacenter/qcJob";
-import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref, watch} from "vue";
-import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
-
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
 
 const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const targetTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
@@ -239,9 +230,9 @@ const addWorkFlow = () => {
   isLoading.value = true
   add_work_flow(JSON.parse(resRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success('清除任务创建成功')
+      window.$message.success('清除任务创建成功')
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
     isLoading.value = false
   })

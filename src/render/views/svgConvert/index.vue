@@ -34,9 +34,7 @@
 import {save_svg_file} from "@render/api/svg.api";
 import {svgStringToBase64} from "@render/utils/common/svgToBase64";
 import {ref} from 'vue'
-import {useMessage} from 'naive-ui'
 
-const message = useMessage()
 const inputValue = ref('');
 const base64Value = ref('');
 const submit = () => {
@@ -45,7 +43,7 @@ const submit = () => {
     base64Value.value = base64Str
     save_svg_file(base64Str)
   } else {
-    message.error('这不是svg标签')
+    window.$message.error('这不是svg标签')
   }
 }
 

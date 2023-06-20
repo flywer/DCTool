@@ -1,6 +1,6 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 158px); " trigger="hover">
-    <n-alert  type="default" :show-icon="false">
+    <n-alert type="default" :show-icon="false">
       校验SQL是否正确
     </n-alert>
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -50,11 +50,8 @@
 <script setup lang="ts">
 import {sql_valid} from "@render/api/datacenter";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
-
-import {FormInst, useMessage} from "naive-ui";
+import {FormInst} from "naive-ui";
 import {ref} from "vue";
-
-const message = useMessage()
 
 const formRef = ref<FormInst | null>(null);
 
@@ -95,12 +92,12 @@ const exec = () => {
 
       await sql_valid(paramModel).then((res) => {
         if (res.code == 0) {
-          message.success('校验成功')
+          window.$message.success('校验成功')
           resRef.value = ''
-        } else if(res.code == 401){
-            message.error('此Token无权')
-        }else {
-          message.error('校验失败，具体看返回结果')
+        } else if (res.code == 401) {
+          window.$message.error('此Token无权')
+        } else {
+          window.$message.error('校验失败，具体看返回结果')
           resRef.value = res.msg
         }
 

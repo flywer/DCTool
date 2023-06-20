@@ -204,28 +204,17 @@ import {
   projectIdOptions,
   projectIdOptionsUpdate
 } from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {
   findCommonElementsByArr2
 } from "@render/utils/datacenter/findCommonElements";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {isEmpty} from "lodash-es";
-import {FormInst, SelectGroupOption, SelectOption, useMessage, useNotification} from "naive-ui";
+import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref, watch} from "vue";
 import {LockOutlined, UnlockOutlined} from '@vicons/antd'
-import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
-
-const message = useMessage()
-
-const notification = useNotification()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
 
 const formRef = ref<FormInst | null>(null);
 const formModel = ref({
@@ -422,7 +411,7 @@ const buildJson = () => {
         if (indexes.length > 0) {
           jsonOutputRef.value = ''
           // 有 NULL 则说明目标表有字段没有被对应上
-          notification.create({
+          window.$notification.create({
             title: "字段对应失败",
             content: `目标表有字段无法在来源表找到对应字段：${targetTableColumnsRef.value.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
             type: "error"
@@ -502,7 +491,7 @@ const buildJson = () => {
       isBuildingRef.value = false
     ])
   } else {
-    message.warning("目标表不存在")
+    window.$message.warning("目标表不存在")
     isBuildingRef.value = false
   }
 
@@ -593,7 +582,7 @@ const createDataXJob = () => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;
       if (res.code == 0) {
-        message.success('采集任务创建成功')
+        window.$message.success('采集任务创建成功')
       }
       if (addSchedTaskCheck.value) {
         const {
@@ -628,11 +617,11 @@ const createDataXJob = () => {
 
         await add_sched_task(SchedTaskJson).then(res => {
           if (res.code == 0) {
-            message.success('调度任务创建成功')
+            window.$message.success('调度任务创建成功')
             submitCount = 0;
             jobTemplateId = null
           } else {
-            notification.create({
+            window.$notification.create({
               title: '调度任务创建失败',
               content: res.msg + '，请重新配置CRON表达式',
               type: "warning"
@@ -642,7 +631,7 @@ const createDataXJob = () => {
         })
       }
     } else {
-      message.error(res.msg)
+      window.$message.error(res.msg)
       console.log(res)
     }
     isLoading.value = false

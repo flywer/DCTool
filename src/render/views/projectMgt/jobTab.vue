@@ -372,16 +372,10 @@ import {
   NPopconfirm,
   NSpace,
   NTag,
-  useMessage,
-  useNotification,
-  useDialog, SelectOption, SelectGroupOption
+  SelectOption, SelectGroupOption
 } from "naive-ui";
 import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {uuid} from "vue3-uuid";
-
-const message = useMessage()
-const notification = useNotification()
-const dialog = useDialog()
 
 const projectTree = useProjectTreeStore()
 
@@ -1056,10 +1050,10 @@ const workflowActive = async (id: string, type: '01' | '02') => {
     type: type
   }).then((res) => {
     if (res.code == 200) {
-      message.success(type == '01' ? '启用成功' : '停用成功')
+      window.$message.success(type == '01' ? '启用成功' : '停用成功')
       tableDataInit()
     } else {
-      message.error(res.msg, res.message)
+      window.$message.error(res.msg, res.message)
       console.log(res)
     }
   })
@@ -1088,7 +1082,7 @@ const workflowRun = async (v: Job) => {
     const records = (await get_valid_config_page(configParam)).data.records
 
     if (isEmpty(records) || records[0].tableName != configParam.likeName) {
-      dialog.warning({
+      window.$dialog.warning({
         title: '警告',
         content: `检测到未在【质量门户】对[${configParam.likeName}]进行配置，是否继续执行质检？`,
         positiveText: '确定',
@@ -1116,10 +1110,10 @@ const workflowJobStart = (v: Job) => {
   }
   workflow_run(param).then(res => {
     if (res.code == 200) {
-      message.success(res.message)
+      window.$message.success(res.message)
       tableDataInit()
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   }).then(() => {
     create_cron_job(v.jobName)
@@ -1130,10 +1124,10 @@ const workflowReRun = (v: Job) => {
 
   workflow_rerun(v.id, 2).then(res => {
     if (res.code == 200) {
-      message.success(res.message)
+      window.$message.success(res.message)
       tableDataInit()
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   }).then(() => {
     create_cron_job(v.jobName)
@@ -1143,10 +1137,10 @@ const workflowReRun = (v: Job) => {
 const workflowDelete = (id) => {
   workflow_delete(id).then(res => {
     if (res.code == 200) {
-      message.success(res.data)
+      window.$message.success(res.data)
       tableDataInit()
     } else {
-      message.error("删除失败")
+      window.$message.error("删除失败")
     }
   })
 }
@@ -1155,10 +1149,10 @@ const cjJobStart = (id) => {
   const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id).id
   cj_job_start(schedJobId).then(res => {
     if (res.data == 'success') {
-      message.success('启用成功')
+      window.$message.success('启用成功')
       tableDataInit()
     } else {
-      message.error(res.msg)
+      window.$message.error(res.msg)
     }
   })
 }
@@ -1167,10 +1161,10 @@ const cjJobStop = (id) => {
   const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id).id
   cj_job_stop(schedJobId).then(res => {
     if (res.data == 'success') {
-      message.success('停用成功')
+      window.$message.success('停用成功')
       tableDataInit()
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   })
 }
@@ -1182,10 +1176,10 @@ const cjJobRun = (row: Job) => {
     subsystemName: "采集"
   }).then(res => {
     if (res.data == 'success') {
-      message.success('执行成功')
+      window.$message.success('执行成功')
       tableDataInit()
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   })
 }
@@ -1195,26 +1189,26 @@ const cjJobDelete = (id) => {
   if (schedJobId != null) {
     sched_job_delete(schedJobId).then(res => {
       if (res.code == 0) {
-        message.success('调度任务删除成功')
+        window.$message.success('调度任务删除成功')
         cj_job_delete(id).then(res1 => {
           if (res1.code == 0) {
-            message.success('采集任务删除成功')
+            window.$message.success('采集任务删除成功')
             tableDataInit()
           } else {
-            message.error(res1.msg)
+            window.$message.error(res1.msg)
           }
         })
       } else {
-        message.error(res.msg)
+        window.$message.error(res.msg)
       }
     })
   } else {
     cj_job_delete(id).then(res1 => {
       if (res1.code == 0) {
-        message.success('采集任务删除成功')
+        window.$message.success('采集任务删除成功')
         tableDataInit()
       } else {
-        message.error(res1.msg)
+        window.$message.error(res1.msg)
       }
     })
   }
@@ -1314,12 +1308,12 @@ const onPositiveClick = async () => {
 
         await add_sched_task(newAddSchedJobModalFormModel).then(res => {
           if (res.code == 0) {
-            message.success('调度任务创建成功')
+            window.$message.success('调度任务创建成功')
             showModalRef.value = false
             formSelect.value.addSchedJob = false
             tableDataInit()
           } else {
-            notification.create({
+            window.$notification.create({
               title: '调度任务创建失败',
               content: res.msg + '，请重新配置CRON表达式',
               type: "warning"

@@ -111,24 +111,16 @@
 <script setup lang="ts">
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {onMounted, ref} from "vue";
-import useClipboard from 'vue-clipboard3';
-import {useMessage, FormInst} from 'naive-ui'
+import {FormInst} from 'naive-ui'
 import {QuestionCircleTwotone} from '@vicons/antd'
 import {LockOutlined, UnlockOutlined} from '@vicons/antd'
 
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
 onMounted(() => {
   projectIdOptionsUpdate()
 })
@@ -230,7 +222,7 @@ const validJsonTrans = (e: MouseEvent) => {
       }
     })
   } else {
-    message.error('原始JSON不能为空')
+    window.$message.error('原始JSON不能为空')
   }
 
 }
@@ -265,9 +257,9 @@ const addWorkFlow = () => {
   isLoading.value = true
   add_work_flow(JSON.parse(validJsonResRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success('质检任务创建成功')
+      window.$message.success('质检任务创建成功')
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
     isLoading.value = false
   })

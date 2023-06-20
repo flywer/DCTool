@@ -35,19 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import {get_job_project_list} from "@render/api/datacenter";
-import {useMessage} from "naive-ui";
-import {onMounted, ref} from 'vue'
-import useClipboard from "vue-clipboard3";
-
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
+import {copyText} from "@render/utils/common/clipboard";
+import {ref} from 'vue'
 
 const inputValue = ref('');
 const resValue = ref('');

@@ -77,22 +77,14 @@
 import {find_by_project_id, get_zj_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {copyText} from "@render/utils/common/clipboard";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {FormInst, SelectGroupOption, SelectOption, useMessage} from "naive-ui";
+import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
-import useClipboard from "vue-clipboard3";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
-const message = useMessage()
-
-const {toClipboard} = useClipboard();
-
-const copyText = async (text) => {
-  await toClipboard(text);
-  message.success('复制成功')
-}
 const tableNameOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
 const jonJsonRef = ref('')
@@ -170,9 +162,9 @@ const addWorkFlow = () => {
   isAdding.value = true
   add_work_flow(JSON.parse(jonJsonRef.value)).then((res) => {
     if (res.code == 200) {
-      message.success('质检任务创建成功')
+      window.$message.success('质检任务创建成功')
     } else {
-      message.error(res.message)
+      window.$message.error(res.message)
     }
   }).finally(() => isAdding.value = false)
 }
