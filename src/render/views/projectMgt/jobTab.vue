@@ -7,6 +7,14 @@
           <span v-else>{{ title }}</span>
         </div>
         <n-space inline class="float-right">
+          <n-button secondary type="info" @click="quickCreateModalInit">
+            快捷创建
+            <template #icon>
+              <n-icon>
+                <AddSquareMultiple16Regular/>
+              </n-icon>
+            </template>
+          </n-button>
           <n-button secondary strong @click="tableDataInit">
             刷新
             <template #icon>
@@ -45,292 +53,368 @@
       :title="modalTitle"
       :size="'small'"
       @afterLeave="onModelAfterLeave"
+      style="width: 566px"
   >
-
-    <n-form
-        v-if="formSelect.addSchedJob"
-        class="mt-4"
-        ref="addSchedJobModalFormRef"
-        :model="addSchedJobModalFormModel"
-        :rules="addSchedJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="14" :x-gap="4">
-        <n-form-item-gi :span="7" label="调度任务名" path="jobContent">
-          <n-input
-              v-model:value="addSchedJobModalFormModel.jobContent"
-              placeholder=""
-              readonly
-              @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="7" label="项目名" path="projectName">
-          <n-input
-              v-model:value="addSchedJobModalFormModel.projectName"
-              placeholder=""
-              readonly
-              @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="7" label="是否重试" path="retry">
-          <n-radio-group v-model:value="addSchedJobModalFormModel.retry">
-            <n-radio-button
-                :key="1"
-                :value="'1'"
-                label="是"
+    <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
+      <n-form
+          v-if="formSelect.addSchedJob"
+          class="mt-4"
+          ref="addSchedJobModalFormRef"
+          :model="addSchedJobModalFormModel"
+          :rules="addSchedJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="14" :x-gap="4">
+          <n-form-item-gi :span="7" label="调度任务名" path="jobContent">
+            <n-input
+                v-model:value="addSchedJobModalFormModel.jobContent"
+                placeholder=""
+                readonly
+                @keydown.enter.prevent
             />
-            <n-radio-button
-                :key="0"
-                :value="'0'"
-                label="否"
+          </n-form-item-gi>
+          <n-form-item-gi :span="7" label="项目名" path="projectName">
+            <n-input
+                v-model:value="addSchedJobModalFormModel.projectName"
+                placeholder=""
+                readonly
+                @keydown.enter.prevent
             />
-          </n-radio-group>
-        </n-form-item-gi>
-        <n-form-item-gi :span="7" label="重试次数" path="executorFailRetryCount">
-          <n-input-number v-model:value="addSchedJobModalFormModel.executorFailRetryCount" button-placement="both"/>
-        </n-form-item-gi>
+          </n-form-item-gi>
+          <n-form-item-gi :span="7" label="是否重试" path="retry">
+            <n-radio-group v-model:value="addSchedJobModalFormModel.retry">
+              <n-radio-button
+                  :key="1"
+                  :value="'1'"
+                  label="是"
+              />
+              <n-radio-button
+                  :key="0"
+                  :value="'0'"
+                  label="否"
+              />
+            </n-radio-group>
+          </n-form-item-gi>
+          <n-form-item-gi :span="7" label="重试次数" path="executorFailRetryCount">
+            <n-input-number v-model:value="addSchedJobModalFormModel.executorFailRetryCount" button-placement="both"/>
+          </n-form-item-gi>
 
-        <n-form-item-gi :span="2" label="秒" path="sec" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center"
-                   v-model:value="addSchedJobModalFormModel.sec"
-                   placeholder=""
-                   @keydown.enter.prevent
-                   readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="分" path="min" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.min" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="时" path="hour" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.hour" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="日" path="day" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.day" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="月" path="month" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.month" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="周" path="week" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.week" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="2" label="年" path="year" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.year" placeholder=""
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-      </n-grid>
+          <n-form-item-gi :span="2" label="秒" path="sec" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center"
+                     v-model:value="addSchedJobModalFormModel.sec"
+                     placeholder=""
+                     @keydown.enter.prevent
+                     readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="分" path="min" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.min" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="时" path="hour" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.hour" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="日" path="day" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.day" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="月" path="month" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.month" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="周" path="week" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.week" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="2" label="年" path="year" :label-style="{margin:'0 auto'}">
+            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.year" placeholder=""
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+        </n-grid>
 
-    </n-form>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createCjJob"
-        class="mt-4"
-        ref="cjJobModalFormRef"
-        :model="cjJobModalFormModel"
-        :rules="cjJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="工作流名称" path="name">
-          <n-input v-model:value="cjJobModalFormModel.name" placeholder=""
-                   readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="来源表" path="sourceTableName">
-          <n-select :size="'small'"
-                    v-model:value="cjJobModalFormModel.sourceTableName"
-                    :options="sourceTableOptions"
-                    filterable
-                    remote
-                    @search="handleSourceTableSearch"
-                    @update:value="handleSourceTableUpdate"
-                    :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="目标表" path="targetTableName">
-          <n-input :size="'small'"
-                   v-model:value="cjJobModalFormModel.targetTableName"
-                   readonly
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createCjJob"
+          class="mt-4"
+          ref="cjJobModalFormRef"
+          :model="cjJobModalFormModel"
+          :rules="cjJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="工作流名称" path="name">
+            <n-input v-model:value="cjJobModalFormModel.name" placeholder=""
+                     readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="来源表" path="sourceTableName">
+            <n-select :size="'small'"
+                      v-model:value="cjJobModalFormModel.sourceTableName"
+                      :options="sourceTableOptions"
+                      filterable
+                      remote
+                      @search="handleSourceTableSearch"
+                      @update:value="handleSourceTableUpdate"
+                      :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="目标表" path="targetTableName">
+            <n-input :size="'small'"
+                     v-model:value="cjJobModalFormModel.targetTableName"
+                     readonly
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createZjJob"
-        class="mt-4"
-        ref="zjJobModalFormRef"
-        :model="zjJobModalFormModel"
-        :rules="zjJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="表名" path="tableName">
-          <n-input
-              v-model:value="zjJobModalFormModel.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="项目" path="projectName">
-          <n-input
-              v-model:value="zjJobModalFormModel.projectName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="责任人" path="personId">
-          <n-select
-              v-model:value="zjJobModalFormModel.personId"
-              placeholder="选择责任人"
-              :options="personIdOptions"
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createZjJob"
+          class="mt-4"
+          ref="zjJobModalFormRef"
+          :model="zjJobModalFormModel"
+          :rules="zjJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-input
+                v-model:value="zjJobModalFormModel.tableName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="zjJobModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="zjJobModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createBfJob"
-        class="mt-4"
-        ref="bfJobModalFormRef"
-        :model="bfJobModalFormModel"
-        :rules="bfJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="表名" path="tableName">
-          <n-input
-              v-model:value="bfJobModalFormModel.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="项目" path="projectName">
-          <n-input
-              v-model:value="bfJobModalFormModel.projectName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="责任人" path="personId">
-          <n-select
-              v-model:value="bfJobModalFormModel.personId"
-              placeholder="选择责任人"
-              :options="personIdOptions"
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createBfJob"
+          class="mt-4"
+          ref="bfJobModalFormRef"
+          :model="bfJobModalFormModel"
+          :rules="bfJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-input
+                v-model:value="bfJobModalFormModel.tableName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="bfJobModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="bfJobModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createRhJob"
-        class="mt-4"
-        ref="rhJobModalFormRef"
-        :model="rhJobModalFormModel"
-        :rules="rhJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="表名" path="tableName">
-          <n-input
-              v-model:value="rhJobModalFormModel.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="项目" path="projectName">
-          <n-input
-              v-model:value="rhJobModalFormModel.projectName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="责任人" path="personId">
-          <n-select
-              v-model:value="rhJobModalFormModel.personId"
-              placeholder="选择责任人"
-              :options="personIdOptions"
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createRhJob"
+          class="mt-4"
+          ref="rhJobModalFormRef"
+          :model="rhJobModalFormModel"
+          :rules="rhJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-input
+                v-model:value="rhJobModalFormModel.tableName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="rhJobModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="rhJobModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createQcJob"
-        class="mt-4"
-        ref="qcJobModalFormRef"
-        :model="qcJobModalFormModel"
-        :rules="qcJobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="表名" path="tableName">
-          <n-input
-              v-model:value="qcJobModalFormModel.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="项目" path="projectName">
-          <n-input
-              v-model:value="qcJobModalFormModel.projectName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="责任人" path="personId">
-          <n-select
-              v-model:value="qcJobModalFormModel.personId"
-              placeholder="选择责任人"
-              :options="personIdOptions"
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createQcJob"
+          class="mt-4"
+          ref="qcJobModalFormRef"
+          :model="qcJobModalFormModel"
+          :rules="qcJobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-input
+                v-model:value="qcJobModalFormModel.tableName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="qcJobModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="qcJobModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
-    <n-form
-        v-if="formSelect.createRh2Job"
-        class="mt-4"
-        ref="rh2JobModalFormRef"
-        :model="rh2JobModalFormModel"
-        :rules="rh2JobModalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="4" :x-gap="4">
-        <n-form-item-gi :span="4" label="表名" path="tableName">
-          <n-input
-              v-model:value="rh2JobModalFormModel.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="项目" path="projectName">
-          <n-input
-              v-model:value="rh2JobModalFormModel.projectName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="4" label="责任人" path="personId">
-          <n-select
-              v-model:value="rh2JobModalFormModel.personId"
-              placeholder="选择责任人"
-              :options="personIdOptions"
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
+      <n-form
+          v-if="formSelect.createRh2Job"
+          class="mt-4"
+          ref="rh2JobModalFormRef"
+          :model="rh2JobModalFormModel"
+          :rules="rh2JobModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
+          <n-form-item-gi :span="4" label="表名" path="tableName">
+            <n-input
+                v-model:value="rh2JobModalFormModel.tableName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="rh2JobModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="rh2JobModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
 
+      <n-form
+          v-if="formSelect.quickCreate"
+          class="mt-4"
+          ref="quickCreateModalFormRef"
+          :model="quickCreateModalFormModel"
+          :rules="quickCreateModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="4" :x-gap="4">
 
+          <n-form-item-gi :span="4" label="项目" path="projectName">
+            <n-input
+                v-model:value="quickCreateModalFormModel.projectName"
+                readonly
+            />
+          </n-form-item-gi>
+
+          <n-form-item-gi :span="4" label="任务选择" path="jobSelect">
+            <n-tree-select
+                v-model:value="quickCreateModalFormModel.jobSelect"
+                multiple
+                cascade
+                checkable
+                :check-strategy="'child'"
+                :options="jobTypeTreeOptionsRef"
+                @update:value="handleJobTreeUpdateValue"
+            />
+          </n-form-item-gi>
+
+          <n-gi v-if="quickCreateModalFormModel.jobSelect.includes('cj')" :span="4">
+            <n-divider style="margin: 0">
+              数据采集任务
+            </n-divider>
+          </n-gi>
+
+          <n-form-item-gi v-if="quickCreateModalFormModel.jobSelect.includes('cj')" :span="4" label="采集来源表"
+                          path="sourceTableName"
+          >
+            <n-select :size="'small'"
+                      v-model:value="quickCreateModalFormModel.sourceTableName"
+                      :options="sourceTableOptions"
+                      filterable
+                      remote
+                      @search="handleSourceTableSearch"
+                      @update:value="handleSourceTableUpdate"
+                      :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+
+          <n-form-item-gi v-if="quickCreateModalFormModel.jobSelect.includes('cj')" :span="4" label="采集目标表"
+                          path="targetTableName"
+          >
+            <n-input :size="'small'"
+                     v-model:value="quickCreateModalFormModel.targetTableName"
+                     readonly
+            />
+          </n-form-item-gi>
+
+          <n-gi v-if="quickCreateModalFormModel.jobSelect.includes('cj')" :span="4">
+            <n-divider style="margin-top: 0"/>
+          </n-gi>
+
+          <n-form-item-gi :span="4" label="责任人" path="personId">
+            <n-select
+                v-model:value="quickCreateModalFormModel.personId"
+                placeholder="选择责任人"
+                :options="personIdOptions"
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
+
+        </n-grid>
+      </n-form>
+
+    </n-scrollbar>
     <template #action>
-      <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
+      <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">创建</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
     </template>
+
   </n-modal>
 
 </template>
@@ -361,10 +445,12 @@ import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
+import {createRkJob} from "@render/utils/datacenter/rkJob";
 import {createZjJob} from "@render/utils/datacenter/zjJob";
 import {Refresh} from '@vicons/ionicons5'
+import {AddSquareMultiple16Regular} from '@vicons/fluent'
 import {parseExpression} from 'cron-parser';
-import {isEmpty} from "lodash-es";
+import {cloneDeep, isEmpty} from "lodash-es";
 import {
   DataTableColumns,
   FormInst,
@@ -372,7 +458,9 @@ import {
   NPopconfirm,
   NSpace,
   NTag,
-  SelectOption, SelectGroupOption
+  SelectOption,
+  SelectGroupOption,
+  TreeSelectOption
 } from "naive-ui";
 import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {uuid} from "vue3-uuid";
@@ -1270,6 +1358,7 @@ const formSelect = ref({
   createRhJob: false,
   createRh2Job: false,
   createQcJob: false,
+  quickCreate: false,
 })
 
 const onNegativeClick = () => {
@@ -1285,6 +1374,7 @@ const onModelAfterLeave = () => {
     createRhJob: false,
     createRh2Job: false,
     createQcJob: false,
+    quickCreate: false,
   }
 }
 
@@ -1455,7 +1545,101 @@ const onPositiveClick = async () => {
     })
   }
 
+  if (formSelect.value.quickCreate) {
+    if (!isEmpty(quickCreateModalFormModel.value.jobSelect)) {
+      quickCreateModalFormRef.value?.validate(async (errors) => {
+        if (!errors) {
+          quickCreate().then(() => {
+            isSaving.value = false
+            showModalRef.value = false
+            formSelect.value.quickCreate = false
+            tableDataInit()
+          })
+        } else {
+          console.log(errors)
+        }
+      })
+    } else {
+      window.$message.warning("未选择任务")
+    }
+  }
+
   isSaving.value = false
+}
+
+const quickCreate = async () => {
+  const project = (await find_by_project_id(queryParam.value.projectId))
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('cj')) {
+    const targetTableColumns = (await get_columns('6', quickCreateModalFormModel.value.targetTableName))
+    if (!isEmpty(targetTableColumns)) {
+      createCjJob({
+        name: `cj_${project.projectAbbr}_${quickCreateModalFormModel.value.tableName}`,
+        sourceTableName: quickCreateModalFormModel.value.sourceTableName,
+        targetTableName: quickCreateModalFormModel.value.targetTableName,
+        projectId: quickCreateModalFormModel.value.projectId,
+        sourceDataSourceId: '7',
+        targetDataSourceId: '6'
+      }, sourceTableColumnsRef.value, targetTableColumns)
+    } else {
+      window.$message.warning('采集目标表不存在')
+    }
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('zj')) {
+    await createZjJob({
+      projectId: quickCreateModalFormModel.value.projectId,
+      personId: quickCreateModalFormModel.value.personId,
+      tableName: quickCreateModalFormModel.value.tableName
+    })
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('bf')) {
+    await createBfJob(quickCreateModalFormModel.value)
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('rh') || quickCreateModalFormModel.value.jobSelect.includes('rh1')) {
+    await createRhJob({
+      projectId: quickCreateModalFormModel.value.projectId,
+      personId: quickCreateModalFormModel.value.personId,
+      tableName: quickCreateModalFormModel.value.tableName
+    }, projectTree.isBasicData, false)
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('rh2')) {
+    await createRhJob({
+      projectId: quickCreateModalFormModel.value.projectId,
+      personId: quickCreateModalFormModel.value.personId,
+      tableName: quickCreateModalFormModel.value.tableName
+    }, projectTree.isBasicData, true)
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('qc')) {
+    await createQcJob(quickCreateModalFormModel.value)
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('rk')) {
+    await createRkJob({
+      name: `rk_${project.projectAbbr}_${quickCreateModalFormModel.value.tableName}`,
+      sourceDataSourceId: '6',
+      sourceTableName: `df_${project?.tableAbbr || ''}_${quickCreateModalFormModel.value.tableName}_dwb`,
+      targetDataSourceId: '8',
+      targetTableName: `sztk_${quickCreateModalFormModel.value.tableName}`,
+      projectId: quickCreateModalFormModel.value.projectId,
+      personId: quickCreateModalFormModel.value.personId
+    }, true, true)
+
+  }
+
+  if (quickCreateModalFormModel.value.jobSelect.includes('gx')) {
+    await createGxJob({
+      name: `gx_${project.projectAbbr}_${quickCreateModalFormModel.value.tableName}`,
+      sourceTableName: `sztk_${quickCreateModalFormModel.value.tableName}`,
+      targetTableName: `gdsztk_${quickCreateModalFormModel.value.tableName}`,
+      projectId: project.projectId
+    })
+  }
+
 }
 
 // region 新增调度任务
@@ -1563,7 +1747,7 @@ const cjJobModalFormRules = {
 const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
 const sourceTableColumnsRef = ref([])
-const targetTableColumnsRef = ref([])
+let targetTableColumnsRef = ref([])
 
 const createCjJobModalInit = async (project, row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
@@ -1706,6 +1890,153 @@ const createQcJobModalInit = (project) => {
 }
 
 //endregion
+
+//region 快捷创建
+const quickCreateModalFormRef = ref<FormInst | null>(null);
+
+const quickCreateModalFormModel = ref({
+  jobSelect: [],
+  sourceDataSourceId: '7',
+  sourceTableName: '',
+  targetTableName: '',
+  tableName: '',
+  projectId: '',
+  projectName: '',
+  personId: ''
+})
+
+const quickCreateModalFormRules = {
+  personId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择责任人'
+  },
+  sourceTableName: {
+    required: true,
+    trigger: ['change'],
+    message: '选择来源表'
+  },
+}
+
+const jobTypeTreeOptionsRef = ref<TreeSelectOption[]>([])
+
+const jobTypeTreeOptionsInit = () => {
+  jobTypeTreeOptionsRef.value = cloneDeep([
+    {
+      label: 'DataX任务',
+      key: '0',
+      children: [
+        {
+          label: '数据采集任务',
+          key: 'cj',
+        },
+        {
+          label: '数据共享任务',
+          key: 'gx',
+          disabled: !projectTree.isBasicData
+        }
+      ]
+    },
+    {
+      label: '工作流任务',
+      key: '1',
+      children: [
+        {
+          label: '数据质检任务',
+          key: 'zj',
+        },
+        {
+          label: '数据备份任务',
+          key: 'bf',
+        },
+        {
+          label: '数据清除任务',
+          key: 'qc',
+        },
+        {
+          label: '数据融合任务',
+          key: 'rh',
+          disabled: !projectTree.isBasicData
+        },
+        {
+          label: '单表融合任务',
+          key: 'rh1',
+          disabled: projectTree.isBasicData
+        },
+        {
+          label: '多表融合任务',
+          key: 'rh2',
+          disabled: projectTree.isBasicData
+        },
+        {
+          label: '数据入库任务',
+          key: 'rk',
+          disabled: !projectTree.isBasicData
+        }
+      ]
+    }
+  ])
+}
+
+const quickCreateModalInit = async () => {
+  modalTitle = '快捷创建任务'
+  formSelect.value.quickCreate = true
+  const project = (await find_by_project_id(queryParam.value.projectId))
+  quickCreateModalFormModel.value.jobSelect = []
+  quickCreateModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toLowerCase()
+  quickCreateModalFormModel.value.projectId = queryParam.value.projectId
+  quickCreateModalFormModel.value.projectName = project.projectName
+
+  handleJobTreeOptionsUpdate()
+
+  showModalRef.value = true
+}
+
+const handleJobTreeOptionsUpdate = () => {
+
+  //先获取已创建的任务名
+  const disabledJobs = tableDataRef.value.filter(job => job.status != -1).map((
+      v => (v.jobName.split('_')[0])
+  ))
+
+  jobTypeTreeOptionsInit()
+
+  jobTypeTreeOptionsRef.value = updateTreeOptionDisabledByKey(jobTypeTreeOptionsRef.value, disabledJobs)
+
+  if (!jobTypeTreeOptionsRef.value[0].children.some((child) => !child.disabled)) {
+    jobTypeTreeOptionsRef.value[0].disabled = true
+  }
+
+  if (!jobTypeTreeOptionsRef.value[1].children.some((child) => !child.disabled)) {
+    jobTypeTreeOptionsRef.value[1].disabled = true
+  }
+}
+
+const updateTreeOptionDisabledByKey = (treeOptions: TreeSelectOption[], disableKeys: string[]) => {
+  for (const option of treeOptions) {
+    if (disableKeys.includes(option.key as string)) {
+      // 找到了指定的节点，更新其 disabled 属性
+      option.disabled = true;
+      // 检查是否需要更新父节点的 disabled 属性
+      // checkParentNodeDisabled(treeOptions, option.key as string);
+    }
+    if (option.children) {
+      // 继续递归查找子节点
+      updateTreeOptionDisabledByKey(option.children, disableKeys);
+    }
+  }
+  return treeOptions
+}
+
+const handleJobTreeUpdateValue = async (v) => {
+  if (v.includes('cj')) {
+    const project = (await find_by_project_id(queryParam.value.projectId))
+    sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
+    quickCreateModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${quickCreateModalFormModel.value.tableName}_temp_ods`
+  }
+}
+//endregion
+
 </script>
 
 <style scoped>

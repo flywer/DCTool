@@ -212,7 +212,6 @@ const handleSelectedKeys = (keys: Array<string>) => {
   useProjectTreeStore().defaultSelectedKeys = keys as string[]
 }
 
-
 </script>
 
 <style scoped>

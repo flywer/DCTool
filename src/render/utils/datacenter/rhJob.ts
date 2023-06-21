@@ -50,7 +50,6 @@ export const buildRhJson = async (formModel: RhFormModelType, templateJson: any,
 
 export const createRhJob = async (formModel: RhFormModelType, isBasicData: boolean, isMultiTableJson: boolean) => {
     let templateJsonStr
-
     if (formModel.jobJsonId != undefined) {
         const jobJson = await get_rh_json_by_id(Number(formModel.jobJsonId));
         if (isMultiTableJson) {
@@ -63,7 +62,6 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
     } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
 
         const jobJson = await get_rh_json(formModel.tableName)
-
         if (jobJson.length > 0) {
             // 若不知道jsonId则使用tableName获取json
             if (isMultiTableJson) {
@@ -81,7 +79,15 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
     if (paramsJson != null) {
         add_work_flow(paramsJson).then((res) => {
             if (res.code == 200) {
-                window.$message.success('融合任务创建成功')
+                if (isBasicData) {
+                    window.$message.success('融合任务创建成功')
+                } else {
+                    if (isMultiTableJson) {
+                        window.$message.success('多表融合任务创建成功')
+                    } else {
+                        window.$message.success('单表融合任务创建成功')
+                    }
+                }
             } else {
                 window.$message.error(res.message)
             }

@@ -92,16 +92,12 @@
 
 <script setup lang="ts">
 import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {add_work_flow, get_columns} from "@render/api/datacenter";
-import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {add_work_flow} from "@render/api/datacenter";
+import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
-import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
-import {removeIds} from "@render/utils/datacenter/removeIds";
-import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {isEmpty} from "lodash-es";
+import {buildRkJson} from "@render/utils/datacenter/rkJob";
 import {FormInst} from "naive-ui";
 import {ref, watch} from 'vue'
-import {format} from 'sql-formatter';
 
 const formRef = ref<FormInst | null>(null);
 
@@ -174,9 +170,9 @@ watch(
     async ([projectId, tableName, dataType]) => {
       tableName = tableName.toLowerCase()
       if (dataType == 1) {
-        const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
-        formModel.value.name = `rk_${projectAbbr}_${tableName}`
-        formModel.value.sourceTableName = `df_${(await find_by_project_id(formModel.value.projectId))?.tableAbbr || ''}_${tableName}_dwb`
+        const project = (await find_by_project_id(projectId))
+        formModel.value.name = `rk_${project?.projectAbbr || ''}_${tableName}`
+        formModel.value.sourceTableName = `df_${project?.tableAbbr || ''}_${tableName}_dwb`
       } else {
         formModel.value.projectId = '26'
         const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
@@ -191,6 +187,7 @@ watch(
 const removeIdCheckRef = ref(true)
 const removeDiffCheckRef = ref(true)
 
+const paramsJsonRef = ref(null)
 const insertSqlRef = ref('')
 const isGenerating = ref(false)
 
@@ -208,41 +205,15 @@ const generateSql = () => {
   formRef.value?.validate(
       async (errors) => {
         if (!errors) {
-          let sourceTableColumns = (await get_columns(formModel.value.sourceDataSourceId, formModel.value.sourceTableName, true))
 
-          if (isEmpty(sourceTableColumns)) {
-            window.$message.warning('来源表不存在')
-            insertSqlRef.value = ''
-            return 0
-          }
-
-          let targetTableColumns = (await get_columns(formModel.value.targetDataSourceId, formModel.value.targetTableName, true))
-
-          if (isEmpty(targetTableColumns)) {
-            window.$message.warning('目标表不存在')
-            insertSqlRef.value = ''
-            return 0
-          }
-
-          if (removeIdCheckRef.value) {
-            sourceTableColumns = sourceTableColumns.filter(c => c !== 'id')
-            targetTableColumns = targetTableColumns.filter(c => c !== 'id')
-          }
-          if (removeDiffCheckRef.value) {
-            const elements = findCommonElements(sourceTableColumns, targetTableColumns);
-            sourceTableColumns = elements.commonArr1
-            targetTableColumns = elements.commonArr2
-          }
-
-          // 因中台问题，需要为hive表的字段取一个与目标表相同的别名
-          const columnMappings = targetTableColumns.map((targetColumn, index) => {
-            const sourceColumn = sourceTableColumns[index];
-            return `${sourceColumn} as ${targetColumn}`;
+          buildRkJson(formModel.value, removeIdCheckRef.value, removeDiffCheckRef.value).then((res) => {
+            paramsJsonRef.value = res
+            insertSqlRef.value = res.dataDevBizVo.sparkSqlDtoList[0].sql
+            isGenerating.value = false
+          }).catch(() => {
+            isGenerating.value = false
           })
 
-          insertSqlRef.value = format(`INSERT INTO ${formModel.value.targetTableName} (${targetTableColumns.join(',')})
-                                       SELECT ${columnMappings.join(',')}
-                                       FROM ${formModel.value.sourceTableName}`, {language: 'mysql'})
         } else {
           console.error(errors)
         }
@@ -250,53 +221,7 @@ const generateSql = () => {
       (rule) => {
         return rule?.key === 'table'
       }
-  ).then(() => {
-    isGenerating.value = false
-  }).catch(() => {
-    isGenerating.value = false
-  })
-}
-
-let paramsModel = {
-  name: '',
-  email: '',
-  description: '',
-  personId: '',
-  personName: '',
-  projectId: '',
-  projectName: "",
-  crontab: "",
-  type: "流程",
-  code: 'sjk07f499ef4b934d79ae56629a061b699e',
-  modelXml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:flowable=\"http://flowable.org/bpmn\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\" typeLanguage=\"http://www.w3.org/2001/XMLSchema\" expressionLanguage=\"http://www.w3.org/1999/XPath\" targetNamespace=\"http://www.flowable.org/processdef\" exporter=\"Flowable Open Source Modeler\" exporterVersion=\"6.7.2\">\n    <process id=\"sjk07f499ef4b934d79ae56629a061b699e\" name=\"sjk07f499ef4b934d79ae56629a061b699e\" isExecutable=\"true\">\n        <startEvent id=\"sjkc233d8c7359c461d89a6f4f83ceb77f7\" name=\"开始\" flowable:formFieldValidation=\"true\"/>\n        <userTask id=\"sjkf3fc13bd07f545f0a386877d5302f525\" name=\"数据开发(Spark SQL)\" flowable:formFieldValidation=\"true\">\n            <extensionElements>\n                <flowable:taskListener event=\"create\" delegateExpression=\"${dataDevSpTaskListener}\"/>\n            </extensionElements>\n        </userTask>\n        <endEvent id=\"sjk9c827209d3dc4818a253b7aad07389e8\" name=\"结束\"/>\n        <sequenceFlow id=\"sjk27cb39ec79244ef9a1027ce58c9fed06\" name=\"TDBS-Hive\" sourceRef=\"sjkc233d8c7359c461d89a6f4f83ceb77f7\" targetRef=\"sjkf3fc13bd07f545f0a386877d5302f525\"/>\n        <sequenceFlow id=\"sjk190be68c0ab2414da5c1d58baf493f07\" name=\"MySQL\" sourceRef=\"sjkf3fc13bd07f545f0a386877d5302f525\" targetRef=\"sjk9c827209d3dc4818a253b7aad07389e8\"/>\n    </process>\n</definitions>",
-  modelJson: "{\"nodeList\":[{\"id\":\"sjkc233d8c7359c461d89a6f4f83ceb77f7\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/ea223490b8676e353d40480c6b4d6de4.svg\",\"size\":\"20\",\"type\":\"startProcess\",\"name\":\"开始\"},{\"id\":\"sjk84954b619bad4ebaac32323abefea6eb\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"sourceTable\"},{\"id\":\"sjk5db9e53230de434dae1f70247d425daa\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/3d8232390940992d1515b8af2150bbc4.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"MySQL\",\"name\":\"MySQL\",\"databaseName\":8,\"tableName\":\"targetTable\"},{\"id\":\"sjkf3fc13bd07f545f0a386877d5302f525\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/71f2f583f082a8d659c9336cab5dc360.svg\",\"size\":\"20\",\"delegateExpression\":\"dataDevSpTaskListener\",\"type\":\"component\",\"name\":\"数据开发(Spark SQL)\",\"taskType\":\"TDBS-Hive\"},{\"id\":\"sjk9c827209d3dc4818a253b7aad07389e8\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/fc24a27468b1b125d7cf415739058b41.svg\",\"size\":\"20\",\"type\":\"endProcess\",\"name\":\"结束\"}],\"edgesList\":[{\"from\":\"sjkc233d8c7359c461d89a6f4f83ceb77f7\",\"to\":\"sjk84954b619bad4ebaac32323abefea6eb\",\"id\":\"sjkdb1de0a2d7a44c5d8077488e9aeb9a74\"},{\"from\":\"sjk84954b619bad4ebaac32323abefea6eb\",\"to\":\"sjkf3fc13bd07f545f0a386877d5302f525\",\"id\":\"sjk27cb39ec79244ef9a1027ce58c9fed06\"},{\"from\":\"sjkf3fc13bd07f545f0a386877d5302f525\",\"to\":\"sjk5db9e53230de434dae1f70247d425daa\",\"id\":\"sjkaea574ab40654d148a0e402b926904aa\"},{\"from\":\"sjk5db9e53230de434dae1f70247d425daa\",\"to\":\"sjk9c827209d3dc4818a253b7aad07389e8\",\"id\":\"sjk190be68c0ab2414da5c1d58baf493f07\"}]}",
-  dataDevBizVo: {
-    dataSyncDtoList: [],
-    qualityInspectionDtoList: [],
-    sparkSqlDtoList: [
-      {
-        taskType: "TDBS-HIVE2MYSQL",
-        sourceDBId: [],
-        targetDBId: '',
-        sql: "",
-        sourceTable: [
-          ""
-        ],
-        targetTable: "",
-        sparkConfig: {
-          saveMode: "overwrite"
-        },
-        taskInfoDto: {
-          taskDefKey: "sjkf3fc13bd07f545f0a386877d5302f525"
-        },
-        id: "sjkf3fc13bd07f545f0a386877d5302f525"
-      }
-    ],
-    mySqlDtoList: [],
-    postgreSqlDtoList: [],
-    trinoSqlDtoList: [],
-    conversionDtoList: []
-  }
+  )
 }
 
 const isLoading = ref(false)
@@ -307,30 +232,7 @@ const addWorkFlow = () => {
   formRef.value?.validate(
       (errors) => {
         if (!errors) {
-
-          paramsModel.modelJson = paramsModel.modelJson.replace(/sourceTable/g, `${formModel.value.sourceTableName}`).replace(/targetTable/g, `${formModel.value.targetTableName}`)
-
-          paramsModel = JSON.parse(updateSjkUUID(removeIds(paramsModel)))
-
-          paramsModel.name = formModel.value.name
-          paramsModel.projectId = formModel.value.projectId
-          paramsModel.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label as string
-          paramsModel.personId = formModel.value.personId
-          paramsModel.personName = personIdOptions.find(option => option.value === formModel.value.personId).label as string
-          paramsModel.email = formModel.value.email
-          paramsModel.description = formModel.value.description
-
-          const sourceDatasource = datasourceOptions.find(option => option.value === formModel.value.sourceDataSourceId).datasource as string;
-          const targetDataSource = datasourceOptions.find(option => option.value === formModel.value.targetDataSourceId).datasource as string;
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].taskType = `${sourceDatasource.toUpperCase()}2${targetDataSource.toUpperCase()}`
-
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].sourceDBId = [`${formModel.value.sourceDataSourceId}`]
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].targetDBId = formModel.value.targetDataSourceId
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].sql = insertSqlRef.value
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].sourceTable = [`${formModel.value.sourceTableName}`]
-          paramsModel.dataDevBizVo.sparkSqlDtoList[0].targetTable = formModel.value.targetTableName
-
-          add_work_flow(paramsModel).then((res) => {
+          add_work_flow(paramsJsonRef.value).then((res) => {
             if (res.code == 200) {
               window.$message.success('入库任务创建成功')
             } else {

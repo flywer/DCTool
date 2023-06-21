@@ -159,7 +159,7 @@ const tableDataInit = async () => {
       page: 1,
       sourceId: 6,
       likeValue: queryParam.value
-    })).data.records || []
+    })).data?.records || []
   }
 
   isTableLoading.value = false
@@ -200,8 +200,17 @@ const createColumns = (): DataTableColumns<Table> => {
                updateTableComment(row)
              }
            }, {default: () => '修改表注解'}), */
-          showConfirmation('清空', () => {
-            tableTruncate(row)
+          h(NPopconfirm, {
+            positiveText: '确定',
+            negativeText: '取消',
+            onPositiveClick: async () => {
+              await onPositiveClick();
+            },
+          }, {
+            trigger: () => {
+              return h(NButton, {size: 'small'}, {default: () => '清空'})
+            },
+            default: () => `确定要使用[TRUNCATE]命令清空吗？`
           }),
           showConfirmation('删除', () => {
             tableDelete(row)
