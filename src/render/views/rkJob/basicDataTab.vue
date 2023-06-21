@@ -234,8 +234,14 @@ const generateSql = () => {
             targetTableColumns = elements.commonArr2
           }
 
+          // 因中台问题，需要为hive表的字段取一个与目标表相同的别名
+          const columnMappings = targetTableColumns.map((targetColumn, index) => {
+            const sourceColumn = sourceTableColumns[index];
+            return `${sourceColumn} as ${targetColumn}`;
+          })
+
           insertSqlRef.value = format(`INSERT INTO ${formModel.value.targetTableName} (${targetTableColumns.join(',')})
-                                       SELECT ${sourceTableColumns.join(',')}
+                                       SELECT ${columnMappings.join(',')}
                                        FROM ${formModel.value.sourceTableName}`, {language: 'mysql'})
         } else {
           console.error(errors)

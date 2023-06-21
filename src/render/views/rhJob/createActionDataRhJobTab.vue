@@ -216,7 +216,7 @@ const addWorkFlow = () => {
             multiTableJson.dependencyWorkflowName = res1.data.procName
             multiTableJson.schedulingMode = 1
 
-            multiTableJsonRef.value = JSON.stringify(multiTableJson,null,2)
+            multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
           }
           console.log(multiTableJsonRef.value)
           add_work_flow(JSON.parse(multiTableJsonRef.value)).then(res2 => {
