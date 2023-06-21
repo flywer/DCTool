@@ -170,9 +170,11 @@ const getExistTableProject = async (node: TreeOption) => {
 
     //调度任务
     const SchedJobs = (await get_sched_job_page(
-        1,
-        10000,
-        projectAbbr,
+        {
+          current: 1,
+          size: 10000,
+          blurry: projectAbbr
+        }
     )).data.records.map((v) => ({
       tableAbbr: v.jobContent.split('_')[2]
     })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {

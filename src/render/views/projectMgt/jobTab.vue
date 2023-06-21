@@ -407,11 +407,6 @@ const queryParam = ref({
 
 const title = ref('')
 
-const allSchedJobInfoRef = ref([])
-const getAllSchedJobInfo = async (param?: string) => {
-  allSchedJobInfoRef.value = (await get_sched_job_page(1, 10000, param || '')).data.records
-}
-
 const projectRef = ref(null)
 
 onMounted(async () => {
@@ -464,8 +459,6 @@ const tableDataInit = async () => {
 
   const project = (await find_by_project_id(queryParam.value.projectId))
 
-  await getAllSchedJobInfo(project.projectAbbr)
-
   setTitle(project)
 
   const projectAbbr = project?.projectAbbr || '';
@@ -477,43 +470,48 @@ const tableDataInit = async () => {
       blurry: `${projectAbbr}_${queryParam.value.tableAbbr}`,
       subsystemName: "采集"
     })).data.records
-        .map((v): Job => ({
-          id: v.id,
-          jobName: v.jobDesc,
-          status: (() => {
-            if (v.configuration == 0) {
-              return 0
+
+    let newDataXJobs = []
+
+    for (const v of dataXJobs) {
+      const schedJob = await getSchedJob(v)
+
+      const job: Job = {
+        id: v.id,
+        jobName: v.jobDesc,
+        status: (() => {
+          if (v.configuration == 0) {
+            return 0
+          } else {
+            if (schedJob?.triggerStatus == 1) {
+              return 2
             } else {
-              const triggerStatus = allSchedJobInfoRef.value.find(item => item.jobTemplateId == v.id)?.triggerStatus
-              if (triggerStatus == 1) {
-                return 2
-              } else {
-                return 1
-              }
+              return 1
             }
-          })(),  //
-          type: (() => {
-            switch (v.jobDesc.split('_')[0]) {
-              case 'cj':
-                return '数据采集任务'
-              case 'gx':
-                return '数据共享任务'
-              default :
-                return '未知任务'
-            }
-          })(),
-          schedMode: 2,
-          cron: (() => {
-            return allSchedJobInfoRef.value.find(item => item.jobTemplateId == v.id)?.jobCron || null
-          })(),
-          lastExecTime: v.triggerLastTime || '--',
-          nextExecTime: cjJobGetNextExecTime(v.id),
-          createBy: null
-        }))
+          }
+        })(),
+        type: (() => {
+          switch (v.jobDesc.split('_')[0]) {
+            case 'cj':
+              return '数据采集任务'
+            case 'gx':
+              return '数据共享任务'
+            default :
+              return '未知任务'
+          }
+        })(),
+        schedMode: 2,
+        cron: schedJob?.jobCron || null,
+        lastExecTime: v.triggerLastTime || '--',
+        nextExecTime: cjJobGetNextExecTime(schedJob),
+        createBy: null
+      }
+      newDataXJobs.push(job)
+    }
 
     // 若不存在采集任务
-    if (!dataXJobs.some(job => job.type === '数据采集任务')) {
-      dataXJobs.push({
+    if (!newDataXJobs.some(job => job.type === '数据采集任务')) {
+      newDataXJobs.push({
         id: null,
         jobName: `cj_${projectAbbr}_${queryParam.value.tableAbbr}`,
         status: -1,
@@ -528,7 +526,7 @@ const tableDataInit = async () => {
 
     // 行为数据的共享任务不显示
     if (!projectTree.isBasicData) {
-      dataXJobs = dataXJobs.filter(job => job.type !== '数据共享任务')
+      newDataXJobs = newDataXJobs.filter(job => job.type !== '数据共享任务')
     }
 
     //工作流任务
@@ -539,7 +537,7 @@ const tableDataInit = async () => {
       procName: `${projectAbbr}_${queryParam.value.tableAbbr}`
     })).data.records
 
-    let newJobs = []
+    let newWorkflowJobs = []
 
     for (const v of workflowJobs) {
       const job = {
@@ -589,18 +587,18 @@ const tableDataInit = async () => {
         code: v.procCode
       }
 
-      newJobs.push(job)
+      newWorkflowJobs.push(job)
     }
 
     // 添加未创建的任务
-    newJobs = pushUnExistJobs(newJobs, projectAbbr)
+    newWorkflowJobs = pushUnExistJobs(newWorkflowJobs, projectAbbr)
 
     // 行为数据的共享任务不显示
     if (!projectTree.isBasicData) {
-      newJobs = newJobs.filter(job => job.type !== '数据入库任务')
+      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据入库任务')
     }
 
-    jobs.push(...dataXJobs, ...newJobs)
+    jobs.push(...newDataXJobs, ...newWorkflowJobs)
   } else {
     tableDataRef.value = []
   }
@@ -608,6 +606,24 @@ const tableDataInit = async () => {
   tableDataRef.value = jobs.sort(compare)
 
   isTableLoading.value = false
+}
+
+const getSchedJob = async (v) => {
+  return (await get_sched_job_page({
+    current: 1,
+    size: 10000,
+    jobContent: v.jobDesc
+  })).data.records[0] || null
+}
+
+const cjJobGetNextExecTime = (schedJob: any) => {
+  const jobCron = schedJob?.jobCron || null
+  if (jobCron != null) {
+    const interval = parseExpression(convertToSixFields(jobCron));
+    return formatDate(interval.next().toDate())
+  } else {
+    return '未配置调度任务'
+  }
 }
 
 const pushUnExistJobs = (newJobs: any[], projectAbbr: string) => {
@@ -897,21 +913,21 @@ const createColumns = (): DataTableColumns<Job> => {
                 formSelect.value.addSchedJob = true
               }),
               showConfirmation('删除', async () => {
-                await cjJobDelete(row.id)
+                await cjJobDelete(row)
               }),
             ]
             break
           case  1: // 任务停用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
-                showButton('启用', async () => {
-                  cjJobStart(row.id)
+                showButton('启用', () => {
+                  cjJobStart(row)
                 }),
-                showConfirmation('执行', async () => {
+                showConfirmation('执行', () => {
                   cjJobRun(row)
                 }),
                 showConfirmation('删除', async () => {
-                  await cjJobDelete(row.id)
+                  await cjJobDelete(row)
                 }),
               ]
             } else {
@@ -932,15 +948,15 @@ const createColumns = (): DataTableColumns<Job> => {
           case 2:// 任务启用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
-                showButton('停用', async () => {
-                  cjJobStop(row.id)
+                showButton('停用', () => {
+                  cjJobStop(row)
                 }),
-                showConfirmation('执行', async () => {
+                showConfirmation('执行', () => {
                   cjJobRun(row)
                 }),
                 showConfirmation('删除', async () => {
-                  await cjJobStop(row.id)
-                  await cjJobDelete(row.id)
+                  await cjJobStop(row)
+                  await cjJobDelete(row)
                 }),
               ]
             } else {
@@ -1145,8 +1161,8 @@ const workflowDelete = (id) => {
   })
 }
 
-const cjJobStart = (id) => {
-  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id).id
+const cjJobStart = async (row: Job) => {
+  const schedJobId = (await getSchedJob(row.jobName)).id
   cj_job_start(schedJobId).then(res => {
     if (res.data == 'success') {
       window.$message.success('启用成功')
@@ -1157,8 +1173,8 @@ const cjJobStart = (id) => {
   })
 }
 
-const cjJobStop = (id) => {
-  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id).id
+const cjJobStop = async (row: Job) => {
+  const schedJobId = (await getSchedJob(row.jobName)).id
   cj_job_stop(schedJobId).then(res => {
     if (res.data == 'success') {
       window.$message.success('停用成功')
@@ -1169,8 +1185,8 @@ const cjJobStop = (id) => {
   })
 }
 
-const cjJobRun = (row: Job) => {
-  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == row.id).id
+const cjJobRun = async (row: Job) => {
+  const schedJobId = (await getSchedJob(row.jobName)).id
   cj_job_run({
     jobId: schedJobId,
     subsystemName: "采集"
@@ -1184,13 +1200,13 @@ const cjJobRun = (row: Job) => {
   })
 }
 
-const cjJobDelete = (id) => {
-  const schedJobId = allSchedJobInfoRef.value.find(item => item.jobTemplateId == id)?.id || null
+const cjJobDelete = async (row: Job) => {
+  const schedJobId = (await getSchedJob(row.jobName)).id
   if (schedJobId != null) {
     sched_job_delete(schedJobId).then(res => {
       if (res.code == 0) {
         window.$message.success('调度任务删除成功')
-        cj_job_delete(id).then(res1 => {
+        cj_job_delete(row.id).then(res1 => {
           if (res1.code == 0) {
             window.$message.success('采集任务删除成功')
             tableDataInit()
@@ -1203,7 +1219,7 @@ const cjJobDelete = (id) => {
       }
     })
   } else {
-    cj_job_delete(id).then(res1 => {
+    cj_job_delete(row.id).then(res1 => {
       if (res1.code == 0) {
         window.$message.success('采集任务删除成功')
         tableDataInit()
@@ -1218,16 +1234,6 @@ const cjJobDelete = (id) => {
 const convertToSixFields = (cron: string): string => {
   const fields = cron.split(' ');
   return `${fields[0]} ${fields[1]} ${fields[2]} ${fields[3]} ${fields[4]} ${fields[5]}`;
-}
-
-const cjJobGetNextExecTime = (jobId: any) => {
-  const jobCron = allSchedJobInfoRef.value.find(item => item.jobTemplateId == jobId)?.jobCron || null
-  if (jobCron != null) {
-    const interval = parseExpression(convertToSixFields(jobCron));
-    return formatDate(interval.next().toDate())
-  } else {
-    return '未配置调度任务'
-  }
 }
 
 const workflowJobGetNextExecTime = (v) => {

@@ -106,15 +106,26 @@ export const get_workflow_page = async (obj: any) => {
     return data
 }
 
-export const get_cj_job_page = async (obj: CommonQueryParam) => {
+export type DataXJobQueryParams = {
+    current: number,
+    size: number,
+    blurry?: string,
+    jobDesc?: string,
+    jobContent?: string,
+    projectName?: string,
+    subsystemName?: '采集'
+}
+
+export const get_cj_job_page = async (obj: DataXJobQueryParams) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobPage, JSON.stringify(obj)))
     return data
 }
 
-export const get_sched_job_page = async (current: number, size: number, blurry: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getSchedJobPage, current, size, blurry))
+export const get_sched_job_page = async (obj: DataXJobQueryParams) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getSchedJobPage, JSON.stringify(obj)))
     return data
 }
+
 export const workflow_active = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowActive, JSON.stringify(obj)))
     return data

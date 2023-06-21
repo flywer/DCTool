@@ -241,12 +241,35 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getSchedJobPage)
-    public async handleGetSchedJobPage(current: number, size: number, blurry: string) {
+    public async handleGetSchedJobPage(obj: string) {
         let result
 
-        const query = `current=${current}&size=${size}&blurry=${blurry}&subsystemName=%E9%87%87%E9%9B%86`;
+        const params = JSON.parse(obj)
 
-        await this.commonGetRequest('/gather/api/job/pageList', query).then((res) => {
+        let paramStr = '';
+        if (params.current !== undefined) {
+            paramStr += `current=${params.current}&`;
+        }
+        if (params.size !== undefined) {
+            paramStr += `size=${params.size}&`;
+        }
+        if (params.blurry !== undefined) {
+            paramStr += `blurry=${params.blurry}&`;
+        }
+        if (params.jobContent !== undefined) {
+            paramStr += `jobContent=${params.jobContent}&`;
+        }
+        if (params.jobDesc !== undefined) {
+            paramStr += `jobContent=${params.jobDesc}&`;
+        }
+        if (params.projectName !== undefined) {
+            paramStr += `jobContent=${params.projectName}&`;
+        }
+        if (params.subsystemName !== undefined) {
+            paramStr += `subsystemName=${encodeURIComponent(params.subsystemName)}&`;
+        }
+
+        await this.commonGetRequest('/gather/api/job/pageList', paramStr.slice(0, -1)).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);
