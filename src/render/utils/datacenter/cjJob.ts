@@ -1,5 +1,6 @@
 import {add_datax_job, build_datax_json} from "@render/api/datacenter";
 import {findCommonElementsByArr2} from "@render/utils/datacenter/findCommonElements";
+import {cloneDeep} from "lodash-es";
 
 export type CjFormModelType = {
     name: string,
@@ -10,7 +11,7 @@ export type CjFormModelType = {
     projectId: string
 }
 
-let paramsJson = {
+const templateJson = {
     readerModel: {
         datasourceType: "mysql",
         datasourceId: '8',
@@ -119,6 +120,8 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
 
         return null
     } else {
+        let paramsJson = cloneDeep(templateJson)
+
         paramsJson.jobDesc = formModel.name
         paramsJson.projectId = formModel.projectId
 

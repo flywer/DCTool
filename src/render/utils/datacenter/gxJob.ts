@@ -1,4 +1,5 @@
 import {add_datax_job, build_datax_json, get_columns} from "@render/api/datacenter";
+import {cloneDeep} from "lodash-es";
 
 export type GxFormModelType = {
     name: string,
@@ -7,7 +8,7 @@ export type GxFormModelType = {
     projectId: string
 }
 
-let paramsJson = {
+const templateJson = {
     readerModel: {
         datasourceType: "mysql",
         datasourceId: '8',
@@ -90,6 +91,9 @@ let paramsJson = {
 }
 
 export const buildGxJson = async (formModel: GxFormModelType) => {
+
+        let paramsJson = cloneDeep(templateJson)
+
     paramsJson.jobDesc = formModel.name
     paramsJson.projectId = formModel.projectId
 

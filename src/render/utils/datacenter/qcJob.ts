@@ -3,6 +3,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
+import {cloneDeep} from "lodash-es";
 
 export type QcFormModelType = {
     personId: string,
@@ -10,7 +11,7 @@ export type QcFormModelType = {
     tableName: string
 }
 
-let paramsJson = {
+const templateJson = {
     name: '',
     email: '',
     description: '',
@@ -61,6 +62,8 @@ export const buildQcJson = async (formModel: QcFormModelType) => {
     formModel.tableName = formModel.tableName.toLowerCase()
 
     const tableName = `di_${project?.tableAbbr}_${formModel.tableName}_temp_ods`
+
+    let paramsJson = cloneDeep(templateJson)
 
     paramsJson.modelJson = paramsJson.modelJson.replace(/sourceTable/g, `${tableName}`).replace(/targetTable/g, `${tableName}`)
 

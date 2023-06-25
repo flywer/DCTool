@@ -3,6 +3,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
+import {cloneDeep} from "lodash-es";
 
 export type BfFormModelType = {
     personId: string,
@@ -10,7 +11,7 @@ export type BfFormModelType = {
     tableName: string
 }
 
-let paramsJson = {
+const templateJson = {
     name: '',
     email: '',
     description: '',
@@ -62,6 +63,8 @@ export const buildBfJson = async (formModel: BfFormModelType) => {
 
     const sourceTable = `di_${project?.tableAbbr}_${formModel.tableName}_temp_ods`
     const targetTable = `di_${project?.tableAbbr}_${formModel.tableName}_ods`
+
+    let paramsJson = cloneDeep(templateJson)
 
     paramsJson.modelJson = paramsJson.modelJson.replace(/sourceTable/g, `${sourceTable}`).replace(/targetTable/g, `${targetTable}`)
 

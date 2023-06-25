@@ -205,7 +205,6 @@ const generateSql = () => {
   formRef.value?.validate(
       async (errors) => {
         if (!errors) {
-
           buildRkJson(formModel.value, removeIdCheckRef.value, removeDiffCheckRef.value).then((res) => {
             paramsJsonRef.value = res
             insertSqlRef.value = res.dataDevBizVo.sparkSqlDtoList[0].sql

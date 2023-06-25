@@ -3,7 +3,7 @@ import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typi
 import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {isEmpty} from "lodash-es";
+import {cloneDeep, isEmpty} from "lodash-es";
 import {format} from "sql-formatter";
 
 export type RkFormModelType = {
@@ -55,7 +55,7 @@ export const buildSql = async (formModel: RkFormModelType, isRemoveId: boolean, 
                    FROM ${formModel.sourceTableName}`, {language: 'mysql'})
 }
 
-let paramsJson = {
+const templateJson = {
     name: '',
     email: '',
     description: '',
@@ -98,6 +98,9 @@ let paramsJson = {
 }
 
 export const buildRkJson = async (formModel: RkFormModelType, isRemoveId: boolean, isRemoveDiff: boolean) => {
+
+    let paramsJson = cloneDeep(templateJson)
+
     paramsJson.modelJson = paramsJson.modelJson.replace(/sourceTable/g, `${formModel.sourceTableName}`).replace(/targetTable/g, `${formModel.targetTableName}`)
 
     paramsJson = JSON.parse(updateSjkUUID(removeIds(paramsJson)))
@@ -119,6 +122,8 @@ export const buildRkJson = async (formModel: RkFormModelType, isRemoveId: boolea
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].sql = await buildSql(formModel, isRemoveId, isRemoveDiff)
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].sourceTable = [`${formModel.sourceTableName}`]
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].targetTable = formModel.targetTableName
+
+    console.log(paramsJson)
 
     return paramsJson
 }

@@ -48,7 +48,7 @@ export const buildRhJson = async (formModel: RhFormModelType, templateJson: any,
     return templateJson
 }
 
-let paramsJson = {
+const templateJson = {
     name: '',
     email: '',
     description: '',
@@ -96,7 +96,7 @@ let paramsJson = {
 
 export const buildRh2Json = async (formModel: RhFormModelType) => {
 
-    let templateJson = cloneDeep(paramsJson)
+    let paramsJson = cloneDeep(templateJson)
 
     const project = await find_by_project_id(formModel.projectId)
     const projectAbbr = project?.projectAbbr || ''
@@ -104,19 +104,19 @@ export const buildRh2Json = async (formModel: RhFormModelType) => {
 
     const primId = (await get_table_sql({tableName: formModel.tableName}))[0].pColName as string
 
-    templateJson.name = `rh2_${projectAbbr}_${formModel.tableName.toLowerCase()}`
-    templateJson.personId = formModel.personId
-    templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
-    templateJson.projectId = formModel.projectId
-    templateJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label as string
+    paramsJson.name = `rh2_${projectAbbr}_${formModel.tableName.toLowerCase()}`
+    paramsJson.personId = formModel.personId
+    paramsJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
+    paramsJson.projectId = formModel.projectId
+    paramsJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label as string
 
-    templateJson = JSON.parse(JSON.stringify(templateJson)
+    paramsJson = JSON.parse(JSON.stringify(paramsJson)
         .replaceAll('tableName', formModel.tableName.toLowerCase())
         .replaceAll('depart', tableAbbr.toLowerCase())
         .replaceAll('primId', primId.toLowerCase())
     )
 
-    return JSON.parse(updateSjkUUID(removeIds(templateJson)))
+    return JSON.parse(updateSjkUUID(removeIds(paramsJson)))
 }
 
 export const createRhJob = async (formModel: RhFormModelType, isBasicData: boolean, isMultiTableJson: boolean) => {
