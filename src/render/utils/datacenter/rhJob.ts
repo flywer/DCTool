@@ -104,8 +104,6 @@ export const buildRh2Json = async (formModel: RhFormModelType) => {
 
     const primId = (await get_table_sql({tableName: formModel.tableName}))[0].pColName as string
 
-    console.log(primId)
-
     templateJson.name = `rh2_${projectAbbr}_${formModel.tableName.toLowerCase()}`
     templateJson.personId = formModel.personId
     templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
@@ -151,7 +149,6 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
     let paramsJson
     if (isMultiTableJson) {
         paramsJson = rh2Json
-        console.log(paramsJson)
     } else {
         paramsJson = await buildRhJson(formModel, JSON.parse(templateJsonStr), isBasicData);
     }

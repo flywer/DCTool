@@ -162,7 +162,7 @@ const generate = () => {
   formRef.value?.validate(async (errors) => {
     if (!errors) {
       const rh1Json = JSON.parse(tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).rh1Json as string)
-      const rh2Json = JSON.parse(tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).rh2Json as string)
+      // const rh2Json = JSON.parse(tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).rh2Json as string)
       const tableName = (tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).label as string).toLowerCase()
 
       if (rh1Json != null) {
@@ -178,17 +178,13 @@ const generate = () => {
         window.$message.warning("单表融合JSON为空")
       }
 
-      if (rh2Json != null) {
-        const multiTableJson = await buildRh2Json({
-          personId: formModel.value.personId,
-          projectId: formModel.value.projectId,
-          tableName: tableName
-        })
+      const multiTableJson = await buildRh2Json({
+        personId: formModel.value.personId,
+        projectId: formModel.value.projectId,
+        tableName: tableName
+      })
 
-        multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
-      } else {
-        window.$message.warning("多表融合JSON为空")
-      }
+      multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
 
     } else {
       console.log(errors)
