@@ -41,6 +41,7 @@ import {RouterLink} from "vue-router";
 import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
+import {LibraryAddOutlined} from '@vicons/material'
 import {AppsListDetail20Filled} from '@vicons/fluent'
 import {SettingsOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
@@ -65,6 +66,20 @@ const menuOptions: MenuOption[] = [
     icon: renderIcon(AppsListDetail20Filled)
   },
   {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.jobCreate,
+              }
+            },
+            {default: () => '任务创建'}
+        ),
+    key: routeName.jobCreate,
+    icon: renderIcon(LibraryAddOutlined)
+  },
+/*   {
     label: () =>
         h(
             RouterLink,
@@ -161,7 +176,7 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.gxJob,
     icon: () => h('span', 'GX')
-  },
+  }, */
   {
     label: () =>
         h(

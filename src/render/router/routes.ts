@@ -4,6 +4,7 @@ const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
 const ocr = () => import('@render/views/ocr/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
 const flattenText = () => import('@render/views/flattenText/index.vue')
+const jobCreate = () => import('@render/views/jobCreate/index.vue')
 const cjJob = () => import('@render/views/cjJob/index.vue')
 const zjJob = () => import('@render/views/zjJob/index.vue')
 const bfJob = () => import('@render/views/bfJob/index.vue')
@@ -26,6 +27,7 @@ export const routeName = {
     ocr: 'ocr',
     svg: 'svg',
     flattenText: 'flattenText',
+    jobCreate: 'jobCreate',
     cjJob: 'cjJob',
     zjJob: 'zjJob',
     bfJob: 'bfJob',
@@ -67,6 +69,11 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.flattenText,
         path: '/flattenText/index',
         component: flattenText
+    },
+    {
+        name: routeName.jobCreate,
+        path: '/jobCreate/index',
+        component: jobCreate
     },
     {
         name: routeName.cjJob,
