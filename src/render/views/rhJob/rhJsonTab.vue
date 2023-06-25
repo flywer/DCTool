@@ -115,16 +115,16 @@ const createColumns = (): DataTableColumns<RhJson> => {
       width: '25%',
       ellipsis: true
     },
-    {
+    /* {
       title: '多表融合JSON',
       key: 'rh2Json',
       width: '25%',
       ellipsis: true
-    },
+    }, */
     {
       title: '操作',
       key: 'actions',
-      width: '30%',
+      width: '15%',
       align: 'center',
       render(row) {
         return h(NSpace, {
@@ -145,7 +145,7 @@ const createColumns = (): DataTableColumns<RhJson> => {
                 },
                 {default: () => '查看单表融合JSON'}
             ),
-              h(
+/*               h(
                   NButton,
                   {
                     size: 'small',
@@ -159,7 +159,7 @@ const createColumns = (): DataTableColumns<RhJson> => {
                     }
                   },
                   {default: () => '查看多表融合JSON'}
-              )
+              ) */
             ])
 
       }
@@ -231,7 +231,7 @@ const tableDataInit = () => {
           id: v.id,
           tableName: v.tableName,
           rh1Json: v.rh1Json,
-          rh2Json: v.rh2Json
+         // rh2Json: v.rh2Json
         })))
   }).finally(() => isLoading.value = false)
 }

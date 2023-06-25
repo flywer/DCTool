@@ -16,4 +16,9 @@ export class TableSql {
 
     @Column({type: "longtext"})
     sql: string
+
+    @Column({
+        name: 'p_col_name'
+    })
+    pColName: string
 }

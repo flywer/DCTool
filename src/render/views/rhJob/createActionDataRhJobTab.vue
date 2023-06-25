@@ -104,7 +104,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
-import {buildRhJson} from "@render/utils/datacenter/rhJob";
+import {buildRh2Json, buildRhJson} from "@render/utils/datacenter/rhJob";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {ref, onMounted} from "vue";
 import {QuestionCircleTwotone} from '@vicons/antd'
@@ -171,7 +171,7 @@ const generate = () => {
           personId: formModel.value.personId,
           projectId: formModel.value.projectId,
           tableName: tableName
-        }, rh1Json, false, false)
+        }, rh1Json, false)
 
         singleTableJsonRef.value = JSON.stringify(singleTableJson, null, 2)
       } else {
@@ -179,12 +179,11 @@ const generate = () => {
       }
 
       if (rh2Json != null) {
-        const multiTableJson = await buildRhJson({
-          jobJsonId: formModel.value.jobJsonId,
+        const multiTableJson = await buildRh2Json({
           personId: formModel.value.personId,
           projectId: formModel.value.projectId,
           tableName: tableName
-        }, rh2Json, false, true)
+        })
 
         multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
       } else {
@@ -218,7 +217,7 @@ const addWorkFlow = () => {
 
             multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
           }
-          console.log(multiTableJsonRef.value)
+
           add_work_flow(JSON.parse(multiTableJsonRef.value)).then(res2 => {
             if (res2.code == 200) {
               window.$message.success('多表融合任务创建成功')
