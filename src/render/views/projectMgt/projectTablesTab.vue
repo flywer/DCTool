@@ -102,6 +102,7 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
+import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, reactive, ref, watch, computed} from "vue";
@@ -204,7 +205,7 @@ const createColumns = (): DataTableColumns<Table> => {
             positiveText: '确定',
             negativeText: '取消',
             onPositiveClick: async () => {
-              await onPositiveClick();
+              await tableTruncate(row)
             },
           }, {
             trigger: () => {
@@ -219,31 +220,6 @@ const createColumns = (): DataTableColumns<Table> => {
       }
     }
   ]
-}
-
-const showButton = (text, onClick) => {
-  return h(NButton, {
-        size: 'small',
-        onClick: async () => {
-          await onClick()
-        }
-      },
-      {default: () => text})
-}
-
-const showConfirmation = (text, onPositiveClick) => {
-  return h(NPopconfirm, {
-    positiveText: '确定',
-    negativeText: '取消',
-    onPositiveClick: async () => {
-      await onPositiveClick();
-    },
-  }, {
-    trigger: () => {
-      return h(NButton, {size: 'small'}, {default: () => text})
-    },
-    default: () => `确定要${text}吗？`
-  });
 }
 
 const columnsRef = ref(createColumns())
@@ -443,7 +419,6 @@ const tableTruncate = async (row: Table) => {
   paramModel.ddlSql = `TRUNCATE TABLE ${row.tableName}`
 
   await exec_sql(paramModel).then((res) => {
-    console.log(res)
     if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
       window.$message.success('执行成功')
       showUpdateModalRef.value = false

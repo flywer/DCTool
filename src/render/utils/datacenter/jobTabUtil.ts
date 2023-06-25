@@ -63,11 +63,11 @@ export const showConfirmation = (text, onPositiveClick) => {
     });
 }
 
-export const getSchedJob = async (v) => {
+export const getSchedJob = async (jobName: string) => {
     return (await get_sched_job_page({
         current: 1,
         size: 10000,
-        jobContent: v.jobDesc
+        jobContent: jobName
     })).data.records[0] || null
 }
 

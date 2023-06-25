@@ -2,9 +2,11 @@
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto h-8 mb-2">
-        <div class="float-left leading-8 font-bold text-base">
+        <div class="float-left leading-8 font-bold text-base" style="max-width: 50%">
           <n-skeleton v-if="isTableLoading" :width="360" size="small"/>
-          <span v-else>{{ title }}</span>
+            <n-ellipsis style="max-width: 100%" v-else>
+            {{ title }}
+            </n-ellipsis>
         </div>
         <n-space inline class="float-right">
 
@@ -641,7 +643,7 @@ const tableDataInit = async () => {
     let newDataXJobs = []
 
     for (const v of dataXJobs) {
-      const schedJob = await getSchedJob(v)
+      const schedJob = await getSchedJob(v.jobDesc)
 
       const job: Job = {
         id: v.id,
@@ -1193,7 +1195,7 @@ const cjJobRun = async (row: Job) => {
 }
 
 const cjJobDelete = async (row: Job) => {
-  const schedJobId = (await getSchedJob(row.jobName)).id
+  const schedJobId = (await getSchedJob(row.jobName))?.id || null
   if (schedJobId != null) {
     sched_job_delete(schedJobId).then(res => {
       if (res.code == 0) {
@@ -1313,18 +1315,16 @@ const onPositiveClick = async () => {
     targetTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.targetDataSourceId, cjJobModalFormModel.value.targetTableName))
 
     if (!isEmpty(targetTableColumnsRef.value)) {
-      cjJobModalFormRef.value?.validate((errors) => {
+      cjJobModalFormRef.value?.validate(async (errors) => {
         if (!errors) {
-          createCjJob({
+          await createCjJob({
             name: cjJobModalFormModel.value.name,
             sourceTableName: cjJobModalFormModel.value.sourceTableName,
             targetTableName: cjJobModalFormModel.value.targetTableName,
             projectId: cjJobModalFormModel.value.projectId,
             sourceDataSourceId: '7',
             targetDataSourceId: '6'
-          }, sourceTableColumnsRef.value, targetTableColumnsRef.value).then(() => {
-            tableDataInit()
-          }).finally(() => {
+          }, sourceTableColumnsRef.value, targetTableColumnsRef.value).finally(() => {
             isSaving.value = false
             showModalRef.value = false
             formSelect.value.createCjJob = false
@@ -1673,7 +1673,7 @@ let targetTableColumnsRef = ref([])
 const createCjJobModalInit = async (project, row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
   cjJobModalFormModel.value.name = row.jobName
-  cjJobModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${queryParam.value.tableAbbr}_temp_ods`
+  cjJobModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${queryParam.value.tableAbbr.toLowerCase()}_temp_ods`
   cjJobModalFormModel.value.projectId = project.projectId
 
   showModalRef.value = true
