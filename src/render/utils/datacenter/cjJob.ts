@@ -181,18 +181,17 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
             subsystemName: "采集"
         }
 
-        console.log(buildJson)
-
         paramsJson.jobJson = await build_datax_json(buildJson)
 
         return paramsJson
     }
 }
 
-export const createCjJob = (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
-    const param = buildCjJobJson(formModel, sourceTableColumns, targetTableColumns)
+export const createCjJob = async  (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
+    const param = await buildCjJobJson(formModel, sourceTableColumns, targetTableColumns)
     if (param != null) {
-        add_datax_job(paramsJson).then(async (res) => {
+        console.log(param)
+        add_datax_job(param).then(async (res) => {
             if (res.code == 0) {
                 window.$message.success('采集任务创建成功')
             } else {
