@@ -51,7 +51,7 @@ export const channels = reactive({
         workflowList: 'datacenter/workflowList',
         workflowRerun: 'datacenter/workflowRerun',
         login: 'datacenter/login',
-
+        getUsrcOrgTree: 'datacenter/getUsrcOrgTree',
     },
     auxiliaryDb: {
         getProjectInfo: 'auxiliaryDb/getProjectInfo',

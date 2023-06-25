@@ -403,6 +403,18 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getUsrcOrgTree)
+    public async handleGetUsrcOrgTree() {
+        let result
+
+        await this.commonPostRequest(`/services/am-usrc/usrc/org/findOrgTree?orgType=GA&area=`, {}).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     @IpcHandle(channels.datacenter.schedJobDelete)
     public async handleSchedJobDelete(id: string) {
         let result

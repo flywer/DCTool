@@ -78,7 +78,7 @@ import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacent
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {onMounted, ref} from 'vue'
-import {NButton, TreeOption, TreeInst} from 'naive-ui'
+import {NButton, NIcon, TreeOption, TreeInst} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
 import {Filter, FilterOff} from '@vicons/tabler'
 

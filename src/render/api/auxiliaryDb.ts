@@ -40,7 +40,13 @@ export const update_auth_token = async (token: string) => {
     return data
 }
 
-export const get_table_sql = async (obj?: any) => {
+export type GetTableSqlParams = {
+    tableName?: string
+    comment?: string
+    sql?: string
+}
+
+export const get_table_sql = async (obj?: GetTableSqlParams) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getTableSql, JSON.stringify(obj)))
     return data
 }

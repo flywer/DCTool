@@ -198,13 +198,25 @@ export const get_cj_job_log = async (obj: CommonQueryParam) => {
     return data
 }
 
-export const create_valid_config = async (obj: CommonQueryParam) => {
+export const create_valid_config = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.createValidConfig, JSON.stringify(obj)))
     return data
 }
 
-export const get_valid_config_page = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getValidConfigPage, JSON.stringify(obj)))
+export const get_valid_config_page = async (likeName: string) => {
+    const params = {
+        page: 1,
+        size: 1,
+        likeName: likeName,
+        orders: [
+            {
+                asc: true,
+                column: "table_name"
+            }
+        ],
+        likeType: 0
+    }
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getValidConfigPage, JSON.stringify(params)))
     return data
 }
 
@@ -215,5 +227,10 @@ export const get_workflow_log = async (id: string, size: number, page: number) =
 
 export const workflow_rerun = async (id: string, type: number) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowRerun, id, type))
+    return data
+}
+
+export const gte_usrc_org_tree = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getUsrcOrgTree))
     return data
 }

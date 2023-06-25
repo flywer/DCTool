@@ -113,7 +113,7 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
         // 有 NULL 则说明目标表有字段没有被对应上
         window.$notification.create({
             title: "字段对应失败",
-            content: `目标表有字段无法在来源表找到对应字段：${targetTableColumns.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
+            content: `目标表有字段无法在来源表[${formModel.sourceTableName}]找到对应字段：${targetTableColumns.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
             type: "error"
         })
 
@@ -187,10 +187,9 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
     }
 }
 
-export const createCjJob = async  (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
+export const createCjJob = async (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
     const param = await buildCjJobJson(formModel, sourceTableColumns, targetTableColumns)
     if (param != null) {
-        console.log(param)
         add_datax_job(param).then(async (res) => {
             if (res.code == 0) {
                 window.$message.success('采集任务创建成功')
