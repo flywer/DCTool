@@ -4,9 +4,9 @@
       <div class="w-auto h-8 mb-2">
         <div class="float-left leading-8 font-bold text-base" style="max-width: 50%">
           <n-skeleton v-if="isTableLoading" :width="360" size="small"/>
-            <n-ellipsis style="max-width: 100%" v-else>
+          <n-ellipsis style="max-width: 100%" v-else>
             {{ title }}
-            </n-ellipsis>
+          </n-ellipsis>
         </div>
         <n-space inline class="float-right">
 
@@ -1317,7 +1317,7 @@ const onPositiveClick = async () => {
     if (!isEmpty(targetTableColumnsRef.value)) {
       cjJobModalFormRef.value?.validate(async (errors) => {
         if (!errors) {
-          await createCjJob({
+          createCjJob({
             name: cjJobModalFormModel.value.name,
             sourceTableName: cjJobModalFormModel.value.sourceTableName,
             targetTableName: cjJobModalFormModel.value.targetTableName,
