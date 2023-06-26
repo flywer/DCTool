@@ -95,6 +95,7 @@ import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
+import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {buildRkJson} from "@render/utils/datacenter/rkJob";
 import {FormInst} from "naive-ui";
 import {ref, watch} from 'vue'
@@ -229,18 +230,25 @@ const addWorkFlow = () => {
   isLoading.value = true
 
   formRef.value?.validate(
-      (errors) => {
+      async (errors) => {
         if (!errors) {
-          add_work_flow(paramsJsonRef.value).then((res) => {
-            if (res.code == 200) {
-              window.$message.success('入库任务创建成功')
-            } else {
-              window.$message.error(res.message)
-            }
-            isLoading.value = false
-          }).catch(() => {
-            isLoading.value = false
-          })
+
+          if (await workflowJobNameExist(paramsJsonRef.value.name)) {
+            window.$dialog.warning({
+              title: '警告',
+              content: `检测到[${paramsJsonRef.value.name}]任务名已存在，是否继续创建？`,
+              positiveText: '确定',
+              negativeText: '取消',
+              onPositiveClick: () => {
+                addWorkflow2()
+              },
+              onAfterLeave: () => {
+                isLoading.value = false
+              }
+            })
+          } else {
+            addWorkflow2()
+          }
 
         } else {
           console.log(errors)
@@ -250,6 +258,18 @@ const addWorkFlow = () => {
     isLoading.value = false
   })
 
+}
+
+const addWorkflow2 = () => {
+  add_work_flow(paramsJsonRef.value).then((res) => {
+    if (res.code == 200) {
+      window.$message.success('入库任务创建成功')
+    } else {
+      window.$message.error(res.message)
+    }
+  }).finally(() => {
+    isLoading.value = false
+  })
 }
 
 </script>

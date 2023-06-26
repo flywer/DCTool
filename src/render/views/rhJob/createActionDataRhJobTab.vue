@@ -104,6 +104,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
+import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {buildRh2Json, buildRhJson} from "@render/utils/datacenter/rhJob";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {ref, onMounted} from "vue";
@@ -194,40 +195,82 @@ const generate = () => {
 
 const isAdding = ref(false)
 
-const addWorkFlow = () => {
+const addWorkFlow = async () => {
   isAdding.value = true
 
   if (singleTableJsonRef.value.length > 0) {
-    add_work_flow(JSON.parse(singleTableJsonRef.value)).then((res1) => {
-      if (res1.code == 200) {
-        window.$message.success('单表融合任务创建成功')
-
-        if (multiTableJsonRef.value.length > 0) {
-          if (jobDependencyCheckRef.value) {
-            let multiTableJson = JSON.parse(multiTableJsonRef.value)
-            multiTableJson.dependencyProjectId = formModel.value.projectId
-            multiTableJson.dependencyProjectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label as string
-            multiTableJson.dependencyWorkflowId = res1.data.id as string
-            multiTableJson.dependencyWorkflowName = res1.data.procName
-            multiTableJson.schedulingMode = 1
-
-            multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
-          }
-
-          add_work_flow(JSON.parse(multiTableJsonRef.value)).then(res2 => {
-            if (res2.code == 200) {
-              window.$message.success('多表融合任务创建成功')
-            } else {
-              window.$message.error(res2.message)
-            }
-          })
+    const paramsModel = JSON.parse(singleTableJsonRef.value)
+    console.log(paramsModel.name)
+    if (await workflowJobNameExist(paramsModel.name)) {
+      window.$dialog.warning({
+        title: '警告',
+        content: `检测到[${paramsModel.name}]任务名已存在，是否继续创建？`,
+        positiveText: '确定',
+        negativeText: '取消',
+        onPositiveClick: () => {
+          addRh1Job(paramsModel)
+        },
+        onAfterLeave: () => {
+          isAdding.value = false
         }
-      } else {
-        window.$message.error(res1.message)
-      }
-    }).finally(() => isAdding.value = false)
+      })
+    } else {
+      addRh1Job(paramsModel)
+    }
   }
 
+}
+
+const addRh1Job = (paramsModel) => {
+  add_work_flow(paramsModel).then(async (res1) => {
+    if (res1.code == 200) {
+      window.$message.success('单表融合任务创建成功')
+
+      if (multiTableJsonRef.value.length > 0) {
+        if (jobDependencyCheckRef.value) {
+          let multiTableJson = JSON.parse(multiTableJsonRef.value)
+          multiTableJson.dependencyProjectId = formModel.value.projectId
+          multiTableJson.dependencyProjectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label as string
+          multiTableJson.dependencyWorkflowId = res1.data.id as string
+          multiTableJson.dependencyWorkflowName = res1.data.procName
+          multiTableJson.schedulingMode = 1
+
+          multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
+        }
+
+        const paramsModel2 = JSON.parse(multiTableJsonRef.value)
+        if (await workflowJobNameExist(paramsModel2.name)) {
+          window.$dialog.warning({
+            title: '警告',
+            content: `检测到[${paramsModel2.name}]任务名已存在，是否继续创建？`,
+            positiveText: '确定',
+            negativeText: '取消',
+            onPositiveClick: async () => {
+              await addRh2Job(paramsModel2)
+            },
+            onAfterLeave: () => {
+              isAdding.value = false
+            }
+          })
+        } else {
+          await addRh2Job(paramsModel2)
+        }
+
+      }
+    } else {
+      window.$message.error(res1.message)
+    }
+  }).finally(() => isAdding.value = false)
+}
+
+const addRh2Job = (paramsModel) => {
+  add_work_flow(paramsModel).then(res2 => {
+    if (res2.code == 200) {
+      window.$message.success('多表融合任务创建成功')
+    } else {
+      window.$message.error(res2.message)
+    }
+  })
 }
 
 </script>

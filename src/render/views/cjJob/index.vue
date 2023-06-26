@@ -210,6 +210,7 @@ import {
 } from "@render/utils/datacenter/findCommonElements";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {dataXJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {isEmpty} from "lodash-es";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref, watch} from "vue";
@@ -478,7 +479,7 @@ const buildJson = () => {
             },
             subsystemName: "采集"
           }
-          console.log(buildJson)
+
           paramsModel.jobJson = await build_datax_json(buildJson)
 
           jsonOutputRef.value = JSON.stringify(paramsModel, null, 2)
@@ -576,8 +577,29 @@ const onPositiveClick = () => {
 //记录本次提交成功数
 let submitCount = 0;
 let jobTemplateId = null
-const createDataXJob = () => {
+const createDataXJob = async () => {
   isLoading.value = true
+
+  if (await dataXJobNameExist(paramsModel.jobDesc)) {
+    window.$dialog.warning({
+      title: '警告',
+      content: `检测到[${paramsModel.jobDesc}]任务名已存在，是否继续创建？`,
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: () => {
+        addDataxJob()
+      },
+      onAfterLeave: () => {
+        isLoading.value = false
+      }
+    })
+  } else {
+    addDataxJob()
+  }
+
+}
+
+const addDataxJob = () => {
   add_datax_job(paramsModel).then(async (res) => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;
@@ -637,7 +659,6 @@ const createDataXJob = () => {
     isLoading.value = false
   })
 }
-
 </script>
 
 <style scoped>

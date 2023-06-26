@@ -144,9 +144,11 @@ import {add_datax_job, add_sched_task} from "@render/api/datacenter";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {buildGxJson} from "@render/utils/datacenter/gxJob";
+import {dataXJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {isEmpty} from "lodash-es";
 import {FormInst} from "naive-ui";
 import {ref, watch} from "vue";
+
 const formRef = ref<FormInst | null>(null);
 
 const formModel = ref({
@@ -342,9 +344,28 @@ const onPositiveClick = () => {
 let submitCount = 0;
 let jobTemplateId = null
 
-const createDataXJob = () => {
+const createDataXJob = async () => {
   isLoading.value = true
   const paramsModel = JSON.parse(dataXJsonRef.value)
+  if (await dataXJobNameExist(paramsModel.jobDesc)) {
+    window.$dialog.warning({
+      title: '警告',
+      content: `检测到[${paramsModel.jobDesc}]任务名已存在，是否继续创建？`,
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: () => {
+        addDataxJob(paramsModel)
+      },
+      onAfterLeave: () => {
+        isLoading.value = false
+      }
+    })
+  } else {
+    addDataxJob(paramsModel)
+  }
+}
+
+const addDataxJob = (paramsModel) => {
   add_datax_job(paramsModel).then(async (res) => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;

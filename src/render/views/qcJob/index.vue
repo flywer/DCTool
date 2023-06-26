@@ -143,6 +143,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
+import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {buildQcJson} from "@render/utils/datacenter/qcJob";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref, watch} from "vue";
@@ -226,9 +227,29 @@ const generate = (e: MouseEvent) => {
 
 const isLoading = ref(false)
 
-const addWorkFlow = () => {
+const addWorkFlow = async () => {
   isLoading.value = true
-  add_work_flow(JSON.parse(resRef.value)).then((res) => {
+  const paramsModel = JSON.parse(resRef.value)
+  if (await workflowJobNameExist(paramsModel.name)) {
+    window.$dialog.warning({
+      title: '警告',
+      content: `检测到[${paramsModel.name}]任务名已存在，是否继续创建？`,
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: () => {
+        addWorkflow2(paramsModel)
+      },
+      onAfterLeave: () => {
+        isLoading.value = false
+      }
+    })
+  } else {
+    addWorkflow2(paramsModel)
+  }
+}
+
+const addWorkflow2 = (paramsModel) => {
+  add_work_flow(paramsModel).then((res) => {
     if (res.code == 200) {
       window.$message.success('清除任务创建成功')
     } else {

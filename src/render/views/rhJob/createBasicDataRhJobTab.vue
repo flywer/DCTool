@@ -79,6 +79,7 @@ import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
+import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {buildRhJson} from "@render/utils/datacenter/rhJob";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
@@ -140,7 +141,7 @@ const generate = () => {
         personId: formModel.value.personId,
         projectId: formModel.value.projectId,
         tableName: tableName
-      }, paramJson, true,false)
+      }, paramJson, true, false)
 
       jonJsonRef.value = JSON.stringify(paramJson, null, 2)
     } else {
@@ -151,9 +152,29 @@ const generate = () => {
 
 const isAdding = ref(false)
 
-const addWorkFlow = () => {
+const addWorkFlow = async () => {
   isAdding.value = true
-  add_work_flow(JSON.parse(jonJsonRef.value)).then((res) => {
+  const paramsModel = JSON.parse(jonJsonRef.value)
+  if (await workflowJobNameExist(paramsModel.name)) {
+    window.$dialog.warning({
+      title: '警告',
+      content: `检测到[${paramsModel.name}]任务名已存在，是否继续创建？`,
+      positiveText: '确定',
+      negativeText: '取消',
+      onPositiveClick: () => {
+        addWorkflow2(paramsModel)
+      },
+      onAfterLeave: () => {
+        isAdding.value = false
+      }
+    })
+  } else {
+    addWorkflow2(paramsModel)
+  }
+}
+
+const addWorkflow2 = (paramsModel) => {
+  add_work_flow(paramsModel).then((res) => {
     if (res.code == 200) {
       window.$message.success('融合任务创建成功')
     } else {
@@ -161,7 +182,6 @@ const addWorkFlow = () => {
     }
   }).finally(() => isAdding.value = false)
 }
-
 </script>
 
 <style scoped>

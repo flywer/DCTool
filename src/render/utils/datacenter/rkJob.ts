@@ -45,13 +45,13 @@ export const buildSql = async (formModel: RkFormModelType, isRemoveId: boolean, 
     }
 
     // 因中台问题，需要为hive表的字段取一个与目标表相同的别名
-    const columnMappings = targetTableColumns.map((targetColumn, index) => {
+/*     const columnMappings = targetTableColumns.map((targetColumn, index) => {
         const sourceColumn = sourceTableColumns[index];
         return `${sourceColumn} as ${targetColumn}`;
-    })
+    }) */
 
-    return format(`INSERT INTO ${formModel.targetTableName} (${targetTableColumns.join(',')})
-                   SELECT ${columnMappings.join(',')}
+    return format(`INSERT INTO ${formModel.targetTableName}
+                   SELECT ${sourceTableColumns.join(',')}
                    FROM ${formModel.sourceTableName}`, {language: 'mysql'})
 }
 
@@ -122,8 +122,6 @@ export const buildRkJson = async (formModel: RkFormModelType, isRemoveId: boolea
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].sql = await buildSql(formModel, isRemoveId, isRemoveDiff)
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].sourceTable = [`${formModel.sourceTableName}`]
     paramsJson.dataDevBizVo.sparkSqlDtoList[0].targetTable = formModel.targetTableName
-
-    console.log(paramsJson)
 
     return paramsJson
 }
