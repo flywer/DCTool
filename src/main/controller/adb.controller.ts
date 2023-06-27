@@ -1,6 +1,7 @@
 import {AppDataSource} from "@main/data-source";
 import {Dict} from "@main/entity/Dict";
 import {JobJson} from "@main/entity/JobJson";
+import {PreDatabase} from "@main/entity/PreDatabase";
 import {ProjectInfo} from "@main/entity/ProjectInfo";
 import {TableSql} from "@main/entity/TableSql";
 import {channels} from "@render/api/channels";
@@ -207,6 +208,49 @@ export class AdbController {
                     tableName: obj.tableName
                 })
                 .where("id = :id", {id: obj.id})
+                .execute()
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getPreDatabaseDepart)
+    public async handleGetPreDatabase() {
+        return await AppDataSource.getRepository(PreDatabase).find({
+            select: ['id', 'departName']
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getPreDatabaseTableInfoJson)
+    public async handleGetPreDatabaseTableInfoJson(id: string) {
+        console.log(id)
+        return await AppDataSource.getRepository(PreDatabase).findOneBy({
+            id: parseInt(id)
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateTableInfoJson)
+    public async handleUpdateTableInfoJson(obj: any) {
+        obj = JSON.parse(obj)
+
+        const pd = await AppDataSource.getRepository(PreDatabase).findOneBy({
+            departName: obj.departName
+        })
+
+        if (pd === null) {
+            return await AppDataSource.getRepository(PreDatabase).createQueryBuilder()
+                .insert()
+                .into(PreDatabase)
+                .values([{
+                    departName: obj.departName,
+                    tableInfoJson: obj.tableInfoJson
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(PreDatabase).createQueryBuilder()
+                .update(PreDatabase)
+                .set({
+                    tableInfoJson: obj.tableInfoJson
+                })
+                .where("departName = :departName", {departName: obj.departName})
                 .execute()
         }
     }

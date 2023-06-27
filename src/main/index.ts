@@ -81,7 +81,7 @@ async function bootstrap() {
 
             const cron = new CronController()
             await cron.datacenterCronJobInit();
-        }).catch(error => console.log(error))
+        }).catch(error => log.error('应用程序数据源连接失败',error))
 
     } catch (error) {
         console.error(error)

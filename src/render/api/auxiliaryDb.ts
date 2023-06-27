@@ -90,3 +90,18 @@ export const update_zj_json = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateZjJson, JSON.stringify(obj)))
     return data
 }
+
+export const get_pre_database_depart = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getPreDatabaseDepart))
+    return data
+}
+
+export const get_pre_database_table_info_json = async (id:string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getPreDatabaseTableInfoJson,id))
+    return data
+}
+
+export const update_table_info_json = async (obj:any) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateTableInfoJson,JSON.stringify(obj)))
+    return data
+}

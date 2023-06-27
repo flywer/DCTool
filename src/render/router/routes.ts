@@ -20,6 +20,7 @@ const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
 const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
 const createTable = () => import('@render/views/createTable/index.vue')
+const preDatabase = () => import('@render/views/preDatabase/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -42,7 +43,8 @@ export const routeName = {
     projectAbbr: 'projectAbbr',
     createTable: 'createTable',
     settings: 'settings',
-    projectMgt: 'projectMgt'
+    projectMgt: 'projectMgt',
+    preDatabase: 'preDatabase'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -153,5 +155,10 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.projectMgt,
         path: '/projectMgt/index',
         component: projectMgt
+    },
+    {
+        name: routeName.preDatabase,
+        path: '/preDatabase/index',
+        component: preDatabase
     }
 ]

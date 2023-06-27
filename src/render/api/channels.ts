@@ -74,6 +74,10 @@ export const channels = reactive({
         getZjJsonById: 'auxiliaryDb/getZjJsonById',
         updateZjJson: 'auxiliaryDb/updateZjJson',
 
+        getPreDatabaseDepart: 'auxiliaryDb/getPreDatabaseDepart',
+        getPreDatabaseTableInfoJson: 'auxiliaryDb/getPreDatabaseTableInfoJson',
+        updateTableInfoJson:  'auxiliaryDb/updateTableInfoJson',
+
     },
     cron: {
         createCronJob: 'cron/createCronJob',
