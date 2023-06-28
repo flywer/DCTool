@@ -1,6 +1,6 @@
 <template>
   <n-alert type="default" :show-icon="false">
-    生成用于查询前置机行为表批次号与行政区划的SQL
+    生成用于查询前置机行为数据表<b>批次号</b>与<b>行政区划</b>的SQL
   </n-alert>
 
   <n-card class="mt-2" :content-style="{paddingBottom:0}" :size="'small'">
@@ -35,6 +35,7 @@
                 :check-strategy="'child'"
                 :options="tableSelectOptionsRef"
                 :size="'small'"
+                clearable
             />
           </n-form-item-gi>
 
@@ -54,7 +55,7 @@
     <n-scrollbar class="pr-2" style="max-height: calc(100vh - 500px);" trigger="hover">
       <n-grid :cols="2" :x-gap="12">
         <n-gi :span="2">
-          <n-dynamic-input v-model:value="inputValueRef" class="mb-4" @create="onCreate">
+          <n-dynamic-input v-model:value="inputValueRef" class="mb-4" @create="onCreate" show-sort-button>
             <template #default="{ value }">
               <div style="display: flex; align-items: center; width: 100%">
                 <n-input v-model:value="value.tableName" type="text" placeholder="输入表名"
