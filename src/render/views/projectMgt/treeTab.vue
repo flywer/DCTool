@@ -75,6 +75,7 @@ import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {onMounted, ref} from 'vue'
@@ -83,10 +84,6 @@ import {Search, Refresh} from '@vicons/ionicons5'
 import {Filter, FilterOff} from '@vicons/tabler'
 
 const tree = ref<TreeInst | null>(null)
-
-const basicTableAbbrs = ['g1010', 'g1020', 'y2010', 'y2020', 'y2030', 'y3010', 'y4010', 'z2010', 'z2020',
-  'z2030', 'z2050', 'z3010', 'f2010', 'f2010', 'f2020', 'f1010', 'f1011', 'f1012', 'f1016', 'f3010', 'f3011',
-  'd1010', 'd1020', 'd1030', 'd1040']
 
 const pattern = ref()
 
@@ -164,7 +161,7 @@ const getExistTableProject = async (node: TreeOption) => {
       subsystemName: "采集"
     })).data.records.map((v) => ({
       tableAbbr: v.jobDesc.split('_')[2]
-    })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
+    })).filter(item => !basicTableNames.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
       return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
     })
 
@@ -177,7 +174,7 @@ const getExistTableProject = async (node: TreeOption) => {
         }
     )).data.records.map((v) => ({
       tableAbbr: v.jobContent.split('_')[2]
-    })).filter(item => !basicTableAbbrs.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
+    })).filter(item => !basicTableNames.includes(item.tableAbbr.toLowerCase())).filter((obj, index, array) => {
       return index === array.findIndex(item => item.tableAbbr === obj.tableAbbr);
     })
 

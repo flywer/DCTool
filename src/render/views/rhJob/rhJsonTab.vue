@@ -84,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Search} from '@vicons/ionicons5'
@@ -145,21 +146,21 @@ const createColumns = (): DataTableColumns<RhJson> => {
                 },
                 {default: () => '查看单表融合JSON'}
             ),
-/*               h(
-                  NButton,
-                  {
-                    size: 'small',
-                    onClick: () => {
-                      showModalRef.value = true
-                      modalTitle = `${row.tableName}`
-                      modalFormModel.value.tableName = row.tableName
-                      modalFormModel.value.json = row.rh2Json
-                      modalFormModel.value.id = row.id
-                      modalFormModel.value.type = 2
-                    }
-                  },
-                  {default: () => '查看多表融合JSON'}
-              ) */
+              /*               h(
+                                NButton,
+                                {
+                                  size: 'small',
+                                  onClick: () => {
+                                    showModalRef.value = true
+                                    modalTitle = `${row.tableName}`
+                                    modalFormModel.value.tableName = row.tableName
+                                    modalFormModel.value.json = row.rh2Json
+                                    modalFormModel.value.id = row.id
+                                    modalFormModel.value.type = 2
+                                  }
+                                },
+                                {default: () => '查看多表融合JSON'}
+                            ) */
             ])
 
       }
@@ -231,7 +232,7 @@ const tableDataInit = () => {
           id: v.id,
           tableName: v.tableName,
           rh1Json: v.rh1Json,
-         // rh2Json: v.rh2Json
+          // rh2Json: v.rh2Json
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -247,6 +248,7 @@ const onPositiveClick = () => {
   modalFormRef.value?.validate((errors) => {
     if (!errors) {
       let jobJson = JSON.parse(modalFormModel.value.json)
+      jobJson.name = ''
       jobJson.email = ''
       jobJson.description = ''
       jobJson.personId = ''
@@ -260,15 +262,32 @@ const onPositiveClick = () => {
       jobJson.schedulingMode = 0
       jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
 
-      // 表名中的项目缩写
-      const tableAbbr = jobJson.name.split('_')[1]
-      jobJson.name = ''
+      for (let i = 0; i < jobJson.dataDevBizVo.sparkSqlDtoList[0].sourceTable.length; i++) {
 
-      if (tableAbbr !== 'depart') {
-        modalFormModel.value.json = JSON.stringify(jobJson, null, 2).replaceAll(tableAbbr, 'depart')
-      } else {
-        modalFormModel.value.json = JSON.stringify(jobJson, null, 2)
+        const tableName = jobJson.dataDevBizVo.sparkSqlDtoList[0].sourceTable[i] as string
+        // 若表名包含depart，则说明不是原始JSON，可以直接存储
+        if (tableName.includes('depart')) {
+          break
+        }
+
+        if (!isBasicTable(tableName)) {
+          // 若不为基础数据表
+          const splitArray = tableName.split('_')
+          splitArray[1] = 'depart'
+          const newTableName = splitArray.join('_');
+          jobJson.modelJson = jobJson.modelJson.replaceAll(tableName, newTableName)
+          jobJson.dataDevBizVo.sparkSqlDtoList[0].sql = jobJson.dataDevBizVo.sparkSqlDtoList[0].sql.replaceAll(tableName, newTableName)
+          jobJson.dataDevBizVo.sparkSqlDtoList[0].sourceTable[i] = newTableName
+        }
+
       }
+      if (!isBasicTable(jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable)) {
+        const splitArray = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')
+        splitArray[1] = 'depart'
+        jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable = splitArray.join('_');
+      }
+
+      modalFormModel.value.json = JSON.stringify(jobJson, null, 2)
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 

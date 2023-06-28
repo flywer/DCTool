@@ -257,8 +257,8 @@ const buildForm = async () => {
       regionColArr.push(getRegionBySql(sql))
     }
 
-    inputValueRef.value = tableSelectRef.value.map((tableName, index) => ({
-      tableAbbr: tableName,
+    inputValueRef.value = tableSelectRef.value.map((name, index) => ({
+      tableAbbr: name,
       tableName: '',
       region: regionColArr[index],
       cdBatch: 'cd_batch',
@@ -280,10 +280,21 @@ const buildSql = async () => {
 
   let sql = ''
 
+  let departName = ''
+
+  if (curTabRef.value == '1') {
+    departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value[0])[0].label as string
+  } else {
+    departName = departNameRef.value || '该地市'
+  }
+
   inputValueRef.value.forEach(table => {
+
+    let comment = actionTablesRef.value.filter(item => item.tableName.toLowerCase() == table.tableAbbr.toLowerCase())[0]?.comment as string || table.tableAbbr
+
     // language=SQL format=false
-    let templateSql = `SELECT '${departNameRef.value || '该地市'}'     AS '名称',
-                        '${table.tableAbbr}'                        AS '表名',
+    let templateSql = `SELECT '${departName}'     AS '单位名称',
+                        '${comment}'              AS '注解',
                         CASE
                             WHEN c1 = 15 AND c2 = 9 THEN NULL
                             WHEN c1 != 15 AND c2 = 9 THEN '批次号'
@@ -296,7 +307,6 @@ const buildSql = async () => {
                                 FROM ${table.tableName}
                                 GROUP BY c1, c2)
                         t1 UNION ALL `
-
     sql += templateSql
   })
 
