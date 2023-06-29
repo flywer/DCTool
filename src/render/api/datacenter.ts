@@ -234,3 +234,20 @@ export const gte_usrc_org_tree = async () => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getUsrcOrgTree))
     return data
 }
+
+type GetDictPageType = {
+    codeSetName: string
+    page: number
+    size: number
+    state?: 0
+    type?: 4
+}
+
+export const get_dict_by_name = async (obj: GetDictPageType) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getDictByName, JSON.stringify(obj)))
+    return data
+}
+export const get_dict_list_by_id = async (id: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getDictListById, id))
+    return data
+}

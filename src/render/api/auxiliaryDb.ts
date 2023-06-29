@@ -96,12 +96,54 @@ export const get_pre_database_depart = async () => {
     return data
 }
 
-export const get_pre_database_table_info_json = async (id:string) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getPreDatabaseTableInfoJson,id))
+export const get_pre_database_table_info_json = async (id: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getPreDatabaseTableInfoJson, id))
     return data
 }
 
-export const update_table_info_json = async (obj:any) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateTableInfoJson,JSON.stringify(obj)))
+export const update_table_info_json = async (obj: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateTableInfoJson, JSON.stringify(obj)))
+    return data
+}
+
+type GetDictType = {
+    dictName: string,
+    dictCode: string
+}
+
+export const get_sztk_dict = async (obj: GetDictType) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getSztkDict, JSON.stringify(obj)))
+    return data
+}
+
+type SztkDictType = {
+    bzId: string
+    dictName: string
+    dictCode: string
+    parentId: string | null
+    orderNum: number
+    addTime: string
+    cdTime: string
+    cdOperation: string
+    cdBatch: string
+}
+
+export const save_sztk_dict = async (obj: SztkDictType[]) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.saveSztkDict, JSON.stringify(obj)))
+    return data
+}
+
+export const get_parent_dict = async (dictName?: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getParentDict, dictName))
+    return data
+}
+
+export const get_dict_by_parent_id = async (parentId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getDictByParentId, parentId))
+    return data
+}
+
+export const get_dict_by_bz_id = async (bzId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getDictByBzId, bzId))
     return data
 }

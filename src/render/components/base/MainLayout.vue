@@ -42,7 +42,7 @@ import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql, DataBase} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
 import {LibraryAddOutlined} from '@vicons/material'
-import {AppsListDetail20Filled} from '@vicons/fluent'
+import {AppsListDetail20Filled,BookSearch24Regular} from '@vicons/fluent'
 import {SettingsOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
@@ -232,6 +232,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.preDatabase,
     icon: renderIcon(DataBase)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.sztkDict,
+              }
+            },
+            {default: () => '字典表'}
+        ),
+    key: routeName.sztkDict,
+    icon: renderIcon(BookSearch24Regular)
   },
   {
     label: () =>

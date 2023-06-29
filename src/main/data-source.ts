@@ -1,5 +1,6 @@
 import "reflect-metadata"
 import {Dict} from "@main/entity/Dict";
+import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
 import {TableSql} from "@main/entity/TableSql";
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
     database: "ap_dev_sjzt",
     synchronize: false,
     logging: false,
-    entities: [ProjectInfo, Dict, TableSql, JobJson,PreDatabase],
+    entities: [ProjectInfo, Dict, TableSql, JobJson, PreDatabase, GdsztkDict],
     migrations: [],
     subscribers: [],
 })

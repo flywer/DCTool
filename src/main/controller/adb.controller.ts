@@ -1,12 +1,13 @@
 import {AppDataSource} from "@main/data-source";
 import {Dict} from "@main/entity/Dict";
+import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
 import {ProjectInfo} from "@main/entity/ProjectInfo";
 import {TableSql} from "@main/entity/TableSql";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
-import {Like} from "typeorm";
+import {IsNull, Like, Not} from "typeorm";
 
 @Controller()
 export class AdbController {
@@ -254,4 +255,57 @@ export class AdbController {
                 .execute()
         }
     }
+
+    @IpcHandle(channels.auxiliaryDb.getSztkDict)
+    public async handleGetSztkDict(obj: any) {
+
+        obj = JSON.parse(obj)
+
+        return await AppDataSource.getRepository(GdsztkDict).find({
+            select: ['id'],
+            where: {
+                dictName: obj.dictName,
+                dictCode: obj.dictCode,
+            },
+            order: {orderNum: 'asc'}
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.saveSztkDict)
+    public async handleSaveSztkDict(obj: any) {
+        obj = JSON.parse(obj) as GdsztkDict[]
+        return await AppDataSource.getRepository(GdsztkDict).insert(obj)
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getParentDict)
+    public async handleGetParentDict(dictName: string) {
+        return await AppDataSource.getRepository(GdsztkDict).find({
+            where: {
+                dictName: Like(`%${dictName || ''}%`),
+                parentId: IsNull(),
+                cdOperation: Not('D')
+            }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getDictByParentId)
+    public async handleGetDictByParentId(parentId: string) {
+        return await AppDataSource.getRepository(GdsztkDict).find({
+            where: {
+                parentId: parentId,
+                cdOperation: Not('D')
+            }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getDictByBzId)
+    public async handleGetDictByBzId(bzId: string) {
+        return await AppDataSource.getRepository(GdsztkDict).find({
+            where: {
+                bzId: bzId,
+                cdOperation: Not('D')
+            }
+        })
+    }
+
 }

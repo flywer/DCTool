@@ -21,6 +21,7 @@ const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
 const createTable = () => import('@render/views/createTable/index.vue')
 const preDatabase = () => import('@render/views/preDatabase/index.vue')
+const sztkDict = () => import('@render/views/sztkDict/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -44,7 +45,8 @@ export const routeName = {
     createTable: 'createTable',
     settings: 'settings',
     projectMgt: 'projectMgt',
-    preDatabase: 'preDatabase'
+    preDatabase: 'preDatabase',
+    sztkDict: 'sztkDict',
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -160,5 +162,10 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.preDatabase,
         path: '/preDatabase/index',
         component: preDatabase
-    }
+    },
+    {
+        name: routeName.sztkDict,
+        path: '/sztkDict/index',
+        component: sztkDict
+    },
 ]

@@ -415,6 +415,32 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getDictByName)
+    public async handleGetDictByName(params: any) {
+        let result
+        params = JSON.parse(params)
+        await this.commonPostRequest(`/datawork/normCodeSet/page`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getDictListById)
+    public async handleGetDictListById(id: string) {
+        let result
+        const params = {
+            codeSetId: id
+        }
+        await this.commonPostRequest(`/datawork/normCode/findList`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     @IpcHandle(channels.datacenter.schedJobDelete)
     public async handleSchedJobDelete(id: string) {
         let result

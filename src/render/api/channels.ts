@@ -52,6 +52,9 @@ export const channels = reactive({
         workflowRerun: 'datacenter/workflowRerun',
         login: 'datacenter/login',
         getUsrcOrgTree: 'datacenter/getUsrcOrgTree',
+        getDictByName:'datacenter/getDictByName',
+        getDictListById: 'datacenter/getDictListById',
+
     },
     auxiliaryDb: {
         getProjectInfo: 'auxiliaryDb/getProjectInfo',
@@ -77,6 +80,12 @@ export const channels = reactive({
         getPreDatabaseDepart: 'auxiliaryDb/getPreDatabaseDepart',
         getPreDatabaseTableInfoJson: 'auxiliaryDb/getPreDatabaseTableInfoJson',
         updateTableInfoJson:  'auxiliaryDb/updateTableInfoJson',
+
+        getSztkDict: 'auxiliaryDb/getSztkDict',
+        saveSztkDict:'auxiliaryDb/saveSztkDict',
+        getParentDict:'auxiliaryDb/getParentDict',
+        getDictByParentId:'auxiliaryDb/getDictByParentId',
+        getDictByBzId: 'auxiliaryDb/getDictByBzId',
 
     },
     cron: {
