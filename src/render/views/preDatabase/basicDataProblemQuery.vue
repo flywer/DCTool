@@ -84,13 +84,15 @@
     >
       SQL生成
     </n-button>
-    <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
+    <n-button class="w-28 float-right" :disabled="sqlRef.length===0" @click="copyText(sqlRef)">
+      复制结果
+    </n-button>
+
+    <n-divider vertical/>
+        <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
               :loading="isSaveForm"
     >
       表单存储
-    </n-button>
-    <n-button class="w-28 float-right" :disabled="sqlRef.length===0" @click="copyText(sqlRef)">
-      复制结果
     </n-button>
   </n-space>
 

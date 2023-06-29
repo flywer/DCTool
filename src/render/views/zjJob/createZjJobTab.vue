@@ -1,6 +1,6 @@
 <template>
-  <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-    <n-card class="mt-2" :content-style="{paddingBottom:0}">
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
+    <n-card :content-style="{paddingBottom:0}">
       <n-form ref="formRef"
               inline
               :size="'small'"

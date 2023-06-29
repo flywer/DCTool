@@ -1,10 +1,7 @@
 <template>
   <n-layout class="m-2">
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-      <n-alert type="default" :show-icon="false">
-        目前只支持中台的TBDS-hive表
-      </n-alert>
-      <n-card class="mt-2" :content-style="{paddingTop:0,paddingBottom:0}">
+      <n-card  :content-style="{paddingTop:0,paddingBottom:0}">
         <n-tabs type="line" animated>
           <n-tab-pane name="1" tab="简易模式">
             <n-form ref="formRef"

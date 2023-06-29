@@ -1,5 +1,5 @@
 <template>
-  <n-layout class="m-2">
+  <n-layout class="ml-2 mr-2">
     <n-tabs type="line" animated>
       <n-tab-pane name="1" tab="基础数据">
         <create-basic-data-rh-job-tab/>

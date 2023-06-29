@@ -1,5 +1,5 @@
 <template>
-  <n-space justify="end" class="mt-2">
+  <n-space justify="end" >
     <n-input
         v-model:value="searchValueRef"
         placeholder="搜索"
