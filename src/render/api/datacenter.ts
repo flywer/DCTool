@@ -5,7 +5,7 @@ export type CommonQueryParam = {
     current: number,
     size: number,
     blurry: string,
-    subsystemName: '采集'
+    subsystemName?: '采集'
 }
 
 // 获取项目列表

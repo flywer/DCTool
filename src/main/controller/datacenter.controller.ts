@@ -371,7 +371,7 @@ export class DatacenterController {
     public async handleGetCjJobLog(params: any) {
         let result
         params = JSON.parse(params)
-        await this.commonPostRequest(`/gateway/gather/api/log/pageList`, params).then((res) => {
+        await this.commonPostRequest(`/gather/api/log/pageList`, params).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);

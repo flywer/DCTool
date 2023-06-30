@@ -10,14 +10,14 @@
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
 
-<!--          <n-button secondary type="info" @click="">
-            已融合
-            <template #icon>
-              <n-icon>
-                <AddSquareMultiple16Regular/>
-              </n-icon>
-            </template>
-          </n-button>-->
+          <!--          <n-button secondary type="info" @click="">
+                      已融合
+                      <template #icon>
+                        <n-icon>
+                          <AddSquareMultiple16Regular/>
+                        </n-icon>
+                      </template>
+                    </n-button>-->
 
 
           <n-button secondary type="info" @click="quickCreateModalInit">
@@ -518,7 +518,7 @@ import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
-  convertToSixFields,
+  convertToSixFields, getDataXJobStatus,
   getIsValidConfig,
   getSchedJob,
   jobNameCompare, pushUnExistJobs,
@@ -658,17 +658,7 @@ const tableDataInit = async () => {
       const job: Job = {
         id: v.id,
         jobName: v.jobDesc,
-        status: (() => {
-          if (v.configuration == 0) {
-            return 0
-          } else {
-            if (schedJob?.triggerStatus == 1) {
-              return 2
-            } else {
-              return 1
-            }
-          }
-        })(),
+        status: await getDataXJobStatus(v, schedJob),
         type: (() => {
           switch (v.jobDesc.split('_')[0]) {
             case 'cj':
@@ -685,6 +675,7 @@ const tableDataInit = async () => {
         nextExecTime: cjJobGetNextExecTime(schedJob),
         createBy: null
       }
+
       newDataXJobs.push(job)
     }
 

@@ -1,5 +1,5 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {get_sched_job_page, get_valid_config_page, get_workflow_log} from "@render/api/datacenter";
+import {get_cj_job_log, get_sched_job_page, get_valid_config_page, get_workflow_log} from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/formatDate";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
@@ -200,4 +200,35 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
 
     return newJobs
 
+}
+
+export const getDataXJobStatus = async (v, schedJob) => {
+    if (v.configuration == 0) {
+        return 0
+    } else {
+        const log = (await get_cj_job_log({
+            current: 1,
+            size: 1,
+            blurry: v.jobDesc
+        })).data.records[0]
+        if (log != undefined) {
+            if (log.handleCode == 200) {
+                if (schedJob?.triggerStatus == 1) {
+                    return 2
+                } else {
+                    return 1
+                }
+            } else if (log.handleCode == 500) {
+                return 4
+            } else if (log.handleCode == 0) {
+                return 3
+            }
+        } else {
+            if (schedJob?.triggerStatus == 1) {
+                return 2
+            } else {
+                return 1
+            }
+        }
+    }
 }
