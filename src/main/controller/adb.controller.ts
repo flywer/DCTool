@@ -222,7 +222,6 @@ export class AdbController {
 
     @IpcHandle(channels.auxiliaryDb.getPreDatabaseTableInfoJson)
     public async handleGetPreDatabaseTableInfoJson(id: string) {
-
         return await AppDataSource.getRepository(PreDatabase).findOneBy({
             id: parseInt(id)
         })

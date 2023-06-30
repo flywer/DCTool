@@ -89,7 +89,7 @@
     </n-button>
 
     <n-divider vertical/>
-        <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
+    <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
               :loading="isSaveForm"
     >
       表单存储
@@ -125,7 +125,7 @@ const curTabRef = ref('1')
 const departOptionsRef = ref<Array<SelectOption | SelectGroupOption>>()
 
 // 简易模式 所选单位ID
-const departIdRef = ref([])
+const departIdRef = ref('')
 
 // 自定义模式 表选项
 const tableSelectOptionsRef = ref<TreeSelectOption[]>([])
@@ -243,8 +243,8 @@ const buildForm = async () => {
 
   if (curTabRef.value === '1') {
     if (departIdRef.value.length > 0) {
-      const josn = (await get_pre_database_table_info_json(departIdRef.value[0])).tableInfoJson
-      inputValueRef.value = JSON.parse(josn)
+      const tableInfoJson = (await get_pre_database_table_info_json(departIdRef.value)).tableInfoJson
+      inputValueRef.value = JSON.parse(tableInfoJson)
     } else {
       window.$message.warning("单位不得为空")
       isBuildForm.value = false
@@ -285,7 +285,7 @@ const buildSql = async () => {
   let departName = ''
 
   if (curTabRef.value == '1') {
-    departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value[0])[0].label as string
+    departName = (await get_pre_database_table_info_json(departIdRef.value)).departName
   } else {
     departName = departNameRef.value || '该地市'
   }
