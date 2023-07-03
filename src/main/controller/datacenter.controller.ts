@@ -367,8 +367,8 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.getCjJobLog)
-    public async handleGetCjJobLog(params: any) {
+    @IpcHandle(channels.datacenter.getDataxJobLog)
+    public async handleGetDataXJobLog(params: any) {
         let result
         params = JSON.parse(params)
         await this.commonPostRequest(`/gather/api/log/pageList`, params).then((res) => {
@@ -497,8 +497,8 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.workflowList)
-    public async handleWorkflowList(id: string, size: number, page: number) {
+    @IpcHandle(channels.datacenter.workflowLog)
+    public async handleWorkflowLog(id: string, size: number, page: number) {
         let result
 
         const query = `procInfoId=${id}&size=${size}&page=${page}`;

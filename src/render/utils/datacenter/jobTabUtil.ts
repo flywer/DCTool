@@ -1,5 +1,10 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {get_cj_job_log, get_sched_job_page, get_valid_config_page, get_workflow_log} from "@render/api/datacenter";
+import {
+    get_datax_job_log,
+    get_sched_job_page,
+    get_valid_config_page,
+    get_workflow_log
+} from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/formatDate";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
@@ -206,13 +211,13 @@ export const getDataXJobStatus = async (v, schedJob) => {
     if (v.configuration == 0) {
         return 0
     } else {
-        const log = (await get_cj_job_log({
+        const log = (await get_datax_job_log({
             current: 1,
             size: 1,
             blurry: v.jobDesc
         })).data.records[0]
         if (log != undefined) {
-            if (log.handleCode == 200) {
+            if (log.handleCode == 200) { //若成功
                 if (schedJob?.triggerStatus == 1) {
                     return 2
                 } else {
@@ -230,5 +235,54 @@ export const getDataXJobStatus = async (v, schedJob) => {
                 return 1
             }
         }
+    }
+}
+
+export const getDataXJobType = (v) => {
+    switch (v.jobDesc.split('_')[0]) {
+        case 'cj':
+            return '数据采集任务'
+        case 'gx':
+            return '数据共享任务'
+        default :
+            return '未知任务'
+    }
+}
+
+export const getWorkflowJobType = (v) => {
+    switch (v.procName.split('_')[0]) {
+        case 'zj':
+            return '数据质检任务'
+        case 'bf':
+            return '数据备份任务'
+        case 'qc':
+            return '数据清除任务'
+        case 'rh':
+            return '数据融合任务'
+        case 'rh1':
+            return '单表融合任务'
+        case 'rh2':
+            return '多表融合任务'
+        case 'rk':
+            return '数据入库任务'
+        default :
+            return '未知任务'
+    }
+}
+
+export const getWorkflowJobStatus = (v) => {
+    switch (v.status) {
+        case '1':// 启用
+            return 2
+        case '2':// 停用
+            return 1
+        case '3':// 异常
+            return 4
+        case '4':// 运行中
+            return 3
+        case '5':// 未反馈
+            return 5
+        default :
+            return v.status as number
     }
 }

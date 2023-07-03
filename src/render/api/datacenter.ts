@@ -193,8 +193,8 @@ export const table_delete = async (id: string) => {
     return data
 }
 
-export const get_cj_job_log = async (obj: CommonQueryParam) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobLog, JSON.stringify(obj)))
+export const get_datax_job_log = async (obj: CommonQueryParam) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataxJobLog, JSON.stringify(obj)))
     return data
 }
 
@@ -221,7 +221,7 @@ export const get_valid_config_page = async (likeName: string) => {
 }
 
 export const get_workflow_log = async (id: string, size: number, page: number) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowList, id, size, page))
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowLog, id, size, page))
     return data
 }
 

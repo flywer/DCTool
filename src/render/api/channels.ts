@@ -45,15 +45,15 @@ export const channels = reactive({
         getTablesInfo: 'datacenter/getTablesInfo',
         tablePreview: 'datacenter/tablePreview',
         tableDelete: 'datacenter/tableDelete',
-        getCjJobLog: 'datacenter/getCjJobLog',
+        getDataxJobLog: 'datacenter/getDataxJobLog',
         createValidConfig: 'datacenter/createValidConfig',
         getValidConfigPage: 'datacenter/getValidConfigPage',
-        workflowList: 'datacenter/workflowList',
         workflowRerun: 'datacenter/workflowRerun',
         login: 'datacenter/login',
         getUsrcOrgTree: 'datacenter/getUsrcOrgTree',
         getDictByName:'datacenter/getDictByName',
         getDictListById: 'datacenter/getDictListById',
+        workflowLog: 'datacenter/workflowLog',
 
     },
     auxiliaryDb: {

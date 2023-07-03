@@ -19,7 +19,6 @@
                       </template>
                     </n-button>-->
 
-
           <n-button secondary type="info" @click="quickCreateModalInit">
             快捷创建
             <template #icon>
@@ -491,6 +490,25 @@
 
   </n-modal>
 
+  <n-drawer
+      v-model:show="showDrawerRef"
+      :width="220"
+      @update:show="handleDrawerShow"
+  >
+    <n-drawer-content title="日志" :native-scrollbar="false" closable>
+      <n-timeline v-if="!isEmpty(logItemsRef)">
+        <n-timeline-item v-for="item in logItemsRef"
+                         :type="item.type"
+                         :title="item.title"
+                         :content="item.content"
+                         :time="item.time"
+        />
+      </n-timeline>
+      <n-empty v-else description="无运行日志"/>
+      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
+    </n-drawer-content>
+  </n-drawer>
+
 </template>
 
 <script setup lang="ts">
@@ -502,8 +520,8 @@ import {
   cj_job_run,
   cj_job_start,
   cj_job_stop, create_valid_config,
-  get_cj_job_page, get_columns,
-  get_valid_config_page,
+  get_cj_job_page, get_columns, get_datax_job_log,
+  get_valid_config_page, get_workflow_log,
   get_workflow_page, gte_usrc_org_tree,
   sched_job_delete,
   workflow_active,
@@ -518,9 +536,9 @@ import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
-  convertToSixFields, getDataXJobStatus,
+  convertToSixFields, getDataXJobStatus, getDataXJobType,
   getIsValidConfig,
-  getSchedJob,
+  getSchedJob, getWorkflowJobStatus, getWorkflowJobType,
   jobNameCompare, pushUnExistJobs,
   showButton,
   showConfirmation, workflowJobGetLastExecTime, workflowJobGetNextExecTime
@@ -541,7 +559,8 @@ import {
   NTag,
   SelectOption,
   SelectGroupOption,
-  TreeSelectOption
+  TreeSelectOption,
+  TimelineItemProps
 } from "naive-ui";
 import {computed, h, onMounted, reactive, ref, watch} from "vue";
 import {uuid} from "vue3-uuid";
@@ -659,16 +678,7 @@ const tableDataInit = async () => {
         id: v.id,
         jobName: v.jobDesc,
         status: await getDataXJobStatus(v, schedJob),
-        type: (() => {
-          switch (v.jobDesc.split('_')[0]) {
-            case 'cj':
-              return '数据采集任务'
-            case 'gx':
-              return '数据共享任务'
-            default :
-              return '未知任务'
-          }
-        })(),
+        type: getDataXJobType(v),
         schedMode: 2,
         cron: schedJob?.jobCron || null,
         lastExecTime: v.triggerLastTime || '--',
@@ -728,42 +738,8 @@ const tableDataInit = async () => {
       const job = {
         id: v.id,
         jobName: v.procName,
-        type: (() => {
-          switch (v.procName.split('_')[0]) {
-            case 'zj':
-              return '数据质检任务'
-            case 'bf':
-              return '数据备份任务'
-            case 'qc':
-              return '数据清除任务'
-            case 'rh':
-              return '数据融合任务'
-            case 'rh1':
-              return '单表融合任务'
-            case 'rh2':
-              return '多表融合任务'
-            case 'rk':
-              return '数据入库任务'
-            default :
-              return '未知任务'
-          }
-        })(),
-        status: (() => {
-          switch (v.status) {
-            case '1':// 启用
-              return 2
-            case '2':// 停用
-              return 1
-            case '3':// 异常
-              return 4
-            case '4':// 运行中
-              return 3
-            case '5':// 未反馈
-              return 5
-            default :
-              return v.status as number
-          }
-        })(),
+        type: getWorkflowJobType(v),
+        status: getWorkflowJobStatus(v),
         schedMode: v.schedulingMode,
         cron: v.crontab == '' ? null : v.crontab,
         lastExecTime: await workflowJobGetLastExecTime(v),
@@ -964,7 +940,6 @@ const createColumns = (): DataTableColumns<Job> => {
 
               })]
             }
-
             break
           case 0:// 未配置调度任务的采集任务
             container.children = [
@@ -972,7 +947,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 await addSchedJobModalFormModelInit(row)
               }),
               showConfirmation('删除', async () => {
-                await cjJobDelete(row)
+                await dataXJobDelete(row)
               }),
             ]
             break
@@ -980,13 +955,16 @@ const createColumns = (): DataTableColumns<Job> => {
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
                 showButton('启用', () => {
-                  cjJobStart(row)
+                  dataXJobStart(row)
                 }),
                 showConfirmation('执行', () => {
-                  cjJobRun(row)
+                  dataXJobRun(row)
                 }),
                 showConfirmation('删除', async () => {
-                  await cjJobDelete(row)
+                  await dataXJobDelete(row)
+                }),
+                showButton('日志', () => {
+                  showDataXJobLog(row)
                 }),
               ]
             } else {
@@ -1001,6 +979,9 @@ const createColumns = (): DataTableColumns<Job> => {
                 showConfirmation('删除', async () => {
                   await workflowDelete(row.id)
                 }),
+                showButton('日志', () => {
+                  showWorkflowLog(row)
+                }),
               ]
             }
             break
@@ -1011,11 +992,14 @@ const createColumns = (): DataTableColumns<Job> => {
                   cjJobStop(row)
                 }),
                 showConfirmation('执行', () => {
-                  cjJobRun(row)
+                  dataXJobRun(row)
                 }),
                 showConfirmation('删除', async () => {
                   await cjJobStop(row)
-                  await cjJobDelete(row)
+                  await dataXJobDelete(row)
+                }),
+                showButton('日志', () => {
+                  showDataXJobLog(row)
                 }),
               ]
             } else {
@@ -1030,6 +1014,9 @@ const createColumns = (): DataTableColumns<Job> => {
                   await workflowActive(row.id, '02')
                   await workflowDelete(row.id)
                 }),
+                showButton('日志', () => {
+                  showWorkflowLog(row)
+                }),
               ]
             }
             break
@@ -1042,7 +1029,10 @@ const createColumns = (): DataTableColumns<Job> => {
               container.children = [
                 showConfirmation('重跑', async () => {
                   workflowReRun(row)
-                })
+                }),
+                showButton('日志', () => {
+                  showWorkflowLog(row)
+                }),
               ]
             }
             break
@@ -1156,7 +1146,7 @@ const workflowDelete = (id) => {
   })
 }
 
-const cjJobStart = async (row: Job) => {
+const dataXJobStart = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName)).id
   cj_job_start(schedJobId).then(res => {
     if (res.data == 'success') {
@@ -1180,7 +1170,7 @@ const cjJobStop = async (row: Job) => {
   })
 }
 
-const cjJobRun = async (row: Job) => {
+const dataXJobRun = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName)).id
   cj_job_run({
     jobId: schedJobId,
@@ -1195,7 +1185,7 @@ const cjJobRun = async (row: Job) => {
   })
 }
 
-const cjJobDelete = async (row: Job) => {
+const dataXJobDelete = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName))?.id || null
   if (schedJobId != null) {
     sched_job_delete(schedJobId).then(res => {
@@ -1478,7 +1468,7 @@ const onPositiveClick = async () => {
         }
 
       } else {
-
+        console.log(errors)
       }
     })
   }
@@ -2058,6 +2048,102 @@ const validConfigModalInit = async () => {
 
 const handlemechanismIdUpdate = () => {
   validConfigModalFormModel.value.mechanismName = mechanismOptions.value.filter(item => item.value == validConfigModalFormModel.value.mechanismId)[0].label as string
+}
+
+//endregion
+
+// region 日志
+const showDrawerRef = ref(false)
+const logItemsRef = ref<TimelineItemProps[]>([])
+const showTipRef = ref(false)
+const handleDrawerShow = (v) => {
+  console.log(v)
+}
+
+const showDataXJobLog = async (v) => {
+  const logs = (await get_datax_job_log({
+    current: 1,
+    size: 100,
+    blurry: v.jobName
+  })).data.records
+
+  showTipRef.value = logs.length >= 100;
+
+  logItemsRef.value = []
+
+  logs.forEach(log => {
+    let type
+    let title
+    let content
+    let time
+
+    if (log.handleCode == 0) {
+      title = '运行中'
+      type = 'info'
+    } else if (log.handleCode == 200) {
+      title = '执行成功'
+      type = 'success'
+    } else if (log.handleCode == 500) {
+      title = '执行失败'
+      type = 'error'
+    } else {
+      title = '未知'
+      type = 'warning'
+    }
+
+    time = log.handleTime
+    content = ''
+
+    logItemsRef.value.push({
+      type: type,
+      title: title,
+      content: content,
+      time: time
+    })
+  })
+
+  showDrawerRef.value = true
+}
+
+const showWorkflowLog = async (v) => {
+  const logs = (await get_workflow_log(v.id, 100, 1)).data.records
+
+  showTipRef.value = logs.length >= 100;
+
+  logItemsRef.value = []
+
+  logs.forEach(log => {
+    let type
+    let title
+    let content
+    let time
+
+    if (log.result == null) {
+      title = '运行中'
+      type = 'info'
+    } else if (log.result == 1) {
+      title = '执行成功'
+      type = 'success'
+    } else if (log.result == 2) {
+      title = '执行失败'
+      type = 'error'
+    } else {
+      title = '未知'
+      type = 'warning'
+    }
+
+    time = log.startTime
+    content = log.componentName
+
+    logItemsRef.value.push({
+      type: type,
+      title: title,
+      content: content,
+      time: time
+    })
+  })
+
+  showDrawerRef.value = true
 }
 
 //endregion
