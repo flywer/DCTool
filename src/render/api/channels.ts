@@ -51,9 +51,11 @@ export const channels = reactive({
         workflowRerun: 'datacenter/workflowRerun',
         login: 'datacenter/login',
         getUsrcOrgTree: 'datacenter/getUsrcOrgTree',
-        getDictByName:'datacenter/getDictByName',
+        getDictByName: 'datacenter/getDictByName',
         getDictListById: 'datacenter/getDictListById',
         workflowLog: 'datacenter/workflowLog',
+        inspHomeList: 'datacenter/inspHomeList',
+        getInpsRecordPage: 'datacenter/getInpsRecordPage',
 
     },
     auxiliaryDb: {
@@ -79,12 +81,12 @@ export const channels = reactive({
 
         getPreDatabaseDepart: 'auxiliaryDb/getPreDatabaseDepart',
         getPreDatabaseTableInfoJson: 'auxiliaryDb/getPreDatabaseTableInfoJson',
-        updateTableInfoJson:  'auxiliaryDb/updateTableInfoJson',
+        updateTableInfoJson: 'auxiliaryDb/updateTableInfoJson',
 
         getSztkDict: 'auxiliaryDb/getSztkDict',
-        saveSztkDict:'auxiliaryDb/saveSztkDict',
-        getParentDict:'auxiliaryDb/getParentDict',
-        getDictByParentId:'auxiliaryDb/getDictByParentId',
+        saveSztkDict: 'auxiliaryDb/saveSztkDict',
+        getParentDict: 'auxiliaryDb/getParentDict',
+        getDictByParentId: 'auxiliaryDb/getDictByParentId',
         getDictByBzId: 'auxiliaryDb/getDictByBzId',
 
     },
@@ -94,6 +96,9 @@ export const channels = reactive({
     },
     app: {
         relaunch: 'app/relaunch'
+    },
+    xlsx: {
+        createDataInpsStat: 'xlsx/createDataInpsStat'
     }
 
 })

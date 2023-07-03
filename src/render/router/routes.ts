@@ -22,6 +22,7 @@ const settings = () => import('@render/views/settings/index.vue')
 const createTable = () => import('@render/views/createTable/index.vue')
 const preDatabase = () => import('@render/views/preDatabase/index.vue')
 const sztkDict = () => import('@render/views/sztkDict/index.vue')
+const dataStat = () => import('@render/views/dataStat/index.vue')
 
 export const routeName = {
     home: 'home',
@@ -47,6 +48,7 @@ export const routeName = {
     projectMgt: 'projectMgt',
     preDatabase: 'preDatabase',
     sztkDict: 'sztkDict',
+    dataStat: 'dataStat'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -167,5 +169,10 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.sztkDict,
         path: '/sztkDict/index',
         component: sztkDict
+    },
+    {
+        name: routeName.dataStat,
+        path: '/dataStat/index',
+        component: dataStat
     },
 ]

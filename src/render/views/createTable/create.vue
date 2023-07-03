@@ -1,5 +1,5 @@
 <template>
-  <n-alert  type="default" :show-icon="false">
+  <n-alert type="default" :show-icon="false">
     建表若出现服务器内部错误的问题，需要自行去中台删除该表然后重建，这是中台的问题
   </n-alert>
   <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -281,29 +281,29 @@ const createTables = () => {
       const tableAbbr = (await find_by_project_id(formModel.value.projectId))?.tableAbbr
       const tableSql = tableNameOptions.value.find(option => option.value === formModel.value.tableSqlId)
 
-      if (formModel.value.tableGroupValue.find(item => item === 'temp_ods') != undefined) {
+      if (formModel.value.tableGroupValue.some(item => item === 'temp_ods')) {
         await tempOdsCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'ods') != undefined) {
+      if (formModel.value.tableGroupValue.some(item => item === 'ods')) {
         await odsCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'right_dwd') != undefined) {
+      if (formModel.value.tableGroupValue.some(item => item === 'right_dwd')) {
         await rightDwdCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'error_dwd') != undefined) {
+      if (formModel.value.tableGroupValue.some(item => item === 'error_dwd')) {
         await errorDwdCreate(tableAbbr, tableSql)
       }
 
-      if (formModel.value.tableGroupValue.find(item => item === 'dwb') != undefined) {
+      if (formModel.value.tableGroupValue.some(item => item === 'dwb')) {
         await dwbCreate(tableAbbr, tableSql)
       }
 
-/*       if (formModel.value.tableGroupValue.find(item => item === 'temp_dwb')[0]) {
-        await tempDwbCreate(tableAbbr, tableSql)
-      } */
+      /*       if (formModel.value.tableGroupValue.find(item => item === 'temp_dwb')[0]) {
+              await tempDwbCreate(tableAbbr, tableSql)
+            } */
 
     } else {
       console.log(errors)

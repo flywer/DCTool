@@ -42,8 +42,8 @@ import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql, DataBase} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
 import {LibraryAddOutlined} from '@vicons/material'
-import {AppsListDetail20Filled,BookSearch24Regular} from '@vicons/fluent'
-import {SettingsOutline} from '@vicons/ionicons5'
+import {AppsListDetail20Filled, BookSearch24Regular} from '@vicons/fluent'
+import {SettingsOutline,StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
@@ -79,104 +79,6 @@ const menuOptions: MenuOption[] = [
     key: routeName.jobCreate,
     icon: renderIcon(LibraryAddOutlined)
   },
-  /*   {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.cjJob,
-                }
-              },
-              {default: () => '采集任务'}
-          ),
-      key: routeName.cjJob,
-      icon: () => h('span', 'CJ')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.zjJob,
-                }
-              },
-              {default: () => '质检任务'}
-          ),
-      key: routeName.zjJob,
-      icon: () => h('span', 'ZJ')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.bfJob,
-                }
-              },
-              {default: () => '备份任务'}
-          ),
-      key: routeName.bfJob,
-      icon: () => h('span', 'BF')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.rhJob,
-                }
-              },
-              {default: () => '融合任务'}
-          ),
-      key: routeName.rhJob,
-      icon: () => h('span', 'RH')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.qcJob,
-                }
-              },
-              {default: () => '清除任务'}
-          ),
-      key: routeName.qcJob,
-      icon: () => h('span', 'QC')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.rkJob,
-                }
-              },
-              {default: () => '入库任务'}
-          ),
-      key: routeName.rkJob,
-      icon: () => h('span', 'RK')
-    },
-    {
-      label: () =>
-          h(
-              RouterLink,
-              {
-                to: {
-                  name: routeName.gxJob,
-                }
-              },
-              {default: () => '共享任务'}
-          ),
-      key: routeName.gxJob,
-      icon: () => h('span', 'GX')
-    }, */
   {
     label: () =>
         h(
@@ -232,6 +134,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.preDatabase,
     icon: renderIcon(DataBase)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.dataStat,
+              }
+            },
+            {default: () => '数据统计'}
+        ),
+    key: routeName.dataStat,
+    icon: renderIcon(StatsChartOutline)
   },
   {
     label: () =>

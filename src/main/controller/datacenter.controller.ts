@@ -4,6 +4,7 @@ import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from "einf";
 import {dialog, net} from "electron";
 import log from 'electron-log'
+import {isEmpty} from "lodash";
 
 @Controller()
 export class DatacenterController {
@@ -518,6 +519,52 @@ export class DatacenterController {
         const query = `type=${type}`;
 
         await this.commonGetRequest(`workflow/proc/rerun/${id}`, query).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.inspHomeList)
+    public async handleInspHomeList() {
+        let result
+        await this.commonGetRequest(`/qaportal/dwInspectionRecord/findHomeList`, ``).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getInpsRecordPage)
+    public async handleGetInpsRecordPage(obj: any) {
+        let result
+        obj = JSON.parse(obj)
+        let params
+        params = {
+            page: obj.page,
+            size: obj.size,
+            orgIds: obj.orgIds,
+            orders: [
+                {
+                    asc: false,
+                    column: 'create_time'
+                }
+            ]
+        }
+
+        if (obj.likeName != undefined && obj.likeName.length > 0) {
+            params.likeName = obj.likeName
+            params.likeType = 1
+        }
+
+        if (!isEmpty(obj.inspTime)) {
+            params.inspectionTimeStart = obj.inspTime[0]
+            params.inspectionTimeEnd = obj.inspTime[1]
+        }
+
+        await this.commonPostRequest(`/qaportal/dwInspectionRecord/page`, params).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);

@@ -251,3 +251,22 @@ export const get_dict_list_by_id = async (id: string) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getDictListById, id))
     return data
 }
+
+export const insp_home_list = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.inspHomeList))
+    return data
+}
+
+type GetInspRecordPageType = {
+    page: number,
+    size: number,
+    orgIds: string[],
+    inspTime: string[],
+    likeName: string,
+    likeType?: 1
+}
+
+export const get_inps_record_page = async (obj: GetInspRecordPageType) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getInpsRecordPage, JSON.stringify(obj)))
+    return data
+}
