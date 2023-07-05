@@ -518,7 +518,7 @@ export class DatacenterController {
 
         const query = `type=${type}`;
 
-        await this.commonGetRequest(`workflow/proc/rerun/${id}`, query).then((res) => {
+        await this.commonGetRequest(`/workflow/proc/rerun/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
             console.error(err);
