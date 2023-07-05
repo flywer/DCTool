@@ -102,7 +102,7 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.getRhJson)
     public async handleGetRhJobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
+            select: ['id', 'tableName', 'rh1Json', 'rh2Json', 'rh1UpdateTime'],
             where: {
                 tableName: Like(`%${tableName || ''}%`)
             },
@@ -113,7 +113,7 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.getRhJsonById)
     public async handleGetRhJobJsonById(id: number) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'rh1Json', 'rh2Json'],
+            select: ['id', 'tableName', 'rh1Json', 'rh2Json', 'rh1UpdateTime'],
             where: {
                 id: id
             }
@@ -123,7 +123,7 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.getZjJson)
     public async handleGetZjJobJson(tableName?: string) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'zjJson'],
+            select: ['id', 'tableName', 'zjJson', 'zjUpdateTime'],
             where: {
                 tableName: Like(`%${tableName || ''}%`)
             },
@@ -134,7 +134,7 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.getZjJsonById)
     public async handleGetZjJobJsonById(id: number) {
         return await AppDataSource.getRepository(JobJson).find({
-            select: ['id', 'tableName', 'zjJson'],
+            select: ['id', 'tableName', 'zjJson', 'zjUpdateTime'],
             where: {
                 id: id
             }
@@ -192,13 +192,16 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.updateZjJson)
     public async handleUpdateZjJson(obj: any) {
         obj = JSON.parse(obj)
+        obj.zjUpdateTime = new Date()
+
         if (obj.id === null) {
             return await AppDataSource.getRepository(JobJson).createQueryBuilder()
                 .insert()
                 .into(JobJson)
                 .values([{
                     zjJson: obj.json,
-                    tableName: obj.tableName
+                    tableName: obj.tableName,
+                    zjUpdateTime: obj.zjUpdateTime
                 }])
                 .execute()
         } else {
@@ -206,7 +209,8 @@ export class AdbController {
                 .update(JobJson)
                 .set({
                     zjJson: obj.json,
-                    tableName: obj.tableName
+                    tableName: obj.tableName,
+                    zjUpdateTime: obj.zjUpdateTime
                 })
                 .where("id = :id", {id: obj.id})
                 .execute()

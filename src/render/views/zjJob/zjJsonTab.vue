@@ -1,5 +1,5 @@
 <template>
-  <n-space justify="end" >
+  <n-space justify="end">
     <n-input
         v-model:value="searchValueRef"
         placeholder="搜索"
@@ -84,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import {getDateStringByDate} from "@render/utils/common/dateUtils";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -98,6 +99,7 @@ type ZjJson = {
   id: number
   tableName: string
   json: string
+  updateTime: string
 }
 
 const createColumns = (): DataTableColumns<ZjJson> => {
@@ -114,7 +116,13 @@ const createColumns = (): DataTableColumns<ZjJson> => {
       key: 'json',
       width: '30%',
       ellipsis: true
-    }, {
+    },
+    {
+      title: '变更时间',
+      key: 'updateTime',
+      width: '10%'
+    },
+    {
       title: '操作',
       key: 'actions',
       width: '15%',
@@ -200,7 +208,8 @@ const tableDataInit = () => {
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.zjJson
+          json: v.zjJson,
+          updateTime: v.zjUpdateTime == null ? '--' : getDateStringByDate(v.zjUpdateTime)
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -315,11 +324,13 @@ const add = () => {
 
 const search = (v) => {
   get_zj_json(v).then((res) => {
+    console.log(res)
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.zjJson
+          json: v.zjJson,
+          updateTime: v.zjUpdateTime == null ? '--' : getDateStringByDate(v.zjUpdateTime)
         })))
   })
 }

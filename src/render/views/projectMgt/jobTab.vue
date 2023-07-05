@@ -1021,10 +1021,27 @@ const createColumns = (): DataTableColumns<Job> => {
             }
             break
           case 3:// 任务运行中
+            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
+              container.children = [
+                showButton('日志', () => {
+                  showDataXJobLog(row)
+                }),
+              ]
+            } else {
+              container.children = [
+                showButton('日志', () => {
+                  showWorkflowLog(row)
+                }),
+              ]
+            }
             break
           case 4:// 任务异常
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-
+              container.children = [
+                showButton('日志', () => {
+                  showDataXJobLog(row)
+                }),
+              ]
             } else {
               container.children = [
                 showConfirmation('重跑', async () => {
@@ -2035,7 +2052,7 @@ const validConfigModalInit = async () => {
     confirmBtnText = '保存'
   }
 
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.map((v => ({
+  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map((v => ({
     label: `${v.name}`,
     value: v.id
   })))
@@ -2045,6 +2062,21 @@ const validConfigModalInit = async () => {
   formSelect.value.validConfig = true
   showModalRef.value = true
 }
+
+const customSort = (a: any, b: any) => {
+  // Check if both strings start with '广东省'
+  const startsWithGuangDongA = a.name.startsWith('广东省');
+  const startsWithGuangDongB = b.name.startsWith('广东省');
+
+  if (startsWithGuangDongA && !startsWithGuangDongB) {
+    return -1; // Move `a` before `b`
+  } else if (!startsWithGuangDongA && startsWithGuangDongB) {
+    return 1; // Move `b` before `a`
+  } else {
+    // Both start with '广东省' or don't start with it
+    return a.name.localeCompare(b.name);
+  }
+};
 
 const handlemechanismIdUpdate = () => {
   validConfigModalFormModel.value.mechanismName = mechanismOptions.value.filter(item => item.value == validConfigModalFormModel.value.mechanismId)[0].label as string
