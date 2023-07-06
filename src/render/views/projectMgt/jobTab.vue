@@ -1047,6 +1047,30 @@ const createColumns = (): DataTableColumns<Job> => {
                 showConfirmation('重跑', async () => {
                   workflowReRun(row)
                 }),
+                showConfirmation('删除', async () => {
+                  await workflowDelete(row.id)
+                }),
+                showButton('日志', () => {
+                  showWorkflowLog(row)
+                }),
+              ]
+            }
+            break
+          case 5:
+            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
+              container.children = [
+                showButton('日志', () => {
+                  showDataXJobLog(row)
+                }),
+              ]
+            } else {
+              container.children = [
+                showConfirmation('重跑', async () => {
+                  workflowReRun(row)
+                }),
+                showConfirmation('删除', async () => {
+                  await workflowDelete(row.id)
+                }),
                 showButton('日志', () => {
                   showWorkflowLog(row)
                 }),
@@ -2159,6 +2183,9 @@ const showWorkflowLog = async (v) => {
     } else if (log.result == 2) {
       title = '执行失败'
       type = 'error'
+    } else if (log.result == 3) {
+      title = '未反馈'
+      type = 'warning'
     } else {
       title = '未知'
       type = 'warning'
