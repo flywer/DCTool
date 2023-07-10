@@ -1,17 +1,19 @@
 <template>
   <n-layout class="m-2">
-    <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
-      <n-tabs type="line" animated>
-        <n-tab-pane name="1" tab="行为数据字段情况查询">
-          <basic-data-problem-query/>
-        </n-tab-pane>
-      </n-tabs>
-    </n-scrollbar>
+    <n-tabs type="line" animated>
+      <n-tab-pane name="1" tab="行为数据字段情况查询">
+        <action-data-problem-query/>
+      </n-tab-pane>
+      <n-tab-pane name="2" tab="行为数据统计查询">
+        <action-data-sum-stat/>
+      </n-tab-pane>
+    </n-tabs>
   </n-layout>
 </template>
 
 <script setup lang="ts">
-import BasicDataProblemQuery from "@render/views/preDatabase/basicDataProblemQuery.vue";
+import ActionDataProblemQuery from "@render/views/preDatabase/actionDataProblemQuery.vue";
+import ActionDataSumStat from "@render/views/preDatabase/actionDataSumStat.vue";
 </script>
 
 <style scoped>

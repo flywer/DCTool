@@ -1,109 +1,110 @@
 <template>
-  <n-alert type="default" :show-icon="false">
-    生成用于查询前置机行为数据表<b>批次号</b>与<b>行政区划</b>的SQL
-  </n-alert>
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
+    <n-alert type="default" :show-icon="false">
+      生成用于查询前置机行为数据表<b>批次号</b>与<b>行政区划</b>的SQL
+    </n-alert>
 
-  <n-card class="mt-2" :content-style="{paddingBottom:0}" :size="'small'">
-    <n-tabs type="line" animated @update:value="handleTabUpdate">
-      <n-tab-pane name="1" tab="简易模式">
+    <n-card class="mt-2" :content-style="{paddingBottom:0}" :size="'small'">
+      <n-tabs type="line" animated @update:value="handleTabUpdate">
+        <n-tab-pane name="1" tab="简易模式">
+          <n-grid :cols="2" :x-gap="12">
+            <n-form-item-gi span="2" label="单位选择">
+              <n-select
+                  v-model:value="departIdRef"
+                  placeholder="选择单位"
+                  :options="departOptionsRef"
+                  :consistent-menu-width="false"
+                  filterable
+                  :size="'small'"
+              />
+            </n-form-item-gi>
+          </n-grid>
+        </n-tab-pane>
+        <n-tab-pane name="2" tab="自定义模式">
+          <n-grid :cols="2" :x-gap="12">
+            <n-form-item-gi span="2" label="单位名称">
+              <n-input v-model:value="departNameRef" placeholder="输入单位名称" :clearable="true" :size="'small'"/>
+            </n-form-item-gi>
+
+            <n-form-item-gi span="2" label="行为表选择">
+              <n-tree-select
+                  v-model:value="tableSelectRef"
+                  multiple
+                  cascade
+                  checkable
+                  :check-strategy="'child'"
+                  :options="tableSelectOptionsRef"
+                  :size="'small'"
+                  clearable
+              />
+            </n-form-item-gi>
+
+          </n-grid>
+        </n-tab-pane>
+      </n-tabs>
+
+    </n-card>
+
+    <n-space class="mt-2" justify="center" align="center">
+      <n-button class="w-28" type="primary" @click="buildForm" :loading="isBuildForm">
+        表单创建
+      </n-button>
+    </n-space>
+
+    <n-card class="mt-2" :content-style="{paddingBottom:0}" :size="'small'" v-if="inputValueRef.length>0">
+      <n-scrollbar class="pr-2" style="max-height: calc(100vh - 500px);" trigger="hover">
         <n-grid :cols="2" :x-gap="12">
-          <n-form-item-gi span="2" label="单位选择">
-            <n-select
-                v-model:value="departIdRef"
-                placeholder="选择单位"
-                :options="departOptionsRef"
-                :consistent-menu-width="false"
-                filterable
-                :size="'small'"
-            />
-
-          </n-form-item-gi>
+          <n-gi :span="2">
+            <n-dynamic-input v-model:value="inputValueRef" class="mb-4" @create="onCreate" show-sort-button>
+              <template #default="{ value }">
+                <div style="display: flex; align-items: center; width: 100%">
+                  <n-input v-model:value="value.tableName" type="text" placeholder="输入表名"
+                           style="margin-right: 12px"
+                  />
+                  <n-input v-model:value="value.tableAbbr" type="text" placeholder="输入表名简称"
+                           style="margin-right: 12px"
+                  />
+                  <n-input v-model:value="value.region" type="text" placeholder="输入行政区划字段"
+                           style="margin-right: 12px"
+                  />
+                  <n-input v-model:value="value.cdBatch" placeholder="输入批次号字段" type="text"/>
+                </div>
+              </template>
+            </n-dynamic-input>
+          </n-gi>
         </n-grid>
-      </n-tab-pane>
-      <n-tab-pane name="2" tab="自定义模式">
-        <n-grid :cols="2" :x-gap="12">
-          <n-form-item-gi span="2" label="行为表选择">
-            <n-input v-model:value="departNameRef" placeholder="输入单位名称" :clearable="true" :size="'small'"/>
-          </n-form-item-gi>
+      </n-scrollbar>
+    </n-card>
+    <n-divider v-else/>
 
-          <n-form-item-gi span="2" label="行为表选择">
-            <n-tree-select
-                v-model:value="tableSelectRef"
-                multiple
-                cascade
-                checkable
-                :check-strategy="'child'"
-                :options="tableSelectOptionsRef"
-                :size="'small'"
-                clearable
-            />
-          </n-form-item-gi>
+    <n-space class="mt-2" justify="center" align="center">
 
-        </n-grid>
-      </n-tab-pane>
-    </n-tabs>
+      <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="buildSql"
+                :loading="isBuildSql"
+      >
+        SQL生成
+      </n-button>
+      <n-button class="w-28 float-right" :disabled="sqlRef.length===0" @click="copyText(sqlRef)">
+        复制结果
+      </n-button>
 
-  </n-card>
+      <n-divider vertical/>
+      <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
+                :loading="isSaveForm"
+      >
+        表单存储
+      </n-button>
+    </n-space>
 
-  <n-space class="mt-2" justify="center" align="center">
-    <n-button class="w-28" type="primary" @click="buildForm" :loading="isBuildForm">
-      表单创建
-    </n-button>
-  </n-space>
-
-  <n-card class="mt-2" :content-style="{paddingBottom:0}" :size="'small'" v-if="inputValueRef.length>0">
-    <n-scrollbar class="pr-2" style="max-height: calc(100vh - 500px);" trigger="hover">
-      <n-grid :cols="2" :x-gap="12">
-        <n-gi :span="2">
-          <n-dynamic-input v-model:value="inputValueRef" class="mb-4" @create="onCreate" show-sort-button>
-            <template #default="{ value }">
-              <div style="display: flex; align-items: center; width: 100%">
-                <n-input v-model:value="value.tableName" type="text" placeholder="输入表名"
-                         style="margin-right: 12px"
-                />
-                <n-input v-model:value="value.tableAbbr" type="text" placeholder="输入表名简称"
-                         style="margin-right: 12px"
-                />
-                <n-input v-model:value="value.region" type="text" placeholder="输入行政区划字段"
-                         style="margin-right: 12px"
-                />
-                <n-input v-model:value="value.cdBatch" placeholder="输入批次号字段" type="text"/>
-              </div>
-            </template>
-          </n-dynamic-input>
-        </n-gi>
-      </n-grid>
-    </n-scrollbar>
-  </n-card>
-  <n-divider v-else/>
-
-  <n-space class="mt-2" justify="center" align="center">
-
-    <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="buildSql"
-              :loading="isBuildSql"
-    >
-      SQL生成
-    </n-button>
-    <n-button class="w-28 float-right" :disabled="sqlRef.length===0" @click="copyText(sqlRef)">
-      复制结果
-    </n-button>
-
-    <n-divider vertical/>
-    <n-button class="w-28" type="primary" :disabled="inputValueRef.length===0" @click="formSave"
-              :loading="isSaveForm"
-    >
-      表单存储
-    </n-button>
-  </n-space>
-
-  <n-input
-      v-model:value="sqlRef"
-      class="mt-2"
-      type="textarea"
-      placeholder=""
-      readonly
-      :autosize="{ minRows:3,maxRows:8 }"
-  />
+    <n-input
+        v-model:value="sqlRef"
+        class="mt-2"
+        type="textarea"
+        placeholder=""
+        readonly
+        :autosize="{ minRows:4,maxRows:8 }"
+    />
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts">
@@ -153,16 +154,31 @@ const sqlRef = ref('')
 onMounted(async () => {
   tableSelectOptionsInit()
 
-  departOptionsRef.value = (await get_pre_database_depart()).map((v => ({
+  departOptionsRef.value = (await get_pre_database_depart()).sort(customSort).map((v => ({
     label: v.departName,
     value: v.id.toString()
   })))
 })
 
+const customSort = (a: any, b: any) => {
+  // Check if both strings start with '广东省'
+  const startsWithGuangDongA = a.departName.startsWith('广东省');
+  const startsWithGuangDongB = b.departName.startsWith('广东省');
+
+  if (startsWithGuangDongA && !startsWithGuangDongB) {
+    return -1; // Move `a` before `b`
+  } else if (!startsWithGuangDongA && startsWithGuangDongB) {
+    return 1; // Move `b` before `a`
+  } else {
+    // Both start with '广东省' or don't start with it
+    return a.departName.localeCompare(b.departName);
+  }
+};
+
 const handleTabUpdate = async (v) => {
   curTabRef.value = v
   if (v === '1') {
-    departOptionsRef.value = (await get_pre_database_depart()).map((v => ({
+    departOptionsRef.value = (await get_pre_database_depart()).sort(customSort).map((v => ({
       label: v.departName,
       value: v.id.toString()
     })))
@@ -334,23 +350,20 @@ const isSaveForm = ref(false)
 
 const formSave = () => {
   isSaveForm.value = true
-
+  let departName
   if (curTabRef.value === '1') {
-    const departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value[0])[0].label
-    update_table_info_json({
-      departName: departName,
-      tableInfoJson: JSON.stringify(inputValueRef.value)
-    }).then(() => {
-      window.$message.success('保存成功')
-    }).finally(() => isSaveForm.value = false)
+    departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value)[0].label
   } else {
-    update_table_info_json({
-      departName: departNameRef.value,
-      tableInfoJson: JSON.stringify(inputValueRef.value)
-    }).then(() => {
-      window.$message.success('保存成功')
-    }).finally(() => isSaveForm.value = false)
+    departName = departNameRef.value
   }
+
+  update_table_info_json({
+    departName: departName,
+    tableInfoJson: JSON.stringify(inputValueRef.value)
+  }).then((res) => {
+    console.log(res)
+    window.$message.success('保存成功')
+  }).finally(() => isSaveForm.value = false)
 
 }
 </script>

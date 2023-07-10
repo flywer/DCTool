@@ -1,70 +1,72 @@
 <template>
-  <n-alert type="default" :show-icon="false">
-    所选地市在该时间内的每个数据表<b>最新</b>的数据质检情况生成Excel
-  </n-alert>
-  <n-card class="mt-2" :content-style="{paddingBottom:0}">
-    <n-form ref="formRef"
-            inline
-            :size="'small'"
-            :model="formModel"
-            label-placement="left"
-    >
-      <n-grid :cols="5" :x-gap="12">
-        <n-form-item-gi :span="2" label="部门选择">
-          <n-tree-select
-              v-model:value="formModel.orgIds"
-              multiple
-              cascade
-              checkable
-              :check-strategy="'child'"
-              :options="orgSelectOptionsRef"
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
+    <n-alert type="default" :show-icon="false">
+      所选地市在该时间内的每个数据表<b>最新</b>的数据质检情况生成Excel
+    </n-alert>
+    <n-card class="mt-2" :content-style="{paddingBottom:0}">
+      <n-form ref="formRef"
+              inline
               :size="'small'"
-              clearable
-              :consistent-menu-width="false"
-          />
-        </n-form-item-gi>
-
-        <n-form-item-gi :span="2" label="时间范围">
-          <n-date-picker v-model:value="formModel.timeRange" type="datetimerange"/>
-        </n-form-item-gi>
-
-        <n-form-item-gi :span="1">
-          <n-checkbox-group
-              v-model:value="formModel.dataTypeGroupValue"
-          >
-            <n-space>
-              <n-checkbox value="basic">
-                基础数据
-              </n-checkbox>
-              <n-checkbox value="action">
-                行为数据
-              </n-checkbox>
-            </n-space>
-          </n-checkbox-group>
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-  </n-card>
-
-  <n-space justify="center" align="center" class="mt-2">
-    <n-button type="primary" class="w-28" @click="createExcel" :loading="isBuilding">生成Excel</n-button>
-  </n-space>
-  <n-grid :cols="1" class="mt-5" v-if="isClick">
-    <n-gi class="pl-5 pr-5">
-      <n-progress
-          type="line"
-          :percentage="percentage"
-          :status="percentage === 100 ?'success':'info'"
-          :indicator-placement="'inside'"
-          processing
+              :model="formModel"
+              label-placement="left"
       >
-      </n-progress>
-    </n-gi>
-    <n-gi class="pl-5 pr-5">
-      <span style="color: #999999">{{ progressText }}</span>
-    </n-gi>
+        <n-grid :cols="5" :x-gap="12">
+          <n-form-item-gi :span="2" label="部门选择">
+            <n-tree-select
+                v-model:value="formModel.orgIds"
+                multiple
+                cascade
+                checkable
+                :check-strategy="'child'"
+                :options="orgSelectOptionsRef"
+                :size="'small'"
+                clearable
+                :consistent-menu-width="false"
+            />
+          </n-form-item-gi>
 
-  </n-grid>
+          <n-form-item-gi :span="2" label="时间范围">
+            <n-date-picker v-model:value="formModel.timeRange" type="datetimerange"/>
+          </n-form-item-gi>
+
+          <n-form-item-gi :span="1">
+            <n-checkbox-group
+                v-model:value="formModel.dataTypeGroupValue"
+            >
+              <n-space>
+                <n-checkbox value="basic">
+                  基础数据
+                </n-checkbox>
+                <n-checkbox value="action">
+                  行为数据
+                </n-checkbox>
+              </n-space>
+            </n-checkbox-group>
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
+    </n-card>
+
+    <n-space justify="center" align="center" class="mt-2">
+      <n-button type="primary" class="w-28" @click="createExcel" :loading="isBuilding">生成Excel</n-button>
+    </n-space>
+    <n-grid :cols="1" class="mt-5" v-if="isClick">
+      <n-gi class="pl-5 pr-5">
+        <n-progress
+            type="line"
+            :percentage="percentage"
+            :status="percentage === 100 ?'success':'info'"
+            :indicator-placement="'inside'"
+            processing
+        >
+        </n-progress>
+      </n-gi>
+      <n-gi class="pl-5 pr-5">
+        <span style="color: #999999">{{ progressText }}</span>
+      </n-gi>
+
+    </n-grid>
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts">

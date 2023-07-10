@@ -1,44 +1,46 @@
 <template>
-  <n-space justify="end">
-    <n-input
-        v-model:value="searchValueRef"
-        placeholder="搜索"
-        @update:value="search"
-        clearable
-    >
-      <template #prefix>
-        <n-icon :component="Search"/>
-      </template>
-    </n-input>
-    <!--    <n-button secondary strong @click="add">
-          新增
-          <template #icon>
-            <n-icon>
-              <Add/>
-            </n-icon>
-          </template>
-        </n-button>-->
-    <n-button secondary strong @click="tableDataInit">
-      刷新
-      <template #icon>
-        <n-icon>
-          <Refresh/>
-        </n-icon>
-      </template>
-    </n-button>
-  </n-space>
-  <n-data-table
-      ref="tableRef"
-      :key="(row) => row.id"
-      class="mt-2"
-      :columns="columnsRef"
-      :data="tableDataRef"
-      :pagination="paginationReactive"
-      :bordered="true"
-      :size="'small'"
-      :loading="isLoading"
-      :striped="true"
-  />
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
+    <n-space justify="end">
+      <n-input
+          v-model:value="searchValueRef"
+          placeholder="搜索"
+          @update:value="search"
+          clearable
+      >
+        <template #prefix>
+          <n-icon :component="Search"/>
+        </template>
+      </n-input>
+      <!--    <n-button secondary strong @click="add">
+            新增
+            <template #icon>
+              <n-icon>
+                <Add/>
+              </n-icon>
+            </template>
+          </n-button>-->
+      <n-button secondary strong @click="tableDataInit">
+        刷新
+        <template #icon>
+          <n-icon>
+            <Refresh/>
+          </n-icon>
+        </template>
+      </n-button>
+    </n-space>
+    <n-data-table
+        ref="tableRef"
+        :key="(row) => row.id"
+        class="mt-2"
+        :columns="columnsRef"
+        :data="tableDataRef"
+        :pagination="paginationReactive"
+        :bordered="true"
+        :size="'small'"
+        :loading="isLoading"
+        :striped="true"
+    />
+  </n-scrollbar>
   <n-modal
       v-model:show="showModalRef"
       :mask-closable="false"
