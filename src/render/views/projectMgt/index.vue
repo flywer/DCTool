@@ -4,7 +4,7 @@
       <n-tab-pane name="1" tab="整体任务">
         <tree-tab/>
       </n-tab-pane>
-      <n-tab-pane name="2" tab="行为数据入库任务">
+      <n-tab-pane name="2" tab="行为数据入湖任务">
         <action-rk-job/>
       </n-tab-pane>
       <n-tab-pane name="3" tab="行为数据共享任务">

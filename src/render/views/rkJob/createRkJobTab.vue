@@ -1,5 +1,5 @@
 <template>
-  <n-layout  >
+  <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
       <n-card :content-style="{paddingBottom:0}">
         <n-form ref="formRef"
@@ -30,6 +30,25 @@
                        @keydown.enter.prevent
               />
             </n-form-item-gi>
+
+            <n-form-item-gi label="来源库" path="sourceDataSourceId">
+              <n-select
+                  v-model:value="formModel.sourceDataSourceId"
+                  :options="datasourceOptions"
+                  :size="'small'"
+                  disabled
+              />
+            </n-form-item-gi>
+
+            <n-form-item-gi label="目标库" path="targetDataSourceId">
+              <n-select
+                  v-model:value="formModel.targetDataSourceId"
+                  :options="datasourceOptions"
+                  :size="'small'"
+                  disabled
+              />
+            </n-form-item-gi>
+
             <n-form-item-gi label="项目" path="projectId">
               <n-select
                   v-model:value="formModel.projectId"
@@ -40,6 +59,7 @@
                   :disabled="formModel.dataType===2"
               />
             </n-form-item-gi>
+
             <n-form-item-gi label="责任人" path="personId">
               <n-select
                   v-model:value="formModel.personId"
@@ -61,7 +81,7 @@
           去除不同名称字段
         </n-checkbox>
         <n-divider :vertical="true"/>
-        <n-button type="primary" class="w-28" @click="generateSql" :loading="isGenerating">SQL生成</n-button>
+        <n-button type="primary" class="w-28" @click="buildJson" :loading="isGenerating">SQL生成</n-button>
         <n-button :disabled="insertSqlRef === ''" class="w-28" @click="copyText(insertSqlRef)">
           复制结果
         </n-button>
@@ -93,7 +113,7 @@
 <script setup lang="ts">
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
-import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {buildRkJson} from "@render/utils/datacenter/rkJob";
@@ -107,9 +127,9 @@ const formModel = ref({
   name: '',
   projectId: '',
   personId: '',
-  sourceDataSourceId: '',
+  sourceDataSourceId: '6',
   sourceTableName: '',
-  targetDataSourceId: '',
+  targetDataSourceId: '8',
   targetTableName: '',
   email: '',
   description: '',
@@ -174,11 +194,13 @@ watch(
         const project = (await find_by_project_id(projectId))
         formModel.value.name = `rk_${project?.projectAbbr || ''}_${tableName}`
         formModel.value.sourceTableName = `df_${project?.tableAbbr || ''}_${tableName}_dwb`
+        formModel.value.targetDataSourceId = '8'
       } else {
         formModel.value.projectId = '26'
         const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
         formModel.value.name = `rk_${projectAbbr}_${tableName}`
         formModel.value.sourceTableName = `sztk_${tableName}_dm`
+        formModel.value.targetDataSourceId = '12'
       }
       formModel.value.targetTableName = `sztk_${tableName}`
       previewRef.value = `工作流名称：${formModel.value.name}，来源表：${formModel.value.sourceTableName}，目标表：${formModel.value.targetTableName}`
@@ -192,7 +214,7 @@ const paramsJsonRef = ref(null)
 const insertSqlRef = ref('')
 const isGenerating = ref(false)
 
-const generateSql = () => {
+const buildJson = () => {
 
   isGenerating.value = true
 
@@ -200,20 +222,22 @@ const generateSql = () => {
     formModel.value.sourceDataSourceId = '6'
   }
   if (formModel.value.targetDataSourceId.length < 1) {
-    formModel.value.targetDataSourceId = '8'
+    if (formModel.value.dataType == 1) { //是否为基础数据
+      formModel.value.targetDataSourceId = '8' // 主题库
+    } else {
+      formModel.value.targetDataSourceId = '12' // 数据湖
+    }
   }
 
   formRef.value?.validate(
       async (errors) => {
         if (!errors) {
-          buildRkJson(formModel.value, removeIdCheckRef.value, removeDiffCheckRef.value).then((res) => {
-            paramsJsonRef.value = res
-            insertSqlRef.value = res.dataDevBizVo.sparkSqlDtoList[0].sql
-            isGenerating.value = false
-          }).catch(() => {
-            isGenerating.value = false
-          })
-
+          buildRkJson(formModel.value, removeIdCheckRef.value, removeDiffCheckRef.value)
+              .then((res) => {
+                paramsJsonRef.value = res
+                insertSqlRef.value = res.dataDevBizVo.sparkSqlDtoList[0].sql
+              })
+              .finally(() => isGenerating.value = false)
         } else {
           console.error(errors)
         }
