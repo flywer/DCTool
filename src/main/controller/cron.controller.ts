@@ -24,7 +24,13 @@ export class CronController {
         if (buffer == null || isEmpty(buffer.toString())) {
             dcJobNames = []
         } else {
-            dcJobNames = JSON.parse(buffer.toString())
+            try {
+                dcJobNames = JSON.parse(buffer.toString())
+            } catch (e) {
+                log.error(e)
+                dcJobNames = []
+            }
+
         }
 
         let filterJobs = [] //要删除的任务名
