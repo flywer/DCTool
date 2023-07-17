@@ -131,10 +131,31 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getSimpZjJson)
+    public async handleGetSimpZjJobJson(tableName?: string) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'simpZjJson', 'simpZjUpdateTime'],
+            where: {
+                tableName: Like(`%${tableName || ''}%`)
+            },
+            order: {orderNum: 'asc'}
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.getZjJsonById)
     public async handleGetZjJobJsonById(id: number) {
         return await AppDataSource.getRepository(JobJson).find({
             select: ['id', 'tableName', 'zjJson', 'zjUpdateTime'],
+            where: {
+                id: id
+            }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getSimpZjJsonById)
+    public async handleGetSimpZjJobJsonById(id: number) {
+        return await AppDataSource.getRepository(JobJson).find({
+            select: ['id', 'tableName', 'simpZjJson', 'simpZjUpdateTime'],
             where: {
                 id: id
             }
@@ -211,6 +232,34 @@ export class AdbController {
                     zjJson: obj.json,
                     tableName: obj.tableName,
                     zjUpdateTime: obj.zjUpdateTime
+                })
+                .where("id = :id", {id: obj.id})
+                .execute()
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateSimpZjJson)
+    public async handleUpdateSimpZjJson(obj: any) {
+        obj = JSON.parse(obj)
+        obj.simpZjUpdateTime = new Date()
+
+        if (obj.id === null) {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .insert()
+                .into(JobJson)
+                .values([{
+                    simpZjJson: obj.json,
+                    tableName: obj.tableName,
+                    simpZjUpdateTime: obj.simpZjUpdateTime
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(JobJson).createQueryBuilder()
+                .update(JobJson)
+                .set({
+                    simpZjJson: obj.json,
+                    tableName: obj.tableName,
+                    simpZjUpdateTime: obj.simpZjUpdateTime
                 })
                 .where("id = :id", {id: obj.id})
                 .execute()

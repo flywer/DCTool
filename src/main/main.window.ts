@@ -5,7 +5,7 @@ const isDev = !app.isPackaged
 
 export async function createWindow() {
     const win = new BrowserWindow({
-        width: 1510,
+        width: 1208,
         height: 760,
         frame: false, // 无边框
         webPreferences: {

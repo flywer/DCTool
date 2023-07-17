@@ -89,6 +89,10 @@ export const channels = reactive({
         getDictByParentId: 'auxiliaryDb/getDictByParentId',
         getDictByBzId: 'auxiliaryDb/getDictByBzId',
 
+        getSimpZjJson: 'auxiliaryDb/getSimpZjJson',
+        getSimpZjJsonById: 'auxiliaryDb/getSimpZjJsonById',
+        updateSimpZjJson: 'auxiliaryDb/updateSimpZjJson',
+
     },
     cron: {
         createCronJob: 'cron/createCronJob',

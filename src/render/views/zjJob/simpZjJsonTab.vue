@@ -98,7 +98,7 @@ import {getDateStringByDate} from "@render/utils/common/dateUtils";
 import {convertZjJson} from "@render/utils/datacenter/zjJob";
 import ZjRulesTable from "@render/views/zjJob/zjRulesTable.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
-import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb";
+import {get_simp_zj_json, update_simp_zj_json} from "@render/api/auxiliaryDb";
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
@@ -243,13 +243,13 @@ onMounted(() => {
 
 const tableDataInit = () => {
   isLoading.value = true
-  get_zj_json(searchValueRef.value).then((res) => {
+  get_simp_zj_json(searchValueRef.value).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.zjJson,
-          updateTime: v.zjUpdateTime == null ? '--' : getDateStringByDate(v.zjUpdateTime)
+          json: v.simpZjJson,
+          updateTime: v.simpZjUpdateTime == null ? '--' : getDateStringByDate(v.simpZjUpdateTime)
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -268,7 +268,7 @@ const onPositiveClick = () => {
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 
-      update_zj_json(modalFormModel.value).then(() => {
+      update_simp_zj_json(modalFormModel.value).then(() => {
         window.$message.success('保存成功')
         tableDataInit()
         showModalRef.value = false;
@@ -283,13 +283,13 @@ const onPositiveClick = () => {
 }
 
 const search = (v) => {
-  get_zj_json(v).then((res) => {
+  get_simp_zj_json(v).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.zjJson,
-          updateTime: v.zjUpdateTime == null ? '--' : getDateStringByDate(v.zjUpdateTime)
+          json: v.simpZjJson,
+          updateTime: v.simpZjUpdateTime == null ? '--' : getDateStringByDate(v.simpZjUpdateTime)
         })))
   })
 }

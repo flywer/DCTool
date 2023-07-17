@@ -1,6 +1,7 @@
 import {find_by_project_id, get_zj_json, get_zj_json_by_id} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 
@@ -62,3 +63,75 @@ export const createZjJob = async (formModel: ZjFormModelType) => {
         window.$message.error('质检模板JSON不存在')
     }
 }
+
+export const convertZjJson = (jsonStr: string, tableName: string): string => {
+    let jobJson = JSON.parse(jsonStr)
+    jobJson.name = ''
+    jobJson.email = ''
+    jobJson.description = ''
+    jobJson.personId = ''
+    jobJson.personName = ''
+    jobJson.projectId = ''
+    jobJson.projectName = ''
+    jobJson.dependencyProjectName = null
+    jobJson.dependencyWorkflowName = null
+    jobJson.dependencyProjectId = null
+    jobJson.dependencyWorkflowId = null
+    jobJson.schedulingMode = 0
+    jobJson.crontab = ''
+    jobJson = JSON.parse(updateSjkUUID(removeIds(jobJson)))
+
+    const oldTableAbbr = jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName.split('_')[1]
+
+    jobJson.modelJson = jobJson.modelJson.replaceAll(oldTableAbbr, 'depart')
+
+    const newSourceTableName = `di_depart_${tableName.toLowerCase()}_temp_ods`
+    const newAimTableName = `di_depart_${tableName.toLowerCase()}_right_dwd`
+    const newWrongTableName = `di_depart_${tableName.toLowerCase()}_error_dwd`
+
+    jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.map(obj => {
+            obj.field = obj.field.replace(jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName, newSourceTableName);
+            return obj
+        }
+    )
+
+    jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = newSourceTableName
+    jobJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = newAimTableName
+    jobJson.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName = newWrongTableName
+
+    //替换关联表里的表名，但关联的是基础数据的不用替换
+    jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.forEach((field: any) => {
+        field.ruleList.forEach((rule: any) => {
+            if (rule.customSqlKey != undefined) {
+                rule.customSqlKey = rule.customSqlKey.replaceAll(oldTableAbbr, 'depart');
+            }
+            if (rule.fromTableDataTable != undefined && !isBasicTable(rule.fromTableDataTable)) {
+                rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, 'depart');
+                rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, 'depart');
+            }
+            if (rule.customSql != undefined) {
+                rule.customSql = convertCustomSqlTableName(rule.customSql, oldTableAbbr, 'depart')
+            }
+        });
+    });
+
+    return JSON.stringify(jobJson, null, 2)
+}
+
+const convertCustomSqlTableName = (sql: string, oldTableAbbr: string, newTableAbbr: string) => {
+    // 定义正则表达式匹配规则，匹配 xzzf_ods. 后面的表名
+    const pattern = /(?<=xzzf_ods\.)\w+/g;
+
+    let newSql = sql
+
+    // 使用正则表达式匹配字符串中的所有表名，并打印结果
+    let match;
+    while ((match = pattern.exec(sql)) !== null) {
+        if (!isBasicTable(match[0])) {
+            const tableName = match[0].replaceAll(oldTableAbbr, newTableAbbr) //转为通用表名
+            newSql = newSql.replaceAll(match[0], tableName)//替换此表名
+        }
+    }
+    return newSql
+}
+

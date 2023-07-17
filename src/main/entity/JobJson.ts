@@ -50,6 +50,21 @@ export class JobJson {
     })
     zjUpdateTime: string
 
+    @Column({
+        type: "longtext",
+        name: 'simp_zj_json',
+        comment: '简化版质检JSON',
+        nullable: true
+    })
+    simpZjJson: string
+
+    @Column({
+        name: 'simp_zj_update_time',
+        type: 'datetime',
+        comment: '简化版质检JSON变更时间'
+    })
+    simpZjUpdateTime: string
+
     @Column({name: 'order_num'})
     orderNum: number
 }
