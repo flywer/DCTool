@@ -148,7 +148,7 @@ const save = async () => {
       })
     }
   }).catch((e) => {
-    console.log(e)
+    console.error(e)
     isSaving.value = false
   })
 }

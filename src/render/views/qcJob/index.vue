@@ -217,7 +217,7 @@ const generate = (e: MouseEvent) => {
     if (!errors) {
       resRef.value = JSON.stringify(await buildQcJson(formModel.value), null, 2)
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 }

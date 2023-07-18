@@ -306,7 +306,7 @@ const createTables = () => {
             } */
 
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 }
@@ -592,7 +592,7 @@ const dwbCreate = async (tableAbbr, tableSql) => {
     createStatus.value.dwb.isSuccess = res.success && res.code == 200;
     createStatus.value.dwb.msg = res.message
     if (!createStatus.value.dwb.isSuccess) {
-      console.log(res)
+      console.error(res)
     }
   }).finally(() => createStatus.value.dwb.isCreating = false)
 }
@@ -648,7 +648,7 @@ const tempDwbCreate = async (tableAbbr, tableSql) => {
     createStatus.value.dwb.isSuccess = res.success && res.code == 200;
     createStatus.value.dwb.msg = res.message
     if (!createStatus.value.dwb.isSuccess) {
-      console.log(res)
+      console.error(res)
     }
   }).finally(() => createStatus.value.dwb.isCreating = false)
 }

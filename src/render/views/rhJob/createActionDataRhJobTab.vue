@@ -188,7 +188,7 @@ const generate = () => {
       multiTableJsonRef.value = JSON.stringify(multiTableJson, null, 2)
 
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   }).finally(() => isGenerating.value = false)
 }
@@ -200,7 +200,6 @@ const addWorkFlow = async () => {
 
   if (singleTableJsonRef.value.length > 0) {
     const paramsModel = JSON.parse(singleTableJsonRef.value)
-    console.log(paramsModel.name)
     if (await workflowJobNameExist(paramsModel.name)) {
       window.$dialog.warning({
         title: '警告',

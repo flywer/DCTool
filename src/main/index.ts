@@ -2,7 +2,6 @@ import {AdbController} from "@main/controller/adb.controller";
 import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
-import {OcrController} from "@main/controller/ocr.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/data-source";
@@ -65,7 +64,6 @@ async function bootstrap() {
                     AppController,
                     WindowController,
                     LdDecryptController,
-                    OcrController,
                     SvgController,
                     DatacenterController,
                     AdbController,

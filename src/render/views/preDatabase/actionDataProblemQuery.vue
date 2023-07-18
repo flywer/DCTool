@@ -360,8 +360,7 @@ const formSave = () => {
   update_table_info_json({
     departName: departName,
     tableInfoJson: JSON.stringify(inputValueRef.value)
-  }).then((res) => {
-    console.log(res)
+  }).then(() => {
     window.$message.success('保存成功')
   }).finally(() => isSaveForm.value = false)
 

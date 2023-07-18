@@ -218,7 +218,7 @@ const validJsonTrans = (e: MouseEvent) => {
 
         validJsonResRef.value = updateSjkUUID(json)
       } else {
-        console.log(errors)
+        console.error(errors)
       }
     })
   } else {

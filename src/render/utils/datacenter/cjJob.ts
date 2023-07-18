@@ -198,7 +198,7 @@ export const createCjJob = async (formModel: CjFormModelType, sourceTableColumns
                 window.$message.success('采集任务创建成功')
             } else {
                 window.$message.error(res.msg)
-                console.log(res)
+                console.error(res)
             }
         })
     }

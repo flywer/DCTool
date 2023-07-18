@@ -115,7 +115,6 @@ export const buildRh2Json = async (formModel: RhFormModelType) => {
         .replaceAll('DEPART', tableAbbr.toLowerCase())
         .replaceAll('primId', primId.toLowerCase())
     )
-    console.log(paramsJson)
     return JSON.parse(updateSjkUUID(removeIds(paramsJson)))
 }
 

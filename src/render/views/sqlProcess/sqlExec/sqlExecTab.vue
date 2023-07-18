@@ -130,7 +130,7 @@ const exec = () => {
         isLoading.value = false
       })
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 }

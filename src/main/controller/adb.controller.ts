@@ -283,7 +283,6 @@ export class AdbController {
     @IpcHandle(channels.auxiliaryDb.updateTableInfoJson)
     public async handleUpdateTableInfoJson(obj: any) {
         obj = JSON.parse(obj)
-        console.log(obj)
         const pd = await AppDataSource.getRepository(PreDatabase).findOneBy({
             departName: obj.departName
         })

@@ -483,7 +483,7 @@ const buildJson = () => {
 
         }
       } else {
-        console.log(errors)
+        console.error(errors)
       }
     }).finally(() => [
       isBuildingRef.value = false
@@ -566,7 +566,7 @@ const onPositiveClick = () => {
     if (!errors) {
       showModalRef.value = false
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 }
@@ -645,13 +645,12 @@ const addDataxJob = () => {
               content: res.msg + '，请重新配置CRON表达式',
               type: "warning"
             })
-            console.log(res)
           }
         })
       }
     } else {
       window.$message.error(res.msg)
-      console.log(res)
+      console.error(res)
     }
     isLoading.value = false
   })

@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import {ZjRulesList} from "@render/utils/datacenter/ZjRulesList";
+import {zjRulesList} from "@render/utils/datacenter/zjRulesList";
 import {DataTableColumns, NButton, NSelect, NThing} from "naive-ui";
 import {h, ref, onMounted, reactive} from 'vue'
 
@@ -79,7 +79,7 @@ const createColumns = (): DataTableColumns<Rule> => [
     render(row) {
       return h(NThing, {}, {
         header: () => {
-          return ZjRulesList.find(rule => rule.id == row.ruleList[0].inspectionRuleId)?.ruleName || ''
+          return zjRulesList.find(rule => rule.id == row.ruleList[0].inspectionRuleId)?.ruleName || ''
         },
         'header-extra': () => {
           return h(NButton, {

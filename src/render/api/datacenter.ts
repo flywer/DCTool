@@ -51,18 +51,23 @@ export const get_columns = async (datasourceId: string, tableName: string, onlyC
     // 取这个新数组中第二个元素（索引为1），也就是两个冒号之间的值。
     // 将这个值存储到一个新的数组中。
     // 最后返回新的数组即可。
-    return data.data.map((item) => {
-        if (item.indexOf(':') === -1) {
-            return item;
-        } else {
-            if (onlyCol) {
-                const parts = item.split(':');
-                return parts[1];
-            } else {
+    if (data.code == -1) {
+        return null
+    } else {
+        return data.data.map((item) => {
+            if (item.indexOf(':') === -1) {
                 return item;
+            } else {
+                if (onlyCol) {
+                    const parts = item.split(':');
+                    return parts[1];
+                } else {
+                    return item;
+                }
             }
-        }
-    });
+        });
+    }
+
 }
 
 // 获取dataXJobJson

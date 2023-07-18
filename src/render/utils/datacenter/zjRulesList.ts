@@ -1,4 +1,4 @@
-export const ZjRulesList = [
+export const zjRulesList = [
     {
         id: "1",
         createBy: "system",

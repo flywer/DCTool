@@ -274,7 +274,7 @@ const onPositiveClick = () => {
         showModalRef.value = false;
       })
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   }).finally(() => {
     isSaving.value = false

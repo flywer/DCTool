@@ -215,7 +215,7 @@ const generate = (e: MouseEvent) => {
     if (!errors) {
       resRef.value = JSON.stringify(await buildBfJson(formModel.value), null, 2)
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 }

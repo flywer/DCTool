@@ -380,7 +380,6 @@ const onPositiveClick = () => {
       paramModel.ddlSql = `ALTER TABLE ${modalFormModel.value.tableName} SET TBLPROPERTIES ('comment' = '${modalFormModel.value.tableComment}')`
 
       await exec_sql(paramModel).then((res) => {
-        console.log(res)
         if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
           window.$message.success('执行成功')
           showUpdateModalRef.value = false
@@ -392,7 +391,7 @@ const onPositiveClick = () => {
         isSaving.value = false
       })
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   })
 

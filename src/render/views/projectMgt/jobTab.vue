@@ -493,7 +493,6 @@
   <n-drawer
       v-model:show="showDrawerRef"
       :width="220"
-      @update:show="handleDrawerShow"
   >
     <n-drawer-content title="日志" :native-scrollbar="false" closable>
       <n-timeline v-if="!isEmpty(logItemsRef)">
@@ -1115,7 +1114,6 @@ const workflowActive = async (id: string, type: '01' | '02') => {
       tableDataInit()
     } else {
       window.$message.error(res.msg, res.message)
-      console.log(res)
     }
   })
 }
@@ -1329,16 +1327,14 @@ const onPositiveClick = async () => {
               content: res.msg + '，请重新配置CRON表达式',
               type: "warning"
             })
-            console.log(res)
           }
         }).finally(() => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.addSchedJob = false
         })
-
       } else {
-        console.log(errors)
+        console.error(errors)
       }
     })
   }
@@ -1363,7 +1359,7 @@ const onPositiveClick = async () => {
             tableDataInit()
           })
         } else {
-          console.log(errors)
+          console.error(errors)
           isSaving.value = false
         }
       })
@@ -1388,7 +1384,7 @@ const onPositiveClick = async () => {
           formSelect.value.createZjJob = false
         })
       } else {
-        console.log(errors)
+        console.error(errors)
         isSaving.value = false
       }
     })
@@ -1405,7 +1401,7 @@ const onPositiveClick = async () => {
           formSelect.value.createBfJob = false
         })
       } else {
-        console.log(errors)
+        console.error(errors)
         isSaving.value = false
       }
     })
@@ -1426,7 +1422,7 @@ const onPositiveClick = async () => {
           formSelect.value.createRhJob = false
         })
       } else {
-        console.log(errors)
+        console.error(errors)
         isSaving.value = false
       }
     })
@@ -1447,7 +1443,7 @@ const onPositiveClick = async () => {
           formSelect.value.createRh2Job = false
         })
       } else {
-        console.log(errors)
+        console.error(errors)
         isSaving.value = false
       }
     })
@@ -1464,7 +1460,7 @@ const onPositiveClick = async () => {
           formSelect.value.createQcJob = false
         })
       } else {
-        console.log(errors)
+        console.error(errors)
         isSaving.value = false
       }
     })
@@ -1482,7 +1478,7 @@ const onPositiveClick = async () => {
             formSelect.value.quickCreate = false
           })
         } else {
-          console.log(errors)
+          console.error(errors)
         }
       })
     } else {
@@ -1509,7 +1505,7 @@ const onPositiveClick = async () => {
         }
 
       } else {
-        console.log(errors)
+        console.error(errors)
       }
     })
   }
@@ -2112,9 +2108,6 @@ const handlemechanismIdUpdate = () => {
 const showDrawerRef = ref(false)
 const logItemsRef = ref<TimelineItemProps[]>([])
 const showTipRef = ref(false)
-const handleDrawerShow = (v) => {
-  console.log(v)
-}
 
 const showDataXJobLog = async (v) => {
   const logs = (await get_datax_job_log({

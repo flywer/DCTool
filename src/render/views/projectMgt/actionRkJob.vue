@@ -358,7 +358,7 @@ const workflowActive = async (id: string, type: '01' | '02') => {
       tableDataInit()
     } else {
       window.$message.error(res.msg, res.message)
-      console.log(res)
+      console.error(res)
     }
   })
 }

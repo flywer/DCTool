@@ -145,7 +145,7 @@ export const createGxJob = async (formModel: GxFormModelType) => {
                 window.$message.success('共享任务创建成功')
             } else {
                 window.$message.error(res.msg)
-                console.log(res)
+                console.error(res)
             }
         })
     }).catch(e => {

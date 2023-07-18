@@ -141,11 +141,11 @@ const generate = () => {
         personId: formModel.value.personId,
         projectId: formModel.value.projectId,
         tableName: tableName
-      }, paramJson, true, false)
+      }, paramJson, true)
 
       jonJsonRef.value = JSON.stringify(paramJson, null, 2)
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   }).finally(() => isGenerating.value = false)
 }

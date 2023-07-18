@@ -306,7 +306,7 @@ const onPositiveClick = () => {
       }
 
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   }).finally(() => {
     isSaving.value = false

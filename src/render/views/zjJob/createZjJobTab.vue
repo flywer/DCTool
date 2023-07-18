@@ -8,7 +8,21 @@
               :rules="rules"
               label-placement="left"
       >
-        <n-grid :cols="3" :x-gap="12">
+        <n-grid :cols="2" :x-gap="12">
+          <n-form-item-gi label="质检类型">
+            <n-radio-group v-model:value="zjType">
+              <n-radio-button
+                  :key="1"
+                  :value="'1'"
+                  label="完整版"
+              />
+              <n-radio-button
+                  :key="2"
+                  :value="'2'"
+                  label="简化版"
+              />
+            </n-radio-group>
+          </n-form-item-gi>
           <n-form-item-gi label="表名" path="jobJsonId">
             <n-select
                 v-model:value="formModel.jobJsonId"
@@ -16,6 +30,7 @@
                 :options="tableNameOptions"
                 :consistent-menu-width="false"
                 filterable
+                :loading="tableSelectLoading"
             />
           </n-form-item-gi>
           <n-form-item-gi label="项目" path="projectId">
@@ -74,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_zj_json} from "@render/api/auxiliaryDb";
+import {find_by_project_id, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb";
 import {add_work_flow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
@@ -83,7 +98,7 @@ import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
 const tableNameOptions = ref<Array<SelectOption | SelectGroupOption>>()
@@ -92,10 +107,12 @@ const jonJsonRef = ref('')
 
 const formRef = ref<FormInst | null>(null);
 
+const zjType = ref('1')
+
 const formModel = ref({
   jobJsonId: '',
   personId: '',
-  projectId: ''
+  projectId: '',
 })
 
 const rules = {
@@ -116,16 +133,45 @@ const rules = {
   }
 }
 
+const tableSelectLoading = ref(false)
+
 onMounted(() => {
-  get_zj_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
-        (v => ({
-          label: `${v.tableName}`,
-          value: v.id.toString(),
-          json: v.zjJson,
-        }))
-    ) || []
-  })
+  tableSelectLoading.value = true
+  get_zj_json()
+      .then((res) => {
+        tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
+            (v => ({
+              label: `${v.tableName}`,
+              value: v.id.toString(),
+              json: v.zjJson,
+            }))
+        ) || []
+      }).finally(() => tableSelectLoading.value = false)
+})
+
+watch(zjType, (value) => {
+  tableSelectLoading.value = true
+  if (value == '1') {
+    get_zj_json().then((res) => {
+      tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
+          (v => ({
+            label: `${v.tableName}`,
+            value: v.id.toString(),
+            json: v.zjJson,
+          }))
+      ) || []
+    }).finally(() => tableSelectLoading.value = false)
+  } else {
+    get_simp_zj_json().then((res) => {
+      tableNameOptions.value = res?.filter(item => item.simpZjJson != null).map(
+          (v => ({
+            label: `${v.tableName}`,
+            value: v.id.toString(),
+            json: v.simpZjJson,
+          }))
+      ) || []
+    }).finally(() => tableSelectLoading.value = false)
+  }
 })
 
 const isGenerating = ref(false)
@@ -139,7 +185,12 @@ const generate = () => {
 
       const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
 
-      paramJson.name = `zj_${projectAbbr}_${tableName}`;
+      if (zjType.value == '1') {
+        paramJson.name = `zj_${projectAbbr}_${tableName}`;
+      } else {
+        paramJson.name = `zj_${projectAbbr}_${tableName}_simp`;
+      }
+
       paramJson.projectId = formModel.value.projectId
       paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
       paramJson.personId = formModel.value.personId
@@ -152,7 +203,7 @@ const generate = () => {
 
       jonJsonRef.value = JSON.stringify(paramJson, null, 2)
     } else {
-      console.log(errors)
+      console.error(errors)
     }
   }).finally(() => isGenerating.value = false)
 }
