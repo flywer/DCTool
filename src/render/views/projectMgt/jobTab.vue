@@ -1162,7 +1162,7 @@ const workflowJobStart = (v: Job) => {
 }
 
 const workflowReRun = (v: Job) => {
-  workflow_rerun(v.id, 2).then(res => {
+  workflow_rerun(v.id, 1).then(res => {
     if (res.code == 200) {
       window.$message.success(res.message)
       tableDataInit()
