@@ -1,5 +1,5 @@
 import {add_work_flow, get_columns} from "@render/api/datacenter";
-import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -41,7 +41,7 @@ export const buildSql = async (formModel: RkFormModelType, isRemoveId: boolean, 
     if (isRemoveDiff) {
         const elements = findCommonElements(sourceTableColumns, targetTableColumns);
         sourceTableColumns = elements.commonArr1
-        targetTableColumns = elements.commonArr2
+       // targetTableColumns = elements.commonArr2
     }
 
     // 因中台问题，需要为hive表的字段取一个与目标表相同的别名
