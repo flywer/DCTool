@@ -244,7 +244,7 @@ onMounted(() => {
 const tableDataInit = () => {
   isLoading.value = true
   get_simp_zj_json(searchValueRef.value).then((res) => {
-    tableDataRef.value = res.map(
+    tableDataRef.value = res.filter(table => table.tableName.startsWith('C')).map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
@@ -284,7 +284,7 @@ const onPositiveClick = () => {
 
 const search = (v) => {
   get_simp_zj_json(v).then((res) => {
-    tableDataRef.value = res.map(
+    tableDataRef.value = res.filter(table => table.tableName.startsWith('C')).map(
         (v => ({
           id: v.id,
           tableName: v.tableName,

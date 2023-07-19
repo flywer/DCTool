@@ -1037,9 +1037,12 @@ const createColumns = (): DataTableColumns<Job> => {
           case 4:// 任务异常
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
+                showConfirmation('重跑', () => {
+                  dataXJobRun(row)
+                }),
                 showButton('日志', () => {
                   showDataXJobLog(row)
-                }),
+                })
               ]
             } else {
               container.children = [
@@ -1055,7 +1058,7 @@ const createColumns = (): DataTableColumns<Job> => {
               ]
             }
             break
-          case 5:
+          case 5:// 任务未反馈
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               container.children = [
                 showButton('日志', () => {

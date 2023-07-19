@@ -402,7 +402,7 @@ const onPositiveClick = () => {
 // region 删除
 const tableDelete = (row: Table) => {
   table_delete(row.id).then(res => {
-    if (res.code == 200) {
+    if (res.code == 200 && res.success) {
       window.$message.success("删除成功")
       tableDataInit()
     } else {

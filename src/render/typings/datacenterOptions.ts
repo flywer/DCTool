@@ -2,7 +2,22 @@
 import {get_datasource_list, get_job_project_list, get_person_list} from "@render/api/datacenter";
 import {SelectGroupOption, SelectOption} from "naive-ui";
 
-export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list())?.map(
+const customSort = (a: any, b: any) => {
+    // Check if both strings start with '广东省'
+    const startsWithGuangDongA = a.name.startsWith('广东省');
+    const startsWithGuangDongB = b.name.startsWith('广东省');
+
+    if (startsWithGuangDongA && !startsWithGuangDongB) {
+        return -1; // Move `a` before `b`
+    } else if (!startsWithGuangDongA && startsWithGuangDongB) {
+        return 1; // Move `b` before `a`
+    } else {
+        // Both start with '广东省' or don't start with it
+        return a.name.localeCompare(b.name);
+    }
+};
+
+export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list())?.sort(customSort).map(
     (v => ({
         label: v.name,
         value: v.id.toString()
@@ -10,7 +25,7 @@ export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await ge
 ) || []
 
 export const projectIdOptionsUpdate = async () => {
-    projectIdOptions = (await get_job_project_list())?.map(
+    projectIdOptions = (await get_job_project_list())?.sort(customSort).map(
         (v => ({
             label: v.name,
             value: v.id.toString()
