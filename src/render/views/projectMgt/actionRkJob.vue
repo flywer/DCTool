@@ -25,6 +25,24 @@
         :striped="true"
     />
   </n-scrollbar>
+
+  <n-drawer
+      v-model:show="showDrawerRef"
+      :width="220"
+  >
+    <n-drawer-content title="日志" :native-scrollbar="false" closable>
+      <n-timeline v-if="!isEmpty(logItemsRef)">
+        <n-timeline-item v-for="item in logItemsRef"
+                         :type="item.type"
+                         :title="item.title"
+                         :content="item.content"
+                         :time="item.time"
+        />
+      </n-timeline>
+      <n-empty v-else description="无运行日志"/>
+      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
+    </n-drawer-content>
+  </n-drawer>
 </template>
 
 <script setup lang="ts">
@@ -42,7 +60,7 @@ import {formatDate} from "@render/utils/common/formatDate";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, NButton, NPopconfirm, NSpace, NTag} from "naive-ui";
+import {DataTableColumns, NButton, NPopconfirm, NSpace, NTag, TimelineItemProps} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 import {uuid} from "vue3-uuid";
 
@@ -271,6 +289,9 @@ const createColumns = (): DataTableColumns<Job> => {
               showConfirmation('删除', async () => {
                 await workflowDelete(row.id)
               }),
+              showButton('日志', () => {
+                showWorkflowLog(row)
+              }),
             ]
             break
           case 2:// 任务启用
@@ -285,6 +306,9 @@ const createColumns = (): DataTableColumns<Job> => {
                 await workflowActive(row.id, '02')
                 await workflowDelete(row.id)
               }),
+              showButton('日志', () => {
+                showWorkflowLog(row)
+              }),
             ]
             break
           case 3:// 任务运行中
@@ -293,7 +317,10 @@ const createColumns = (): DataTableColumns<Job> => {
             container.children = [
               showConfirmation('重跑', async () => {
                 workflowReRun(row)
-              })
+              }),
+              showButton('日志', () => {
+                showWorkflowLog(row)
+              }),
             ]
             break
         }
@@ -409,6 +436,56 @@ const workflowDelete = (id) => {
     }
   })
 }
+
+// region 日志
+const showDrawerRef = ref(false)
+const logItemsRef = ref<TimelineItemProps[]>([])
+const showTipRef = ref(false)
+const showWorkflowLog = async (v) => {
+  const logs = (await get_workflow_log(v.id, 100, 1)).data.records
+
+  showTipRef.value = logs.length >= 100;
+
+  logItemsRef.value = []
+
+  logs.forEach(log => {
+    let type
+    let title
+    let content
+    let time
+
+    if (log.result == null) {
+      title = '运行中'
+      type = 'info'
+    } else if (log.result == 1) {
+      title = '执行成功'
+      type = 'success'
+    } else if (log.result == 2) {
+      title = '执行失败'
+      type = 'error'
+    } else if (log.result == 3) {
+      title = '未反馈'
+      type = 'warning'
+    } else {
+      title = '未知'
+      type = 'warning'
+    }
+
+    time = log.startTime
+    content = log.componentName
+
+    logItemsRef.value.push({
+      type: type,
+      title: title,
+      content: content,
+      time: time
+    })
+  })
+
+  showDrawerRef.value = true
+}
+
+//endregion
 
 </script>
 
