@@ -47,39 +47,24 @@
 
 <script setup lang="ts">
 import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
-import {create_cron_job} from "@render/api/cron";
+import {get_workflow_log, get_workflow_page} from "@render/api/datacenter";
 import {
-  get_workflow_log,
-  get_workflow_page,
-  workflow_active,
-  workflow_delete,
-  workflow_rerun,
-  workflow_run
-} from "@render/api/datacenter";
-import {formatDate} from "@render/utils/common/formatDate";
+  getWorkflowJobStatus,
+  Job,
+  setJobStatus,
+  showButton,
+  showConfirmation,
+  workflowActive,
+  workflowDelete,
+  workflowJobGetLastExecTime,
+  workflowJobGetNextExecTime,
+  workflowReRun,
+  workflowStart
+} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
-import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, NButton, NPopconfirm, NSpace, NTag, TimelineItemProps} from "naive-ui";
+import {DataTableColumns, NButton, NSpace, TimelineItemProps} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
-import {uuid} from "vue3-uuid";
-
-type Job = {
-  id: string
-  type: string
-  jobName: string
-  // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
-  status: number
-  // 1:依赖调度；2:定时调度
-  schedMode: number
-  cron: string
-  lastExecTime: string
-  nextExecTime: string
-  createBy: string
-  code?: string
-
-  comment: string
-}
 
 const tableDataRef = ref([])
 const isTableLoading = ref(false)
@@ -111,22 +96,7 @@ const tableDataInit = async () => {
       id: v.id,
       jobName: v.procName,
       type: '数据入库任务',
-      status: (() => {
-        switch (v.status) {
-          case '1':// 启用
-            return 2
-          case '2':// 停用
-            return 1
-          case '3':// 异常
-            return 4
-          case '4':// 运行中
-            return 3
-          case '5':// 未反馈
-            return 5
-          default :
-            return v.status as number
-        }
-      })(),
+      status: getWorkflowJobStatus(v),
       schedMode: v.schedulingMode,
       cron: v.crontab == '' ? null : v.crontab,
       lastExecTime: await workflowJobGetLastExecTime(v),
@@ -149,32 +119,6 @@ const getTableComment = async (procName: string) => {
     tableName: procName.split('_')[2]
   }))[0].comment as string
 }
-
-const workflowJobGetLastExecTime = async (v) => {
-  const res = await get_workflow_log(v.id, 1, 1);
-  if (!isEmpty(res.data.records)) {
-    return res.data.records[0].startTime;
-  } else {
-    return '--';
-  }
-};
-
-const workflowJobGetNextExecTime = (v) => {
-  if (v.schedulingMode == 2) {
-    const interval = parseExpression(convertToSixFields(v.crontab));
-    return formatDate(interval.next().toDate())
-  } else if (v.schedulingMode == 1) {
-    return `依赖于${v.dependencyWorkflowName}`
-  } else {
-    return '未配置调度任务'
-  }
-}
-
-const convertToSixFields = (cron: string): string => {
-  const fields = cron.split(' ');
-  return `${fields[0]} ${fields[1]} ${fields[2]} ${fields[3]} ${fields[4]} ${fields[5]}`;
-}
-
 const createColumns = (): DataTableColumns<Job> => {
   return [
     {
@@ -193,66 +137,7 @@ const createColumns = (): DataTableColumns<Job> => {
       width: '8%',
       align: 'center',
       render(row) {
-        switch (row.status) {
-          case -1:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#797979',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未创建'})
-          case 0:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#ffc062',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未配置'})
-          case 1:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'default'
-                },
-                {default: () => '停用'})
-          case 2:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'info'
-                },
-                {default: () => '启用'})
-          case 3:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'success'
-                },
-                {default: () => '运行中'})
-          case 4:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'error'
-                },
-                {default: () => '异常'})
-          case 5:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#8eafd3',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未反馈'})
-        }
+        return setJobStatus(row)
       }
     },
     {
@@ -279,48 +164,58 @@ const createColumns = (): DataTableColumns<Job> => {
         switch (row.status) {
           case  1: // 任务停用
             container.children = [
-              showButton('启用', () => {
-                workflowActive(row.id, '01')
+              showButton('启用', async () => {
+                await workflowActive(row.id, '01', () => tableDataInit())
               }),
               showConfirmation('执行', async () => {
-                await workflowActive(row.id, '01')
-                await workflowRun(row)
+                await workflowActive(row.id, '01', () => {
+                })
+                await workflowStart(row, () => tableDataInit())
               }),
               showConfirmation('删除', async () => {
-                await workflowDelete(row.id)
+                await workflowDelete(row.id, () => tableDataInit())
               }),
-              showButton('日志', () => {
-                showWorkflowLog(row)
-              }),
+              showButton('日志', () => showWorkflowLog(row)),
             ]
             break
           case 2:// 任务启用
             container.children = [
-              showButton('停用', () => {
-                workflowActive(row.id, '02')
+              showButton('停用', async () => {
+                await workflowActive(row.id, '02', () => tableDataInit())
               }),
               showConfirmation('执行', () => {
-                workflowRun(row)
+                workflowStart(row, () => tableDataInit())
               }),
               showConfirmation('删除', async () => {
-                await workflowActive(row.id, '02')
-                await workflowDelete(row.id)
+                await workflowActive(row.id, '02', () => {
+                })
+                await workflowDelete(row.id, () => tableDataInit())
               }),
-              showButton('日志', () => {
-                showWorkflowLog(row)
-              }),
+              showButton('日志', () => showWorkflowLog(row)),
             ]
             break
           case 3:// 任务运行中
+            container.children = [
+              showButton('日志', () => showWorkflowLog(row)),
+            ]
             break
           case 4:// 任务异常
             container.children = [
               showConfirmation('重跑', async () => {
-                workflowReRun(row)
+                workflowReRun(row, () => tableDataInit())
               }),
-              showButton('日志', () => {
-                showWorkflowLog(row)
+              showButton('日志', () => showWorkflowLog(row)),
+            ]
+            break
+          case 5:// 任务未反馈
+            container.children = [
+              showConfirmation('重跑', async () => {
+                workflowReRun(row, () => tableDataInit())
               }),
+              showConfirmation('删除', async () => {
+                await workflowDelete(row.id, () => tableDataInit())
+              }),
+              showButton('日志', () => showWorkflowLog(row)),
             ]
             break
         }
@@ -345,97 +240,6 @@ const paginationReactive = reactive({
     paginationReactive.page = 1
   }
 })
-
-const showButton = (text, onClick) => {
-  return h(NButton, {
-        size: 'small',
-        onClick: async () => {
-          await onClick()
-        }
-      },
-      {default: () => text})
-}
-
-const showConfirmation = (text, onPositiveClick) => {
-  return h(NPopconfirm, {
-    positiveText: '确定',
-    negativeText: '取消',
-    onPositiveClick: async () => {
-      await onPositiveClick();
-    },
-  }, {
-    trigger: () => {
-      return h(NButton, {size: 'small'}, {default: () => text})
-    },
-    default: () => `确定要${text}吗？`
-  });
-}
-
-/**
- * @param id: 任务ID
- * @param type: 01：启用， 02：停用
- **/
-const workflowActive = async (id: string, type: '01' | '02') => {
-  await workflow_active({
-    id: id,
-    type: type
-  }).then((res) => {
-    if (res.code == 200) {
-      window.$message.success(type == '01' ? '启用成功' : '停用成功')
-      tableDataInit()
-    } else {
-      window.$message.error(res.msg, res.message)
-      console.error(res)
-    }
-  })
-}
-
-const workflowRun = async (v: Job) => {
-  workflowJobStart(v)
-}
-
-const workflowJobStart = (v: Job) => {
-  const param = {
-    businessKey: uuid.v4(),
-    code: v.code,
-    createBy: v.createBy,
-    creator: v.createBy
-  }
-  workflow_run(param).then(res => {
-    if (res.code == 200) {
-      window.$message.success(res.message)
-      tableDataInit()
-    } else {
-      window.$message.error(res.message)
-    }
-  }).then(() => {
-    create_cron_job(v.jobName)
-  })
-}
-
-const workflowReRun = (v: Job) => {
-  workflow_rerun(v.id, 1).then(res => {
-    if (res.code == 200) {
-      window.$message.success(res.message)
-      tableDataInit()
-    } else {
-      window.$message.error(res.message)
-    }
-  }).then(() => {
-    create_cron_job(v.jobName)
-  })
-}
-
-const workflowDelete = (id) => {
-  workflow_delete(id).then(res => {
-    if (res.code == 200) {
-      window.$message.success(res.data)
-      tableDataInit()
-    } else {
-      window.$message.error("删除失败")
-    }
-  })
-}
 
 // region 日志
 const showDrawerRef = ref(false)

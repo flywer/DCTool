@@ -7,7 +7,13 @@
       <n-tab-pane name="2" tab="行为数据入湖">
         <action-rk-tab/>
       </n-tab-pane>
-      <n-tab-pane name="3" tab="行为数据共享">
+      <n-tab-pane name="3" tab="数据湖质检">
+        <data-lake-zj-tab/>
+      </n-tab-pane>
+      <n-tab-pane name="4" tab="数据湖入库">
+
+      </n-tab-pane>
+      <n-tab-pane name="5" tab="行为数据共享">
         <action-gx-job/>
       </n-tab-pane>
     </n-tabs>
@@ -17,6 +23,7 @@
 <script setup lang="ts">
 import ActionGxJob from "@render/views/projectMgt/actionGxJob.vue";
 import ActionRkTab from "@render/views/projectMgt/actionRkTab.vue";
+import DataLakeZjTab from "@render/views/projectMgt/dataLakeZjTab.vue";
 import TreeTab from "@render/views/projectMgt/treeTab.vue";
 </script>
 

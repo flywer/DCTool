@@ -133,10 +133,10 @@
 <script setup lang="ts">
 import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
 import {
-  cj_job_delete,
-  cj_job_run,
-  cj_job_start,
-  cj_job_stop,
+  datax_job_delete,
+  datax_job_run,
+  datax_job_start,
+  datax_job_stop,
   get_cj_job_page,
   get_sched_job_page,
   sched_job_delete
@@ -441,7 +441,7 @@ const showConfirmation = (text, onPositiveClick) => {
 
 const cjJobStart = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName)).id
-  cj_job_start(schedJobId).then(res => {
+  datax_job_start(schedJobId).then(res => {
     if (res.data == 'success') {
       window.$message.success('启用成功')
       tableDataInit()
@@ -453,7 +453,7 @@ const cjJobStart = async (row: Job) => {
 
 const cjJobStop = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName)).id
-  cj_job_stop(schedJobId).then(res => {
+  datax_job_stop(schedJobId).then(res => {
     if (res.data == 'success') {
       window.$message.success('停用成功')
       tableDataInit()
@@ -465,7 +465,7 @@ const cjJobStop = async (row: Job) => {
 
 const cjJobRun = async (row: Job) => {
   const schedJobId = (await getSchedJob(row.jobName)).id
-  cj_job_run({
+  datax_job_run({
     jobId: schedJobId,
     subsystemName: "采集"
   }).then(res => {
@@ -484,7 +484,7 @@ const cjJobDelete = async (row: Job) => {
     sched_job_delete(schedJobId).then(res => {
       if (res.code == 0) {
         window.$message.success('调度任务删除成功')
-        cj_job_delete(row.id).then(res1 => {
+        datax_job_delete(row.id).then(res1 => {
           if (res1.code == 0) {
             window.$message.success('采集任务删除成功')
             tableDataInit()
@@ -497,7 +497,7 @@ const cjJobDelete = async (row: Job) => {
       }
     })
   } else {
-    cj_job_delete(row.id).then(res1 => {
+    datax_job_delete(row.id).then(res1 => {
       if (res1.code == 0) {
         window.$message.success('采集任务删除成功')
         tableDataInit()

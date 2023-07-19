@@ -278,8 +278,8 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.cjJobStart)
-    public async handleCjJobStart(id: string) {
+    @IpcHandle(channels.datacenter.dataxJobStart)
+    public async handleDataXJobStart(id: string) {
         let result
 
         const query = `id=${id}&subsystemName=%E9%87%87%E9%9B%86`;
@@ -292,8 +292,8 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.cjJobStop)
-    public async handleCjJobStop(id: string) {
+    @IpcHandle(channels.datacenter.dataxJobStop)
+    public async handleDataXJobStop(id: string) {
         let result
 
         const query = `id=${id}&subsystemName=%E9%87%87%E9%9B%86`;
@@ -318,8 +318,8 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.cjJobRun)
-    public async handleCjJobRun(params: any) {
+    @IpcHandle(channels.datacenter.dataxJobRun)
+    public async handleDataXJobRun(params: any) {
         let result
         params = JSON.parse(params)
         await this.commonPostRequest('/gather/api/job/trigger', params).then((res) => {
@@ -330,7 +330,7 @@ export class DatacenterController {
         return result
     }
 
-    @IpcHandle(channels.datacenter.cjJobDelete)
+    @IpcHandle(channels.datacenter.dataxJobDelete)
     public async handleCjJobDelete(id: any) {
         let result
         const params = {

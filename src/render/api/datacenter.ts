@@ -135,30 +135,30 @@ export const workflow_active = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowActive, JSON.stringify(obj)))
     return data
 }
-export const cj_job_start = async (id: number | string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobStart, id))
+export const datax_job_start = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.dataxJobStart, id))
     return data
 }
 
-export const cj_job_stop = async (id: number | string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobStop, id))
+export const datax_job_stop = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.dataxJobStop, id))
     return data
 }
 
 //采集任务执行
-export const cj_job_run = async ({
+export const datax_job_run = async ({
                                      jobId,
                                      subsystemName
                                  }) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobRun, JSON.stringify({
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.dataxJobRun, JSON.stringify({
         jobId,
         subsystemName
     })))
     return data
 }
 
-export const cj_job_delete = async (id: number | string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.cjJobDelete, id))
+export const datax_job_delete = async (id: number | string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.dataxJobDelete, id))
     return data
 }
 
