@@ -194,14 +194,11 @@ const validJsonTrans = (e: MouseEvent) => {
 
         paramJson.modelJson = paramJson.modelJson.replaceAll(oldSourceTableName, newSourceTableName).replaceAll(oldAimTableName, newAimTableName).replaceAll(oldWrongTableName, newWrongTableName)
 
-        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.map(obj => {
-              obj.field = obj.field.replace(oldSourceTableName, newSourceTableName);
-              return obj
-            }
-        )
-
         //替换关联表里的表名，但关联的是基础数据的不用替换
         paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.forEach((field: any) => {
+
+          field.field = field.field.replace(`${oldSourceTableName}.`, '')
+
           field.ruleList.forEach((rule: any) => {
             if (rule.customSqlKey != undefined) {
               rule.customSqlKey = rule.customSqlKey.replaceAll(oldTableAbbr, tableAbbr);

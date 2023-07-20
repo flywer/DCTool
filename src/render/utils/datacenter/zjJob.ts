@@ -93,12 +93,6 @@ export const convertZjJson = (jsonStr: string, tableName: string): string => {
     jobJson.dataDevBizVo.qualityInspectionDtoList[0].incrementColumnName = `cd_time`
     jobJson.dataDevBizVo.qualityInspectionDtoList[0].incrementColumnValueInit = "2023-01-01T03:33:44.132Z"
 
-    jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = jobJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.map(obj => {
-            obj.field = obj.field.replace(jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName, newSourceTableName);
-            return obj
-        }
-    )
-
     jobJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = newSourceTableName
     jobJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = newAimTableName
     jobJson.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName = newWrongTableName
