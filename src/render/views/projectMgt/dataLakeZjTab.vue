@@ -131,7 +131,7 @@
   >
     <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
       <n-alert class="mt-4" type="default" :show-icon="false">
-        1.已去除id,add_time,cd_time,cd_batch 字段的质检<br/>
+        1.已去除id,add_time,cd_time,cd_operation,cd_batch 字段的质检<br/>
         2.已去除必填项中值域、主外键一致性、身份证号、手机号、邮箱、正则的质检<br/>
         3.已去除自定义sql中包含中台表的质检规则
       </n-alert>
@@ -264,7 +264,13 @@ const tableDataInit = async () => {
     newJobs.push(job)
   }
 
-  tableDataRef.value = newJobs
+  tableDataRef.value = newJobs.sort((a, b) => {
+    const aSplit = a.jobName.split("_");
+    const bSplit = b.jobName.split("_");
+    const aSplitValue = aSplit[2];
+    const bSplitValue = bSplit[2];
+    return aSplitValue.localeCompare(bSplitValue);
+  })
 
   isTableLoading.value = false
 }
@@ -354,6 +360,9 @@ const createColumns = (): DataTableColumns<Job> => {
             children = [
               showConfirmation('重跑', async () => {
                 workflowReRun(row, () => tableDataInit())
+              }),
+              showConfirmation('删除', async () => {
+                await workflowDelete(row.id, () => tableDataInit())
               }),
             ]
             break

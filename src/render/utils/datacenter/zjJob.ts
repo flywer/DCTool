@@ -182,7 +182,7 @@ export const dataLakeZjJobJsonConvert = (formModel: ZjFormModelType, paramJson: 
     // 去除id,add_time,cd_time,cd_batch 字段的质检
     paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = removeRulesByField(
         paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList,
-        ['id', 'add_time', 'cd_time', 'cd_batch']
+        ['id', 'add_time', 'cd_time', 'cd_operation','cd_batch']
     )
 
     // 去除值域质检、外键、身份证、手机号、邮箱、正则质检
