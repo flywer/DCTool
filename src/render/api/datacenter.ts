@@ -147,9 +147,9 @@ export const datax_job_stop = async (id: number | string) => {
 
 //采集任务执行
 export const datax_job_run = async ({
-                                     jobId,
-                                     subsystemName
-                                 }) => {
+                                        jobId,
+                                        subsystemName
+                                    }) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.dataxJobRun, JSON.stringify({
         jobId,
         subsystemName
@@ -273,5 +273,15 @@ type GetInspRecordPageType = {
 
 export const get_inps_record_page = async (obj: GetInspRecordPageType) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getInpsRecordPage, JSON.stringify(obj)))
+    return data
+}
+
+export const get_workflow = async (jobId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getWorkflow, jobId))
+    return data
+}
+
+export const update_workflow = async (jobId: string,params:any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.updateWorkflow, jobId,JSON.stringify(params)))
     return data
 }

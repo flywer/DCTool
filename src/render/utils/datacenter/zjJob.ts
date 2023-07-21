@@ -1,7 +1,14 @@
-import {find_by_project_id, get_zj_json, get_zj_json_by_id} from "@render/api/auxiliaryDb";
-import {add_work_flow} from "@render/api/datacenter";
+import {
+    find_by_project_id,
+    get_simp_zj_json,
+    get_simp_zj_json_by_id,
+    get_zj_json,
+    get_zj_json_by_id
+} from "@render/api/auxiliaryDb";
+import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
+import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 
@@ -30,29 +37,45 @@ const buildZjJobJson = async (formModel: ZjFormModelType, templateJson: any) => 
     return templateJson
 
 }
-
-export const createZjJob = async (formModel: ZjFormModelType) => {
+/**
+ * @param formModel
+ * @param jobType 1：完整版；2：简化版
+ **/
+export const createZjJob = async (formModel: ZjFormModelType, jobType: string) => {
     let templateJsonStr
-    if (formModel.jobJsonId != undefined) {
-        const cjJson = await get_zj_json_by_id(Number(formModel.jobJsonId));
 
-        templateJsonStr = cjJson?.zjJson || null;
-        formModel.tableName = cjJson?.tableName.toLowerCase() || null;
-    } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
-
-        const cjJsonArr = await get_zj_json(formModel.tableName)
-        if (cjJsonArr.length > 0) {
-            // 若不知道jsonId则使用tableName获取json
-            templateJsonStr = cjJsonArr[0]?.zjJson || null;
-        } else {
-            templateJsonStr = null;
+    if (jobType == '1') {
+        if (formModel.jobJsonId != undefined) {
+            const json = await get_zj_json_by_id(Number(formModel.jobJsonId));
+            templateJsonStr = json?.zjJson || null;
+        } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
+            const jsonArr = await get_zj_json(formModel.tableName)
+            if (jsonArr.length > 0) {
+                // 若不知道jsonId则使用tableName获取json
+                templateJsonStr = jsonArr[0]?.zjJson || null;
+            } else {
+                templateJsonStr = null;
+            }
+        }
+    } else if (jobType == '2') {
+        if (formModel.jobJsonId != undefined) {
+            const json = await get_simp_zj_json_by_id(Number(formModel.jobJsonId));
+            templateJsonStr = json?.simpZjJson || null;
+        } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
+            const jsonArr = await get_simp_zj_json(formModel.tableName)
+            if (jsonArr.length > 0) {
+                // 若不知道jsonId则使用tableName获取json
+                templateJsonStr = jsonArr[0]?.simpZjJson || null;
+            } else {
+                templateJsonStr = null;
+            }
         }
     }
 
     const paramsJson = await buildZjJobJson(formModel, JSON.parse(templateJsonStr));
 
     if (paramsJson != null) {
-        add_work_flow(paramsJson).then((res) => {
+        await add_work_flow(paramsJson).then((res) => {
             if (res.code == 200) {
                 window.$message.success('质检任务创建成功')
             } else {
@@ -162,7 +185,7 @@ export const dataLakeZjJobJsonConvert = (formModel: ZjFormModelType, paramJson: 
 
     paramJson.dataDevBizVo.qualityInspectionDtoList[0].incrementColumnName = `cd_time`
 
-    const oldSourceTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+    // const oldSourceTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
     // const oldAimTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].aimTableName
     // const oldWrongTableName = paramJson.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName
 
@@ -179,25 +202,31 @@ export const dataLakeZjJobJsonConvert = (formModel: ZjFormModelType, paramJson: 
         .replaceAll('aimTableName', newAimTableName)
         .replaceAll('wrongTableName', newWrongTableName)
 
+    paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = dataLakeQualityInspectionFieldListConvert(paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList)
+
+    return JSON.parse(updateSjkUUID(removeIds(paramJson)))
+}
+
+const dataLakeQualityInspectionFieldListConvert = (qualityInspectionFieldList: any[]) => {
     // 去除id,add_time,cd_time,cd_batch 字段的质检
-    paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = removeRulesByField(
-        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList,
-        ['id', 'add_time', 'cd_time', 'cd_operation','cd_batch']
+    qualityInspectionFieldList = removeRulesByField(
+        qualityInspectionFieldList,
+        ['id', 'add_time', 'cd_time', 'cd_operation', 'cd_batch']
     )
 
     // 去除值域质检、外键、身份证、手机号、邮箱、正则质检
-    paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = removeRulesByIds(
-        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList,
+    qualityInspectionFieldList = removeRulesByIds(
+        qualityInspectionFieldList,
         ['2', '5', '7', '8', '9', '16']
     )
 
     // 去除自定义sql中包含其他表的质检规则
-    paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = removeRulesByCustomSql(
-        paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList,
+    qualityInspectionFieldList = removeRulesByCustomSql(
+        qualityInspectionFieldList,
         'xzzf_ods.'
     )
 
-    paramJson.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList.forEach((inspField: any) => {
+    qualityInspectionFieldList.forEach((inspField: any) => {
         inspField.ruleList.forEach((rule: any) => {
             if (rule.fromTableDataSourceId != undefined) {
                 rule.fromTableDataSourceId = 12
@@ -213,12 +242,12 @@ export const dataLakeZjJobJsonConvert = (formModel: ZjFormModelType, paramJson: 
             }
 
             if (rule.customSqlKey != undefined) {
-                rule.customSqlKey = rule.customSqlKey.replaceAll(`${oldSourceTableName}.`, '');
+                rule.customSqlKey = rule.customSqlKey.split('.').pop();
             }
         })
     })
 
-    return JSON.parse(updateSjkUUID(removeIds(paramJson)))
+    return qualityInspectionFieldList
 }
 
 const removeRulesByField = (list: any, fields: string[]) => {
@@ -237,5 +266,88 @@ const removeRulesByCustomSql = (list: any, str: string) => {
             return true
         }
     })
+}
+
+export type UpdateZjJobFormType = {
+    jobId: string
+    tableName: string
+    type: string
+}
+
+/**
+ * @jobId 任务ID
+ **/
+export const updateZjJob = async (form: UpdateZjJobFormType, isDataLake: boolean) => {
+
+    const jobInfo = (await get_workflow(form.jobId)).data
+
+    let paramsJson = {
+        name: jobInfo.procName,
+        email: jobInfo.email,
+        description: jobInfo.description,
+        personId: jobInfo.personId,
+        personName: jobInfo.personName,
+        projectId: jobInfo.projectId,
+        projectName: jobInfo.projectName,
+        dependencyProjectId: jobInfo.dependencyProjectId,
+        dependencyProjectName: jobInfo.dependencyProjectName,
+        dependencyWorkflowId: jobInfo.dependencyWorkflowId,
+        dependencyWorkflowName: jobInfo.dependencyWorkflowName,
+        schedulingMode: jobInfo.schedulingMode,
+        crontab: jobInfo.crontab,
+        type: "流程",
+        code: jobInfo.procCode,
+        modelXml: jobInfo.modelXml,
+        modelJson: jobInfo.modelJson,
+        dataDevBizVo: ''
+    }
+
+    const dataDevBizVo = JSON.parse(jobInfo.businessParamsJson)
+
+    let newRules = []
+    if (form.type == '1') {
+        const jsonArr = await get_zj_json(form.tableName)
+        if (jsonArr.length > 0) {
+            const zjJson = jsonArr[0]?.zjJson || null;
+            if (zjJson != null) {
+                newRules = JSON.parse(zjJson).dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList
+            }
+        }
+    } else {
+        const jsonArr = await get_simp_zj_json(form.tableName)
+        if (jsonArr.length > 0) {
+            const zjJson = jsonArr[0]?.simpZjJson || null;
+            if (zjJson != null) {
+                newRules = JSON.parse(zjJson).dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList
+            }
+        }
+    }
+
+    if (newRules.length > 0) {
+
+        const {tableAbbr} = await getAbbrByProId(paramsJson.projectId);
+
+        newRules = JSON.parse(JSON.stringify(newRules).replaceAll('depart', tableAbbr))
+
+        if (isDataLake) {
+            dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = dataLakeQualityInspectionFieldListConvert(newRules)
+        } else {
+            dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = newRules
+        }
+
+        paramsJson.dataDevBizVo = dataDevBizVo
+
+        await update_workflow(jobInfo.id, paramsJson).then((res) => {
+            if (res.success) {
+                window.$message.success(res.message)
+            } else {
+                window.$message.error(res.message)
+            }
+        })
+
+    } else {
+        window.$message.error('质检模板JSON不存在')
+    }
+
 }
 

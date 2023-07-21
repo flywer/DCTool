@@ -572,6 +572,29 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getWorkflow)
+    public async handleGetWorkflow(jobId: string) {
+        let result
+        await this.commonGetRequest(`/workflow/proc/get/${jobId}`, ``).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.updateWorkflow)
+    public async handleUpdateWorkflow(jobId: string, param: any) {
+        let result
+        const params = JSON.parse(param)
+        await this.commonPostRequest(`/workflow/proc/update/${jobId}`, params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            console.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({

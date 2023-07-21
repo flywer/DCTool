@@ -57,6 +57,7 @@
           :size="'small'"
           :loading="isTableLoading"
           :striped="true"
+          :scroll-x="1050"
       >
         <template #empty>
           <span style="color: rgba(194, 194, 194, 1)">未选择项目对应表</span>
@@ -218,6 +219,20 @@
                 v-model:value="zjJobModalFormModel.projectName"
                 readonly
             />
+          </n-form-item-gi>
+          <n-form-item-gi :span="4" label="任务类型" path="jobType">
+            <n-radio-group v-model:value="zjJobModalFormModel.jobType">
+              <n-radio-button
+                  :key="1"
+                  :value="'1'"
+                  label="完整版质检"
+              />
+              <n-radio-button
+                  :key="2"
+                  :value="'2'"
+                  label="简化版质检"
+              />
+            </n-radio-group>
           </n-form-item-gi>
           <n-form-item-gi :span="4" label="责任人" path="personId">
             <n-select
@@ -420,6 +435,32 @@
             <n-divider style="margin-top: 0"/>
           </n-gi>
 
+          <n-gi v-if="quickCreateModalFormModel.jobSelect.includes('zj')" :span="4">
+            <n-divider style="margin: 0">
+              数据质检任务
+            </n-divider>
+          </n-gi>
+          <n-form-item-gi v-if="quickCreateModalFormModel.jobSelect.includes('zj')" :span="4" label="任务类型"
+                          path="zjJobType"
+          >
+            <n-radio-group v-model:value="quickCreateModalFormModel.zjJobType">
+              <n-radio-button
+                  :key="1"
+                  :value="'1'"
+                  label="完整版质检"
+              />
+              <n-radio-button
+                  :key="2"
+                  :value="'2'"
+                  label="简化版质检"
+              />
+            </n-radio-group>
+          </n-form-item-gi>
+
+          <n-gi v-if="quickCreateModalFormModel.jobSelect.includes('zj')" :span="4">
+            <n-divider style="margin-top: 0"/>
+          </n-gi>
+
           <n-form-item-gi :span="4" label="责任人" path="personId">
             <n-select
                 v-model:value="quickCreateModalFormModel.personId"
@@ -509,6 +550,50 @@
     </n-drawer-content>
   </n-drawer>
 
+  <n-modal
+      v-model:show="showUpdateZjJobModalRef"
+      :mask-closable="false"
+      :closable="true"
+      preset="dialog"
+      role="dialog"
+      :show-icon="false"
+      :title="'更新质检规则'"
+      :size="'small'"
+      style="width: 370px"
+  >
+    <n-form
+        class="mt-4"
+        :model="updateZjJobFormRef"
+        :size="'small'"
+    >
+      <n-grid :cols="1">
+        <n-form-item-gi :span="1" label="表名" path="tableName">
+          <n-input
+              v-model:value="updateZjJobFormRef.tableName"
+              readonly
+          />
+        </n-form-item-gi>
+        <n-form-item-gi :span="1" label="规则类型">
+          <n-radio-group v-model:value="updateZjJobFormRef.type" :size="'small'">
+            <n-radio-button
+                :key="1"
+                :value="'1'"
+                label="完整版规则"
+            />
+            <n-radio-button
+                :key="2"
+                :value="'2'"
+                label="简化版规则"
+            />
+          </n-radio-group>
+        </n-form-item-gi>
+      </n-grid>
+    </n-form>
+    <template #action>
+      <n-button type="primary" :size="'small'" @click="onUpdateZjJob" :loading="isUpdateZjJob">更新</n-button>
+      <n-button :size="'small'" @click="showUpdateZjJobModalRef=!showUpdateZjJobModalRef">返回</n-button>
+    </template>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
@@ -558,7 +643,7 @@ import {
 import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
 import {createRkJob} from "@render/utils/datacenter/rkJob";
-import {createZjJob} from "@render/utils/datacenter/zjJob";
+import {createZjJob, updateZjJob} from "@render/utils/datacenter/zjJob";
 import {AddSquareMultiple16Regular, Options16Regular} from '@vicons/fluent'
 import {Refresh} from '@vicons/ionicons5'
 import {cloneDeep, isEmpty} from "lodash-es";
@@ -768,17 +853,17 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '15%'
+      width: '6%'
     },
     {
       title: '任务类型',
       key: 'type',
-      width: '10%'
+      width: '6%'
     },
     {
       title: '状态',
       key: 'status',
-      width: '8%',
+      width: '3%',
       align: 'center',
       render(row) {
         return setJobStatus(row)
@@ -787,28 +872,31 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '16%'
+      width: '8%'
     },
     {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '16%'
+      width: '8%'
     },
     {
       title: '操作',
       key: 'actions',
-      width: '20%',
+      width: '13%',
       align: 'center',
+      fixed: 'right',
       render(row) {
 
         let container = h(NSpace, {
           justify: 'center'
         })
 
+        let children: any[] = []
+
         switch (row.status) {
           case -1:// 未创建的任务
             if (row.type != '数据共享任务') {
-              container.children = [showButton('创建', async () => {
+              children = [showButton('创建', async () => {
                 const project = (await find_by_project_id(queryParam.value.projectId))
                 switch (row.type) {
                   case '数据采集任务':
@@ -850,7 +938,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 }
               })]
             } else {
-              container.children = [showConfirmation('创建', async () => {
+              children = [showConfirmation('创建', async () => {
                 const project = (await find_by_project_id(queryParam.value.projectId))
                 const tableName = queryParam.value.tableAbbr.toString().toLowerCase()
 
@@ -867,7 +955,7 @@ const createColumns = (): DataTableColumns<Job> => {
             }
             break
           case 0:// 未配置调度任务的采集任务
-            container.children = [
+            children = [
               showButton('配置', async () => {
                 await addSchedJobModalFormModelInit(row)
               }),
@@ -878,7 +966,7 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case  1: // 任务停用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              container.children = [
+              children = [
                 showButton('启用', () => {
                   dataXJobStart(row, () => tableDataInit())
                 }),
@@ -893,7 +981,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 }),
               ]
             } else {
-              container.children = [
+              children = [
                 showButton('启用', async () => {
                   await workflowActive(row.id, '01', () => tableDataInit())
                 }),
@@ -913,7 +1001,7 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case 2:// 任务启用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              container.children = [
+              children = [
                 showButton('停用', () => {
                   dataXJobStop(row, () => tableDataInit())
                 }),
@@ -929,7 +1017,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 }),
               ]
             } else {
-              container.children = [
+              children = [
                 showButton('停用', async () => {
                   await workflowActive(row.id, '02', () => tableDataInit())
                 }),
@@ -949,13 +1037,13 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case 3:// 任务运行中
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              container.children = [
+              children = [
                 showButton('日志', () => {
                   showDataXJobLog(row)
                 }),
               ]
             } else {
-              container.children = [
+              children = [
                 showButton('日志', () => {
                   showWorkflowLog(row)
                 }),
@@ -964,7 +1052,7 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case 4:// 任务异常
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              container.children = [
+              children = [
                 showConfirmation('重跑', () => {
                   dataXJobRun(row, () => tableDataInit())
                 }),
@@ -973,7 +1061,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 })
               ]
             } else {
-              container.children = [
+              children = [
                 showConfirmation('重跑', () => {
                   workflowReRun(row, () => tableDataInit())
                 }),
@@ -988,13 +1076,13 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case 5:// 任务未反馈
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              container.children = [
+              children = [
                 showButton('日志', () => {
                   showDataXJobLog(row)
                 }),
               ]
             } else {
-              container.children = [
+              children = [
                 showConfirmation('重跑', async () => {
                   workflowReRun(row, () => tableDataInit())
                 }),
@@ -1006,6 +1094,16 @@ const createColumns = (): DataTableColumns<Job> => {
             }
             break
         }
+
+        if (row.type === '数据质检任务' && row.status != -1) {
+          children.push(
+              showButton('更新质检规则', () => {
+                showUpdateZjJobModal(row)
+              })
+          )
+        }
+
+        container.children = children
 
         return container
       }
@@ -1144,13 +1242,13 @@ const onPositiveClick = async () => {
   }
 
   if (formSelect.value.createZjJob) {
-    zjJobModalFormRef.value?.validate((errors) => {
+    zjJobModalFormRef.value?.validate(async (errors) => {
       if (!errors) {
-        createZjJob({
+        await createZjJob({
           projectId: zjJobModalFormModel.value.projectId,
           personId: zjJobModalFormModel.value.personId,
           tableName: zjJobModalFormModel.value.tableName
-        }).then(() => {
+        }, zjJobModalFormModel.value.jobType).then(() => {
           tableDataInit()
         }).finally(() => {
           isSaving.value = false
@@ -1309,7 +1407,7 @@ const quickCreate = async () => {
       projectId: quickCreateModalFormModel.value.projectId,
       personId: quickCreateModalFormModel.value.personId,
       tableName: quickCreateModalFormModel.value.tableName
-    })
+    }, quickCreateModalFormModel.value.zjJobType)
   }
 
   if (quickCreateModalFormModel.value.jobSelect.includes('bf')) {
@@ -1502,7 +1600,8 @@ const zjJobModalFormModel = ref({
   tableName: '',
   projectId: '',
   projectName: '',
-  personId: ''
+  personId: '',
+  jobType: '1'
 })
 const zjJobModalFormRules = {
   personId: {
@@ -1646,7 +1745,8 @@ const quickCreateModalFormModel = ref({
   tableName: '',
   projectId: '',
   projectName: '',
-  personId: ''
+  personId: '',
+  zjJobType: '1'
 })
 
 const quickCreateModalFormRules = {
@@ -1972,6 +2072,34 @@ const showWorkflowLog = async (v) => {
   showDrawerRef.value = true
 }
 
+//endregion
+
+// region 质检规则更新
+const showUpdateZjJobModalRef = ref(false)
+const updateZjJobFormRef = ref({
+  tableName: '',
+  type: '1',
+  jobId: ''
+})
+
+const showUpdateZjJobModal = (v: Job) => {
+  updateZjJobFormRef.value.jobId = v.id
+  updateZjJobFormRef.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
+
+  showUpdateZjJobModalRef.value = true
+}
+
+const isUpdateZjJob = ref(false)
+
+const onUpdateZjJob = () => {
+  isUpdateZjJob.value = true
+
+  updateZjJob(updateZjJobFormRef.value,false)
+      .then(() => {
+        showUpdateZjJobModalRef.value = false
+      })
+      .finally(() => isUpdateZjJob.value = false)
+}
 //endregion
 </script>
 

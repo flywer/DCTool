@@ -181,6 +181,7 @@
       <n-button :size="'small'" @click="showCreateJobModalRef=!showCreateJobModalRef">返回</n-button>
     </template>
   </n-modal>
+
 </template>
 
 <script setup lang="ts">
@@ -208,7 +209,7 @@ import {
   workflowReRun,
   workflowRun,
 } from "@render/utils/datacenter/jobTabUtil";
-import {dataLakeZjJobJsonConvert} from "@render/utils/datacenter/zjJob";
+import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
 import {Add, Refresh} from '@vicons/ionicons5'
 import {isEmpty} from "lodash-es";
 import {
@@ -376,6 +377,14 @@ const createColumns = (): DataTableColumns<Job> => {
               }),
             ]
             break
+        }
+
+        if (row.type === '数据质检任务' && row.status != -1) {
+          children.push(
+              showConfirmation('更新质检规则', () => {
+                onUpdateZjJob(row)
+              })
+          )
         }
 
         children.push(
@@ -764,6 +773,20 @@ const handlemechanismIdUpdate = () => {
 
 //endregion
 
+// region 质检规则更新
+const updateZjJobFormRef = ref({
+  tableName: '',
+  type: '1',
+  jobId: ''
+})
+
+const onUpdateZjJob = (v: Job) => {
+  updateZjJobFormRef.value.jobId = v.id
+  updateZjJobFormRef.value.tableName = v.jobName.split('_')[2].toUpperCase()
+
+  updateZjJob(updateZjJobFormRef.value, true)
+}
+//endregion
 </script>
 
 <style scoped>

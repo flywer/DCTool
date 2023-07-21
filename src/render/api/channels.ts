@@ -56,6 +56,8 @@ export const channels = reactive({
         workflowLog: 'datacenter/workflowLog',
         inspHomeList: 'datacenter/inspHomeList',
         getInpsRecordPage: 'datacenter/getInpsRecordPage',
+        getWorkflow: 'datacenter/getWorkflow',
+        updateWorkflow: 'datacenter/updateWorkflow',
 
     },
     auxiliaryDb: {
