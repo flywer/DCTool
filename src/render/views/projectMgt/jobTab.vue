@@ -857,7 +857,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '6%'
+      width: '8%'
     },
     {
       title: '任务类型',
@@ -1109,9 +1109,10 @@ const createColumns = (): DataTableColumns<Job> => {
             break
         }
 
-        if (row.type === '数据质检任务' && row.status != -1) {
+        const cantUpdateStatus = [-1, 2, 3]
+        if (row.type === '数据质检任务' && !cantUpdateStatus.includes(row.status)) {
           children.push(
-              showButton('更新质检规则', () => {
+              showButton('更新规则', () => {
                 showUpdateZjJobModal(row)
               })
           )

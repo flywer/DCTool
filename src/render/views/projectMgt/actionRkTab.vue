@@ -7,6 +7,9 @@
       <n-tab-pane name="2" tab="行为数据集市表">
         <action-dm-table/>
       </n-tab-pane>
+      <n-tab-pane name="3" tab="数据湖行为表">
+        <data-lake-table/>
+      </n-tab-pane>
     </n-tabs>
   </n-layout>
 </template>
@@ -14,6 +17,7 @@
 <script setup lang="ts">
 import ActionDmTable from "@render/views/projectMgt/actionDmTable.vue";
 import ActionRkJob from "@render/views/projectMgt/actionRkJob.vue";
+import DataLakeTable from "@render/views/projectMgt/dataLakeTable.vue";
 </script>
 
 <style scoped>

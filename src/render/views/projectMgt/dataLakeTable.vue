@@ -152,7 +152,7 @@ const tableDataInit = async () => {
     tableDataRef.value = (await get_tables_info({
       size: 100,
       page: 1,
-      sourceId: 6,
+      sourceId: 12,
       likeValue: queryParam.value
     })).data?.records || []
   }
@@ -253,7 +253,7 @@ const tablePreview = (row) => {
   isPreviewTableLoading.value = true
   modalTitle = row.tableName
 
-  table_preview(6, row.tableName).then(res => {
+  table_preview(12, row.tableName).then(res => {
     if (res.code == 200) {
       if (res.data.length != 0) {
 
@@ -353,8 +353,8 @@ const onNegativeClick = () => {
 const isSaving = ref(false)
 
 let paramModel = {
-  sourceId: '6',
-  dbType: 'tbds-hive',
+  sourceId: '12',
+  dbType: 'mysql',
   sourceName: '',
   dataTierCode: '',
   dataTierName: '',

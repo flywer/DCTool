@@ -330,7 +330,7 @@ const createColumns = (): DataTableColumns<Job> => {
       key: 'actions',
       width: '15%',
       align: 'center',
-      fixed:'right',
+      fixed: 'right',
       render(row) {
 
         let container = h(NSpace, {
@@ -393,9 +393,10 @@ const createColumns = (): DataTableColumns<Job> => {
             break
         }
 
-        if (row.type === '数据质检任务' && row.status != -1) {
+        const cantUpdateStatus = [-1, 2, 3]
+        if (row.type === '数据质检任务' && !cantUpdateStatus.includes(row.status)) {
           children.push(
-              showConfirmation('更新质检规则', () => {
+              showConfirmation('更新规则', () => {
                 onUpdateZjJob(row)
               })
           )
