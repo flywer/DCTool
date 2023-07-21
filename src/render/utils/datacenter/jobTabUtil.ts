@@ -30,6 +30,8 @@ export  type Job = {
     createBy: string
     code?: string
     comment?: string
+    createTime: string
+    updateTime: string
 }
 
 // 查询中台表的质检任务是否已配置

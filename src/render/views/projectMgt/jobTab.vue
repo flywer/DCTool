@@ -57,7 +57,7 @@
           :size="'small'"
           :loading="isTableLoading"
           :striped="true"
-          :scroll-x="1050"
+          :scroll-x="1200"
       >
         <template #empty>
           <span style="color: rgba(194, 194, 194, 1)">未选择项目对应表</span>
@@ -762,7 +762,9 @@ const tableDataInit = async () => {
         cron: schedJob?.jobCron || null,
         lastExecTime: v.triggerLastTime || '--',
         nextExecTime: dataXJobGetNextExecTime(schedJob),
-        createBy: null
+        createBy: null,
+        createTime: schedJob.addTime,
+        updateTime: schedJob.updateTime
       }
 
       newDataXJobs.push(job)
@@ -814,7 +816,7 @@ const tableDataInit = async () => {
     let newWorkflowJobs = []
 
     for (const v of workflowJobs) {
-      const job = {
+      const job: Job = {
         id: v.id,
         jobName: v.procName,
         type: getWorkflowJobType(v),
@@ -824,7 +826,9 @@ const tableDataInit = async () => {
         lastExecTime: await workflowJobGetLastExecTime(v),
         nextExecTime: workflowJobGetNextExecTime(v),
         createBy: v.createBy,
-        code: v.procCode
+        code: v.procCode,
+        createTime: v.createTime,
+        updateTime: v.updateTime
       }
 
       newWorkflowJobs.push(job)
@@ -877,6 +881,16 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '下次执行时间',
       key: 'nextExecTime',
+      width: '8%'
+    },
+    {
+      title: '任务创建时间',
+      key: 'createTime',
+      width: '8%'
+    },
+    {
+      title: '任务更新时间',
+      key: 'updateTime',
       width: '8%'
     },
     {
@@ -2094,7 +2108,7 @@ const isUpdateZjJob = ref(false)
 const onUpdateZjJob = () => {
   isUpdateZjJob.value = true
 
-  updateZjJob(updateZjJobFormRef.value,false)
+  updateZjJob(updateZjJobFormRef.value, false)
       .then(() => {
         showUpdateZjJobModalRef.value = false
       })

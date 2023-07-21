@@ -23,6 +23,7 @@
         :size="'small'"
         :loading="isTableLoading"
         :striped="true"
+        :scroll-x="1400"
     />
   </n-scrollbar>
 
@@ -103,7 +104,9 @@ const tableDataInit = async () => {
       nextExecTime: workflowJobGetNextExecTime(v),
       createBy: v.createBy,
       code: v.procCode,
-      comment: await getTableComment(v.procName)
+      comment: await getTableComment(v.procName),
+      createTime: v.createTime,
+      updateTime: v.updateTime
     }
 
     newJobs.push(job)
@@ -129,12 +132,12 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '数据类型',
       key: 'comment',
-      width: '15%'
+      width: '10%'
     },
     {
       title: '状态',
       key: 'status',
-      width: '8%',
+      width: '5%',
       align: 'center',
       render(row) {
         return setJobStatus(row)
@@ -143,18 +146,29 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '16%'
+      width: '10%'
     },
     {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '16%'
+      width: '10%'
+    },
+    {
+      title: '任务创建时间',
+      key: 'createTime',
+      width: '10%'
+    },
+    {
+      title: '任务更新时间',
+      key: 'updateTime',
+      width: '10%'
     },
     {
       title: '操作',
       key: 'actions',
-      width: '20%',
+      width: '15%',
       align: 'center',
+      fixed:'right',
       render(row) {
 
         let container = h(NSpace, {

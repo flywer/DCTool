@@ -23,6 +23,7 @@
         :size="'small'"
         :loading="isTableLoading"
         :striped="true"
+        :scroll-x="1200"
     />
   </n-scrollbar>
 
@@ -142,27 +143,11 @@ import {
   sched_job_delete
 } from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/formatDate";
+import {Job, setJobStatus} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from "cron-parser";
-import {DataTableColumns, FormInst, NButton, NPopconfirm, NSpace, NTag} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NPopconfirm, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
-
-type Job = {
-  id: string
-  type: string
-  jobName: string
-  // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
-  status: number
-  // 1:依赖调度；2:定时调度
-  schedMode: number
-  cron: string
-  lastExecTime: string
-  nextExecTime: string
-  createBy: string
-  code?: string
-
-  comment: string
-}
 
 const tableDataRef = ref([])
 const isTableLoading = ref(false)
@@ -190,6 +175,7 @@ const tableDataInit = async () => {
 
   for (const v of dataXJobs) {
     const schedJob = await getSchedJob(v)
+
     const job: Job = {
       id: v.id,
       jobName: v.jobDesc,
@@ -210,7 +196,9 @@ const tableDataInit = async () => {
       lastExecTime: v.triggerLastTime || '--',
       nextExecTime: cjJobGetNextExecTime(schedJob),
       createBy: null,
-      comment: await getTableComment(v.jobDesc)
+      comment: await getTableComment(v.jobDesc),
+      createTime: schedJob?.addTime || '--',
+      updateTime: schedJob?.updateTime || '--'
     }
 
     newJobs.push(job)
@@ -260,91 +248,43 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '数据类型',
       key: 'comment',
-      width: '15%'
+      width: '10%'
     },
     {
       title: '状态',
       key: 'status',
-      width: '8%',
+      width: '5%',
       align: 'center',
       render(row) {
-        switch (row.status) {
-          case -1:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#797979',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未创建'})
-          case 0:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#ffc062',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未配置'})
-          case 1:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'default'
-                },
-                {default: () => '停用'})
-          case 2:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'info'
-                },
-                {default: () => '启用'})
-          case 3:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'success'
-                },
-                {default: () => '运行中'})
-          case 4:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  type: 'error'
-                },
-                {default: () => '异常'})
-          case 5:
-            return h(NTag, {
-                  size: 'small',
-                  bordered: false,
-                  color: {
-                    color: '#8eafd3',
-                    textColor: 'white'
-                  }
-                },
-                {default: () => '未反馈'})
-        }
+        return setJobStatus(row)
       }
     },
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '16%'
+      width: '13%'
     },
     {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '16%'
+      width: '13%'
+    },
+    {
+      title: '任务创建时间',
+      key: 'createTime',
+      width: '13%'
+    },
+    {
+      title: '任务更新时间',
+      key: 'updateTime',
+      width: '13%'
     },
     {
       title: '操作',
       key: 'actions',
-      width: '20%',
+      width: '15%',
       align: 'center',
+      fixed: 'right',
       render(row) {
 
         let container = h(NSpace, {
