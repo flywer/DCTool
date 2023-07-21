@@ -84,7 +84,7 @@ async function bootstrap() {
         }).catch(error => log.error('应用程序数据源连接失败', error))
 
     } catch (error) {
-        console.error(error)
+        log.error(error)
         app.quit()
     }
 }

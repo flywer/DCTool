@@ -48,7 +48,7 @@ export class DatacenterController {
                 result = res;
             })
             .catch((err) => {
-                console.error(err);
+                log.error(err);
             });
         return result
     }
@@ -59,7 +59,7 @@ export class DatacenterController {
         await this.commonPostRequest('/services/am-usrc/usrc/user/sm-list', {}).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -75,7 +75,7 @@ export class DatacenterController {
         }).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -90,7 +90,7 @@ export class DatacenterController {
                 result = res;
             })
             .catch((err) => {
-                console.error(err);
+                log.error(err);
             });
         return result
     }
@@ -101,7 +101,7 @@ export class DatacenterController {
         await this.commonPostRequest('/data_develop/assembly/checkSql', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -113,7 +113,7 @@ export class DatacenterController {
         await this.commonPostRequest('/workflow/proc/add', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -127,7 +127,7 @@ export class DatacenterController {
         await this.commonGetRequest('/gather/api/metadata/getColumns', query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -141,7 +141,7 @@ export class DatacenterController {
         await this.commonGetRequest('/gather/api/metadata/getTables', query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -155,7 +155,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/dataxJson/buildJson', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -167,7 +167,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/jobTemplate/add', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -178,7 +178,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/job/add', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -189,7 +189,7 @@ export class DatacenterController {
         await this.commonPostRequest('/datawork/datamodelTables/save', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -200,7 +200,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/metadataCatch/executeSqlPost', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -212,7 +212,7 @@ export class DatacenterController {
         await this.commonPostRequest('/datawork/datamodelTables/save', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -224,7 +224,7 @@ export class DatacenterController {
         await this.commonPostRequest('/workflow/proc/page', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -236,7 +236,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/jobTemplate/findPage', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -273,7 +273,7 @@ export class DatacenterController {
         await this.commonGetRequest('/gather/api/job/pageList', paramStr.slice(0, -1)).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -287,7 +287,7 @@ export class DatacenterController {
         await this.commonGetRequest('/gather/api/job/start', query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -301,7 +301,7 @@ export class DatacenterController {
         await this.commonGetRequest('/gather/api/job/stop', query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -313,7 +313,7 @@ export class DatacenterController {
         await this.commonPostRequest('/workflow/proc/activate', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -325,7 +325,7 @@ export class DatacenterController {
         await this.commonPostRequest('/gather/api/job/trigger', params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -339,7 +339,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/gather/api/jobTemplate/remove/${id}`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -351,7 +351,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/workflow/proc-inst/start`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -363,7 +363,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/datawork/datamodelTables/page`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -375,7 +375,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/gather/api/log/pageList`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -387,7 +387,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/qaportal/dwInspectionPortalConfig/add`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -399,7 +399,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/qaportal/dwInspectionPortalConfig/page`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -411,7 +411,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/services/am-usrc/usrc/org/findOrgTree?orgType=GA&area=`, {}).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -423,7 +423,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/datawork/normCodeSet/page`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -437,7 +437,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/datawork/normCode/findList`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -451,7 +451,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/gather/api/job/remove/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -465,7 +465,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/workflow/proc/delete/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -479,7 +479,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/datawork/dataSource/getLimitNum`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -493,7 +493,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/datawork/datamodelTables/delete/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -507,7 +507,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/workflow/workflow-log/list`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -521,7 +521,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/workflow/proc/rerun/${id}`, query).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -532,7 +532,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/qaportal/dwInspectionRecord/findHomeList`, ``).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -567,7 +567,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/qaportal/dwInspectionRecord/page`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -578,7 +578,7 @@ export class DatacenterController {
         await this.commonGetRequest(`/workflow/proc/get/${jobId}`, ``).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
@@ -590,7 +590,7 @@ export class DatacenterController {
         await this.commonPostRequest(`/workflow/proc/update/${jobId}`, params).then((res) => {
             result = res;
         }).catch((err) => {
-            console.error(err);
+            log.error(err);
         });
         return result
     }
