@@ -763,8 +763,8 @@ const tableDataInit = async () => {
         lastExecTime: v.triggerLastTime || '--',
         nextExecTime: dataXJobGetNextExecTime(schedJob),
         createBy: null,
-        createTime: schedJob.addTime,
-        updateTime: schedJob.updateTime
+        createTime: schedJob?.addTime || '--',
+        updateTime: schedJob?.updateTime || '--'
       }
 
       newDataXJobs.push(job)

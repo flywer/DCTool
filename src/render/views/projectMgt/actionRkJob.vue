@@ -112,7 +112,13 @@ const tableDataInit = async () => {
     newJobs.push(job)
   }
 
-  tableDataRef.value = newJobs
+  tableDataRef.value = newJobs.sort((a, b) => {
+    const aSplit = a.jobName.split("_");
+    const bSplit = b.jobName.split("_");
+    const aSplitValue = aSplit[2];
+    const bSplitValue = bSplit[2];
+    return aSplitValue.localeCompare(bSplitValue);
+  })
 
   isTableLoading.value = false
 }
