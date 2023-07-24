@@ -2149,6 +2149,7 @@ const onUpdateZjJob = () => {
 
   updateZjJob(updateZjJobFormRef.value, false)
       .then(() => {
+        tableDataInit()
         showUpdateZjJobModalRef.value = false
       })
       .finally(() => isUpdateZjJob.value = false)

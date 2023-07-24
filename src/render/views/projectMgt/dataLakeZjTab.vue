@@ -222,6 +222,7 @@ import {
   SelectOption,
   TimelineItemProps
 } from "naive-ui";
+import {format} from "sql-formatter";
 import {h, onMounted, reactive, ref} from "vue";
 
 const tableDataRef = ref([])
@@ -603,7 +604,7 @@ const createWrongTable = async (tableName: string) => {
 
   const sql = (await get_table_sql({tableName: tableName}))[0].sql
 
-  paramsJson.ddlSql = `CREATE TABLE ${paramsJson.tableName} ${sql}`
+  paramsJson.ddlSql = format(addFieldsToSql(`CREATE TABLE ${paramsJson.tableName} ${sql}`))
 
   await create_table(paramsJson).then(res => {
     if (res.success && res.code == 200) {
@@ -613,6 +614,24 @@ const createWrongTable = async (tableName: string) => {
     }
   })
 
+}
+
+const addFieldsToSql = (sql: string): string => {
+  const fieldStr = `OPT_AREA_CODE VARCHAR(20) COMMENT '数据所属单位区划',
+    OPT_FIELD_CODE VARCHAR(20) COMMENT '数据所属单位领域',
+    OPT_SUBJECT_ID VARCHAR(36) COMMENT '数据所属单位主体ID',
+    OPT_SUBJECT_NAME VARCHAR(50) COMMENT '数据所属单位主体名称',
+    OPT_DEPT_ID VARCHAR(36) COMMENT '数据所属单位部门ID',
+    OPT_DEPT_NAME VARCHAR(50) COMMENT '数据所属单位部门名称'`;
+  const index = sql.indexOf('cd_batch');
+  if (index < 0) { // 如果原表中不存在cd_batch字段，则直接返回原sql语句
+    return sql;
+  }
+  const preSql = sql.slice(0, index); // 获取cd_batch字段前面的sql语句
+  const postSql = sql.slice(index).replace('cd_batch VARCHAR(50) COMMENT \'批次号\'', ''); // 获取cd_batch字段后面的sql语句
+  const newFields = `cd_batch VARCHAR(50) COMMENT '批次号',
+    ${fieldStr}`;
+  return `${preSql} ${newFields} ${postSql}`;// 拼接新增字段后的完整sql语句
 }
 
 //endregion
@@ -799,7 +818,7 @@ const onUpdateZjJob = (v: Job) => {
   updateZjJobFormRef.value.jobId = v.id
   updateZjJobFormRef.value.tableName = v.jobName.split('_')[2].toUpperCase()
 
-  updateZjJob(updateZjJobFormRef.value, true)
+  updateZjJob(updateZjJobFormRef.value, true).then(() => tableDataInit())
 }
 //endregion
 </script>

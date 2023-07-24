@@ -227,6 +227,9 @@ const dataLakeQualityInspectionFieldListConvert = (qualityInspectionFieldList: a
     )
 
     qualityInspectionFieldList.forEach((inspField: any) => {
+
+        inspField.field = inspField.field.toUpperCase()
+
         inspField.ruleList.forEach((rule: any) => {
             if (rule.fromTableDataSourceId != undefined) {
                 rule.fromTableDataSourceId = 12
@@ -242,7 +245,7 @@ const dataLakeQualityInspectionFieldListConvert = (qualityInspectionFieldList: a
             }
 
             if (rule.customSqlKey != undefined) {
-                rule.customSqlKey = rule.customSqlKey.split('.').pop();
+                rule.customSqlKey = rule.customSqlKey.split('.').pop().toUpperCase();
             }
         })
     })
