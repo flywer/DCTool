@@ -261,7 +261,7 @@ const tablePreview = (row) => {
 
   table_preview(6, row.tableName).then(res => {
     if (res.code == 200) {
-      if (res.data.length != 0) {
+      if (res.data && res.data.length != 0) {
 
         tableHeadCol.value = res.data[0]
         tableRows.value = res.data.slice(1)

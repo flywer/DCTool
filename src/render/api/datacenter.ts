@@ -281,7 +281,12 @@ export const get_workflow = async (jobId: string) => {
     return data
 }
 
-export const update_workflow = async (jobId: string,params:any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.updateWorkflow, jobId,JSON.stringify(params)))
+export const update_workflow = async (jobId: string, params: any) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.updateWorkflow, jobId, JSON.stringify(params)))
+    return data
+}
+
+export const get_dataXJob = async (jobId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataXJob, jobId))
     return data
 }

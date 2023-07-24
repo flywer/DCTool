@@ -58,6 +58,7 @@ export const channels = reactive({
         getInpsRecordPage: 'datacenter/getInpsRecordPage',
         getWorkflow: 'datacenter/getWorkflow',
         updateWorkflow: 'datacenter/updateWorkflow',
+        getDataXJob: 'datacenter/getDataXJob',
 
     },
     auxiliaryDb: {

@@ -594,6 +594,35 @@
       <n-button :size="'small'" @click="showUpdateZjJobModalRef=!showUpdateZjJobModalRef">返回</n-button>
     </template>
   </n-modal>
+
+  <n-modal
+      v-model:show="showPreviewModalRef"
+      :mask-closable="true"
+      :closable="true"
+      preset="card"
+      role="card"
+      :show-icon="false"
+      :title="previewModalTitle"
+      :size="'small'"
+      style="width: calc(100vw - 100px);"
+  >
+
+    <n-data-table
+        style="overflow: auto"
+        class="mt-2 mb-2"
+        :key="(row) => row.id"
+        :columns="previewColsRef"
+        :data="previewTableDataRef"
+        :bordered="true"
+        :size="'small'"
+        :striped="true"
+        :loading="isPreviewTableLoading"
+        :max-height="450"
+    />
+
+  </n-modal>
+
+
 </template>
 
 <script setup lang="ts">
@@ -603,11 +632,11 @@ import {
   create_valid_config,
   get_cj_job_page,
   get_columns,
-  get_datax_job_log,
+  get_datax_job_log, get_dataXJob,
   get_valid_config_page,
   get_workflow_log,
   get_workflow_page,
-  gte_usrc_org_tree
+  gte_usrc_org_tree, table_preview
 } from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
@@ -1023,8 +1052,9 @@ const createColumns = (): DataTableColumns<Job> => {
                   dataXJobRun(row, () => tableDataInit())
                 }),
                 showConfirmation('删除', async () => {
-                  await dataXJobStop(row, () => tableDataInit())
-                  await dataXJobDelete(row, () => tableDataInit())
+                  await dataXJobStop(row, () => {
+                    dataXJobDelete(row, () => tableDataInit())
+                  })
                 }),
                 showButton('日志', () => {
                   showDataXJobLog(row)
@@ -1114,6 +1144,14 @@ const createColumns = (): DataTableColumns<Job> => {
           children.push(
               showButton('更新规则', () => {
                 showUpdateZjJobModal(row)
+              })
+          )
+        }
+
+        if (row.type === '数据采集任务' && row.status != -1) {
+          children.push(
+              showButton('源表预览', () => {
+                tablePreview(row)
               })
           )
         }
@@ -2116,6 +2154,90 @@ const onUpdateZjJob = () => {
       .finally(() => isUpdateZjJob.value = false)
 }
 //endregion
+
+//region 预览
+const showPreviewModalRef = ref(false)
+
+let previewModalTitle = '';
+
+const previewColsRef = ref([])
+
+const tableHeadCol = ref([])
+
+const tableRows = ref([])
+
+const previewTableDataRef = ref([])
+
+const isPreviewTableLoading = ref(false)
+const tablePreview = async (row: Job) => {
+  previewColsRef.value = []
+  previewTableDataRef.value = []
+
+  isPreviewTableLoading.value = true
+
+  const jobInfo = await get_dataXJob(row.id)
+  const tableName = jobInfo.data.jobTemplate.readerTable
+
+  previewModalTitle = tableName
+  table_preview(7, tableName).then(res => {
+    if (res.code == 200) {
+      if (res.data && res.data.length != 0) {
+
+        tableHeadCol.value = res.data[0]
+        tableRows.value = res.data.slice(1)
+
+        // 创建表头
+        previewColsRef.value = res.data[0].map((col) => ({
+          title: col,
+          key: col,
+          // fixed: key.split('.')[1] === 'id' ? 'left' : false
+          width: '200px',
+          ellipsis: {
+            tooltip: true
+          }
+        }));
+
+        // 处理数据
+        previewTableDataRef.value = res.data.slice(1).map((item) =>
+            Object.values(item).map(
+                (value) => (value === null ? 'null' : value.toString())
+            )
+        )
+
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item) =>
+            Object.values(item).map(
+                (value) => (value === null ? 'null' : value.toString())
+            )
+        ));
+      }
+    } else {
+      window.$message.error(res.message)
+    }
+  }).finally(() => isPreviewTableLoading.value = false)
+
+  showPreviewModalRef.value = true
+}
+
+interface ObjA {
+  title: string;
+  key: string
+}
+
+type ObjB = Array<string[]>;
+
+const transform = (objA: ObjA[], objB: ObjB): Record<string, string>[] => {
+  const transformed: Record<string, string>[] = [];
+  for (const row of objB) {
+    const obj: Record<string, string> = {};
+    for (let i = 0; i < row.length && i < objA.length; i++) {
+      obj[objA[i].key] = row[i];
+    }
+    transformed.push(obj);
+  }
+  return transformed;
+}
+// endregion
+
 </script>
 
 <style scoped>

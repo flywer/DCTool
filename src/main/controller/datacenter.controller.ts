@@ -595,6 +595,17 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.getDataXJob)
+    public async handleGetDataXJob(jobId: string) {
+        let result
+        await this.commonGetRequest(`/gather/api/jobTemplate/get/${jobId}`, `subsystemName=%E9%87%87%E9%9B%86`).then((res) => {
+            result = res;
+        }).catch((err) => {
+            log.error(err);
+        });
+        return result
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({

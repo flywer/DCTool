@@ -109,10 +109,10 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess) =
     await workflow_active({
         id: id,
         type: type
-    }).then((res) => {
+    }).then(async (res) => {
         if (res.code == 200) {
             window.$message.success(type == '01' ? '启用成功' : '停用成功')
-            onSuccess()
+            await onSuccess()
         } else {
             window.$message.error(res.msg, res.message)
             console.error(res)
@@ -147,10 +147,10 @@ export const workflowStart = (v: Job, onSuccess) => {
         createBy: v.createBy,
         creator: v.createBy
     }
-    workflow_run(param).then(res => {
+    workflow_run(param).then(async res => {
         if (res.code == 200) {
             window.$message.success(res.message)
-            onSuccess()
+            await onSuccess()
         } else {
             window.$message.error(res.message)
         }
