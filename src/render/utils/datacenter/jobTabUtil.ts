@@ -3,11 +3,18 @@ import {create_cron_job} from "@render/api/cron";
 import {
     datax_job_delete,
     datax_job_run,
-    datax_job_start, datax_job_stop,
+    datax_job_start,
+    datax_job_stop,
     get_datax_job_log,
     get_sched_job_page,
     get_valid_config_page,
-    get_workflow_log, sched_job_delete, workflow_active, workflow_delete, workflow_rerun, workflow_run
+    get_workflow_log,
+    get_workflow_page,
+    sched_job_delete,
+    workflow_active,
+    workflow_delete,
+    workflow_rerun,
+    workflow_run
 } from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/formatDate";
 import {parseExpression} from "cron-parser";
@@ -121,22 +128,47 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess) =
 }
 
 export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: string, onSuccess) => {
-    if (v.type === '数据质检任务') {
-        if (!isValidConfigRef) {
-            window.$dialog.warning({
-                title: '警告',
-                content: `检测到未在【质量门户】对[${tableName}]进行配置，是否继续执行质检？`,
-                positiveText: '确定',
-                negativeText: '取消',
-                onPositiveClick: () => {
-                    workflowStart(v, () => onSuccess())
-                }
-            })
+
+    //工作流任务
+    const runningJobs = (await get_workflow_page({
+        page: 1,
+        size: 10000,
+        status: '4',
+        procName: ``
+    })).data.records
+
+    const runFunc = () => {
+        if (v.type === '数据质检任务') {
+            if (!isValidConfigRef) {
+                window.$dialog.warning({
+                    title: '警告',
+                    content: `检测到未在【质量门户】对[${tableName}]进行配置，是否继续执行质检？`,
+                    positiveText: '确定',
+                    negativeText: '取消',
+                    onPositiveClick: () => {
+                        workflowStart(v, () => onSuccess())
+                    }
+                })
+            } else {
+                workflowStart(v, () => onSuccess())
+            }
         } else {
             workflowStart(v, () => onSuccess())
         }
+    }
+
+    if (runningJobs.length >= 5) {
+        window.$dialog.warning({
+            title: '警告',
+            content: `目前正在运行的工作流有${runningJobs.length}个，是否继续执行此任务？`,
+            positiveText: '确定',
+            negativeText: '取消',
+            onPositiveClick: () => {
+                runFunc()
+            }
+        })
     } else {
-        workflowStart(v, () => onSuccess())
+        runFunc()
     }
 }
 
