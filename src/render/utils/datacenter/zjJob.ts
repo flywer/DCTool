@@ -140,10 +140,34 @@ export const convertZjJson = (jsonStr: string, tableName: string): string => {
             if (rule.customSql != undefined) {
                 rule.customSql = convertCustomSqlTableName(rule.customSql, oldTableAbbr, 'depart')
             }
+
+            if (rule.customDescribe != undefined) {
+                rule.customDescribe = replaceQuotes(rule.customDescribe)
+            }
         });
     });
 
     return JSON.stringify(jobJson, null, 2)
+}
+
+const replaceQuotes = (sentence: string): string => {
+    let result = '';
+    let count = 0;
+
+    for (let i = 0; i < sentence.length; i++) {
+        if (sentence[i] === '"') {
+            count++;
+            if (count % 2 === 0) {
+                result += '”';
+            } else {
+                result += '“';
+            }
+        } else {
+            result += sentence[i];
+        }
+    }
+
+    return result;
 }
 
 export const convertCustomSqlTableName = (sql: string, oldTableAbbr: string, newTableAbbr: string) => {
