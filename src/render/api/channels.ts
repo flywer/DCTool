@@ -66,6 +66,7 @@ export const channels = reactive({
         updateProjectInfo: 'auxiliaryDb/updateProjectInfo',
         findByProjectId: 'auxiliaryDb/findByProjectId',
         getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
+        getProjectByTableAbbr: 'auxiliaryDb/getProjectByTableAbbr',
 
         getAuthToken: 'auxiliaryDb/getAuthToken',
         updateAuthToken: 'auxiliaryDb/updateAuthToken',

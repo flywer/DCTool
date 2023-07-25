@@ -30,6 +30,11 @@ export const get_project_by_pro_abbr = async (projectAbbr: string) => {
     return data
 }
 
+export const get_project_by_table_abbr = async (tableAbbr: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByTableAbbr, tableAbbr))
+    return data
+}
+
 export const get_auth_token = async () => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getAuthToken))
     return data

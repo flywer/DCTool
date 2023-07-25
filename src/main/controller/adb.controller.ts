@@ -49,6 +49,13 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getProjectByTableAbbr)
+    public async handleGetProjectByTableAbbr(tableAbbr: string) {
+        return await AppDataSource.getRepository(ProjectInfo).findOneBy({
+            tableAbbr: tableAbbr
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.getAuthToken)
     public async handleGetAuthToken() {
         return await AppDataSource.getRepository(Dict).findOneBy({

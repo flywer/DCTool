@@ -34,13 +34,18 @@
 </template>
 
 <script setup lang="ts">
-import {get_project_info, update_project_info} from "@render/api/auxiliaryDb";
+import {
+  get_project_by_pro_abbr,
+  get_project_by_table_abbr,
+  get_project_info,
+  update_project_info
+} from "@render/api/auxiliaryDb";
 import {get_job_project_list} from "@render/api/datacenter";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
+import {isNull} from "lodash-es";
 import type {DataTableColumns} from 'naive-ui'
-import { h, onMounted, ref, reactive} from 'vue'
+import {h, onMounted, ref, reactive} from 'vue'
 import {Refresh} from '@vicons/ionicons5'
-
 
 const tableRef = ref()
 
@@ -116,12 +121,34 @@ const createColumns = ({}: {
         return h(showOrEdit, {
           value: row.projectAbbr,
           async onUpdateValue(v) {
-            tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
-            update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-              tableDataInit().then(() => {
-                window.$message.success('修改成功')
-              })
+            get_project_by_pro_abbr(v).then(res => {
+              if (isNull(res)) {
+                tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
+
+                update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                  tableDataInit().then(() => {
+                    window.$message.success('修改成功')
+                  })
+                })
+              } else {
+                window.$dialog.warning({
+                  title: '警告',
+                  content: `检测到[${v}]已被使用，是否继续？`,
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: () => {
+                    tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
+
+                    update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                      tableDataInit().then(() => {
+                        window.$message.success('修改成功')
+                      })
+                    })
+                  }
+                })
+              }
             })
+
           }
         })
       }
@@ -134,11 +161,30 @@ const createColumns = ({}: {
         return h(showOrEdit, {
           value: row.tableAbbr,
           async onUpdateValue(v) {
-            tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
-            update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-              tableDataInit().then(() => {
-                window.$message.success('修改成功')
-              })
+            get_project_by_table_abbr(v).then(res => {
+              if (isNull(res)) {
+                tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
+                update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                  tableDataInit().then(() => {
+                    window.$message.success('修改成功')
+                  })
+                })
+              } else {
+                window.$dialog.warning({
+                  title: '警告',
+                  content: `检测到[${v}]已被使用，是否继续？`,
+                  positiveText: '确定',
+                  negativeText: '取消',
+                  onPositiveClick: () => {
+                    tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
+                    update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                      tableDataInit().then(() => {
+                        window.$message.success('修改成功')
+                      })
+                    })
+                  }
+                })
+              }
             })
           }
         })
