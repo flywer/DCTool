@@ -129,10 +129,14 @@ export const convertZjJson = (jsonStr: string, tableName: string): string => {
             if (rule.customSqlKey != undefined) {
                 rule.customSqlKey = rule.customSqlKey.replaceAll(`${oldSourceTableName}.`, '');
             }
-            if (rule.fromTableDataTable != undefined && !isBasicTable(rule.fromTableDataTable)) {
-                rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, 'depart');
-                rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, 'depart');
+            if (rule.fromTableDataTable != undefined) {
+                if (!isBasicTable(rule.fromTableDataTable)) {
+                    rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, 'depart');
+                }
+                // rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, 'depart');
+                rule.fromTableField = rule.fromTableField.split('.').pop()
             }
+
             if (rule.customSql != undefined) {
                 rule.customSql = convertCustomSqlTableName(rule.customSql, oldTableAbbr, 'depart')
             }

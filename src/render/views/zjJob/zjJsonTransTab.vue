@@ -203,9 +203,11 @@ const validJsonTrans = (e: MouseEvent) => {
             if (rule.customSqlKey != undefined) {
               rule.customSqlKey = rule.customSqlKey.replaceAll(oldTableAbbr, tableAbbr);
             }
-            if (rule.fromTableDataTable != undefined && !isBasicTable(rule.fromTableDataTable)) {
-              rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, tableAbbr);
-              rule.fromTableField = rule.fromTableField.replaceAll(oldTableAbbr, tableAbbr);
+            if (rule.fromTableDataTable != undefined) {
+              if (!isBasicTable(rule.fromTableDataTable)) {
+                rule.fromTableDataTable = rule.fromTableDataTable.replaceAll(oldTableAbbr, tableAbbr);
+              }
+              rule.fromTableField = rule.fromTableField.split('.').pop()
             }
           });
         });
