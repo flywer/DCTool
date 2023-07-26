@@ -21,7 +21,7 @@ export const channels = reactive({
         checkInsertSql: 'datacenter/checkInsertSql',
         addWorkFlow: 'datacenter/addWorkFlow',
         getColumns: 'datacenter/getColumns',
-        jobList: 'datacenter/jobList',
+        jobProjectList: 'datacenter/jobProjectList',
         personList: 'datacenter/personList',
         getTables: 'datacenter/getTables',
         buildDataXJson: 'datacenter/buildDataXJson',
@@ -59,6 +59,7 @@ export const channels = reactive({
         getWorkflow: 'datacenter/getWorkflow',
         updateWorkflow: 'datacenter/updateWorkflow',
         getDataXJob: 'datacenter/getDataXJob',
+        getProject: 'datacenter/getProject',
 
     },
     auxiliaryDb: {

@@ -10,7 +10,12 @@ export type CommonQueryParam = {
 
 // 获取项目列表
 export const get_job_project_list = async () => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.jobList))
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.jobProjectList))
+    return data.data
+}
+
+export const get_job_project_by_id = async (id: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getProject, id))
     return data.data
 }
 

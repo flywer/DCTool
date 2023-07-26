@@ -632,7 +632,7 @@ import {
   create_valid_config,
   get_cj_job_page,
   get_columns,
-  get_datax_job_log, get_dataXJob,
+  get_datax_job_log, get_dataXJob, get_job_project_by_id,
   get_valid_config_page,
   get_workflow_log,
   get_workflow_page,
@@ -693,8 +693,11 @@ const projectTree = useProjectTreeStore()
 // 创建计算属性来获取 Pinia 存储中的值
 const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
 
-// 当前项目示例
+// 当前项目示例，辅助库信息
 const projectRef = ref(null)
+
+// 当前项目示例，数据中台信息
+const datacenterProjectRef = ref(null)
 
 // 此项目中的质检任务是否已配置组织机构
 const isValidConfigRef = ref(false)
@@ -710,7 +713,7 @@ watch(defaultSelectedKeys, async (newValue) => {
       queryParam.value.projectId = segments[segments.length - 2]
       queryParam.value.tableAbbr = segments[segments.length - 1]
       projectRef.value = await find_by_project_id(queryParam.value.projectId)
-
+      datacenterProjectRef.value = await get_job_project_by_id(queryParam.value.projectId)
       isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
 
       tableDataInit()
@@ -734,6 +737,7 @@ onMounted(async () => {
     queryParam.value.projectId = segments[segments.length - 2]
     queryParam.value.tableAbbr = segments[segments.length - 1]
     projectRef.value = await find_by_project_id(queryParam.value.projectId)
+    datacenterProjectRef.value = await get_job_project_by_id(queryParam.value.projectId)
 
     isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
 
@@ -1668,6 +1672,7 @@ const createZjJobModalInit = (project) => {
   zjJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   zjJobModalFormModel.value.projectId = queryParam.value.projectId
   zjJobModalFormModel.value.projectName = project.projectName
+  zjJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   showModalRef.value = true
   modalTitle = '创建质检任务'
@@ -1699,6 +1704,7 @@ const createBfJobModalInit = (project) => {
   bfJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   bfJobModalFormModel.value.projectId = queryParam.value.projectId
   bfJobModalFormModel.value.projectName = project.projectName
+  bfJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   showModalRef.value = true
   modalTitle = '创建备份任务'
@@ -1729,6 +1735,7 @@ const createRhJobModalInit = (project) => {
   rhJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   rhJobModalFormModel.value.projectId = queryParam.value.projectId
   rhJobModalFormModel.value.projectName = project.projectName
+  rhJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   confirmBtnText = '创建'
 }
@@ -1755,6 +1762,7 @@ const createRh2JobModalInit = (project) => {
   rh2JobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   rh2JobModalFormModel.value.projectId = queryParam.value.projectId
   rh2JobModalFormModel.value.projectName = project.projectName
+  rh2JobModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   confirmBtnText = '创建'
 }
@@ -1781,6 +1789,7 @@ const createQcJobModalInit = (project) => {
   qcJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   qcJobModalFormModel.value.projectId = queryParam.value.projectId
   qcJobModalFormModel.value.projectName = project.projectName
+  qcJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   confirmBtnText = '创建'
 }
@@ -1883,6 +1892,7 @@ const quickCreateModalInit = async () => {
   quickCreateModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toLowerCase()
   quickCreateModalFormModel.value.projectId = queryParam.value.projectId
   quickCreateModalFormModel.value.projectName = project.projectName
+  quickCreateModalFormModel.value.personId = datacenterProjectRef.value?.userId
 
   handleJobTreeOptionsUpdate()
 

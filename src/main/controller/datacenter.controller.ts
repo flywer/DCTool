@@ -39,11 +39,25 @@ export class DatacenterController {
         return `数据中台访问令牌已不合法，请前往设置修改令牌`
     }
 
-    @IpcHandle(channels.datacenter.jobList)
+    @IpcHandle(channels.datacenter.jobProjectList)
     public async handleJobList() {
         let result
 
         await this.commonGetRequest('/gather/api/jobProject/list', null)
+            .then((res) => {
+                result = res;
+            })
+            .catch((err) => {
+                log.error(err);
+            });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getProject)
+    public async handleGetProject(id: string) {
+        let result
+
+        await this.commonGetRequest(`/gather/api/jobProject/${id}`, null)
             .then((res) => {
                 result = res;
             })
