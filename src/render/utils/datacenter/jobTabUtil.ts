@@ -137,7 +137,7 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
         procName: ``
     })).data.records
 
-    const runFunc = () => {
+    const runFunc = async () => {
         if (v.type === '数据质检任务') {
             if (!isValidConfigRef) {
                 window.$dialog.warning({
@@ -151,6 +151,29 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
                 })
             } else {
                 workflowStart(v, () => onSuccess())
+            }
+        } else if (v.type === '多表融合任务') {
+
+            // 所有正在运行的多表融合的任务
+            const runningRh2JobsByPrefix = (await get_workflow_page({
+                page: 1,
+                size: 10000,
+                status: '4',
+                procName: `rh2_`
+            })).data.records
+
+            if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some(job => job.procName.split('_')[2] == v.jobName.split('_')[2])) {
+                window.$dialog.warning({
+                    title: '警告',
+                    content: `目前已有${v.jobName.split('_')[2].toUpperCase()}的多表融合任务正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
+                    positiveText: '确定',
+                    negativeText: '取消',
+                    onPositiveClick: () => {
+                        workflowStart(v, () => onSuccess())
+                    }
+                })
+            } else {
+                 workflowStart(v, () => onSuccess())
             }
         } else {
             workflowStart(v, () => onSuccess())

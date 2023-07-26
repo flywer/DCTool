@@ -153,7 +153,7 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
     }
 
     if (paramsJson != null) {
-        add_work_flow(paramsJson).then((res) => {
+        await add_work_flow(paramsJson).then((res) => {
             if (res.code == 200) {
                 if (isBasicData) {
                     window.$message.success('融合任务创建成功')
