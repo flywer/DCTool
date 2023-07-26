@@ -755,7 +755,7 @@ const setTitle = async (project: any) => {
 
   const index = projectName.indexOf('数据归集')
 
-  title.value = projectName.slice(0, index) + '-' + tableComment + '-' + projectName.slice(index)
+  title.value = projectName.slice(0, index) + '-' + tableComment
 }
 
 const tableDataInit = async () => {

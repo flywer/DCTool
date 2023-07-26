@@ -191,14 +191,106 @@ const getExistTableProject = async (node: TreeOption) => {
 }
 
 const setDefaultActionTable = (node: TreeOption): TreeOption[] => {
-  const tables = ['c1010', 'c2010', 'c2011', 'c2020', 'c2030', 'c2040', 'c2050', 'c2051', 'c2060', 'c2070', 'c2080', 'c2100', 'c2090', 'c3010', 'c3011', 'c3020', 'c3030', 'c3040', 'c4010', 'c4110', 'c6010', 'c6020', 'c6030', 'c6040', 'c7090']
+  /*   const tables = [
+      'c1010',
+      'c2010', 'c2011', 'c2020', 'c2030', 'c2040', 'c2050', 'c2051', 'c2060', 'c2070', 'c2080', 'c2100', 'c2090',
+      'c3010', 'c3011', 'c3020', 'c3030', 'c3040',
+      'c4010',
+      'c4110',
+      'c6010', 'c6020', 'c6030', 'c6040',
+      'c7090'
+    ] */
 
-  return tables.map((v): TreeOption => ({
-    label: v.toUpperCase(),
-    key: `${node.key}-${v}`,
-    isLeaf: true
-  }))
+  let children: TreeOption[] = []
 
+  const c10Options: TreeOption = {
+    label: '行政许可',
+    key: `${node.key}-c10`,
+    isLeaf: false,
+    children: [{
+      label: 'C1010',
+      key: `${node.key}-c1010`,
+      isLeaf: true
+    }]
+  }
+  children.push(c10Options)
+
+  const c20Tables = ['c2010', 'c2011', 'c2020', 'c2030', 'c2040', 'c2050', 'c2051', 'c2060', 'c2070', 'c2080', 'c2100', 'c2090']
+  const c20Options: TreeOption = {
+    label: '行政处罚',
+    key: `${node.key}-c20`,
+    isLeaf: false,
+    children: c20Tables.map((v): TreeOption => ({
+      label: v.toUpperCase(),
+      key: `${node.key}-${v}`,
+      isLeaf: true
+    }))
+  }
+  children.push(c20Options)
+
+  const c30Tables = ['c3010', 'c3011', 'c3020', 'c3030', 'c3040']
+  const c30Options: TreeOption = {
+    label: '行政强制',
+    key: `${node.key}-c30`,
+    isLeaf: false,
+    children: c30Tables.map((v): TreeOption => ({
+      label: v.toUpperCase(),
+      key: `${node.key}-${v}`,
+      isLeaf: true
+    }))
+  }
+  children.push(c30Options)
+
+  const c40Options: TreeOption = {
+    label: '行政征收',
+    key: `${node.key}-c40`,
+    isLeaf: false,
+    children: [{
+      label: 'C4010',
+      key: `${node.key}-c4010`,
+      isLeaf: true
+    }]
+  }
+  children.push(c40Options)
+
+  const c41Options: TreeOption = {
+    label: '行政征用',
+    key: `${node.key}-c41`,
+    isLeaf: false,
+    children: [{
+      label: 'C4110',
+      key: `${node.key}-c4110`,
+      isLeaf: true
+    }]
+  }
+  children.push(c41Options)
+
+  const c60Tables = ['c6010', 'c6020', 'c6030', 'c6040']
+  const c60Options: TreeOption = {
+    label: '行政检查',
+    key: `${node.key}-c60`,
+    isLeaf: false,
+    children: c60Tables.map((v): TreeOption => ({
+      label: v.toUpperCase(),
+      key: `${node.key}-${v}`,
+      isLeaf: true
+    }))
+  }
+  children.push(c60Options)
+
+  const c70Options: TreeOption = {
+    label: '行为救济',
+    key: `${node.key}-c70`,
+    isLeaf: false,
+    children: [{
+      label: 'C7090',
+      key: `${node.key}-c7090`,
+      isLeaf: true
+    }]
+  }
+  children.push(c70Options)
+
+  return children
 }
 
 const handleExpandedKeys = (keys: Array<string>) => {
