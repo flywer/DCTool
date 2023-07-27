@@ -407,8 +407,8 @@
                       :options="sourceTableOptions"
                       filterable
                       remote
-                      @search="handleSourceTableSearch"
-                      @update:value="handleSourceTableUpdate"
+                      @search="handleQuickCreateSourceTableSearch"
+                      @update:value="handleQuickCreateSourceTableUpdate"
                       :consistent-menu-width="false"
             />
           </n-form-item-gi>
@@ -1390,7 +1390,7 @@ const onPositiveClick = async () => {
     if (!isEmpty(quickCreateModalFormModel.value.jobSelect)) {
       quickCreateModalFormRef.value?.validate(async (errors) => {
         if (!errors) {
-          quickCreate().then(() => {
+          await quickCreate().then(() => {
             tableDataInit()
           }).finally(() => {
             isSaving.value = false
@@ -1437,7 +1437,7 @@ const quickCreate = async () => {
   if (quickCreateModalFormModel.value.jobSelect.includes('cj')) {
     const targetTableColumns = (await get_columns('6', quickCreateModalFormModel.value.targetTableName))
     if (!isEmpty(targetTableColumns)) {
-      createCjJob({
+      await createCjJob({
         name: `cj_${project.projectAbbr}_${quickCreateModalFormModel.value.tableName}`,
         sourceTableName: quickCreateModalFormModel.value.sourceTableName,
         targetTableName: quickCreateModalFormModel.value.targetTableName,
@@ -1636,6 +1636,14 @@ const handleSourceTableSearch = async (query: string) => {
 
 const handleSourceTableUpdate = async () => {
   sourceTableColumnsRef.value = (await get_columns(cjJobModalFormModel.value.sourceDataSourceId, cjJobModalFormModel.value.sourceTableName))
+}
+
+const handleQuickCreateSourceTableSearch = async (query: string) => {
+  sourceTableOptions.value = await getTablesOptions(quickCreateModalFormModel.value.sourceDataSourceId, query)
+}
+
+const handleQuickCreateSourceTableUpdate = async () => {
+  sourceTableColumnsRef.value = (await get_columns(quickCreateModalFormModel.value.sourceDataSourceId, quickCreateModalFormModel.value.sourceTableName))
 }
 
 //endregion
