@@ -1,6 +1,7 @@
 import {isEmpty} from "lodash-es";
-import {TreeOption} from "naive-ui";
+import {NTag, TreeOption} from "naive-ui";
 import {defineStore} from "pinia";
+import {h} from "vue";
 
 export const useProjectTreeStore = defineStore({
     id: 'projectTree',
@@ -28,8 +29,16 @@ export const useProjectTreeStore = defineStore({
                             key: '0',
                             children: [
                                 {
-                                    label: '广东省司法厅数据归集',
+                                    label: '省司法厅',
                                     key: '0-6',
+                                    prefix: () => {
+                                        return h(NTag, {
+                                                size: 'small',
+                                                bordered: false,
+                                                type: "info"
+                                            },
+                                            {default: () => '司'})
+                                    },
                                     children: [
                                         {
                                             label: 'G1010',
@@ -83,8 +92,16 @@ export const useProjectTreeStore = defineStore({
                                     ]
                                 },
                                 {
-                                    label: '广东省政务服务数据管理局数据归集',
+                                    label: '省政务服务数据管理局',
                                     key: '0-11',
+                                    prefix: () => {
+                                        return h(NTag, {
+                                                size: 'small',
+                                                bordered: false,
+                                                type: "info"
+                                            },
+                                            {default: () => '政'})
+                                    },
                                     children: [
                                         {
                                             label: 'F1010',
@@ -115,8 +132,16 @@ export const useProjectTreeStore = defineStore({
                                     ]
                                 },
                                 {
-                                    label: '广东省市场监督管理局数据归集',
+                                    label: '省市场监督管理局',
                                     key: '0-5',
+                                    prefix: () => {
+                                        return h(NTag, {
+                                                size: 'small',
+                                                bordered: false,
+                                                type: "info"
+                                            },
+                                            {default: () => '市'})
+                                    },
                                     children: [
                                         {
                                             label: 'F3010',

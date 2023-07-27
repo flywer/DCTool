@@ -57,9 +57,6 @@
           <n-tab-pane name="1" tab="数据归集任务">
             <job-tab/>
           </n-tab-pane>
-          <!--            <n-tab-pane name="2" tab="执行日志">
-
-                      </n-tab-pane>-->
           <n-tab-pane name="3" tab="中台相关表">
             <project-tables-tab/>
           </n-tab-pane>
@@ -78,8 +75,8 @@ import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacent
 import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
-import {onMounted, ref} from 'vue'
-import {NButton, NIcon, TreeOption, TreeInst} from 'naive-ui'
+import {onMounted, ref, h} from 'vue'
+import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
 import {Filter, FilterOff} from '@vicons/tabler'
 
@@ -111,8 +108,16 @@ const handleLoad = (node: TreeOption) => {
           (element.label as string).includes('数据归集') &&
           (element.label as string).includes('广东省')
       ).map((element) => ({
-        label: element.label,
+        label: (element.label as string).replace('广东', '').replace('数据归集', '').replace('行政行为', ''),
         key: `${node.key}-${element.value}`,
+        prefix: () => {
+          return h(NTag, {
+                size: 'small',
+                bordered: false,
+                type: "info"
+              },
+              {default: () => (element.label as string).charAt(3)})
+        },
         isLeaf: false
       })) as TreeOption[]
     } else if (node.key.toString() === '1-1') {
@@ -123,8 +128,16 @@ const handleLoad = (node: TreeOption) => {
           !(element.label as string).includes('广东省') &&
           (element.label as string).includes('市')
       ).map((element) => ({
-        label: element.label,
+        label: (element.label as string).replace('数据归集', '').replace('行政行为', ''),
         key: `${node.key}-${element.value}`,
+        prefix: () => {
+          return h(NTag, {
+                size: 'small',
+                bordered: false,
+                type: "info"
+              },
+              {default: () => (element.label as string).charAt(0)})
+        },
         isLeaf: false
       })) as TreeOption[]
     } else {

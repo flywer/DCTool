@@ -10,15 +10,6 @@
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
 
-          <!--          <n-button secondary type="info" @click="">
-                      已融合
-                      <template #icon>
-                        <n-icon>
-                          <AddSquareMultiple16Regular/>
-                        </n-icon>
-                      </template>
-                    </n-button>-->
-
           <n-button secondary type="info" @click="quickCreateModalInit">
             快捷创建
             <template #icon>
