@@ -139,6 +139,7 @@ export const convertZjJson = (jsonStr: string, tableName: string): string => {
 
             if (rule.customSql != undefined) {
                 rule.customSql = convertCustomSqlTableName(rule.customSql, oldTableAbbr, 'depart')
+                rule.customSql = rule.customSql.replaceAll(oldSourceTableName, newSourceTableName)
             }
 
             if (rule.customDescribe != undefined) {
