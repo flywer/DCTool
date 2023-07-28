@@ -59,8 +59,7 @@ import {
   workflowDelete,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
-  workflowReRun,
-  workflowStart
+  workflowReRun, workflowRun,
 } from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {isEmpty} from "lodash-es";
@@ -174,7 +173,7 @@ const createColumns = (): DataTableColumns<Job> => {
       key: 'actions',
       width: '15%',
       align: 'center',
-      fixed:'right',
+      fixed: 'right',
       render(row) {
 
         let container = h(NSpace, {
@@ -189,8 +188,9 @@ const createColumns = (): DataTableColumns<Job> => {
               }),
               showConfirmation('执行', async () => {
                 await workflowActive(row.id, '01', () => {
+                  workflowRun(row, false, '', () => tableDataInit())
                 })
-                await workflowStart(row, () => tableDataInit())
+
               }),
               showConfirmation('删除', async () => {
                 await workflowDelete(row.id, () => tableDataInit())
@@ -204,7 +204,7 @@ const createColumns = (): DataTableColumns<Job> => {
                 await workflowActive(row.id, '02', () => tableDataInit())
               }),
               showConfirmation('执行', () => {
-                workflowStart(row, () => tableDataInit())
+                workflowRun(row, false, '', () => tableDataInit())
               }),
               showConfirmation('删除', async () => {
                 await workflowActive(row.id, '02', () => {

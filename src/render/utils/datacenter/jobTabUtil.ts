@@ -127,6 +127,12 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess) =
     })
 }
 
+/**
+ * @param v
+ * @param isValidConfigRef 若是质检任务，是否已配置
+ * @param tableName 质检任务的质检表名
+ * @param onSuccess 成功时的触发函数
+ **/
 export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: string, onSuccess) => {
 
     //工作流任务
@@ -173,7 +179,7 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
                     }
                 })
             } else {
-                 workflowStart(v, () => onSuccess())
+                workflowStart(v, () => onSuccess())
             }
         } else {
             workflowStart(v, () => onSuccess())

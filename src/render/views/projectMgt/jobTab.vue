@@ -1657,7 +1657,7 @@ const zjJobModalFormModel = ref({
   projectId: '',
   projectName: '',
   personId: '',
-  jobType: '1'
+  jobType: '2'
 })
 const zjJobModalFormRules = {
   personId: {
@@ -1807,7 +1807,7 @@ const quickCreateModalFormModel = ref({
   projectId: '',
   projectName: '',
   personId: '',
-  zjJobType: '1'
+  zjJobType: '2'
 })
 
 const quickCreateModalFormRules = {

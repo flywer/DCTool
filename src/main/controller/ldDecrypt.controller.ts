@@ -7,7 +7,6 @@ import fs from 'fs';
 import {exec} from 'child_process';
 import path from 'path';
 import log from "electron-log";
-import fes from 'fs-extra';
 
 @Controller()
 export class LdDecryptController {
@@ -47,7 +46,7 @@ export class LdDecryptController {
                                     fs.writeFileSync(savePath, data);
 
                                     //修改文件名
-                                    exec(`ren \"${path.basename(savePath)}\" \"${fileName + '_解密' + fileExt}\"`, {cwd: `${path.dirname(savePath)}`}, (error, stdout, stderr) => {
+                                    exec(`ren \"${path.basename(savePath)}\" \"${fileName + '_解密' + fileExt}\"`, {cwd: `${path.dirname(savePath)}`}, (error) => {
                                         if (error) {
                                             log.error(error)
                                             throw err;
