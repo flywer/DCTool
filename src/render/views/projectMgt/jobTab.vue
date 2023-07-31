@@ -768,7 +768,7 @@ const tableDataInit = async () => {
     let dataXJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
-      blurry: `${projectAbbr}_${queryParam.value.tableAbbr}`,
+      jobDesc: `${projectAbbr}_${queryParam.value.tableAbbr}`,
       subsystemName: "采集"
     })).data.records
 

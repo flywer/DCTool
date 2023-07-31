@@ -6,7 +6,9 @@
           <n-gi :span="5">
             <n-input v-model:value="pattern" placeholder="搜索">
               <template #prefix>
-                <n-icon :component="Search"/>
+                <n-icon>
+                  <Search/>
+                </n-icon>
               </template>
               <template #suffix>
                 <n-tooltip trigger="hover">
@@ -170,7 +172,7 @@ const getExistTableProject = async (node: TreeOption) => {
     const cjJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
-      blurry: projectAbbr,
+      jobDesc: projectAbbr,
       subsystemName: "采集"
     })).data.records.map((v) => ({
       tableAbbr: v.jobDesc.split('_')[2]
