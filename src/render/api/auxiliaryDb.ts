@@ -35,6 +35,26 @@ export const get_project_by_table_abbr = async (tableAbbr: string) => {
     return data
 }
 
+export const get_project_by_project_name = async (projectName: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByProjectName, projectName))
+    return data
+}
+
+export const get_project_cj_cron = async (projectName: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectCjCron, projectName))
+    return data
+}
+
+export const get_project_by_cj_cron_is_null = async (nullable: boolean) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByCjCronIsNull, nullable))
+    return data
+}
+
+export const update_cj_cron = async (obj: { projectName?: string, projectId: string, cron: string }) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateCjCron, JSON.stringify(obj)))
+    return data
+}
+
 export const get_auth_token = async () => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getAuthToken))
     return data

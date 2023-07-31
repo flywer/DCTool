@@ -17,4 +17,7 @@ export class ProjectInfo {
 
     @Column({name: 'table_abbr'})
     tableAbbr: string
+
+    @Column({name: 'cj_cron'})
+    cjCron: string
 }

@@ -56,6 +56,64 @@ export class AdbController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.getProjectByProjectName)
+    public async handleGetProjectByProjectName(projectName: string) {
+        return await AppDataSource.getRepository(ProjectInfo).findBy({
+            projectName: Like(`%${projectName || ''}%`)
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.updateCjCron)
+    public async handleUpdateCjCron(obj: any) {
+        obj = JSON.parse(obj)
+
+        const project = await AppDataSource.getRepository(ProjectInfo).findOneBy({
+            projectId: obj.projectId
+        })
+
+        if (project == null) {
+            return await AppDataSource.getRepository(ProjectInfo).createQueryBuilder()
+                .insert()
+                .into(ProjectInfo)
+                .values([{
+                    projectName:obj.projectName,
+                    projectId: obj.projectId,
+                    cjCron: obj.cron,
+                }])
+                .execute()
+        } else {
+            return await AppDataSource.getRepository(ProjectInfo).createQueryBuilder()
+                .update()
+                .set({
+                    cjCron: obj.cron,
+                })
+                .where("projectId = :projectId", {projectId: obj.projectId})
+                .execute()
+        }
+
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getProjectCjCron)
+    public async handleGetProjectCjCron(projectName: string) {
+        return await AppDataSource.getRepository(ProjectInfo).find({
+            select: ['id', 'projectId', 'projectName', 'cjCron'],
+            where: {
+                projectName: Like(`%${projectName || ''}%`),
+                cjCron: Not(IsNull())
+            }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getProjectByCjCronIsNull)
+    public async handleGetProjectByCjCronIsNull(nullable: boolean) {
+        return await AppDataSource.getRepository(ProjectInfo).find({
+            select: ['id', 'projectId', 'projectName', 'cjCron'],
+            where: {
+                cjCron: nullable ? IsNull() : Not(IsNull())
+            }
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.getAuthToken)
     public async handleGetAuthToken() {
         return await AppDataSource.getRepository(Dict).findOneBy({

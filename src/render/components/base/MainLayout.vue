@@ -42,8 +42,8 @@ import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql, DataBase} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
 import {LibraryAddOutlined} from '@vicons/material'
-import {AppsListDetail20Filled, BookSearch24Regular} from '@vicons/fluent'
-import {SettingsOutline,StatsChartOutline} from '@vicons/ionicons5'
+import {AppsListDetail20Filled, BookSearch24Regular,CalendarClock24Regular,TableAdd16Regular} from '@vicons/fluent'
+import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
@@ -91,7 +91,21 @@ const menuOptions: MenuOption[] = [
             {default: () => '中台建表'}
         ),
     key: routeName.createTable,
-    icon: () => h('span', 'CT')
+    icon: renderIcon(TableAdd16Regular)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.schedulingMgt,
+              }
+            },
+            {default: () => '调度管理'}
+        ),
+    key: routeName.schedulingMgt,
+    icon: renderIcon(CalendarClock24Regular)
   },
   {
     label: () =>
