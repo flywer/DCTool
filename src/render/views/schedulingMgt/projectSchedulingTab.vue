@@ -58,7 +58,7 @@
       preset="dialog"
       role="dialog"
       :show-icon="false"
-      :title="modelTitle"
+      :title="modalTitle"
       :size="'small'"
       style="width: 566px"
   >
@@ -278,7 +278,7 @@ const deleteConfig = (row: Project) => {
     cron: null
   }).then(() => {
     window.$message.success('删除成功')
-    tableDataInit()
+    tableDataInit(queryParam.value)
   })
 
 }
@@ -390,7 +390,7 @@ const onSave = () => {
                   .then(() => {
                     showCreateModalRef.value = false
                     window.$message.success('保存成功')
-                    tableDataInit()
+                    tableDataInit(queryParam.value)
                   })
                   .finally(() => isSaving.value = false)
             }
