@@ -218,7 +218,7 @@ const createColumns = (): DataTableColumns<Project> => {
       render(row: Project) {
         const minRange = row.cron.split(' ')[1]
         const hour = row.cron.split(' ')[2]
-        return `任务在${hour.split(',')[0]}时与${hour.split(',')[1]}时的${minRange.split('-')[0]}分到${minRange.split('-')[1]}分执行`
+        return `任务在${hour.split(',')[0]}点与${hour.split(',')[1]}点的${minRange.split('-')[0]}分到${minRange.split('-')[1]}分执行`
       }
     },
     {

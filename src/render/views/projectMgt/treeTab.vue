@@ -2,8 +2,8 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 42px);" trigger="hover">
     <n-layout has-sider style="height: calc(100vh - 92px);">
       <n-layout-sider content-style="padding: 4px 12px 12px 12px;overflow:hidden">
-        <n-grid :cols="6" :x-gap="8">
-          <n-gi :span="5">
+        <n-grid :cols="8" :x-gap="4">
+          <n-gi :span="6">
             <n-input v-model:value="pattern" placeholder="搜索">
               <template #prefix>
                 <n-icon>
@@ -28,7 +28,22 @@
             </n-input>
           </n-gi>
           <n-gi :span="1">
-            <n-button @click="handleTreeNodeInit">
+            <n-button
+                quaternary circle
+                style="font-size: 18px;"
+                @click="tree.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})"
+            >
+              <n-icon>
+                <Focus2/>
+              </n-icon>
+            </n-button>
+          </n-gi>
+          <n-gi :span="1">
+            <n-button
+                quaternary circle
+                style="font-size: 18px;margin-left: 4px"
+                @click="handleTreeNodeInit"
+            >
               <n-icon>
                 <Refresh/>
               </n-icon>
@@ -80,7 +95,7 @@ import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {onMounted, ref, h} from 'vue'
 import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
-import {Filter, FilterOff} from '@vicons/tabler'
+import {Filter, FilterOff, Focus2} from '@vicons/tabler'
 
 const tree = ref<TreeInst | null>(null)
 
