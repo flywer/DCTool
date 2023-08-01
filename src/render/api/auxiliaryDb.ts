@@ -50,6 +50,11 @@ export const get_project_by_cj_cron_is_null = async (nullable: boolean) => {
     return data
 }
 
+export const get_cj_cron_by_project_id = async (projectId: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getCjCronByProjectId, projectId))
+    return data
+}
+
 export const update_cj_cron = async (obj: { projectName?: string, projectId: string, cron: string }) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateCjCron, JSON.stringify(obj)))
     return data

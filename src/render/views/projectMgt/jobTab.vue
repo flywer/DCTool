@@ -70,7 +70,9 @@
       style="width: 566px"
   >
     <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
-
+      <n-alert type="warning" :show-icon="false" v-if="showCronUnConfigAlert">
+        此项目未进行调度配置，可能会与其他项目执行时间产生冲突，前往<b>调度管理</b>进行配置
+      </n-alert>
       <n-form
           v-if="formSelect.addSchedJob"
           class="mt-4"
@@ -114,7 +116,7 @@
             <n-input-number v-model:value="addSchedJobModalFormModel.executorFailRetryCount" button-placement="both"/>
           </n-form-item-gi>
 
-          <n-form-item-gi :span="2" label="秒" path="sec" :label-style="{margin:'0 auto'}">
+          <n-form-item-gi :span="1" label="秒" path="sec" :label-style="{margin:'0 auto'}">
             <n-input class="text-center"
                      v-model:value="addSchedJobModalFormModel.sec"
                      placeholder=""
@@ -122,9 +124,10 @@
                      readonly
             />
           </n-form-item-gi>
-          <n-form-item-gi :span="2" label="分" path="min" :label-style="{margin:'0 auto'}">
-            <n-input class="text-center" v-model:value="addSchedJobModalFormModel.min" placeholder=""
-                     @keydown.enter.prevent
+          <n-form-item-gi :span="3" label="分" path="min" :label-style="{margin:'0 auto'}">
+            <n-input-number class="text-center" v-model:value="addSchedJobModalFormModel.min"
+                            :min="schedMinRange.startMin" :max="schedMinRange.endMIn" placeholder=""
+                            @keydown.enter.prevent
             />
           </n-form-item-gi>
           <n-form-item-gi :span="2" label="时" path="hour" :label-style="{margin:'0 auto'}">
@@ -613,11 +616,15 @@
 
   </n-modal>
 
-
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
+import {
+  find_by_project_id,
+  get_cj_cron_by_project_id,
+  get_project_by_pro_abbr,
+  get_table_sql
+} from "@render/api/auxiliaryDb";
 import {
   add_sched_task,
   create_valid_config,
@@ -1524,7 +1531,7 @@ const addSchedJobModalFormModel = ref({
   jobTemplateId: '',
   subsystemName: "采集",
   sec: '*',
-  min: '0',
+  min: 0,
   hour: '0,12',
   day: '?',
   month: '*',
@@ -1549,9 +1556,9 @@ const addSchedJobModalFormRules = {
     message: ''
   },
   min: {
+    type: 'number',
     required: true,
-    trigger: ['input'],
-    message: ''
+    trigger: ['change']
   },
   hour: {
     required: true,
@@ -1580,11 +1587,40 @@ const addSchedJobModalFormRules = {
   }
 }
 
-const addSchedJobModalFormModelInit = async (v) => {
+let schedMinRange = {
+  startMin: 0,
+  endMIn: 59
+}
+
+const showCronUnConfigAlert = ref(false)
+
+const addSchedJobModalFormModelInit = async (v: Job) => {
   addSchedJobModalFormModel.value.jobContent = v.jobName
   addSchedJobModalFormModel.value.jobDesc = v.jobName
   addSchedJobModalFormModel.value.jobTemplateId = v.id
   addSchedJobModalFormModel.value.projectName = (await get_project_by_pro_abbr(v.jobName.split("_")[1]))?.projectName || '未知项目'
+
+  const cron = (await get_cj_cron_by_project_id(queryParam.value.projectId))?.cjCron || null
+  if (cron != null) {
+    showCronUnConfigAlert.value = false
+
+    const minRange = cron.split(' ')[1]
+    schedMinRange = {
+      startMin: parseInt(minRange.split('-')[0]),
+      endMIn: parseInt(minRange.split('-')[1]),
+    }
+    addSchedJobModalFormModel.value.min = schedMinRange.startMin
+    addSchedJobModalFormModel.value.hour = cron.split(' ')[2]
+  } else {
+    showCronUnConfigAlert.value = true
+
+    schedMinRange = {
+      startMin: 0,
+      endMIn: 59
+    }
+    addSchedJobModalFormModel.value.min = 0
+    addSchedJobModalFormModel.value.hour = '0,12'
+  }
 
   showModalRef.value = true
   modalTitle = '创建调度任务'

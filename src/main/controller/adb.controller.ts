@@ -76,7 +76,7 @@ export class AdbController {
                 .insert()
                 .into(ProjectInfo)
                 .values([{
-                    projectName:obj.projectName,
+                    projectName: obj.projectName,
                     projectId: obj.projectId,
                     cjCron: obj.cron,
                 }])
@@ -94,12 +94,28 @@ export class AdbController {
     }
 
     @IpcHandle(channels.auxiliaryDb.getProjectCjCron)
-    public async handleGetProjectCjCron(projectName: string) {
+    public async handleGetProjectCjCron(param: string) {
         return await AppDataSource.getRepository(ProjectInfo).find({
             select: ['id', 'projectId', 'projectName', 'cjCron'],
+            where: [
+                {
+                    projectName: Like(`%${param || ''}%`),
+                    cjCron: Not(IsNull())
+                },
+                {
+                    cjCron: Like(`%${param || ''}%`)
+                }
+            ]
+
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getCjCronByProjectId)
+    public async handleGetCjCronByProjectId(projectId: string) {
+        return await AppDataSource.getRepository(ProjectInfo).findOne({
+            select: ['id', 'projectId', 'projectName', 'cjCron'],
             where: {
-                projectName: Like(`%${projectName || ''}%`),
-                cjCron: Not(IsNull())
+                projectId: projectId
             }
         })
     }

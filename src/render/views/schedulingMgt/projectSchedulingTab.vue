@@ -3,6 +3,18 @@
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto h-8 mb-2">
         <n-space inline class="float-right">
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              @update:value="tableDataInit"
+              clearable
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
           <n-button secondary type="info" @click="showCreateModal">
             新增
             <template #icon>
@@ -152,7 +164,7 @@ import {get_project_by_cj_cron_is_null, get_project_cj_cron, update_cj_cron} fro
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {isTimeConflict} from "@render/utils/common/cronUtils";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
-import {Add, Refresh, RemoveOutline, AddOutline} from '@vicons/ionicons5'
+import {Add, Refresh, RemoveOutline, AddOutline, Search} from '@vicons/ionicons5'
 import {DataTableColumns, FormInst, NButton, NSpace, SelectGroupOption, SelectOption} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
@@ -171,14 +183,13 @@ type Project = {
 const queryParam = ref('')
 
 onMounted(async () => {
-  queryParam.value = ``
-  await tableDataInit()
+  await tableDataInit(queryParam.value)
 })
 
-const tableDataInit = async () => {
+const tableDataInit = async (v: string) => {
   isTableLoading.value = true
 
-  tableDataRef.value = (await get_project_cj_cron(queryParam.value)).map((v => ({
+  tableDataRef.value = (await get_project_cj_cron(v)).map((v => ({
     id: v.id,
     projectName: v.projectName,
     projectId: v.projectId,
@@ -203,7 +214,12 @@ const createColumns = (): DataTableColumns<Project> => {
     {
       title: '描述',
       key: 'comment',
-      width: '15%',
+      width: '20%',
+      render(row: Project) {
+        const minRange = row.cron.split(' ')[1]
+        const hour = row.cron.split(' ')[2]
+        return `任务在${hour.split(',')[0]}时与${hour.split(',')[1]}时的${minRange.split('-')[0]}分到${minRange.split('-')[1]}分执行`
+      }
     },
     {
       title: '操作',
@@ -296,7 +312,8 @@ const cronConfigModalFormRules = ref({
       }
       return true
     },
-    trigger: ['input', 'change'],
+    type: 'number',
+    trigger: ['blur', 'change', 'input'],
   },
   hour: {
     required: true

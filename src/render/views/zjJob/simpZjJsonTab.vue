@@ -8,7 +8,9 @@
           clearable
       >
         <template #prefix>
-          <n-icon :component="Search"/>
+          <n-icon>
+            <Search/>
+          </n-icon>
         </template>
       </n-input>
       <n-button secondary strong @click="tableDataInit">
