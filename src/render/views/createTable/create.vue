@@ -1,7 +1,4 @@
 <template>
-  <n-alert type="default" :show-icon="false">
-    建表若出现服务器内部错误的问题，需要自行去中台删除该表然后重建，这是中台的问题
-  </n-alert>
   <n-card class="mt-2" :content-style="{paddingBottom:0}">
     <n-form ref="formRef"
             inline
@@ -89,6 +86,11 @@
               <CloseSharp/>
             </n-icon>
             {{ createStatus.tempOds.msg }}
+            <n-button text type="info"
+                      v-if="!createStatus.tempOds.isSuccess"
+                      @click="deleteTableRebuild(createStatus.tempOds.tableName,'temp_ods')"
+            >删除重建
+            </n-button>
           </n-space>
         </n-space>
       </n-list-item>
@@ -105,6 +107,11 @@
               <CloseSharp/>
             </n-icon>
             {{ createStatus.ods.msg }}
+            <n-button text type="info"
+                      v-if="!createStatus.ods.isSuccess"
+                      @click="deleteTableRebuild(createStatus.ods.tableName,'ods')"
+            >删除重建
+            </n-button>
           </n-space>
         </n-space>
       </n-list-item>
@@ -121,6 +128,12 @@
               <CloseSharp/>
             </n-icon>
             {{ createStatus.rightDwd.msg }}
+            <n-button text type="info"
+                      v-if="!createStatus.rightDwd.isSuccess"
+                      @click="deleteTableRebuild(createStatus.rightDwd.tableName,'right_dwd')"
+            >
+              删除重建
+            </n-button>
           </n-space>
         </n-space>
       </n-list-item>
@@ -137,6 +150,12 @@
               <CloseSharp/>
             </n-icon>
             {{ createStatus.errorDwd.msg }}
+            <n-button text type="info"
+                      v-if="!createStatus.errorDwd.isSuccess"
+                      @click="deleteTableRebuild(createStatus.errorDwd.tableName,'error_dwd')"
+            >
+              删除重建
+            </n-button>
           </n-space>
         </n-space>
       </n-list-item>
@@ -153,32 +172,37 @@
               <CloseSharp/>
             </n-icon>
             {{ createStatus.dwb.msg }}
+            <n-button text type="info"
+                      v-if="!createStatus.dwb.isSuccess"
+                      @click="deleteTableRebuild(createStatus.dwb.tableName,'dwb')"
+            >删除重建
+            </n-button>
           </n-space>
         </n-space>
       </n-list-item>
 
-      <n-list-item v-if="createStatus.tempDwb.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.tempDwb.isCreating"/>
-          <div>{{ createStatus.tempDwb.tableName }}</div>
-          <n-space v-if="!createStatus.tempDwb.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempDwb.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.tempDwb.msg }}
-          </n-space>
-        </n-space>
-      </n-list-item>
+      <!--      <n-list-item v-if="createStatus.tempDwb.tableName !==''">
+              <n-space class="pl-2">
+                <n-spin :size="14" v-if="createStatus.tempDwb.isCreating"/>
+                <div>{{ createStatus.tempDwb.tableName }}</div>
+                <n-space v-if="!createStatus.tempDwb.isCreating">
+                  <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempDwb.isSuccess">
+                    <CheckmarkSharp/>
+                  </n-icon>
+                  <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                    <CloseSharp/>
+                  </n-icon>
+                  {{ createStatus.tempDwb.msg }}
+                </n-space>
+              </n-space>
+            </n-list-item>-->
     </n-list>
   </n-card>
 </template>
 
 <script setup lang="ts">
 import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
-import {create_table} from "@render/api/datacenter";
+import {create_table, get_tables_info, table_delete} from "@render/api/datacenter";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
 import {cloneDeep} from "lodash-es";
@@ -392,6 +416,9 @@ const tempOdsCreate = async (tableAbbr, tableSql) => {
   create_table(paramsJson).then((res) => {
     createStatus.value.tempOds.isSuccess = res.success && res.code == 200;
     createStatus.value.tempOds.msg = res.message
+    if (!createStatus.value.tempOds.isSuccess) {
+      console.error(res)
+    }
   }).finally(() => createStatus.value.tempOds.isCreating = false)
 }
 
@@ -441,6 +468,9 @@ const odsCreate = async (tableAbbr, tableSql) => {
   create_table(paramsJson).then((res) => {
     createStatus.value.ods.isSuccess = res.success && res.code == 200;
     createStatus.value.ods.msg = res.message
+    if (!createStatus.value.ods.isSuccess) {
+      console.error(res)
+    }
   }).finally(() => createStatus.value.ods.isCreating = false)
 }
 
@@ -490,6 +520,9 @@ const rightDwdCreate = async (tableAbbr, tableSql) => {
   create_table(paramsJson).then((res) => {
     createStatus.value.rightDwd.isSuccess = res.success && res.code == 200;
     createStatus.value.rightDwd.msg = res.message
+    if (!createStatus.value.rightDwd.isSuccess) {
+      console.error(res)
+    }
   }).finally(() => createStatus.value.rightDwd.isCreating = false)
 }
 const errorDwdCreate = async (tableAbbr, tableSql) => {
@@ -538,6 +571,9 @@ const errorDwdCreate = async (tableAbbr, tableSql) => {
   create_table(paramsJson).then((res) => {
     createStatus.value.errorDwd.isSuccess = res.success && res.code == 200;
     createStatus.value.errorDwd.msg = res.message
+    if (!createStatus.value.errorDwd.isSuccess) {
+      console.error(res)
+    }
   }).finally(() => createStatus.value.errorDwd.isCreating = false)
 }
 const dwbCreate = async (tableAbbr, tableSql) => {
@@ -596,6 +632,8 @@ const dwbCreate = async (tableAbbr, tableSql) => {
     }
   }).finally(() => createStatus.value.dwb.isCreating = false)
 }
+
+/*
 const tempDwbCreate = async (tableAbbr, tableSql) => {
   let paramsJson = cloneDeep(paramsModel)
 
@@ -652,6 +690,7 @@ const tempDwbCreate = async (tableAbbr, tableSql) => {
     }
   }).finally(() => createStatus.value.dwb.isCreating = false)
 }
+*/
 
 const addFieldsToSql = (sql: string): string => {
   const fieldStr = `OPT_AREA_CODE VARCHAR(20) COMMENT '数据所属单位区划',
@@ -669,6 +708,52 @@ const addFieldsToSql = (sql: string): string => {
   const newFields = `cd_batch VARCHAR(50) COMMENT '批次号',
     ${fieldStr}`;
   return `${preSql} ${newFields} ${postSql}`;// 拼接新增字段后的完整sql语句
+}
+
+const deleteTableRebuild = async (tableName: string, tableSuffix: string) => {
+  const table = (await get_tables_info({
+    size: 1,
+    page: 1,
+    sourceId: 6,
+    likeValue: tableName
+  })).data?.records || []
+
+  if (table.length == 1) {
+
+    window.$message.success("正在删除...")
+
+    table_delete(table[0].id).then(async res => {
+      if (res.code == 200 && res.success) {
+        window.$message.success("删除成功")
+
+        const tableAbbr = (await find_by_project_id(formModel.value.projectId))?.tableAbbr
+        const tableSql = tableNameOptions.value.find(option => option.value === formModel.value.tableSqlId)
+
+        switch (tableSuffix) {
+          case 'temp_ods':
+            await tempOdsCreate(tableAbbr, tableSql)
+            break
+          case 'ods':
+            await odsCreate(tableAbbr, tableSql)
+            break
+          case 'right_dwd':
+            await rightDwdCreate(tableAbbr, tableSql)
+            break
+          case 'error_dwd':
+            await errorDwdCreate(tableAbbr, tableSql)
+            break
+          case 'dwb':
+            await dwbCreate(tableAbbr, tableSql)
+            break
+        }
+      } else {
+        window.$message.error(res.message)
+      }
+    })
+  } else {
+    window.$message.info(`${tableName}不存在`)
+  }
+
 }
 
 </script>
