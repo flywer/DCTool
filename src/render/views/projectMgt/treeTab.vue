@@ -74,10 +74,12 @@
           <n-tab-pane name="1" tab="数据归集任务">
             <job-tab/>
           </n-tab-pane>
-          <n-tab-pane name="3" tab="中台相关表">
+          <n-tab-pane name="2" tab="中台相关表">
             <project-tables-tab/>
           </n-tab-pane>
-
+          <n-tab-pane name="3" tab="质检情况">
+            <job-inspection-tab/>
+          </n-tab-pane>
         </n-tabs>
       </n-layout-content>
     </n-layout>
@@ -90,6 +92,7 @@ import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/ap
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
+import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
 import {onMounted, ref, h} from 'vue'

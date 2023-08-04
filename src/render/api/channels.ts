@@ -110,7 +110,8 @@ export const channels = reactive({
         datacenterCronJobInit: 'cron/datacenterCronJobInit',
     },
     app: {
-        relaunch: 'app/relaunch'
+        relaunch: 'app/relaunch',
+        openDefaultBrowser:'app/openDefaultBrowser'
     },
     xlsx: {
         createDataInpsStat: 'xlsx/createDataInpsStat'

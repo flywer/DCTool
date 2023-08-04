@@ -1,6 +1,7 @@
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from 'einf'
-import {app} from "electron";
+import {app, shell} from "electron";
+import log from "electron-log";
 import {AppService} from '../service/app.service'
 
 @Controller()
@@ -22,6 +23,13 @@ export class AppController {
         }, this.appService.getDelayTime() * 1000)
 
         return `The main process received your message: ${msg}`
+    }
+
+    @IpcHandle(channels.app.openDefaultBrowser)
+    public handleOpenDefaultBrowser(link: string) {
+        shell.openExternal(link).catch(error => {
+            log.error(error)
+        });
     }
 
     /**
