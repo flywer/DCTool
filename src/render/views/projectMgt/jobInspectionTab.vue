@@ -9,18 +9,17 @@
           </n-ellipsis>
         </div>
         <n-space inline class="float-right">
+          <n-form-item label="质检时间:" label-placement="left">
           <n-date-picker v-model:value="formModel.timeRange" type="datetimerange" clearable
                          @update:value="tableDataInit"
-          />
+          /></n-form-item>
         </n-space>
       </div>
-
       <n-data-table
           :key="(row) => row.id"
           class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
-          :pagination="paginationReactive"
           :bordered="true"
           :size="'small'"
           :loading="isTableLoading"
@@ -31,6 +30,16 @@
           <span style="color: rgba(194, 194, 194, 1)">暂无质检记录</span>
         </template>
       </n-data-table>
+      <n-space justify="end">
+      <n-pagination
+          v-model:page="paginationReactive.page"
+          v-model:page-size="paginationReactive.pageSize"
+          :item-count="paginationReactive.itemCount"
+          :page-sizes="[10, 20, 30, 40]"
+          show-size-picker
+          @update:page="paginationReactive.onChange"
+          @update:page-size="paginationReactive.onUpdatePageSize"
+      /></n-space>
     </n-scrollbar>
   </n-layout>
 </template>
@@ -43,7 +52,7 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {getDateStringByDate} from "@render/utils/common/dateUtils";
 import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";
-import {DataTableColumns, NSpace} from "naive-ui";
+import {DataTableColumns, NSpace, NNumberAnimation} from "naive-ui";
 import {computed, onMounted, ref, watch, reactive, h} from "vue";
 
 const queryParam = ref('')
@@ -86,13 +95,17 @@ const formModel = ref({
 const tableDataInit = async () => {
   isTableLoading.value = true
 
-  const records = (await get_inps_record_page({
+  const data = (await get_inps_record_page({
     page: paginationReactive.page,
     size: paginationReactive.pageSize,
     orgIds: [],
     inspTime: timeRangeConvert(formModel.value.timeRange),
     likeName: queryParam.value
-  })).data?.records || []
+  })).data
+
+  const records = data?.records || []
+
+  paginationReactive.itemCount = data.total || 0
 
   if (records.length > 0) {
     tableDataRef.value = records.map((v => ({
@@ -163,28 +176,63 @@ const createColumns = (): DataTableColumns<InspectionItem> => {
     {
       title: '质检数据总量',
       key: 'totalRecordSum',
-      width: '9%'
+      width: '9%',
+      render(row) {
+        return h(NNumberAnimation, {
+          from: row.totalRecordSum,
+          to: row.totalRecordSum,
+          showSeparator: true
+        })
+      }
     },
     {
       title: '校验通过数量',
       key: 'aimRecordSum',
-      width: '9%'
+      width: '9%',
+      render(row) {
+        return h(NNumberAnimation, {
+          from: row.aimRecordSum,
+          to: row.aimRecordSum,
+          showSeparator: true
+        })
+      }
     },
     {
       title: '校验失败数量',
       key: 'wrongRecordSum',
       width: '9%',
-      className: 'error-bg'
+      className: 'error-bg',
+      render(row) {
+        return h(NNumberAnimation, {
+          from: row.wrongRecordSum,
+          to: row.wrongRecordSum,
+          showSeparator: true
+        })
+      }
     },
     {
       title: '已修复数量',
       key: 'repairRecordSum',
-      width: '9%'
+      width: '9%',
+      render(row) {
+        return h(NNumberAnimation, {
+          from: row.repairRecordSum,
+          to: row.repairRecordSum,
+          showSeparator: true
+        })
+      }
     },
     {
       title: '未修复数量',
       key: 'unRepairRecordSum',
-      width: '9%'
+      width: '9%',
+      render(row) {
+        return h(NNumberAnimation, {
+          from: row.unRepairRecordSum,
+          to: row.unRepairRecordSum,
+          showSeparator: true
+        })
+      }
     },
     {
       title: '操作',
@@ -211,8 +259,7 @@ const columnsRef = ref(createColumns())
 const paginationReactive = reactive({
   page: 1,
   pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
+  itemCount: 0,
   onChange: async (page: number) => {
     paginationReactive.page = page
     await tableDataInit()
