@@ -1,6 +1,6 @@
 {
   "name": "n1tool",
-  "version": "0.3.19",
+  "version": "0.3.20",
   "description": "",
   "main": "dist/main/index.js",
   "scripts": {
