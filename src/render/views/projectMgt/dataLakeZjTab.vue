@@ -290,12 +290,12 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '8%'
+      width: '6%'
     },
     {
       title: '数据类型',
       key: 'comment',
-      width: '8%'
+      width: '10%'
     },
     {
       title: '状态',
@@ -420,9 +420,8 @@ const columnsRef = ref(createColumns())
 
 const paginationReactive = reactive({
   page: 1,
-  pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
+  pageSize: 6,
+  showSizePicker: false,
   onChange: async (page: number) => {
     paginationReactive.page = page
   },
