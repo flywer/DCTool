@@ -10,9 +10,10 @@
         </div>
         <n-space inline class="float-right">
           <n-form-item label="质检时间:" label-placement="left">
-          <n-date-picker v-model:value="formModel.timeRange" type="datetimerange" clearable
-                         @update:value="tableDataInit"
-          /></n-form-item>
+            <n-date-picker v-model:value="formModel.timeRange" type="datetimerange" clearable
+                           @update:value="tableDataInit"
+            />
+          </n-form-item>
         </n-space>
       </div>
       <n-data-table
@@ -31,15 +32,16 @@
         </template>
       </n-data-table>
       <n-space justify="end">
-      <n-pagination
-          v-model:page="paginationReactive.page"
-          v-model:page-size="paginationReactive.pageSize"
-          :item-count="paginationReactive.itemCount"
-          :page-sizes="[10, 20, 30, 40]"
-          show-size-picker
-          @update:page="paginationReactive.onChange"
-          @update:page-size="paginationReactive.onUpdatePageSize"
-      /></n-space>
+        <n-pagination
+            v-model:page="paginationReactive.page"
+            v-model:page-size="paginationReactive.pageSize"
+            :item-count="paginationReactive.itemCount"
+            :page-sizes="[10, 20, 30, 40]"
+            show-size-picker
+            @update:page="paginationReactive.onChange"
+            @update:page-size="paginationReactive.onUpdatePageSize"
+        />
+      </n-space>
     </n-scrollbar>
   </n-layout>
 </template>
@@ -50,7 +52,6 @@ import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {get_inps_record_page} from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {getDateStringByDate} from "@render/utils/common/dateUtils";
-import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";
 import {DataTableColumns, NSpace, NNumberAnimation} from "naive-ui";
 import {computed, onMounted, ref, watch, reactive, h} from "vue";
@@ -89,7 +90,7 @@ onMounted(async () => {
 })
 
 const formModel = ref({
-  timeRange: [getFirstDayOfMonth(), new Date()]
+  timeRange: null
 })
 
 const tableDataInit = async () => {
@@ -127,12 +128,14 @@ const tableDataInit = async () => {
 }
 
 const timeRangeConvert = (timeRange: (number | Date)[]) => {
-
   let res: string[] = []
+
   if (timeRange != null) {
     timeRange.forEach(time => {
       if (time instanceof Date) {
         res.push(getDateStringByDate(time))
+      } else if (time == null) {
+        res.push(null)
       } else {
         res.push(getDateStringByDate(new Date(time)))
       }
