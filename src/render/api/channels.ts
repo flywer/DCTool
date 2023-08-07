@@ -9,9 +9,6 @@ export const channels = reactive({
     ldDecrypt: {
         decrypt: 'ldDecrypt/decrypt'
     },
-    ocr: {
-        scan: 'ocr/scan'
-    },
     svg: {
         saveSvgFile: 'svg/saveSvgFile'
     },

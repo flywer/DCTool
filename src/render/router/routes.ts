@@ -1,7 +1,6 @@
 import {RouteRecordRaw} from 'vue-router'
 
 const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
-const ocr = () => import('@render/views/ocr/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
 const flattenText = () => import('@render/views/flattenText/index.vue')
 const jobCreate = () => import('@render/views/jobCreate/index.vue')
@@ -28,7 +27,6 @@ const schedulingMgt = () => import('@render/views/schedulingMgt/index.vue')
 export const routeName = {
     home: 'home',
     ldDecrypt: 'ldDecrypt',
-    ocr: 'ocr',
     svg: 'svg',
     flattenText: 'flattenText',
     jobCreate: 'jobCreate',
@@ -62,11 +60,6 @@ export const routes: Array<RouteRecordRaw> = [
         name: routeName.ldDecrypt,
         path: '/ldDecrypt/index',
         component: ldDecrypt
-    },
-    {
-        name: routeName.ocr,
-        path: '/ocr/index',
-        component: ocr
     },
     {
         name: routeName.svg,
