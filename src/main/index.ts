@@ -77,7 +77,7 @@ async function bootstrap() {
         })
 
         AppDataSource.initialize().then(async () => {
-            console.log("应用程序数据源连接初始化成功")
+            log.info("应用程序数据源连接初始化成功")
 
             const cron = new CronController()
             await cron.datacenterCronJobInit();

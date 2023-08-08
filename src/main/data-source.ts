@@ -9,6 +9,20 @@ import {ProjectInfo} from "./entity/ProjectInfo"
 
 export const AppDataSource = new DataSource({
     type: "mysql",
+    host: "19.15.66.46",
+    port: 13302,
+    username: "beiruan",
+    password: "Bd<Uti#2020",
+    database: "dc_tool_test",
+    synchronize: false,
+    logging: false,
+    entities: [ProjectInfo, Dict, TableSql, JobJson, PreDatabase, GdsztkDict],
+    migrations: [],
+    subscribers: [],
+})
+
+/* new DataSource({
+    type: "mysql",
     host: "192.168.1.93",
     port: 3306,
     username: "root",
@@ -19,4 +33,4 @@ export const AppDataSource = new DataSource({
     entities: [ProjectInfo, Dict, TableSql, JobJson, PreDatabase, GdsztkDict],
     migrations: [],
     subscribers: [],
-})
+}) */

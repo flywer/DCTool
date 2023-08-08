@@ -25,8 +25,8 @@ export class DatacenterController {
             log.error(e)
             dialog.showMessageBox({
                 type: 'error',
-                title: '数据库连接错误',
-                message: `无法连接到辅助库，中台辅助功能无法使用，查看VPN是否连接正常`,
+                title: '网络连接错误',
+                message: `无法连接到辅助库，中台辅助功能无法使用，查看政务外网连接是否正常`,
                 buttons: ['ok']
             })
             res = null
