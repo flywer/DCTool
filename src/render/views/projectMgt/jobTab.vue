@@ -2237,7 +2237,7 @@ const tablePreview = async (row: Job) => {
     previewColsRef.value = res[0].map((col) => ({
       title: col,
       key: col,
-      // fixed: key.split('.')[1] === 'id' ? 'left' : false
+      fixed: col === 'cd_time' ? 'right' : false,
       width: '200px',
       ellipsis: {
         tooltip: true
