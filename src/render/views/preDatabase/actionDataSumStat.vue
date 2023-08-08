@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import {get_pre_database_depart, get_pre_database_table_info_json, get_table_sql} from "@render/api/auxiliaryDb";
 import {copyText} from "@render/utils/common/clipboard";
-import {getDateStringByDate} from "@render/utils/common/dateUtils";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
 import {TreeSelectOption} from "naive-ui";
 import {format} from "sql-formatter";
@@ -238,9 +238,9 @@ const timeRangeConvert = (timeRange: (number | Date)[]) => {
 
   timeRange.forEach(time => {
     if (time instanceof Date) {
-      res.push(getDateStringByDate(time))
+      res.push(formatDate(time))
     } else {
-      res.push(getDateStringByDate(new Date(time)))
+      res.push(formatDate(new Date(time)))
     }
   })
 

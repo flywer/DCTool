@@ -51,7 +51,7 @@ import {open_default_browser} from "@render/api/app.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb";
 import {get_inps_record_page} from "@render/api/datacenter";
 import {useProjectTreeStore} from "@render/stores/projectTree";
-import {getDateStringByDate} from "@render/utils/common/dateUtils";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";
 import {DataTableColumns, NSpace, NNumberAnimation} from "naive-ui";
 import {computed, onMounted, ref, watch, reactive, h} from "vue";
@@ -133,11 +133,11 @@ const timeRangeConvert = (timeRange: (number | Date)[]) => {
   if (timeRange != null) {
     timeRange.forEach(time => {
       if (time instanceof Date) {
-        res.push(getDateStringByDate(time))
+        res.push(formatDate(time))
       } else if (time == null) {
         res.push(null)
       } else {
-        res.push(getDateStringByDate(new Date(time)))
+        res.push(formatDate(new Date(time)))
       }
     })
   }

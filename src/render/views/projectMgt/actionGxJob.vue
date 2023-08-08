@@ -142,7 +142,7 @@ import {
   get_sched_job_page,
   sched_job_delete
 } from "@render/api/datacenter";
-import {formatDate} from "@render/utils/common/formatDate";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {Job, setJobStatus} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from "cron-parser";

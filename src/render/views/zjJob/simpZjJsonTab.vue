@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import {copyText} from "@render/utils/common/clipboard";
-import {getDateStringByDate} from "@render/utils/common/dateUtils";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {convertZjJson} from "@render/utils/datacenter/zjJob";
 import ZjRulesTable from "@render/views/zjJob/zjRulesTable.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
@@ -251,7 +251,7 @@ const tableDataInit = () => {
           id: v.id,
           tableName: v.tableName,
           json: v.simpZjJson,
-          updateTime: v.simpZjUpdateTime == null ? '--' : getDateStringByDate(v.simpZjUpdateTime)
+          updateTime: v.simpZjUpdateTime == null ? '--' : formatDate(v.simpZjUpdateTime)
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -291,7 +291,7 @@ const search = (v) => {
           id: v.id,
           tableName: v.tableName,
           json: v.simpZjJson,
-          updateTime: v.simpZjUpdateTime == null ? '--' : getDateStringByDate(v.simpZjUpdateTime)
+          updateTime: v.simpZjUpdateTime == null ? '--' : formatDate(v.simpZjUpdateTime)
         })))
   })
 }

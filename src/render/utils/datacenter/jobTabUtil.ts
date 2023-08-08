@@ -16,7 +16,7 @@ import {
     workflow_rerun,
     workflow_run
 } from "@render/api/datacenter";
-import {formatDate} from "@render/utils/common/formatDate";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
 import {NButton, NPopconfirm, NTag} from "naive-ui";

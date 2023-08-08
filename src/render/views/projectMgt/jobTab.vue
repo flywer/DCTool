@@ -635,10 +635,12 @@ import {
   get_valid_config_page,
   get_workflow_log,
   get_workflow_page,
-  gte_usrc_org_tree, table_preview
+  gte_usrc_org_tree
 } from "@render/api/datacenter";
+import {get_table_data} from "@render/api/front";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
 import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
@@ -2226,40 +2228,36 @@ const tablePreview = async (row: Job) => {
   const tableName = jobInfo.data.jobTemplate.readerTable
 
   previewModalTitle = tableName
-  table_preview(7, tableName).then(res => {
-    if (res.code == 200) {
-      if (res.data && res.data.length != 0) {
 
-        tableHeadCol.value = res.data[0]
-        tableRows.value = res.data.slice(1)
+  get_table_data(tableName, 10, true).then(res => {
+    tableHeadCol.value = res[0]
+    tableRows.value = res.slice(1)
 
-        // 创建表头
-        previewColsRef.value = res.data[0].map((col) => ({
-          title: col,
-          key: col,
-          // fixed: key.split('.')[1] === 'id' ? 'left' : false
-          width: '200px',
-          ellipsis: {
-            tooltip: true
-          }
-        }));
-
-        // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
-        )
-
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
-        ));
+    // 创建表头
+    previewColsRef.value = res[0].map((col) => ({
+      title: col,
+      key: col,
+      // fixed: key.split('.')[1] === 'id' ? 'left' : false
+      width: '200px',
+      ellipsis: {
+        tooltip: true
       }
-    } else {
-      window.$message.error(res.message)
-    }
+    }));
+
+    // 处理数据
+    previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item) =>
+        Object.values(item).map(
+            (value) => {
+              if (value === null) {
+                return 'null'
+              } else if (value instanceof Date) {
+                return formatDate(value)
+              } else {
+                return value.toString()
+              }
+            }
+        )
+    ));
   }).finally(() => isPreviewTableLoading.value = false)
 
   showPreviewModalRef.value = true

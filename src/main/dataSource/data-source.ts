@@ -5,7 +5,7 @@ import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
 import {TableSql} from "@main/entity/TableSql";
 import {DataSource} from "typeorm"
-import {ProjectInfo} from "./entity/ProjectInfo"
+import {ProjectInfo} from "../entity/ProjectInfo"
 
 export const AppDataSource = new DataSource({
     type: "mysql",

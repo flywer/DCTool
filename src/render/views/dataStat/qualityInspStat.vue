@@ -73,7 +73,7 @@
 import {get_table_sql} from "@render/api/auxiliaryDb";
 import {get_inps_record_page, insp_home_list} from "@render/api/datacenter";
 import {create_data_inps_stat} from "@render/api/xlsx";
-import {getDateStringByDate} from "@render/utils/common/dateUtils";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
 import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
 import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
@@ -217,9 +217,9 @@ const timeRangeConvert = (timeRange: (number | Date)[]) => {
 
   timeRange.forEach(time => {
     if (time instanceof Date) {
-      res.push(getDateStringByDate(time))
+      res.push(formatDate(time))
     } else {
-      res.push(getDateStringByDate(new Date(time)))
+      res.push(formatDate(new Date(time)))
     }
   })
 

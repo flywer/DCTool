@@ -108,10 +108,13 @@ export const channels = reactive({
     },
     app: {
         relaunch: 'app/relaunch',
-        openDefaultBrowser:'app/openDefaultBrowser'
+        openDefaultBrowser: 'app/openDefaultBrowser'
     },
     xlsx: {
         createDataInpsStat: 'xlsx/createDataInpsStat'
+    },
+    front: {
+        getTableData: 'front/getTableData'
     }
 
 })

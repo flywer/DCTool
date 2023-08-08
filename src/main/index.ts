@@ -1,10 +1,12 @@
 import {AdbController} from "@main/controller/adb.controller";
 import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
+import {FrontController} from "@main/controller/front.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
-import {AppDataSource} from "@main/data-source";
+import {AppDataSource} from "@main/dataSource/data-source";
+import {FrontSource} from "@main/dataSource/front-source";
 import {appLogInit} from "@main/log";
 import {getAppDataPath} from "@main/utils/appPath";
 import {app} from 'electron'
@@ -68,7 +70,8 @@ async function bootstrap() {
                     DatacenterController,
                     AdbController,
                     CronController,
-                    XlsxController
+                    XlsxController,
+                    FrontController
                 ],
             injects: [{
                 name: 'IS_DEV',
@@ -82,6 +85,10 @@ async function bootstrap() {
             const cron = new CronController()
             await cron.datacenterCronJobInit();
         }).catch(error => log.error('应用程序数据源连接失败', error))
+
+        FrontSource.initialize().then(async () => {
+            log.info("前置机数据源连接初始化成功")
+        }).catch(error => log.error('前置机数据源连接失败', error))
 
     } catch (error) {
         log.error(error)

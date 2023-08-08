@@ -1,4 +1,4 @@
-import {AppDataSource} from "@main/data-source";
+import {AppDataSource} from "@main/dataSource/data-source";
 import {Dict} from "@main/entity/Dict";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from "einf";
