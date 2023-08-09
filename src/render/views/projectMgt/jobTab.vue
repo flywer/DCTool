@@ -468,7 +468,6 @@
         </n-grid>
       </n-form>
 
-
       <n-alert v-if="formSelect.validConfig && isValidConfigRef" class="mt-4" type="default" :show-icon="false">
         一旦创建无法修改，只可删除
       </n-alert>
