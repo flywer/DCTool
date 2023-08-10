@@ -7,13 +7,14 @@ import {LoginController} from "@main/controller/login.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
-import {appLogInit} from "@main/log";
+import {appLogInit} from "../app/app.log";
 import {getAppDataPath} from "@main/utils/appPath";
 import {app} from 'electron'
 import log from 'electron-log'
 import {createEinf} from 'einf'
 import fs from "fs";
 import {join} from "path";
+import {trayInit} from "../app/app.tray";
 import {AppController} from './controller/app.controller'
 import {createWindow} from './main.window'
 import {WindowController} from "@main/controller/window.controller";
@@ -30,10 +31,16 @@ async function electronAppInit() {
     app.setAppUserModelId('DCTool')
 
     const isDev = !app.isPackaged
+
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') {
             app.exit()
         }
+    })
+
+    ///应用启动后的操作
+    app.whenReady().then(async () => {
+        trayInit()
     })
 
     if (isDev) {

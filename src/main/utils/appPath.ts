@@ -14,3 +14,9 @@ export const getAppDataPath = () => {
 export const getAppTempDataPath = () => {
     return path.join(os.tmpdir(), '/DCTool')
 }
+
+export const getResourcePath = () => {
+    return !process.env.NODE_ENV || process.env.NODE_ENV === "production"
+        ? process.resourcesPath // Live Mode
+        : process.cwd(); // Dev Mode
+}
