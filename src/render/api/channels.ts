@@ -115,6 +115,13 @@ export const channels = reactive({
     },
     front: {
         getTableData: 'front/getTableData'
+    },
+    login: {
+        signIn: 'login/signIn',
+        signUp: 'login/signUp',
+        sendCanLogin: 'login/sendCanLogin',
+        rememberMe: 'login/rememberMe',
+        readUserConfig: 'login/readUserConfig',
     }
 
 })

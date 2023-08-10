@@ -1,5 +1,5 @@
 <template>
-  <n-layout has-sider style="margin-top: 32px;">
+  <n-layout has-sider class="mt-8">
     <n-layout-sider
         class="select-none"
         collapse-mode="width"
@@ -42,7 +42,7 @@ import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql, DataBase} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
 import {LibraryAddOutlined} from '@vicons/material'
-import {AppsListDetail20Filled, BookSearch24Regular,CalendarClock24Regular,TableAdd16Regular} from '@vicons/fluent'
+import {AppsListDetail20Filled, BookSearch24Regular, CalendarClock24Regular, TableAdd16Regular} from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";

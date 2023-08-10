@@ -3,10 +3,10 @@ import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {FrontController} from "@main/controller/front.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
+import {LoginController} from "@main/controller/login.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
-import {FrontSource} from "@main/dataSource/front-source";
 import {appLogInit} from "@main/log";
 import {getAppDataPath} from "@main/utils/appPath";
 import {app} from 'electron'
@@ -27,7 +27,7 @@ async function electronAppInit() {
     if (!app.requestSingleInstanceLock()) app.quit();
 
     //设置操作系统全局名称
-    app.setAppUserModelId('N1Tool')
+    app.setAppUserModelId('DCTool')
 
     const isDev = !app.isPackaged
     app.on('window-all-closed', () => {
@@ -71,7 +71,8 @@ async function bootstrap() {
                     AdbController,
                     CronController,
                     XlsxController,
-                    FrontController
+                    FrontController,
+                    LoginController
                 ],
             injects: [{
                 name: 'IS_DEV',
@@ -86,10 +87,6 @@ async function bootstrap() {
             await cron.datacenterCronJobInit();
         }).catch(error => log.error('应用程序数据源连接失败', error))
 
-        FrontSource.initialize().then(async () => {
-            log.info("前置机数据源连接初始化成功")
-        }).catch(error => log.error('前置机数据源连接失败', error))
-
     } catch (error) {
         log.error(error)
         app.quit()
@@ -99,10 +96,13 @@ async function bootstrap() {
 bootstrap()
 
 /**
- * 创建cron文件夹，防止不存在报错
+ * 创建cron、config文件夹，防止不存在报错
  */
 function appDataFolderInit() {
     fs.mkdir(join(getAppDataPath(), 'cron'), {recursive: true}, (error) => {
+        if (error) log.error(error)
+    })
+    fs.mkdir(join(getAppDataPath(), 'config'), {recursive: true}, (error) => {
         if (error) log.error(error)
     })
 }

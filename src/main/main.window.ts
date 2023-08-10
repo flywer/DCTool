@@ -5,8 +5,11 @@ const isDev = !app.isPackaged
 
 export async function createWindow() {
     const win = new BrowserWindow({
-        width: 1208,
-        height: 760,
+        width: 450,
+        minWidth: 450,
+        height: 550,
+        minHeight: 550,
+        resizable: false,
         frame: false, // 无边框
         webPreferences: {
             nodeIntegration: false,
@@ -14,10 +17,11 @@ export async function createWindow() {
             preload: join(__dirname, '../preload/index.js'),
             devTools: isDev,
             webSecurity: false,// 允许跨域访问
-           // nodeIntegration: false, // 允许 Node.js APIs 在渲染进程中使用
-           // nodeIntegrationInWorker: true, // 允许 Node.js APIs 在 Web Worker 中使用（仅 Electron 5+）
-          //  nodeIntegrationInSubFrames: true // 允许 Node.js APIs 在子 frame 中使用（仅 Electron 5+）
+            // nodeIntegration: false, // 允许 Node.js APIs 在渲染进程中使用
+            // nodeIntegrationInWorker: true, // 允许 Node.js APIs 在 Web Worker 中使用（仅 Electron 5+）
+            //  nodeIntegrationInSubFrames: true // 允许 Node.js APIs 在子 frame 中使用（仅 Electron 5+）
         },
+        show: false,
         autoHideMenuBar: !isDev,
     })
 
@@ -28,6 +32,11 @@ export async function createWindow() {
         : `file://${join(app.getAppPath(), 'dist/render/index.html')}`
 
     win.loadURL(URL)
+
+    // 监听 "ready-to-show" 事件
+    win.once('ready-to-show', () => {
+        win.show(); // 当渲染器加载完毕时显示窗口
+    });
 
     if (isDev) {
         win.webContents.openDevTools()
