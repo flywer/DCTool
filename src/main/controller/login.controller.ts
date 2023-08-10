@@ -150,7 +150,7 @@ export class LoginController {
                                         createTime: formatDate(new Date())
                                     }])
                                     .execute()
-                                    .then(async res => {
+                                    .then(async () => {
                                         await AppDataSource.getRepository(ActivationKey).createQueryBuilder()
                                             .update()
                                             .set({

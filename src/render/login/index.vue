@@ -9,7 +9,7 @@
             p-id="4426" fill="#18a058"
         ></path>
       </svg>
-      <n-h2 style="margin-bottom: 0">数据归集辅助工具</n-h2>
+      <n-h2 style="margin-bottom: 0" class="select-none">数据归集辅助工具</n-h2>
     </n-space>
 
     <n-form
@@ -19,10 +19,10 @@
         :model="formModel"
         :rules="signInRules"
     >
-      <n-form-item-row label="账号" path="account">
+      <n-form-item-row label="账号" path="account" :label-style="{userSelect: 'none'}">
         <n-input v-model:value="formModel.account"/>
       </n-form-item-row>
-      <n-form-item-row label="密码" path="password">
+      <n-form-item-row label="密码" path="password" :label-style="{userSelect: 'none'}">
         <n-input
             type="password"
             show-password-on="click"
@@ -40,7 +40,7 @@
           </template>
         </n-input>
       </n-form-item-row>
-      <n-form-item-row label="重复密码" path="password2" v-if="!isSignInTab">
+      <n-form-item-row label="重复密码" path="password2" :label-style="{userSelect: 'none'}" v-if="!isSignInTab">
         <n-input
             type="password"
             show-password-on="click"
@@ -58,7 +58,7 @@
           </template>
         </n-input>
       </n-form-item-row>
-      <n-form-item-row label="激活码" v-if="!isSignInTab">
+      <n-form-item-row label="激活码" :label-style="{userSelect: 'none'}" v-if="!isSignInTab">
         <n-input
             type="password"
             show-password-on="click"
@@ -100,7 +100,7 @@
 import {Result} from "@main/vo/resultVo";
 import {read_user_config, remember_me, sign_in, sign_up} from "@render/api/login";
 import {FormInst, FormItemRule} from "naive-ui";
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref} from "vue";
 import {GlassesOutline, Glasses} from '@vicons/ionicons5'
 
 const isSignInTab = ref(true)

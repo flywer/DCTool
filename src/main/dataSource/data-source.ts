@@ -31,17 +31,3 @@ export const AppDataSource = new DataSource({
     migrations: [],
     subscribers: [],
 })
-
-/* new DataSource({
-    type: "mysql",
-    host: "192.168.1.93",
-    port: 3306,
-    username: "root",
-    password: "Beidas0ft",
-    database: "ap_dev_sjzt",
-    synchronize: false,
-    logging: false,
-    entities: [ProjectInfo, Dict, TableSql, JobJson, PreDatabase, GdsztkDict],
-    migrations: [],
-    subscribers: [],
-}) */
