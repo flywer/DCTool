@@ -1,6 +1,6 @@
 <template>
-  <n-scrollbar style="height: calc(100vh - 42px);" trigger="hover">
-    <n-layout class="m-2">
+  <n-layout class="m-2">
+    <n-scrollbar style="height: calc(100vh - 42px);" trigger="hover">
       <n-grid :cols="1">
         <n-gi>
           <n-card size="small" :embedded="true">
@@ -33,9 +33,8 @@
 
         </n-gi>
       </n-grid>
-    </n-layout>
-  </n-scrollbar>
-
+    </n-scrollbar>
+  </n-layout>
 </template>
 
 <script setup lang="ts">
@@ -70,7 +69,7 @@ const handleUpdateAuthToken = () => {
   update_auth_token(authTokenRef.value).then(() => {
     authTokenIsEdit.value = false
     window.$dialog.success({
-      title:'更新成功',
+      title: '更新成功',
       content: '是否立即重启应用？',
       positiveText: '确定',
       negativeText: '取消',

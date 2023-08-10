@@ -43,7 +43,8 @@ export class LoginController {
         await AppDataSource.getRepository(User).findOne({
             select: ['id'],
             where: {
-                account: model.account
+                account: model.account,
+                isActive:1
             }
         })
             .then(async res => {
@@ -85,7 +86,7 @@ export class LoginController {
                         })
 
                 } else {
-                    result = failure('账号不存在！')
+                    result = failure('账号不存在或被禁用！')
                 }
             })
             .catch(error => {

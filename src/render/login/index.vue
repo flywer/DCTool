@@ -99,9 +99,12 @@
 <script setup lang="ts">
 import {Result} from "@main/vo/resultVo";
 import {read_user_config, remember_me, sign_in, sign_up} from "@render/api/login";
+import {useUserStore} from "@render/stores/user";
 import {FormInst, FormItemRule} from "naive-ui";
 import {onMounted, ref} from "vue";
 import {GlassesOutline, Glasses} from '@vicons/ionicons5'
+
+const user = useUserStore()
 
 const isSignInTab = ref(true)
 
@@ -189,6 +192,9 @@ const handleSignIn = () => {
             if (res.success) {
               // 记住密码
               remember_me(formModel.value)
+
+              user.account = formModel.value.account
+
             } else {
               window.$message.error(res.message)
             }
