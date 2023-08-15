@@ -9,7 +9,7 @@ const logoPath = path.join(getResourcePath(), '/assets', 'logo_32.ico')
 /**
  * 启用系统托盘
  */
-export function trayInit() {
+export const trayInit = () => {
     const icon = nativeImage.createFromPath(logoPath)
     tray = new Tray(icon)
 
@@ -41,7 +41,7 @@ export function trayInit() {
 
     const contextMenu = Menu.buildFromTemplate([
         privacyPolicyMenuItem,
-        { type: 'separator' },
+        {type: 'separator'},
         appRelaunchMenuItem,
         quitMenuItem
     ])

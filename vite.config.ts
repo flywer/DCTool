@@ -22,7 +22,7 @@ export default defineConfig({
         build: {
           config: './electron-builder.config.js',
           cliOptions: {
-            publish: 'never', // "onTag" | "onTagOrDraft" | "always" | "never"
+            publish: 'always', // "onTag" | "onTagOrDraft" | "always" | "never"
           },
         },
         preload: {

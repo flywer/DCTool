@@ -1,10 +1,28 @@
 import {reactive} from "vue";
 
 export const channels = reactive({
+    app: {
+        relaunch: 'app/relaunch',
+        openDefaultBrowser: 'app/openDefaultBrowser',
+        updateSettings: 'app/updateSettings',
+        getSettings: 'app/getSettings',
+        updateTheme: "app/updateTheme",
+        getAppVersion: "app/getAppVersion",
+    },
+    sys: {
+        shouldUseDarkColors: 'sys/shouldUseDarkColors'
+    },
     window: {
         max: 'window/max',
         min: "window/min",
         close: "window/close"
+    },
+    login: {
+        signIn: 'login/signIn',
+        signUp: 'login/signUp',
+        sendCanLogin: 'login/sendCanLogin',
+        rememberMe: 'login/rememberMe',
+        readUserConfig: 'login/readUserConfig',
     },
     ldDecrypt: {
         decrypt: 'ldDecrypt/decrypt'
@@ -72,8 +90,8 @@ export const channels = reactive({
         updateCjCron: 'auxiliaryDb/updateCjCron',
         getCjCronByProjectId: 'auxiliaryDb/getCjCronByProjectId',
 
-        getAuthToken: 'auxiliaryDb/getAuthToken',
-        updateAuthToken: 'auxiliaryDb/updateAuthToken',
+        getAuthTokenByAccount: 'auxiliaryDb/getAuthTokenByAccount',
+        updateAuthTokenByAccount: 'auxiliaryDb/updateAuthTokenByAccount',
 
         getTableSql: 'auxiliaryDb/getTableSql',
         updateTableSql: 'auxiliaryDb/updateTableSql',
@@ -106,22 +124,14 @@ export const channels = reactive({
         createCronJob: 'cron/createCronJob',
         datacenterCronJobInit: 'cron/datacenterCronJobInit',
     },
-    app: {
-        relaunch: 'app/relaunch',
-        openDefaultBrowser: 'app/openDefaultBrowser'
-    },
     xlsx: {
         createDataInpsStat: 'xlsx/createDataInpsStat'
     },
     front: {
         getTableData: 'front/getTableData'
     },
-    login: {
-        signIn: 'login/signIn',
-        signUp: 'login/signUp',
-        sendCanLogin: 'login/sendCanLogin',
-        rememberMe: 'login/rememberMe',
-        readUserConfig: 'login/readUserConfig',
-    }
+    updater: {
+        msg: 'updater/msg'
+    },
 
 })

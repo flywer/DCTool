@@ -1,33 +1,61 @@
 <template>
   <n-config-provider
+      class="h-full"
       :locale="zhCN"
       :date-locale="dateZhCN"
+      :theme="theme"
   >
     <naive-provider>
-      <WindowBtn :show-window-min="true" :show-window-max="user.isLogin" :show-window-close="true"/>
-      <MainLayout v-if="user.isLogin"/>
-      <LoginLayout v-else/>
+      <router-view/>
     </naive-provider>
   </n-config-provider>
 </template>
 
 <script setup lang="ts">
+import {SetupModelType} from "@common/types";
+import {get_app_settings} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
-import {useIpc} from '@render/plugins/ipc'
-import {useUserStore} from "@render/stores/user";
-import {zhCN, dateZhCN} from 'naive-ui';
+import {should_use_dark_theme} from "@render/api/sys.api";
+import {useIpc} from "@render/plugins";
+import {useAppSettingsStore} from "@render/stores/appSettings";
+import {zhCN, dateZhCN, darkTheme} from 'naive-ui';
 import NaiveProvider from "@render/components/common/NaiveProvider.vue"
-import WindowBtn from "@render/components/base/WindowBar.vue";
-import MainLayout from "@render/components/base/MainLayout.vue";
-import LoginLayout from "@render/login/index.vue";
+import {ref} from 'vue'
 
-const user = useUserStore()
+const appSettings = useAppSettingsStore()
+
+const theme = ref(null)
 
 const ipc = useIpc()
 
-ipc.on(channels.login.sendCanLogin, (msg: boolean) => {
-  user.isLogin = msg
+// 应用设置
+get_app_settings().then(async res => {
+  if (res.success) {
+    appSettings.setup = res.data as SetupModelType
+    await updateTheme()
+  } else {
+    window.$message.error(res.message)
+  }
 })
+
+const updateTheme = async () => {
+  if (appSettings.setup?.themeAccentColor) {
+    if (appSettings.setup.themeAccentColor == 'followSys') {
+      theme.value = (await should_use_dark_theme()) ? darkTheme : null
+    } else if (appSettings.setup.themeAccentColor == 'light') {
+      theme.value = null
+    } else {
+      theme.value = darkTheme
+    }
+  } else {
+    theme.value = (await should_use_dark_theme()) ? darkTheme : null
+  }
+}
+
+ipc.on(channels.app.updateTheme, () => {
+  updateTheme()
+})
+
 
 </script>
 

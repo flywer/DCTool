@@ -1,28 +1,20 @@
+import {getAppDataPath} from "@main/utils/appPath";
+import {APP_CONFIG_PATH, getAppSettings} from "@main/utils/configUtils";
+import {jsonfileWrite, readFsSync} from "@main/utils/fsUtils";
+import {failure, Result, success} from "@main/vo/resultVo";
+import {MAIN_WINDOW} from "@main/window/constants";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from 'einf'
 import {app, shell} from "electron";
 import log from "electron-log";
-import {AppService} from '../service/app.service'
+import {autoUpdater} from "electron-updater";
+import {isEmpty} from "lodash";
+import {join} from "path";
+import {tray, trayInit} from "../../app/app.tray";
 
 @Controller()
 export class AppController {
-    constructor(
-        private appService: AppService,
-    ) {
-    }
-
-    @IpcSend('reply-msg')
-    public replyMsg(msg: string) {
-        return `${this.appService.getDelayTime()} seconds later, the main process replies to your message: ${msg}`
-    }
-
-    @IpcHandle('send-msg')
-    public async handleSendMsg(msg: string): Promise<string> {
-        setTimeout(() => {
-            this.replyMsg(msg)
-        }, this.appService.getDelayTime() * 1000)
-
-        return `The main process received your message: ${msg}`
+    constructor() {
     }
 
     @IpcHandle(channels.app.openDefaultBrowser)
@@ -37,8 +29,83 @@ export class AppController {
      * @constructor
      */
     @IpcHandle(channels.app.relaunch)
-    public HandleRelaunch() {
+    public handleRelaunch() {
         app.relaunch()
         app.exit(0)
+    }
+
+    @IpcHandle(channels.app.getSettings)
+    public async handleGetSettings() {
+        try {
+            let result
+            const filePath = join(getAppDataPath(), 'config', 'app.json')
+            const buffer = await readFsSync(filePath)
+            if (buffer == null || isEmpty(buffer.toString())) {
+                result = success()
+                result.data = null
+            } else {
+                result = success()
+                result.data = JSON.parse(buffer.toString())
+            }
+            return result
+        } catch (e) {
+            log.error(e)
+            return failure()
+        }
+    }
+
+    @IpcHandle(channels.app.updateSettings)
+    public async handleUpdateSettings(setupModel) {
+        try {
+            const newSettings = Object.assign({}, await getAppSettings(), setupModel);
+
+            jsonfileWrite(APP_CONFIG_PATH, newSettings, {spaces: 2})
+
+            /*设置开机自启*/
+            //mac系统
+            if (process.platform === "darwin") {
+                app.setLoginItemSettings({
+                    openAtLogin: newSettings?.openAtLogin || false
+                });
+            } else {
+                app.setLoginItemSettings({
+                    openAtLogin: newSettings?.openAtLogin || false
+                });
+            }
+
+            /*设置是否启用托盘*/
+            if (newSettings?.enableSysTray) {
+                trayInit()
+            } else if (tray != null) {
+                tray.destroy()
+            }
+
+            /*设置主题*/
+            this.handleSendUpdateTheme()
+
+            return success()
+        } catch (e) {
+            log.error(e)
+            return failure()
+        }
+    }
+
+    @IpcSend(channels.app.updateTheme, MAIN_WINDOW)
+    public handleSendUpdateTheme() {
+        return true
+    }
+
+    @IpcHandle(channels.app.getAppVersion)
+    public handleGetAppVersion() {
+        let result: Result
+        try {
+            result = success()
+            result.data = autoUpdater.currentVersion.version
+        } catch (e) {
+            log.error(e)
+            result = failure()
+            result.data = e
+        }
+        return result
     }
 }

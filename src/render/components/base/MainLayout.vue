@@ -22,10 +22,8 @@
       </n-scrollbar>
     </n-layout-sider>
 
-    <n-layout style="height:100%">
-      <n-message-provider>
-        <router-view/>
-      </n-message-provider>
+    <n-layout class="h-full">
+      <router-view/>
     </n-layout>
   </n-layout>
 </template>
@@ -35,9 +33,9 @@ import {channels} from "@render/api/channels";
 import {useIpc} from "@render/plugins";
 import {routeName} from "@render/router";
 import {useNotification} from "naive-ui";
-import {h, ref} from 'vue'
+import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
-import {RouterLink} from "vue-router";
+import {RouterLink, useRouter} from "vue-router";
 import {AccessibleIcon} from '@vicons/fa'
 import {Svg, Sql, DataBase} from '@vicons/carbon'
 import {LetterF} from '@vicons/tabler'
@@ -48,6 +46,8 @@ import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
 
 const notification = useNotification()
+
+const router = useRouter()
 
 // 菜单项
 const menuOptions: MenuOption[] = [
@@ -238,15 +238,17 @@ const menuOptions: MenuOption[] = [
 // 菜单实例
 const menuInstRef = ref<MenuInst | null>(null)
 // 默认选中的菜单
-const selectedKey = ref(menuOptions[0].key)
+const selectedKey = ref(routeName.projectMgt)
 // 菜单是否折叠
 const collapsed = ref(false)
+
+onMounted(() => {
+  router.push({name: routeName.projectMgt});
+})
 
 const ipc = useIpc()
 
 ipc.on(channels.datacenter.authTokenNotice, (msg: string) => {
-  notification.destroyAll()
-
   notification.create({
     title: "访问令牌出错",
     content: msg,

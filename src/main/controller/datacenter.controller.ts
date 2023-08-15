@@ -1,10 +1,14 @@
 import {AppDataSource} from "@main/dataSource/data-source";
-import {Dict} from "@main/entity/Dict";
+import {User} from "@main/entity/User";
+import {getAppDataPath} from "@main/utils/appPath";
+import {readFsSync} from "@main/utils/fsUtils";
+import {MAIN_WINDOW} from "@main/window/constants";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from "einf";
 import {dialog, net} from "electron";
 import log from 'electron-log'
 import {isEmpty} from "lodash";
+import {join} from "path";
 
 @Controller()
 export class DatacenterController {
@@ -13,13 +17,13 @@ export class DatacenterController {
 
     private static apiUrl = 'http://19.15.97.242:19080/szrzyt/data_center/gateway';
 
-    public async getAuthToken() {
+    public async getAuthToken(account: string) {
         let res
         try {
-            await AppDataSource.getRepository(Dict).findOneBy({
-                name: 'authToken'
+            await AppDataSource.getRepository(User).findOneBy({
+                account: account
             }).then((data) => {
-                res = data.value
+                res = data.dcToken
             })
         } catch (e) {
             log.error(e)
@@ -34,9 +38,9 @@ export class DatacenterController {
         return res
     }
 
-    @IpcSend(channels.datacenter.authTokenNotice)
+    @IpcSend(channels.datacenter.authTokenNotice, MAIN_WINDOW)
     public handleAuthTokenNotice() {
-        return `数据中台访问令牌已不合法，请前往设置修改令牌`
+        return `数据中台访问令牌出错或不存在，请前往应用设置修改令牌`
     }
 
     @IpcHandle(channels.datacenter.jobProjectList)
@@ -620,6 +624,18 @@ export class DatacenterController {
         return result
     }
 
+    public async getAccountByConfig() {
+        const filePath = join(getAppDataPath(), 'config', 'user.json')
+        const buffer = await readFsSync(filePath)
+        let account
+        if (buffer == null || isEmpty(buffer.toString())) {
+            account = null
+        } else {
+            account = JSON.parse(buffer.toString()).account
+        }
+        return account
+    }
+
     public commonGetRequest(url: string, query: string): Promise<any> {
         return new Promise(async (resolve, reject) => {
             const request = net.request({
@@ -627,7 +643,7 @@ export class DatacenterController {
                 url: `${DatacenterController.apiUrl}${url}?${query || ''}`
             });
 
-            const authToken = await this.getAuthToken()
+            const authToken = await this.getAuthToken(await this.getAccountByConfig())
 
             if (authToken != null) {
                 request.setHeader('Authorization', `bearer ${authToken}`)
@@ -659,6 +675,9 @@ export class DatacenterController {
                 });
 
                 request.end();
+            } else {
+                this.handleAuthTokenNotice()
+                return null
             }
 
         })
@@ -671,7 +690,7 @@ export class DatacenterController {
                 url: `${DatacenterController.apiUrl}${url}`
             });
 
-            const authToken = await this.getAuthToken()
+            const authToken = await this.getAuthToken(await this.getAccountByConfig())
             if (authToken != null) {
                 request.setHeader('Authorization', `bearer ${authToken}`)
                 request.setHeader('Content-Type', 'application/json;charset=UTF-8');
@@ -691,19 +710,23 @@ export class DatacenterController {
                             }
                             resolve(res);
                         } catch (err) {
-                            log.error(data)
+                            log.error(err)
                             reject(err);
                         }
                     });
                 });
 
                 request.on('error', (err) => {
+                    log.error(err)
                     reject(err);
                 });
 
                 request.write(JSON.stringify(params))
 
                 request.end();
+            } else {
+                this.handleAuthTokenNotice()
+                return null
             }
 
         })

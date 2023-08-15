@@ -1,20 +1,15 @@
 import {RouteRecordRaw} from 'vue-router'
 
+const App = () => import ('@render/App.vue')
+
+const Main = () => import ('@render/pages/main.vue')
+const Updater = () => import ('@render/pages/updater.vue')
+
 const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
 const svg = () => import('@render/views/svgConvert/index.vue')
 const flattenText = () => import('@render/views/flattenText/index.vue')
 const jobCreate = () => import('@render/views/jobCreate/index.vue')
-const cjJob = () => import('@render/views/cjJob/index.vue')
-const zjJob = () => import('@render/views/zjJob/index.vue')
-const bfJob = () => import('@render/views/bfJob/index.vue')
-const qcJob = () => import('@render/views/qcJob/index.vue')
-const rhJob = () => import('@render/views/rhJob/index.vue')
-const rkJob = () => import('@render/views/rkJob/index.vue')
-const gxJob = () => import('@render/views/gxJob/index.vue')
 const projectMgt = () => import('@render/views/projectMgt/index.vue')
-const execSql = () => import('@render/views/sqlProcess/sqlExec/sqlExecTab.vue')
-const sqlValid = () => import('@render/views/sqlProcess/sqlValid/sqlValidTab.vue')
-const hiveSqlTrans = () => import('@render/views/sqlProcess/sqlTrans/sqlTransTab.vue')
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
 const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
@@ -25,6 +20,9 @@ const dataStat = () => import('@render/views/dataStat/index.vue')
 const schedulingMgt = () => import('@render/views/schedulingMgt/index.vue')
 
 export const routeName = {
+    app: 'app',
+    main: 'main-page',
+    updater: 'updater-page',
     home: 'home',
     ldDecrypt: 'ldDecrypt',
     svg: 'svg',
@@ -54,125 +52,86 @@ export const routeName = {
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
-        redirect: '/projectMgt/index',
-    },
-    {
-        name: routeName.ldDecrypt,
-        path: '/ldDecrypt/index',
-        component: ldDecrypt
-    },
-    {
-        name: routeName.svg,
-        path: '/svg/index',
-        component: svg
-    },
-    {
-        name: routeName.flattenText,
-        path: '/flattenText/index',
-        component: flattenText
-    },
-    {
-        name: routeName.jobCreate,
-        path: '/jobCreate/index',
-        component: jobCreate
-    },
-    {
-        name: routeName.cjJob,
-        path: '/cjJob/index',
-        component: cjJob
-    },
-    {
-        name: routeName.execSql,
-        path: '/execSql/index',
-        component: execSql
-    },
-    {
-        name: routeName.sqlValid,
-        path: '/sqlValid/index',
-        component: sqlValid
-    },
-    {
-        name: routeName.hiveSqlTrans,
-        path: '/hiveSqlTrans/index',
-        component: hiveSqlTrans
-    },
-    {
-        name: routeName.projectAbbr,
-        path: '/projectAbbr/index',
-        component: projectAbbr
-    },
-    {
-        name: routeName.zjJob,
-        path: '/zjJob/index',
-        component: zjJob
-    }, {
-        name: routeName.bfJob,
-        path: '/bfJob/index',
-        component: bfJob
-    },
-    {
-        name: routeName.settings,
-        path: '/settings/index',
-        component: settings
-    },
-    {
-        name: routeName.qcJob,
-        path: '/qcJob/index',
-        component: qcJob
-    },
-    {
-        name: routeName.rkJob,
-        path: '/rkJob/index',
-        component: rkJob
-    },
-    {
-        name: routeName.gxJob,
-        path: '/gxJob/index',
-        component: gxJob
-    },
-    {
-        name: routeName.sqlProcess,
-        path: '/sqlProcess/index',
-        component: sqlProcess
-    },
-    {
-        name: routeName.createTable,
-        path: '/createTable/index',
-        component: createTable
-    },
-    {
-        name: routeName.createTable,
-        path: '/createTable/index',
-        component: createTable
-    },
-    {
-        name: routeName.rhJob,
-        path: '/rhJob/index',
-        component: rhJob
-    },
-    {
-        name: routeName.projectMgt,
-        path: '/projectMgt/index',
-        component: projectMgt
-    },
-    {
-        name: routeName.preDatabase,
-        path: '/preDatabase/index',
-        component: preDatabase
-    },
-    {
-        name: routeName.sztkDict,
-        path: '/sztkDict/index',
-        component: sztkDict
-    },
-    {
-        name: routeName.dataStat,
-        path: '/dataStat/index',
-        component: dataStat
-    },
-    {
-        name: routeName.schedulingMgt,
-        path: '/schedulingMgt/index',
-        component: schedulingMgt
-    },
+        name: routeName.app,
+        component: App,
+        children: [
+            {
+                name: routeName.main,
+                path: 'main-page',
+                component: Main,
+                children: [
+                    {
+                        name: routeName.projectMgt,
+                        path: 'projectMgt/index',
+                        component: projectMgt
+                    },
+                    {
+                        name: routeName.jobCreate,
+                        path: '/jobCreate/index',
+                        component: jobCreate
+                    },
+                    {
+                        name: routeName.createTable,
+                        path: '/createTable/index',
+                        component: createTable
+                    },
+                    {
+                        name: routeName.schedulingMgt,
+                        path: '/schedulingMgt/index',
+                        component: schedulingMgt
+                    },
+                    {
+                        name: routeName.sqlProcess,
+                        path: '/sqlProcess/index',
+                        component: sqlProcess
+                    },
+                    {
+                        name: routeName.projectAbbr,
+                        path: '/projectAbbr/index',
+                        component: projectAbbr
+                    },
+                    {
+                        name: routeName.preDatabase,
+                        path: '/preDatabase/index',
+                        component: preDatabase
+                    },
+                    {
+                        name: routeName.dataStat,
+                        path: '/dataStat/index',
+                        component: dataStat
+                    },
+                    {
+                        name: routeName.sztkDict,
+                        path: '/sztkDict/index',
+                        component: sztkDict
+                    },
+                    {
+                        name: routeName.ldDecrypt,
+                        path: '/ldDecrypt/index',
+                        component: ldDecrypt
+                    },
+                    {
+                        name: routeName.flattenText,
+                        path: '/flattenText/index',
+                        component: flattenText
+                    },
+                    {
+                        name: routeName.svg,
+                        path: '/svg/index',
+                        component: svg
+                    },
+                    {
+                        name: routeName.settings,
+                        path: '/settings/index',
+                        component: settings
+                    },
+                ]
+            },
+            {
+                name: routeName.updater,
+                path: 'updater-page',
+                component: Updater
+            }
+        ]
+    }
 ]

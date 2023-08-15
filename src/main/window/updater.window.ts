@@ -1,16 +1,17 @@
-import {join} from 'path'
-import {BrowserWindow, app} from 'electron'
+import {UPDATER_WINDOW_URL} from "@main/window/constants";
+import {app, BrowserWindow} from "electron";
+import {join} from "path";
 
 const isDev = !app.isPackaged
 
-export async function createWindow() {
+export const createUpdaterWindow = (): BrowserWindow => {
     const win = new BrowserWindow({
-        width: 435,
-        height: 550,
+        width: 650,
+        height: 165,
         resizable: false,
-        frame: false, // 无边框
+        // frame: false, // 无边框
         webPreferences: {
-            nodeIntegration: false,
+            nodeIntegration: true,
             contextIsolation: true,
             preload: join(__dirname, '../preload/index.js'),
             devTools: isDev,
@@ -20,20 +21,14 @@ export async function createWindow() {
             //  nodeIntegrationInSubFrames: true // 允许 Node.js APIs 在子 frame 中使用（仅 Electron 5+）
         },
         show: false,
-        autoHideMenuBar: !isDev,
+        autoHideMenuBar: true,
     })
 
-    //win.maximize()
-
-    const URL = isDev
-        ? process.env.DS_RENDERER_URL
-        : `file://${join(app.getAppPath(), 'dist/render/index.html')}`
-
-    win.loadURL(URL)
+    win.loadURL(UPDATER_WINDOW_URL)
 
     // 监听 "ready-to-show" 事件
     win.once('ready-to-show', () => {
-        win.show(); // 当渲染器加载完毕时显示窗口
+        // win.show(); // 当渲染器加载完毕时显示窗口
     });
 
     if (isDev) {
@@ -47,18 +42,4 @@ export async function createWindow() {
     })
 
     return win
-}
-
-export async function restoreOrCreateWindow() {
-    let window = BrowserWindow.getAllWindows().find(w => !w.isDestroyed())
-
-    if (window === undefined) {
-        window = await createWindow()
-    }
-
-    if (window.isMinimized()) {
-        window.restore()
-    }
-
-    window.focus()
 }

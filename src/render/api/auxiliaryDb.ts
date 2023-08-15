@@ -60,13 +60,13 @@ export const update_cj_cron = async (obj: { projectName?: string, projectId: str
     return data
 }
 
-export const get_auth_token = async () => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getAuthToken))
+export const get_auth_token = async (account: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getAuthTokenByAccount, account))
     return data
 }
 
-export const update_auth_token = async (token: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateAuthToken, token))
+export const update_auth_token = async (token: string, account: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateAuthTokenByAccount, token, account))
     return data
 }
 

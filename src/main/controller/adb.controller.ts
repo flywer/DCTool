@@ -1,10 +1,10 @@
 import {AppDataSource} from "@main/dataSource/data-source";
-import {Dict} from "@main/entity/Dict";
 import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
 import {ProjectInfo} from "@main/entity/ProjectInfo";
 import {TableSql} from "@main/entity/TableSql";
+import {User} from "@main/entity/User";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
 import {IsNull, Like, Not} from "typeorm";
@@ -130,20 +130,20 @@ export class AdbController {
         })
     }
 
-    @IpcHandle(channels.auxiliaryDb.getAuthToken)
-    public async handleGetAuthToken() {
-        return await AppDataSource.getRepository(Dict).findOneBy({
-            name: 'authToken'
+    @IpcHandle(channels.auxiliaryDb.getAuthTokenByAccount)
+    public async handleGetAuthToken(account: string) {
+        return await AppDataSource.getRepository(User).findOneBy({
+            account: account
         })
     }
 
-    @IpcHandle(channels.auxiliaryDb.updateAuthToken)
-    public async handleUpdateAuthToken(token: string) {
-        const dict = await AppDataSource.getRepository(Dict).findOneBy({
-            name: 'authToken'
-        });
-        dict.value = token
-        return await AppDataSource.manager.save(dict)
+    @IpcHandle(channels.auxiliaryDb.updateAuthTokenByAccount)
+    public async handleUpdateAuthToken(token: string, account: string) {
+        const user = await AppDataSource.getRepository(User).findOneBy({
+            account: account
+        })
+        user.dcToken = token
+        return await AppDataSource.manager.save(user)
     }
 
     @IpcHandle(channels.auxiliaryDb.getTableSql)

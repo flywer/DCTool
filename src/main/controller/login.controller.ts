@@ -13,11 +13,12 @@ import {BrowserWindow} from "electron";
 import log from "electron-log";
 import {isEmpty} from "lodash";
 import {join} from "path";
+import {MAIN_WINDOW} from "@main/window/constants";
 
 @Controller()
 export class LoginController {
     constructor(
-        @Window() private mainWindow: BrowserWindow, // 主窗口实例
+        @Window(MAIN_WINDOW) private mainWindow: BrowserWindow, // 主窗口实例
         @Inject("IS_DEV") private isDev: boolean
     ) {
     }
@@ -44,7 +45,7 @@ export class LoginController {
             select: ['id'],
             where: {
                 account: model.account,
-                isActive:1
+                isActive: 1
             }
         })
             .then(async res => {
@@ -102,7 +103,7 @@ export class LoginController {
         this.mainWindow.setSize(width, height, true)
     }
 
-    @IpcSend(channels.login.sendCanLogin)
+    @IpcSend(channels.login.sendCanLogin, MAIN_WINDOW)
     public handleSendCanLogin() {
         return true
     }
