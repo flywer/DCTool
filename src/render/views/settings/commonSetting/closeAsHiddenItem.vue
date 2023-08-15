@@ -7,12 +7,12 @@
           <n-text depth="3" class="ml-3">启用此项需先启用系统托盘，禁用此项后关闭主窗口将直接退出程序</n-text>
         </div>
       </n-gi>
-      <n-gi  :span="1">
+      <n-gi :span="1">
         <n-space class="h-full" justify="end" align="center">
           <n-switch
-              :disabled="!appSettings.setup.enableSysTray"
+              :disabled=" appSettings.setup==null || !appSettings.setup?.enableSysTray "
               :rubber-band="false"
-              :value="appSettings.setup.closeAsHidden"
+              :value="active"
               :loading="loading"
               @update:value="handleUpdateValue"
           />
@@ -25,10 +25,11 @@
 <script setup lang="ts">
 import {set_app_settings} from "@render/api/app.api"
 import {useAppSettingsStore} from "@render/stores/appSettings";
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 
 const appSettings = useAppSettingsStore()
 
+const active = ref(false)
 const loading = ref(false)
 
 const handleUpdateValue = (v) => {
@@ -38,8 +39,10 @@ const handleUpdateValue = (v) => {
   })
       .then(res => {
         appSettings.setup.closeAsHidden = v
+        active.value = v
         if (!res.success) {
           appSettings.setup.closeAsHidden = !v
+          active.value = !v
           window.$message.error(res.message)
         }
       })
@@ -48,6 +51,10 @@ const handleUpdateValue = (v) => {
       })
       .finally(() => loading.value = false)
 }
+
+watch(() => appSettings.setup.closeAsHidden, (newValue) => {
+  active.value = newValue
+})
 
 </script>
 
