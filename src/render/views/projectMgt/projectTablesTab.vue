@@ -104,6 +104,7 @@ import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/ap
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
+import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, reactive, ref, watch, computed} from "vue";
 
@@ -155,15 +156,57 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    tableDataRef.value = (await get_tables_info({
+    const records = (await get_tables_info({
       size: 10000,
       page: 1,
       sourceId: 6,
       likeValue: queryParam.value
     })).data?.records || []
+
+    if (!isEmpty(records)) {
+      tableDataRef.value = customSort(records);
+    }
   }
 
   isTableLoading.value = false
+}
+
+const customSort = (arr: any[]): string[] => {
+  const map = new Map<string, number>();
+
+  [
+    'temp_ods',
+    'ods',
+    'right_dwd',
+    'error_dwd',
+    'dwb'
+  ].forEach((item, index) => {
+    map.set(item, index);
+  });
+
+  const getSuffix = (tableName: string) => {
+    if (tableName.endsWith('temp_ods')) {
+      return 'temp_ods'
+    } else if (tableName.endsWith('ods')) {
+      return 'ods'
+    } else if (tableName.endsWith('right_dwd')) {
+      return 'right_dwd'
+    } else if (tableName.endsWith('error_dwd')) {
+      return 'error_dwd'
+    } else if (tableName.endsWith('dwb')) {
+      return 'dwb'
+    } else {
+      return ''
+    }
+  }
+
+  return arr.sort((a, b) => {
+    const aSuffix = getSuffix(a.tableName)
+    const bSuffix = getSuffix(b.tableName)
+    const aIndex = map.get(aSuffix)
+    const bIndex = map.get(bSuffix)
+    return aIndex - bIndex
+  });
 }
 
 const createColumns = (): DataTableColumns<Table> => {
