@@ -626,7 +626,6 @@ import {
   get_table_sql
 } from "@render/api/auxiliaryDb";
 import {
-  add_sched_task,
   create_valid_config,
   get_cj_job_page,
   get_columns,
@@ -641,7 +640,7 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
-import {CjFormModelType, createCjJob} from "@render/utils/datacenter/cjJob";
+import {CjFormModelType, createCjJob, createSchedJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
@@ -1225,44 +1224,18 @@ const isSaving = ref(false)
 
 const onPositiveClick = async () => {
   isSaving.value = true
-
   if (formSelect.value.addSchedJob) {
     addSchedJobModalFormRef.value?.validate(async (errors) => {
       if (!errors) {
-        const {
-          projectName,
-          sec,
-          min,
-          hour,
-          day,
-          month,
-          week,
-          year,
-          ...newAddSchedJobModalFormModel
-        } = {
-          ...addSchedJobModalFormModel.value,
-          retry: parseInt(addSchedJobModalFormModel.value.retry),
-          executorFailRetryCount: addSchedJobModalFormModel.value.executorFailRetryCount.toString(),
-          jobCron: `${addSchedJobModalFormModel.value.sec} ${addSchedJobModalFormModel.value.min} ${addSchedJobModalFormModel.value.hour} ${addSchedJobModalFormModel.value.day} ${addSchedJobModalFormModel.value.month} ${addSchedJobModalFormModel.value.week} ${addSchedJobModalFormModel.value.year}`
-        };
-
-        await add_sched_task(newAddSchedJobModalFormModel).then(res => {
-          if (res.code == 0) {
-            window.$message.success('调度任务创建成功')
-            tableDataInit()
-          } else {
-            window.$notification.create({
-              title: '调度任务创建失败',
-              content: res.msg + '，请重新配置CRON表达式',
-              type: "warning"
-            })
-          }
+        createSchedJob(addSchedJobModalFormModel.value).then(() => {
+          tableDataInit()
+          showModalRef.value = false
         }).finally(() => {
           isSaving.value = false
-          showModalRef.value = false
           formSelect.value.addSchedJob = false
         })
       } else {
+        isSaving.value = false
         console.error(errors)
       }
     })

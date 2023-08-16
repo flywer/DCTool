@@ -1,4 +1,4 @@
-import {add_datax_job, build_datax_json} from "@render/api/datacenter";
+import {add_datax_job, add_sched_task, build_datax_json} from "@render/api/datacenter";
 import {findCommonElementsByArr2} from "@render/utils/datacenter/findCommonElements";
 import {cloneDeep} from "lodash-es";
 
@@ -9,6 +9,28 @@ export type CjFormModelType = {
     targetDataSourceId: '6',
     targetTableName: string,
     projectId: string
+}
+
+export type SchedJobFromModelType = {
+    jobType: string,
+    jobContent: string,
+    glueType: string,
+    projectId: string,
+    projectName: string,
+    jobCron: string,
+    jobDesc: string,
+    jobGroup: number,
+    retry: string,
+    executorFailRetryCount: number,
+    jobTemplateId: string,
+    subsystemName: string,
+    sec: string,
+    min: number,
+    hour: string,
+    day: string,
+    month: string,
+    week: string,
+    year: string,
 }
 
 const templateJson = {
@@ -193,7 +215,7 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
 export const createCjJob = async (formModel: CjFormModelType, sourceTableColumns: any[], targetTableColumns: any[]) => {
     const param = await buildCjJobJson(formModel, sourceTableColumns, targetTableColumns)
     if (param != null) {
-       await add_datax_job(param).then(async (res) => {
+        await add_datax_job(param).then(async (res) => {
             if (res.code == 0) {
                 window.$message.success('采集任务创建成功')
             } else {
@@ -202,4 +224,36 @@ export const createCjJob = async (formModel: CjFormModelType, sourceTableColumns
             }
         })
     }
+}
+
+export const createSchedJob = async (formModel: SchedJobFromModelType) => {
+    const {
+        projectName,
+        sec,
+        min,
+        hour,
+        day,
+        month,
+        week,
+        year,
+        ...newAddSchedJobModalFormModel
+    } = {
+        ...formModel,
+        retry: parseInt(formModel.retry),
+        executorFailRetryCount: formModel.executorFailRetryCount.toString(),
+        jobCron: `${formModel.sec} ${formModel.min} ${formModel.hour} ${formModel.day} ${formModel.month} ${formModel.week} ${formModel.year}`
+    };
+
+    await add_sched_task(newAddSchedJobModalFormModel).then(res => {
+        if (res.code == 0) {
+            window.$message.success('调度任务创建成功')
+
+        } else {
+            window.$notification.create({
+                title: '调度任务创建失败',
+                content: res.msg + '，请重新配置CRON表达式',
+                type: "warning"
+            })
+        }
+    })
 }

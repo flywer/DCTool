@@ -37,6 +37,11 @@
       :title="modalTitle"
       :size="'small'"
   >
+
+    <n-alert type="warning" :show-icon="false" v-if="showCronUnConfigAlert">
+      此项目未进行调度配置，可能会与其他项目执行时间产生冲突，前往<b>调度管理</b>进行配置
+    </n-alert>
+
     <n-form
         class="mt-4"
         ref="addSchedJobModalFormRef"
@@ -79,7 +84,7 @@
           <n-input-number v-model:value="addSchedJobModalFormModel.executorFailRetryCount" button-placement="both"/>
         </n-form-item-gi>
 
-        <n-form-item-gi :span="2" label="秒" path="sec" :label-style="{margin:'0 auto'}">
+        <n-form-item-gi :span="1" label="秒" path="sec" :label-style="{margin:'0 auto'}">
           <n-input class="text-center"
                    v-model:value="addSchedJobModalFormModel.sec"
                    placeholder=""
@@ -87,9 +92,10 @@
                    readonly
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="2" label="分" path="min" :label-style="{margin:'0 auto'}">
-          <n-input class="text-center" v-model:value="addSchedJobModalFormModel.min" placeholder=""
-                   @keydown.enter.prevent
+        <n-form-item-gi :span="3" label="分" path="min" :label-style="{margin:'0 auto'}">
+          <n-input-number class="text-center" v-model:value="addSchedJobModalFormModel.min" placeholder=""
+                          :min="schedMinRange.startMin" :max="schedMinRange.endMIn"
+                          @keydown.enter.prevent
           />
         </n-form-item-gi>
         <n-form-item-gi :span="2" label="时" path="hour" :label-style="{margin:'0 auto'}">
@@ -132,21 +138,29 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_project_by_pro_abbr, get_table_sql} from "@render/api/auxiliaryDb";
 import {
-  datax_job_delete,
-  datax_job_run,
-  datax_job_start,
-  datax_job_stop,
+  find_by_project_id,
+  get_cj_cron_by_project_id,
+  get_project_by_pro_abbr,
+  get_table_sql
+} from "@render/api/auxiliaryDb";
+import {
   get_cj_job_page,
   get_sched_job_page,
-  sched_job_delete
 } from "@render/api/datacenter";
 import {formatDate} from "@render/utils/common/dateUtils";
-import {Job, setJobStatus} from "@render/utils/datacenter/jobTabUtil";
+import {createSchedJob} from "@render/utils/datacenter/cjJob";
+import {
+  dataXJobDelete, dataXJobRun,
+  dataXJobStart, dataXJobStop,
+  Job,
+  setJobStatus,
+  showButton,
+  showConfirmation
+} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {parseExpression} from "cron-parser";
-import {DataTableColumns, FormInst, NButton, NPopconfirm, NSpace} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const tableDataRef = ref([])
@@ -204,7 +218,13 @@ const tableDataInit = async () => {
     newJobs.push(job)
   }
 
-  tableDataRef.value = newJobs
+  tableDataRef.value = newJobs.sort((a, b) => {
+    const aSplit = a.jobName.split("_");
+    const bSplit = b.jobName.split("_");
+    const aSplitValue = aSplit[2];
+    const bSplitValue = bSplit[2];
+    return aSplitValue.localeCompare(bSplitValue);
+  })
 
   isTableLoading.value = false
 }
@@ -248,7 +268,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '数据类型',
       key: 'comment',
-      width: '10%'
+      width: '14%'
     },
     {
       title: '状态',
@@ -296,38 +316,37 @@ const createColumns = (): DataTableColumns<Job> => {
             container.children = [
               showButton('配置', async () => {
                 await addSchedJobModalFormModelInit(row)
-                showModalRef.value = true
-                modalTitle = '创建调度任务'
               }),
               showConfirmation('删除', async () => {
-                await cjJobDelete(row)
-              }),
+                await dataXJobDelete(row, () => tableDataInit())
+              })
             ]
             break
           case  1: // 任务停用
             container.children = [
               showButton('启用', () => {
-                cjJobStart(row)
+                dataXJobStart(row, () => tableDataInit())
               }),
               showConfirmation('执行', () => {
-                cjJobRun(row)
+                dataXJobRun(row, () => tableDataInit())
               }),
               showConfirmation('删除', async () => {
-                await cjJobDelete(row)
+                await dataXJobDelete(row, () => tableDataInit())
               }),
             ]
             break
           case 2:// 任务启用
             container.children = [
               showButton('停用', () => {
-                cjJobStop(row)
+                dataXJobStop(row, () => tableDataInit())
               }),
               showConfirmation('执行', () => {
-                cjJobRun(row)
+                dataXJobRun(row, () => tableDataInit())
               }),
               showConfirmation('删除', async () => {
-                await cjJobStop(row)
-                await cjJobDelete(row)
+                await dataXJobStop(row, () => {
+                  dataXJobDelete(row, () => tableDataInit())
+                })
               }),
             ]
             break
@@ -354,101 +373,6 @@ const paginationReactive = reactive({
   }
 })
 
-const showButton = (text, onClick) => {
-  return h(NButton, {
-        size: 'small',
-        onClick: async () => {
-          await onClick()
-        }
-      },
-      {default: () => text})
-}
-
-const showConfirmation = (text, onPositiveClick) => {
-  return h(NPopconfirm, {
-    positiveText: '确定',
-    negativeText: '取消',
-    onPositiveClick: async () => {
-      await onPositiveClick();
-    },
-  }, {
-    trigger: () => {
-      return h(NButton, {size: 'small'}, {default: () => text})
-    },
-    default: () => `确定要${text}吗？`
-  });
-}
-
-const cjJobStart = async (row: Job) => {
-  const schedJobId = (await getSchedJob(row.jobName)).id
-  datax_job_start(schedJobId).then(res => {
-    if (res.data == 'success') {
-      window.$message.success('启用成功')
-      tableDataInit()
-    } else {
-      window.$message.error(res.msg)
-    }
-  })
-}
-
-const cjJobStop = async (row: Job) => {
-  const schedJobId = (await getSchedJob(row.jobName)).id
-  datax_job_stop(schedJobId).then(res => {
-    if (res.data == 'success') {
-      window.$message.success('停用成功')
-      tableDataInit()
-    } else {
-      window.$message.error(res.message)
-    }
-  })
-}
-
-const cjJobRun = async (row: Job) => {
-  const schedJobId = (await getSchedJob(row.jobName)).id
-  datax_job_run({
-    jobId: schedJobId,
-    subsystemName: "采集"
-  }).then(res => {
-    if (res.data == 'success') {
-      window.$message.success('执行成功')
-      tableDataInit()
-    } else {
-      window.$message.error(res.message)
-    }
-  })
-}
-
-const cjJobDelete = async (row: Job) => {
-  const schedJobId = (await getSchedJob(row.jobName)).id
-  if (schedJobId != null) {
-    sched_job_delete(schedJobId).then(res => {
-      if (res.code == 0) {
-        window.$message.success('调度任务删除成功')
-        datax_job_delete(row.id).then(res1 => {
-          if (res1.code == 0) {
-            window.$message.success('采集任务删除成功')
-            tableDataInit()
-          } else {
-            window.$message.error(res1.msg)
-          }
-        })
-      } else {
-        window.$message.error(res.msg)
-      }
-    })
-  } else {
-    datax_job_delete(row.id).then(res1 => {
-      if (res1.code == 0) {
-        window.$message.success('采集任务删除成功')
-        tableDataInit()
-      } else {
-        window.$message.error(res1.msg)
-      }
-    })
-  }
-
-}
-
 // region 新增调度任务
 const showModalRef = ref(false)
 
@@ -462,8 +386,19 @@ const isSaving = ref(false)
 
 const onPositiveClick = async () => {
   isSaving.value = true
-
-  isSaving.value = false
+  addSchedJobModalFormRef.value?.validate(async (errors) => {
+    if (!errors) {
+      createSchedJob(addSchedJobModalFormModel.value).then(() => {
+        tableDataInit()
+        showModalRef.value = false
+      }).finally(() => {
+        isSaving.value = false
+      })
+    } else {
+      isSaving.value = false
+      console.error(errors)
+    }
+  })
 }
 
 const addSchedJobModalFormRef = ref<FormInst | null>(null);
@@ -482,7 +417,7 @@ const addSchedJobModalFormModel = ref({
   jobTemplateId: '',
   subsystemName: "采集",
   sec: '*',
-  min: '0',
+  min: 0,
   hour: '0,12',
   day: '?',
   month: '*',
@@ -507,6 +442,7 @@ const addSchedJobModalFormRules = {
     message: ''
   },
   min: {
+    type: 'number',
     required: true,
     trigger: ['input'],
     message: ''
@@ -538,11 +474,43 @@ const addSchedJobModalFormRules = {
   }
 }
 
+const showCronUnConfigAlert = ref(false)
+
+let schedMinRange = {
+  startMin: 0,
+  endMIn: 59
+}
+
 const addSchedJobModalFormModelInit = async (v) => {
   addSchedJobModalFormModel.value.jobContent = v.jobName
   addSchedJobModalFormModel.value.jobDesc = v.jobName
   addSchedJobModalFormModel.value.jobTemplateId = v.id
   addSchedJobModalFormModel.value.projectName = (await get_project_by_pro_abbr(v.jobName.split("_")[1]))?.projectName || '未知项目'
+
+  const cron = (await get_cj_cron_by_project_id(projectId))?.cjCron || null
+  if (cron != null) {
+    showCronUnConfigAlert.value = false
+
+    const minRange = cron.split(' ')[1]
+    schedMinRange = {
+      startMin: parseInt(minRange.split('-')[0]),
+      endMIn: parseInt(minRange.split('-')[1]),
+    }
+    addSchedJobModalFormModel.value.min = schedMinRange.startMin
+    addSchedJobModalFormModel.value.hour = cron.split(' ')[2]
+  } else {
+    showCronUnConfigAlert.value = true
+
+    schedMinRange = {
+      startMin: 0,
+      endMIn: 59
+    }
+    addSchedJobModalFormModel.value.min = 0
+    addSchedJobModalFormModel.value.hour = '0,12'
+  }
+
+  showModalRef.value = true
+  modalTitle = '创建调度任务'
 }
 
 // endregion
