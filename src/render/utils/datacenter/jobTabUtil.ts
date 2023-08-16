@@ -1,4 +1,5 @@
 // 这里存放jobTab.vue中使用的一些工具方法
+import {get_max_running_workflow_num} from "@render/api/auxiliaryDb.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
@@ -186,7 +187,8 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
         }
     }
 
-    if (runningJobs.length >= 5) {
+    const maxRunningNum = (await get_max_running_workflow_num()).value
+    if (runningJobs.length >= maxRunningNum) {
         window.$dialog.warning({
             title: '警告',
             content: `目前正在运行的工作流有${runningJobs.length}个，是否继续执行此任务？`,

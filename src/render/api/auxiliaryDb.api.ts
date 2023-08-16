@@ -70,6 +70,11 @@ export const get_auth_token = async (account: string) => {
     return data
 }
 
+export const get_max_running_workflow_num = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getMaxRunningWorkFlowJobNum))
+    return data
+}
+
 export const update_auth_token = async (token: string, account: string) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateAuthTokenByAccount, token, account))
     return data

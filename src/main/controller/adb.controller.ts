@@ -1,4 +1,5 @@
 import {AppDataSource} from "@main/dataSource/data-source";
+import {Dict} from "@main/entity/Dict";
 import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
@@ -444,6 +445,13 @@ export class AdbController {
                 bzId: bzId,
                 cdOperation: Not('D')
             }
+        })
+    }
+
+    @IpcHandle(channels.auxiliaryDb.getMaxRunningWorkFlowJobNum)
+    public async handleGetMaxRunningWorkFlowJobNum() {
+        return await AppDataSource.getRepository(Dict).findOneBy({
+            name: 'maxRunningWorkFlowJobNum'
         })
     }
 
