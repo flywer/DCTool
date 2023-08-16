@@ -166,7 +166,7 @@ import {isTimeConflict} from "@render/utils/common/cronUtils";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Add, Refresh, RemoveOutline, AddOutline, Search} from '@vicons/ionicons5'
 import {DataTableColumns, FormInst, NButton, NSpace, SelectGroupOption, SelectOption} from "naive-ui";
-import {h, onMounted, reactive, ref} from "vue";
+import {h, onMounted, reactive, ref, watch} from "vue";
 
 const isTableLoading = ref(false)
 
@@ -299,6 +299,19 @@ const cronConfigModalFormModel = ref({
   cron: ''
 })
 
+watch(() => cronConfigModalFormModel.value.min[1], () => {
+  cronConfigModalFormRef.value?.validate(
+      (errors) => {
+        if (errors) {
+          console.error(errors)
+        }
+      },
+      (rule) => {
+        return rule?.key === 'mins'
+      }
+  )
+})
+
 const cronConfigModalFormRules = ref({
   projectId: {
     required: true,
@@ -306,6 +319,7 @@ const cronConfigModalFormRules = ref({
     message: '请选择项目'
   },
   min: {
+    key: 'mins',
     validator() {
       if (cronConfigModalFormModel.value.min[0] > cronConfigModalFormModel.value.min[1]) {
         return new Error('起始分需小于等于结束分')
