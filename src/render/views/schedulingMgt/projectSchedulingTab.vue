@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_project_by_cj_cron_is_null, get_project_cj_cron, update_cj_cron} from "@render/api/auxiliaryDb";
+import {get_project_by_cj_cron_is_null, get_project_cj_cron, update_cj_cron} from "@render/api/auxiliaryDb.api";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {isTimeConflict} from "@render/utils/common/cronUtils";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";

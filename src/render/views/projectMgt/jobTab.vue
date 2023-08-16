@@ -624,7 +624,7 @@ import {
   get_cj_cron_by_project_id,
   get_project_by_pro_abbr,
   get_table_sql
-} from "@render/api/auxiliaryDb";
+} from "@render/api/auxiliaryDb.api";
 import {
   create_valid_config,
   get_cj_job_page,
@@ -634,8 +634,8 @@ import {
   get_workflow_log,
   get_workflow_page,
   gte_usrc_org_tree
-} from "@render/api/datacenter";
-import {get_table_data} from "@render/api/front";
+} from "@render/api/datacenter.api";
+import {get_table_data} from "@render/api/front.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {formatDate} from "@render/utils/common/dateUtils";

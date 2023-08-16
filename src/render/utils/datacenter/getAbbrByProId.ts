@@ -1,5 +1,5 @@
-import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {get_job_project_list_all} from "@render/api/datacenter";
+import {find_by_project_id} from "@render/api/auxiliaryDb.api";
+import {get_job_project_list_all} from "@render/api/datacenter.api";
 import pinyin from "pinyin";
 
 export const getAbbrByProId = async (projectId: string) => {

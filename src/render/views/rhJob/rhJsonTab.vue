@@ -88,7 +88,7 @@ import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Search} from '@vicons/ionicons5'
-import {get_rh_json, update_rh1_json, update_rh2_json} from "@render/api/auxiliaryDb";
+import {get_rh_json, update_rh1_json, update_rh2_json} from "@render/api/auxiliaryDb.api";
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 

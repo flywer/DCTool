@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import {check_insert_sql} from "@render/api/datacenter";
+import {check_insert_sql} from "@render/api/datacenter.api";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {clone} from "lodash-es";
 import {ref} from "vue";

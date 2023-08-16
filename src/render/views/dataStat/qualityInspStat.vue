@@ -70,9 +70,9 @@
 </template>
 
 <script setup lang="ts">
-import {get_table_sql} from "@render/api/auxiliaryDb";
-import {get_inps_record_page, insp_home_list} from "@render/api/datacenter";
-import {create_data_inps_stat} from "@render/api/xlsx";
+import {get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_inps_record_page, insp_home_list} from "@render/api/datacenter.api";
+import {create_data_inps_stat} from "@render/api/xlsx.api";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
 import {actionTableNames} from "@render/utils/datacenter/actionTableNames";

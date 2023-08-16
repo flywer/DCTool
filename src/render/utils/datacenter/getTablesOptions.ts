@@ -1,4 +1,4 @@
-import {get_tables} from "@render/api/datacenter";
+import {get_tables} from "@render/api/datacenter.api";
 
 export const getTablesOptions = async (dataSourceId: string, tableSchema?: string) => {
     const tables = await get_tables(dataSourceId, tableSchema || '')

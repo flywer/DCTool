@@ -1,5 +1,5 @@
 // 项目
-import {get_datasource_list, get_job_project_list_all, get_person_list} from "@render/api/datacenter";
+import {get_datasource_list, get_job_project_list_all, get_person_list} from "@render/api/datacenter.api";
 import {SelectGroupOption, SelectOption} from "naive-ui";
 
 const customSort = (a: any, b: any) => {

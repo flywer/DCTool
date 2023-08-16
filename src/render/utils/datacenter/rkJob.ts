@@ -1,4 +1,4 @@
-import {add_work_flow, get_columns} from "@render/api/datacenter";
+import {add_work_flow, get_columns} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {findCommonElements} from "@render/utils/datacenter/findCommonElements";
 import {removeIds} from "@render/utils/datacenter/removeIds";

@@ -47,8 +47,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
-import {get_workflow_log, get_workflow_page} from "@render/api/datacenter";
+import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_workflow_log, get_workflow_page} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,
   Job,

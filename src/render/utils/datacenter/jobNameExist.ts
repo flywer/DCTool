@@ -1,5 +1,5 @@
 // 查询dataX任务名是否存在
-import {get_cj_job_page, get_workflow_page} from "@render/api/datacenter";
+import {get_cj_job_page, get_workflow_page} from "@render/api/datacenter.api";
 
 export const dataXJobNameExist = async (jobName: string) => {
     const records = (await get_cj_job_page({

@@ -31,8 +31,8 @@
 
 <script setup lang="ts">
 import {getCurrentDateTime, getDayString} from "@main/utils/dateUtils";
-import {get_sztk_dict, save_sztk_dict} from "@render/api/auxiliaryDb";
-import {get_dict_by_name, get_dict_list_by_id} from "@render/api/datacenter";
+import {get_sztk_dict, save_sztk_dict} from "@render/api/auxiliaryDb.api";
+import {get_dict_by_name, get_dict_list_by_id} from "@render/api/datacenter.api";
 import {isEmpty} from "lodash-es";
 import {SelectGroupOption, SelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";

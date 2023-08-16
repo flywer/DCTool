@@ -1,5 +1,5 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {create_cron_job} from "@render/api/cron";
+import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
     datax_job_run,
@@ -15,7 +15,7 @@ import {
     workflow_delete,
     workflow_rerun,
     workflow_run
-} from "@render/api/datacenter";
+} from "@render/api/datacenter.api";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";

@@ -87,8 +87,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter";
+import {find_by_project_id} from "@render/api/auxiliaryDb.api";
+import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {basicTableNames} from "@render/utils/datacenter/basicTableNames";

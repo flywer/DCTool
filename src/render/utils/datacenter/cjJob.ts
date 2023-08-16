@@ -1,4 +1,4 @@
-import {add_datax_job, add_sched_task, build_datax_json} from "@render/api/datacenter";
+import {add_datax_job, add_sched_task, build_datax_json} from "@render/api/datacenter.api";
 import {findCommonElementsByArr2} from "@render/utils/datacenter/findCommonElements";
 import {cloneDeep} from "lodash-es";
 

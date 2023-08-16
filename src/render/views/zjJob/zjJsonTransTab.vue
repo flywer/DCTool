@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import {add_work_flow} from "@render/api/datacenter";
+import {add_work_flow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";

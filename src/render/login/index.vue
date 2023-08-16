@@ -98,7 +98,7 @@
 
 <script setup lang="ts">
 import {Result} from "@main/vo/resultVo";
-import {read_user_config, remember_me, sign_in, sign_up} from "@render/api/login";
+import {read_user_config, remember_me, sign_in, sign_up} from "@render/api/login.api";
 import {useUserStore} from "@render/stores/user";
 import {FormInst, FormItemRule} from "naive-ui";
 import {onMounted, ref} from "vue";

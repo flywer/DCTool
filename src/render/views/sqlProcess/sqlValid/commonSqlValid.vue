@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import {sql_valid} from "@render/api/datacenter";
+import {sql_valid} from "@render/api/datacenter.api";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {FormInst} from "naive-ui";
 import {ref} from "vue";

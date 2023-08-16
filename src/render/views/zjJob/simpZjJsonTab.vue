@@ -100,7 +100,7 @@ import {formatDate} from "@render/utils/common/dateUtils";
 import {convertZjJson} from "@render/utils/datacenter/zjJob";
 import ZjRulesTable from "@render/views/zjJob/zjRulesTable.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
-import {get_simp_zj_json, update_simp_zj_json} from "@render/api/auxiliaryDb";
+import {get_simp_zj_json, update_simp_zj_json} from "@render/api/auxiliaryDb.api";
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 

@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts" setup>
-import {exec_sql} from "@render/api/datacenter";
+import {exec_sql} from "@render/api/datacenter.api";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {FormInst} from "naive-ui";
 import {ref} from "vue";

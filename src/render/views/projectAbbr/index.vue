@@ -58,10 +58,9 @@ import {
   find_by_project_id,
   get_project_by_pro_abbr,
   get_project_by_table_abbr,
-  get_project_info, get_project_info_by_project_name,
   update_project_info
-} from "@render/api/auxiliaryDb";
-import {get_job_project_list_all, get_job_project_list_by_page} from "@render/api/datacenter";
+} from "@render/api/auxiliaryDb.api";
+import {get_job_project_list_by_page} from "@render/api/datacenter.api";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
 import {isNull} from "lodash-es";
 import type {DataTableColumns} from 'naive-ui'

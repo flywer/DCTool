@@ -89,8 +89,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb";
-import {add_work_flow} from "@render/api/datacenter";
+import {find_by_project_id, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {add_work_flow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";

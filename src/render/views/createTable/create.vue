@@ -201,8 +201,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb";
-import {create_table, get_tables_info, table_delete} from "@render/api/datacenter";
+import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
+import {create_table, get_tables_info, table_delete} from "@render/api/datacenter.api";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
 import {cloneDeep} from "lodash-es";

@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import {app_relaunch} from "@render/api/app.api";
-import {get_auth_token, update_auth_token} from "@render/api/auxiliaryDb";
+import {get_auth_token, update_auth_token} from "@render/api/auxiliaryDb.api";
 import {useUserStore} from "@render/stores/user";
 import {nextTick, onMounted, ref} from "vue";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'

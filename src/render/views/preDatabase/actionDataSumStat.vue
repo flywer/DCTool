@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_pre_database_depart, get_pre_database_table_info_json, get_table_sql} from "@render/api/auxiliaryDb";
+import {get_pre_database_depart, get_pre_database_table_info_json, get_table_sql} from "@render/api/auxiliaryDb.api";
 import {copyText} from "@render/utils/common/clipboard";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";

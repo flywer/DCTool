@@ -139,8 +139,8 @@
 </template>
 
 <script lang="ts" setup>
-import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {add_datax_job, add_sched_task} from "@render/api/datacenter";
+import {find_by_project_id} from "@render/api/auxiliaryDb.api";
+import {add_datax_job, add_sched_task} from "@render/api/datacenter.api";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {buildGxJson} from "@render/utils/datacenter/gxJob";

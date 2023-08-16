@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_dict_by_bz_id, get_dict_by_parent_id, get_parent_dict} from "@render/api/auxiliaryDb";
+import {get_dict_by_bz_id, get_dict_by_parent_id, get_parent_dict} from "@render/api/auxiliaryDb.api";
 import {copyText} from "@render/utils/common/clipboard";
 import {isNull} from "lodash-es";
 import {TreeSelectOption} from "naive-ui";

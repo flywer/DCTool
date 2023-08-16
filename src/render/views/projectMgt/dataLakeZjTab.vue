@@ -186,7 +186,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_table_sql, get_zj_json} from "@render/api/auxiliaryDb";
+import {get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {
   add_work_flow, create_table,
   create_valid_config, get_tables,
@@ -194,7 +194,7 @@ import {
   get_workflow_log,
   get_workflow_page,
   gte_usrc_org_tree
-} from "@render/api/datacenter";
+} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {
   getCustomTableValidConfig,

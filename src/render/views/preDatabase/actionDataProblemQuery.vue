@@ -113,7 +113,7 @@ import {
   get_pre_database_table_info_json,
   get_table_sql,
   update_table_info_json
-} from "@render/api/auxiliaryDb";
+} from "@render/api/auxiliaryDb.api";
 import {copyText} from "@render/utils/common/clipboard";
 import {isEmpty} from "lodash-es";
 import {SelectGroupOption, SelectOption, TreeSelectOption} from "naive-ui";

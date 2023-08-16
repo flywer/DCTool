@@ -109,8 +109,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {add_work_flow} from "@render/api/datacenter";
+import {find_by_project_id} from "@render/api/auxiliaryDb.api";
+import {add_work_flow} from "@render/api/datacenter.api";
 import {datasourceOptions, personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";

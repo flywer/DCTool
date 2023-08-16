@@ -1,4 +1,4 @@
-import {add_datax_job, build_datax_json, get_columns} from "@render/api/datacenter";
+import {add_datax_job, build_datax_json, get_columns} from "@render/api/datacenter.api";
 import {cloneDeep} from "lodash-es";
 
 export type GxFormModelType = {

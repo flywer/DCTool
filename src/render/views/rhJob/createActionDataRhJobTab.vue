@@ -99,8 +99,8 @@
 </template>
 
 <script setup lang="ts">
-import {get_rh_json} from "@render/api/auxiliaryDb";
-import {add_work_flow} from "@render/api/datacenter";
+import {get_rh_json} from "@render/api/auxiliaryDb.api";
+import {add_work_flow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {isBasicTable} from "@render/utils/common/isBasicTable";

@@ -99,8 +99,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb";
-import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter";
+import {find_by_project_id} from "@render/api/auxiliaryDb.api";
+import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
@@ -366,7 +366,7 @@ const showUpdateModalRef = ref(false)
 
 const commentInputRef = ref(null)
 
-const updateTableComment = (row: Table) => {
+/* const updateTableComment = (row: Table) => {
   modalFormModel.value.id = row.id
   modalFormModel.value.tableName = row.tableName
   modalFormModel.value.tableComment = row.tableComment
@@ -374,7 +374,7 @@ const updateTableComment = (row: Table) => {
   commentInputRef.value?.focus()
 
   showUpdateModalRef.value = true
-}
+} */
 
 const modalFormRef = ref<FormInst | null>(null);
 

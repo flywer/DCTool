@@ -4,8 +4,8 @@ import {
     get_simp_zj_json_by_id,
     get_zj_json,
     get_zj_json_by_id
-} from "@render/api/auxiliaryDb";
-import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter";
+} from "@render/api/auxiliaryDb.api";
+import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";

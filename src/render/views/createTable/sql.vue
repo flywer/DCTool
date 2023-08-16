@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb";
+import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb.api";
 import {DataTableColumns, NButton, FormInst} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
