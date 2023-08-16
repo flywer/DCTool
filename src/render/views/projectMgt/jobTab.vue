@@ -43,7 +43,6 @@
           class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
-          :pagination="paginationReactive"
           :bordered="true"
           :size="'small'"
           :loading="isTableLoading"
@@ -685,7 +684,7 @@ import {
   TimelineItemProps,
   TreeSelectOption
 } from "naive-ui";
-import {computed, h, onMounted, reactive, ref, watch} from "vue";
+import {computed, h, onMounted, ref, watch} from "vue";
 
 const projectTree = useProjectTreeStore()
 
@@ -1168,20 +1167,6 @@ const createColumns = (): DataTableColumns<Job> => {
 }
 
 const columnsRef = ref(createColumns())
-
-const paginationReactive = reactive({
-  page: 1,
-  pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
-  onChange: async (page: number) => {
-    paginationReactive.page = page
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    paginationReactive.pageSize = pageSize
-    paginationReactive.page = 1
-  }
-})
 
 // endregion
 

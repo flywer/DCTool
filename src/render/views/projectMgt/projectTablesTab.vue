@@ -19,7 +19,6 @@
           class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
-          :pagination="paginationReactive"
           :bordered="true"
           :size="'small'"
           :loading="isTableLoading"
@@ -106,7 +105,7 @@ import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil"
 import {Refresh} from '@vicons/ionicons5'
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
-import {h, onMounted, reactive, ref, watch, computed} from "vue";
+import {h, onMounted, ref, watch, computed} from "vue";
 
 const queryParam = ref('')
 
@@ -266,20 +265,6 @@ const createColumns = (): DataTableColumns<Table> => {
 }
 
 const columnsRef = ref(createColumns())
-
-const paginationReactive = reactive({
-  page: 1,
-  pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
-  onChange: async (page: number) => {
-    paginationReactive.page = page
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    paginationReactive.pageSize = pageSize
-    paginationReactive.page = 1
-  }
-})
 
 //region 预览
 const showPreviewModalRef = ref(false)
