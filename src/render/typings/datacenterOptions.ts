@@ -1,5 +1,5 @@
 // 项目
-import {get_datasource_list, get_job_project_list, get_person_list} from "@render/api/datacenter";
+import {get_datasource_list, get_job_project_list_all, get_person_list} from "@render/api/datacenter";
 import {SelectGroupOption, SelectOption} from "naive-ui";
 
 const customSort = (a: any, b: any) => {
@@ -17,7 +17,7 @@ const customSort = (a: any, b: any) => {
     }
 };
 
-export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list())?.sort(customSort).map(
+export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await get_job_project_list_all())?.sort(customSort).map(
     (v => ({
         label: v.name,
         value: v.id.toString()
@@ -25,7 +25,7 @@ export let projectIdOptions: Array<SelectOption | SelectGroupOption> = (await ge
 ) || []
 
 export const projectIdOptionsUpdate = async () => {
-    projectIdOptions = (await get_job_project_list())?.sort(customSort).map(
+    projectIdOptions = (await get_job_project_list_all())?.sort(customSort).map(
         (v => ({
             label: v.name,
             value: v.id.toString()

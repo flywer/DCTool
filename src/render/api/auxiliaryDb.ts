@@ -6,6 +6,11 @@ export const get_project_info = async () => {
     return data
 }
 
+export const get_project_info_by_project_name = async (projectName: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectInfoByProjectName, projectName))
+    return data
+}
+
 export const update_project_info = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.updateProjectInfo, obj))
     return data

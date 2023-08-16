@@ -43,11 +43,26 @@ export class DatacenterController {
         return `数据中台访问令牌出错或不存在，请前往应用设置修改令牌`
     }
 
-    @IpcHandle(channels.datacenter.jobProjectList)
-    public async handleJobList() {
+    @IpcHandle(channels.datacenter.jobProjectListAll)
+    public async handleGetJobListAll() {
         let result
 
         await this.commonGetRequest('/gather/api/jobProject/list', null)
+            .then((res) => {
+                result = res;
+            })
+            .catch((err) => {
+                log.error(err);
+            });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getJobProjectListByPage)
+    public async handleGetJobProjectListByPage(param:any) {
+        let result
+
+        const query = `pageNo=${param.pageNo}&pageSize=${param.pageSize}&searchVal=${param.searchParam}&subsystemName=%E9%87%87%E9%9B%86`
+        await this.commonGetRequest('/gather/api/jobProject/listAll', query)
             .then((res) => {
                 result = res;
             })

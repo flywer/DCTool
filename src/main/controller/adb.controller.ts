@@ -19,6 +19,13 @@ export class AdbController {
         return await AppDataSource.manager.find(ProjectInfo)
     }
 
+    @IpcHandle(channels.auxiliaryDb.getProjectInfoByProjectName)
+    public async handleGetProjectInfoByProjectName(param: string) {
+        return await AppDataSource.getRepository(ProjectInfo).findBy({
+            projectName: Like(`%${param || ''}%`),
+        })
+    }
+
     @IpcHandle(channels.auxiliaryDb.updateProjectInfo)
     public async handleUpdateProjectInfo(arr: any) {
         arr = JSON.parse(arr)

@@ -1,3 +1,4 @@
+import {PageVo} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
@@ -9,8 +10,13 @@ export type CommonQueryParam = {
 }
 
 // 获取项目列表
-export const get_job_project_list = async () => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.jobProjectList))
+export const get_job_project_list_all = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.jobProjectListAll))
+    return data.data
+}
+
+export const get_job_project_list_by_page = async (param: PageVo) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getJobProjectListByPage, param))
     return data.data
 }
 

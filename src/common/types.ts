@@ -23,3 +23,9 @@ export type SetupModelType = {
     // 硬件加速
     hardwareAcceleration?: boolean
 }
+
+export type PageVo = {
+    pageNo: number,
+    pageSize: number,
+    searchParam: string
+}

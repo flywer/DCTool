@@ -36,7 +36,8 @@ export const channels = reactive({
         checkInsertSql: 'datacenter/checkInsertSql',
         addWorkFlow: 'datacenter/addWorkFlow',
         getColumns: 'datacenter/getColumns',
-        jobProjectList: 'datacenter/jobProjectList',
+        jobProjectListAll: 'datacenter/jobProjectListAll',
+        getJobProjectListByPage: 'datacenter/getJobProjectListByPage',
         personList: 'datacenter/personList',
         getTables: 'datacenter/getTables',
         buildDataXJson: 'datacenter/buildDataXJson',
@@ -75,10 +76,10 @@ export const channels = reactive({
         updateWorkflow: 'datacenter/updateWorkflow',
         getDataXJob: 'datacenter/getDataXJob',
         getProject: 'datacenter/getProject',
-
     },
     auxiliaryDb: {
         getProjectInfo: 'auxiliaryDb/getProjectInfo',
+        getProjectInfoByProjectName: 'auxiliaryDb/getProjectInfoByProjectName',
         updateProjectInfo: 'auxiliaryDb/updateProjectInfo',
         findByProjectId: 'auxiliaryDb/findByProjectId',
         getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',

@@ -1,11 +1,21 @@
 <template>
-  <n-layout class="mt-2 ml-2 mb-2">
+  <n-layout class="mt-2 ml-2 mb-2 mr-4 root-layout">
     <n-scrollbar style="height: calc(100vh - 50px);" trigger="hover">
-      <n-layout style="width: 98%">
-        <n-alert type="default" :show-icon="false">
-          在这里配置每个项目的缩写简称
-        </n-alert>
+
         <n-space justify="end" class="mt-2">
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              @update:value="tableDataInit"
+              clearable
+              :readonly="isLoading"
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
           <n-button secondary strong @click="tableDataInit">
             刷新
             <template #icon>
@@ -21,13 +31,23 @@
             class="mt-2"
             :columns="columnsRef"
             :data="tableDataRef"
-            :pagination="paginationReactive"
             :bordered="true"
             :size="'small'"
             :loading="isLoading"
             :striped="true"
         />
-      </n-layout>
+        <n-space class="mt-4" justify="end">
+          <n-pagination
+              v-model:page="paginationReactive.page"
+              v-model:page-size="paginationReactive.pageSize"
+              :item-count="paginationReactive.itemCount"
+              :page-sizes="[10, 20, 30, 40]"
+              show-size-picker
+              @update:page="paginationReactive.onChange"
+              @update:page-size="paginationReactive.onUpdatePageSize"
+          />
+        </n-space>
+
     </n-scrollbar>
   </n-layout>
 
@@ -35,17 +55,18 @@
 
 <script setup lang="ts">
 import {
+  find_by_project_id,
   get_project_by_pro_abbr,
   get_project_by_table_abbr,
-  get_project_info,
+  get_project_info, get_project_info_by_project_name,
   update_project_info
 } from "@render/api/auxiliaryDb";
-import {get_job_project_list} from "@render/api/datacenter";
+import {get_job_project_list_all, get_job_project_list_by_page} from "@render/api/datacenter";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
 import {isNull} from "lodash-es";
 import type {DataTableColumns} from 'naive-ui'
 import {h, onMounted, ref, reactive} from 'vue'
-import {Refresh} from '@vicons/ionicons5'
+import {Refresh, Search} from '@vicons/ionicons5'
 
 const tableRef = ref()
 
@@ -61,40 +82,55 @@ type ProjectInfo = {
   tableAbbr: string
 }
 
+const queryParam = ref('')
+
 onMounted(async () => {
-  await tableDataInit()
+  await tableDataInit(queryParam.value)
 })
 
-const paginationReactive = reactive({
-  page: 1,
-  pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
-  onChange: async (page: number) => {
-    paginationReactive.page = page
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    paginationReactive.pageSize = pageSize
-    paginationReactive.page = 1
-  }
-})
-
-const tableDataInit = async () => {
+const tableDataInit = async (param: string) => {
   isLoading.value = true
-  const map = (await get_job_project_list()).map(
-      (v => ({
-        projectName: v.name,
-        projectId: v.id.toString(),
-        projectAbbr: '',
-        tableAbbr: ''
-      })));
+  /*   const map = (await get_job_project_list_all()).map(
+        (v => ({
+          projectName: v.name,
+          projectId: v.id.toString(),
+          projectAbbr: '',
+          tableAbbr: ''
+        }))); */
 
-  const projectInfo: ProjectInfo[] = await get_project_info()
+  const data = (await get_job_project_list_by_page({
+    pageNo: paginationReactive.page,
+    pageSize: paginationReactive.pageSize,
+    searchParam: param
+  }))
+
+  const records = data?.records
+      .map(
+          (v => ({
+            projectName: v.name,
+            projectId: v.id.toString(),
+            projectAbbr: '',
+            tableAbbr: ''
+          }))) || [];
+
+  paginationReactive.itemCount = data.total || 0
+
+  // 已配置项
+  // const projectInfo: ProjectInfo[] = await get_project_info_by_project_name(param)
+
+  for (let i = 0; i < records.length; i++) {
+    const project = await find_by_project_id(records[i].projectId)
+    if (!isNull(project)) {
+      records[i].projectAbbr = project.projectAbbr
+      records[i].tableAbbr = project.tableAbbr
+    }
+  }
 
   // 融合辅助库内没有的项目
-  tableDataRef.value = projectInfo.concat(map.filter((m) => {
-    return !projectInfo.some((p) => p.projectId === m.projectId);
-  }))
+  /*   tableDataRef.value = projectInfo.concat(records.filter((m) => {
+      return (!projectInfo.some((p) => p.projectId === m.projectId));
+    })) */
+  tableDataRef.value = records
   isLoading.value = false
 }
 
@@ -126,7 +162,7 @@ const createColumns = ({}: {
                 tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
 
                 update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-                  tableDataInit().then(() => {
+                  tableDataInit(queryParam.value).then(() => {
                     window.$message.success('修改成功')
                   })
                 })
@@ -140,7 +176,7 @@ const createColumns = ({}: {
                     tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
 
                     update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-                      tableDataInit().then(() => {
+                      tableDataInit(queryParam.value).then(() => {
                         window.$message.success('修改成功')
                       })
                     })
@@ -165,7 +201,7 @@ const createColumns = ({}: {
               if (isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
                 update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-                  tableDataInit().then(() => {
+                  tableDataInit(queryParam.value).then(() => {
                     window.$message.success('修改成功')
                   })
                 })
@@ -178,7 +214,7 @@ const createColumns = ({}: {
                   onPositiveClick: () => {
                     tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
                     update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
-                      tableDataInit().then(() => {
+                      tableDataInit(queryParam.value).then(() => {
                         window.$message.success('修改成功')
                       })
                     })
@@ -198,6 +234,21 @@ const columnsRef = ref(createColumns({
     window.$message.success(`Edit ${row.projectName}`)
   }
 }))
+
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  itemCount: 0,
+  onChange: async (page: number) => {
+    paginationReactive.page = page
+    await tableDataInit(queryParam.value)
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    paginationReactive.pageSize = pageSize
+    paginationReactive.page = 1
+    tableDataInit(queryParam.value)
+  }
+})
 
 </script>
 
