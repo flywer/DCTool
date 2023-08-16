@@ -2,51 +2,51 @@
   <n-layout class="mt-2 ml-2 mb-2 mr-4 root-layout">
     <n-scrollbar style="height: calc(100vh - 50px);" trigger="hover">
 
-        <n-space justify="end" class="mt-2">
-          <n-input
-              v-model:value="queryParam"
-              placeholder="搜索"
-              @update:value="tableDataInit"
-              clearable
-              :readonly="isLoading"
-          >
-            <template #prefix>
-              <n-icon>
-                <Search/>
-              </n-icon>
-            </template>
-          </n-input>
-          <n-button secondary strong @click="tableDataInit">
-            刷新
-            <template #icon>
-              <n-icon>
-                <Refresh/>
-              </n-icon>
-            </template>
-          </n-button>
-        </n-space>
-        <n-data-table
-            ref="tableRef"
-            :key="(row) => row.projectId"
-            class="mt-2"
-            :columns="columnsRef"
-            :data="tableDataRef"
-            :bordered="true"
-            :size="'small'"
-            :loading="isLoading"
-            :striped="true"
+      <n-space justify="end" class="mt-2">
+        <n-input
+            v-model:value="queryParam"
+            placeholder="搜索"
+            @update:value="tableDataInit"
+            clearable
+            :readonly="isLoading"
+        >
+          <template #prefix>
+            <n-icon>
+              <Search/>
+            </n-icon>
+          </template>
+        </n-input>
+        <n-button secondary strong @click="tableDataInit(queryParam)">
+          刷新
+          <template #icon>
+            <n-icon>
+              <Refresh/>
+            </n-icon>
+          </template>
+        </n-button>
+      </n-space>
+      <n-data-table
+          ref="tableRef"
+          :key="(row) => row.projectId"
+          class="mt-2"
+          :columns="columnsRef"
+          :data="tableDataRef"
+          :bordered="true"
+          :size="'small'"
+          :loading="isLoading"
+          :striped="true"
+      />
+      <n-space class="mt-4" justify="end">
+        <n-pagination
+            v-model:page="paginationReactive.page"
+            v-model:page-size="paginationReactive.pageSize"
+            :item-count="paginationReactive.itemCount"
+            :page-sizes="[10, 20, 30, 40]"
+            show-size-picker
+            @update:page="paginationReactive.onChange"
+            @update:page-size="paginationReactive.onUpdatePageSize"
         />
-        <n-space class="mt-4" justify="end">
-          <n-pagination
-              v-model:page="paginationReactive.page"
-              v-model:page-size="paginationReactive.pageSize"
-              :item-count="paginationReactive.itemCount"
-              :page-sizes="[10, 20, 30, 40]"
-              show-size-picker
-              @update:page="paginationReactive.onChange"
-              @update:page-size="paginationReactive.onUpdatePageSize"
-          />
-        </n-space>
+      </n-space>
 
     </n-scrollbar>
   </n-layout>
@@ -89,13 +89,6 @@ onMounted(async () => {
 
 const tableDataInit = async (param: string) => {
   isLoading.value = true
-  /*   const map = (await get_job_project_list_all()).map(
-        (v => ({
-          projectName: v.name,
-          projectId: v.id.toString(),
-          projectAbbr: '',
-          tableAbbr: ''
-        }))); */
 
   const data = (await get_job_project_list_by_page({
     pageNo: paginationReactive.page,
@@ -109,26 +102,21 @@ const tableDataInit = async (param: string) => {
             projectName: v.name,
             projectId: v.id.toString(),
             projectAbbr: '',
-            tableAbbr: ''
+            tableAbbr: '',
+            id: ''
           }))) || [];
 
   paginationReactive.itemCount = data.total || 0
-
-  // 已配置项
-  // const projectInfo: ProjectInfo[] = await get_project_info_by_project_name(param)
 
   for (let i = 0; i < records.length; i++) {
     const project = await find_by_project_id(records[i].projectId)
     if (!isNull(project)) {
       records[i].projectAbbr = project.projectAbbr
       records[i].tableAbbr = project.tableAbbr
+      records[i].id = project.id
     }
   }
 
-  // 融合辅助库内没有的项目
-  /*   tableDataRef.value = projectInfo.concat(records.filter((m) => {
-      return (!projectInfo.some((p) => p.projectId === m.projectId));
-    })) */
   tableDataRef.value = records
   isLoading.value = false
 }
@@ -159,8 +147,7 @@ const createColumns = ({}: {
             get_project_by_pro_abbr(v).then(res => {
               if (isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
-
-                update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                   tableDataInit(queryParam.value).then(() => {
                     window.$message.success('修改成功')
                   })
@@ -173,8 +160,7 @@ const createColumns = ({}: {
                   negativeText: '取消',
                   onPositiveClick: () => {
                     tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
-
-                    update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                    update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                       tableDataInit(queryParam.value).then(() => {
                         window.$message.success('修改成功')
                       })
@@ -199,7 +185,7 @@ const createColumns = ({}: {
             get_project_by_table_abbr(v).then(res => {
               if (isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
-                update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                   tableDataInit(queryParam.value).then(() => {
                     window.$message.success('修改成功')
                   })
@@ -212,7 +198,7 @@ const createColumns = ({}: {
                   negativeText: '取消',
                   onPositiveClick: () => {
                     tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
-                    update_project_info(JSON.stringify([tableDataRef.value.find(item => item.projectId == row.projectId)])).then(() => {
+                    update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                       tableDataInit(queryParam.value).then(() => {
                         window.$message.success('修改成功')
                       })
