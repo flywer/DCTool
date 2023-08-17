@@ -76,6 +76,8 @@ export const channels = reactive({
         updateWorkflow: 'datacenter/updateWorkflow',
         getDataXJob: 'datacenter/getDataXJob',
         getProject: 'datacenter/getProject',
+        getWorkflowListByProjectId: 'datacenter/getWorkflowListByProjectId',
+
     },
     auxiliaryDb: {
         getProjectInfo: 'auxiliaryDb/getProjectInfo',

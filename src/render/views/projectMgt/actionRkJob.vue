@@ -2,6 +2,24 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
       <n-space inline class="float-right">
+        <n-input-group>
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              clearable
+              :readonly="isTableLoading"
+              @keydown.enter="tableDataInit"
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
+          <n-button type="primary" ghost @click="tableDataInit">
+            搜索
+          </n-button>
+        </n-input-group>
         <n-button secondary strong @click="tableDataInit">
           刷新
           <template #icon>
@@ -47,8 +65,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
-import {get_workflow_log, get_workflow_page} from "@render/api/datacenter.api";
+import {get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_workflow_list_by_project_id, get_workflow_log} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,
   Job,
@@ -61,7 +79,7 @@ import {
   workflowJobGetNextExecTime,
   workflowReRun, workflowRun,
 } from "@render/utils/datacenter/jobTabUtil";
-import {Refresh} from '@vicons/ionicons5'
+import {Refresh, Search} from '@vicons/ionicons5'
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, NButton, NSpace, TimelineItemProps} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
@@ -71,6 +89,8 @@ const isTableLoading = ref(false)
 
 const projectId = '26'
 
+const queryParam = ref('')
+
 onMounted(() => {
   tableDataInit()
 })
@@ -78,16 +98,10 @@ onMounted(() => {
 const tableDataInit = async () => {
   isTableLoading.value = true
 
-  const project = (await find_by_project_id(projectId))
-  const projectAbbr = project?.projectAbbr || '';
+  // 工作流任务
+  const allActionRkJobs = (await get_workflow_list_by_project_id(projectId)).data
 
-  //工作流任务
-  const actionRkJobs = (await get_workflow_page({
-    page: 1,
-    size: 10000,
-    status: null,
-    procName: `rk_${projectAbbr}_`
-  })).data.records
+  const actionRkJobs = allActionRkJobs.filter(job => job.procName.includes(queryParam.value))
 
   let newJobs = []
 
@@ -250,14 +264,15 @@ const columnsRef = ref(createColumns())
 const paginationReactive = reactive({
   page: 1,
   pageSize: 10,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50],
+  showSizePicker: false,
   onChange: async (page: number) => {
     paginationReactive.page = page
+    await tableDataInit()
   },
   onUpdatePageSize: (pageSize: number) => {
     paginationReactive.pageSize = pageSize
     paginationReactive.page = 1
+    tableDataInit()
   }
 })
 

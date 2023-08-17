@@ -301,3 +301,12 @@ export const get_dataXJob = async (jobId: string) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataXJob, jobId))
     return data
 }
+
+/**
+ * @param projectId 项目ID
+ * @param procName 任务名称
+ **/
+export const get_workflow_list_by_project_id = async (projectId: string, procName?: string) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowListByProjectId, projectId, procName))
+    return data
+}

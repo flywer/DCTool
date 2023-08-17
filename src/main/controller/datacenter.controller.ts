@@ -58,7 +58,7 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getJobProjectListByPage)
-    public async handleGetJobProjectListByPage(param:any) {
+    public async handleGetJobProjectListByPage(param: any) {
         let result
 
         const query = `pageNo=${param.pageNo}&pageSize=${param.pageSize}&searchVal=${param.searchParam}&subsystemName=%E9%87%87%E9%9B%86`
@@ -632,6 +632,31 @@ export class DatacenterController {
     public async handleGetDataXJob(jobId: string) {
         let result
         await this.commonGetRequest(`/gather/api/jobTemplate/get/${jobId}`, `subsystemName=%E9%87%87%E9%9B%86`).then((res) => {
+            result = res;
+        }).catch((err) => {
+            log.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.getWorkflowListByProjectId)
+    public async handleGetWorkflowListByProjectId(projectId: string, procName: string) {
+        let result
+
+        let params
+
+        if (procName != undefined && procName.length > 0) {
+            params = {
+                projectId: projectId,
+                procName: procName
+            }
+        } else {
+            params = {
+                projectId: projectId
+            }
+        }
+
+        await this.commonPostRequest(`/workflow/proc/findList`, params).then((res) => {
             result = res;
         }).catch((err) => {
             log.error(err);
