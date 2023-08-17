@@ -12,7 +12,7 @@
           <n-switch
               :disabled="true"
               :rubber-band="false"
-              :value="true"
+              :value="appSettings.setup.hardwareAcceleration"
               :loading="loading"
               @update:value="handleUpdateValue"
           />

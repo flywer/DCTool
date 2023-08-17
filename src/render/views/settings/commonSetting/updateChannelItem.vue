@@ -9,7 +9,7 @@
       <n-gi>
         <n-space class="h-full" justify="end" align="center">
           <n-select
-              v-model:value="selectValue"
+              v-model:value="appSettings.setup.updateChannel"
               :options="options"
               @update:value="handleUpdateValue"
               style="width: 120px"
@@ -27,7 +27,6 @@ import {ref} from 'vue'
 
 const appSettings = useAppSettingsStore()
 
-const selectValue = ref(appSettings.setup?.updateChannel || 'Github')
 const options = ref([
   {
     label: "Github",
@@ -36,7 +35,7 @@ const options = ref([
 ])
 
 const handleUpdateValue = (v) => {
-  const appSettingsBackUp = appSettings.setup
+  const updateChannelBackUp = appSettings.setup.updateChannel
   appSettings.setup.updateChannel = v
 
   set_app_settings({
@@ -44,7 +43,7 @@ const handleUpdateValue = (v) => {
   })
       .then(res => {
         if (!res.success) {
-          appSettings.setup = appSettingsBackUp
+          appSettings.setup.updateChannel = updateChannelBackUp
           window.$message.error(res.message)
         }
       })

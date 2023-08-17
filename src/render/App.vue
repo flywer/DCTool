@@ -12,7 +12,6 @@
 </template>
 
 <script setup lang="ts">
-import {SetupModelType} from "@common/types";
 import {get_app_settings} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
 import {should_use_dark_theme} from "@render/api/sys.api";
@@ -31,7 +30,9 @@ const ipc = useIpc()
 // 应用设置
 get_app_settings().then(async res => {
   if (res.success) {
-    appSettings.setup = res.data as SetupModelType
+    if (res.data != null) {
+      Object.assign(appSettings.setup, res.data)
+    }
     await updateTheme()
   } else {
     window.$message.error(res.message)

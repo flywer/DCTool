@@ -10,7 +10,7 @@
         <n-space class="h-full" justify="end" align="center">
           <n-switch
               :rubber-band="false"
-              :value="active"
+              :value="appSettings.setup.enableSysTray"
               :loading="loading"
               @update:value="handleUpdateValue"
           />
@@ -28,7 +28,6 @@ import {ref} from 'vue'
 
 const appSettings = useAppSettingsStore()
 
-const active = ref(false)
 const loading = ref(false)
 
 const handleUpdateValue = (v) => {
@@ -49,11 +48,9 @@ const handleUpdateValue = (v) => {
       .then(res => {
         appSettings.setup.enableSysTray = v
         appSettings.setup.closeAsHidden = setup.closeAsHidden
-        active.value = v
         if (!res.success) {
           appSettings.setup.enableSysTray = !setup.enableSysTray
           appSettings.setup.closeAsHidden = !setup.closeAsHidden
-          active.value = !v
           window.$message.error(res.message)
         }
       })

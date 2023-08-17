@@ -9,7 +9,7 @@ import {SysController} from "@main/controller/sys.controller";
 import {UpdaterController} from "@main/controller/updater.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
-import { getAppSettings} from "@main/utils/configUtils";
+import {getAppSettings} from "@main/utils/configUtils";
 import {createWindow} from "@main/window/windowManager";
 import {appLogInit} from "../app/app.log";
 import {getAppDataPath} from "@main/utils/appPath";
@@ -44,10 +44,10 @@ async function electronAppInit() {
     ///应用启动后的操作
     app.whenReady().then(async () => {
         const setup = await getAppSettings()
-        if (setup?.enableSysTray) {
+        if (setup != null && setup.enableSysTray) {
             trayInit()
         }
-        if (setup?.autoUpdate) {
+        if (setup != null && setup.autoUpdate) {
             handleAutoUpdate()
         }
     })
