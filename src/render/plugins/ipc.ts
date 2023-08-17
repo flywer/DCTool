@@ -1,5 +1,6 @@
 import type { IpcResponse } from '@common/types'
 import { getCurrentInstance, onUnmounted, toRaw } from 'vue'
+// @ts-ignore
 const { ipcRenderer } = window
 
 interface IpcInstance {
