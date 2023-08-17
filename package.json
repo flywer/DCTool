@@ -1,6 +1,6 @@
 {
   "name": "dctool",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "dist/main/index.js",
   "scripts": {
@@ -50,8 +50,8 @@
     "@vue/compiler-sfc": "3.2.39",
     "@vue/test-utils": "2.0.2",
     "autoprefixer": "^10.4.14",
-    "electron": "20.0.0",
-    "electron-builder": "23.3.3",
+    "electron": "22.3.21",
+    "electron-builder": "^24.6.3",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-fix": "^1.1.3",
