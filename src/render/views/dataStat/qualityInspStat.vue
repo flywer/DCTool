@@ -1,9 +1,9 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      所选地市在该时间内的每个数据表的数据质检情况，生成规则如下:<br/>
-      1.若同一业务表的多条质检记录中质检时间为同一天且质检总量相同时，则只保留质检时间最大的那一条记录；<br/>
-      2.若同一业务表的多条质检记录中质检总量与合格数量皆相同时，则只保留质检时间最大的那一条记录。
+      所选单位在该时间内的每个数据表的数据质检情况，生成规则如下:<br/>
+      1.若同一业务表的多条质检记录中质检时间为同一天且质检总量相同时，则只保留质检时间最新的那一条记录；<br/>
+      2.若同一业务表的多条质检记录中质检总量与合格数量皆相同时，则只保留质检时间最新的那一条记录。
     </n-alert>
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
       <n-form ref="formRef"
@@ -12,8 +12,8 @@
               :model="formModel"
               label-placement="left"
       >
-        <n-grid :cols="5" :x-gap="12">
-          <n-form-item-gi :span="2" label="部门选择">
+        <n-grid :cols="10" :x-gap="12">
+          <n-form-item-gi :span="4" label="部门选择">
             <n-tree-select
                 v-model:value="formModel.orgIds"
                 multiple
@@ -27,11 +27,11 @@
             />
           </n-form-item-gi>
 
-          <n-form-item-gi :span="2" label="时间范围">
+          <n-form-item-gi :span="4" label="时间范围">
             <n-date-picker v-model:value="formModel.timeRange" type="datetimerange"/>
           </n-form-item-gi>
 
-          <n-form-item-gi :span="1">
+          <n-form-item-gi :span="2">
             <n-checkbox-group
                 v-model:value="formModel.dataTypeGroupValue"
             >
