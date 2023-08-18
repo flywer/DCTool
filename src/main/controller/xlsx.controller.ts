@@ -1,3 +1,4 @@
+import {InspectionDataStatType} from "@common/types";
 import {getDayString} from "@main/utils/dateUtils";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
@@ -10,29 +11,28 @@ export class XlsxController {
     }
 
     @IpcHandle(channels.xlsx.createDataInpsStat)
-    public async handleCreateDataInpsStat(data: any[]) {
+    public async handleCreateDataInpsStat(data: InspectionDataStatType[]) {
         const ExcelJS = require('exceljs');
         const workbook = new ExcelJS.Workbook();
+        const columnWidths = [20, 30, 30, 20, 20, 20, 20];
 
-        const provinceData = data.filter((item) => item.orgName.startsWith('广东省'));
-        const cityData = data.filter((item) => !item.orgName.startsWith('广东省'));
+        const provinceData: InspectionDataStatType[] = data.filter((item) => item.orgName.startsWith('广东省'));
+        const cityData: InspectionDataStatType[] = data.filter((item) => !item.orgName.startsWith('广东省'));
 
         const provinceWorksheet = workbook.addWorksheet('省直部门');
-        const provinceColumnWidths = [20, 30, 20, 20, 20];
 
         provinceWorksheet.addRows(createExcelData(provinceData));
 
-        setColumnWidths(provinceWorksheet, provinceColumnWidths);
+        setColumnWidths(provinceWorksheet, columnWidths);
         setFirstRow(provinceWorksheet)
         setBolder(provinceWorksheet)
         setStripeStyle(provinceWorksheet)
 
         const cityWorksheet = workbook.addWorksheet('地市');
-        const cityColumnWidths = [20, 30, 20, 20, 20];
 
         cityWorksheet.addRows(createExcelData(cityData));
 
-        setColumnWidths(cityWorksheet, cityColumnWidths);
+        setColumnWidths(cityWorksheet, columnWidths);
         setFirstRow(cityWorksheet)
         setBolder(cityWorksheet)
         setStripeStyle(cityWorksheet)
@@ -54,20 +54,22 @@ export class XlsxController {
     }
 }
 
-const createExcelData = (data: any[]): any[][] => {
+const createExcelData = (data: InspectionDataStatType[]): InspectionDataStatType[][] => {
     const excelData: any[][] = [];
 
     // Add header row
-    excelData.push(['部门名称', '数据信息名称', '质检数据总量', '校验通过数量', '校验失败数量']);
+    excelData.push(['部门名称', '数据表名称', '数据表备注', '质检数据总量', '校验通过数量', '校验失败数量', '质检时间']);
 
     // Add data rows
     for (const item of data) {
         excelData.push([
             item.orgName,
             item.tableName,
+            item.tableComment,
             item.totalRecordSum,
             item.aimRecordSum,
             item.wrongRecordSum,
+            item.inspectionTime
         ]);
     }
 
@@ -91,7 +93,6 @@ const setFirstRow = (worksheet: ExcelJS.Worksheet) => {
         vertical: 'middle',
         horizontal: 'center'
     };
-
     worksheet.getCell('B1').alignment = {
         vertical: 'middle',
         horizontal: 'center'
@@ -105,6 +106,14 @@ const setFirstRow = (worksheet: ExcelJS.Worksheet) => {
         horizontal: 'center'
     };
     worksheet.getCell('E1').alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+    };
+    worksheet.getCell('F1').alignment = {
+        vertical: 'middle',
+        horizontal: 'center'
+    };
+    worksheet.getCell('G1').alignment = {
         vertical: 'middle',
         horizontal: 'center'
     };

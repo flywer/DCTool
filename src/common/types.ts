@@ -29,3 +29,14 @@ export type PageVo = {
     pageSize: number,
     searchParam: string
 }
+
+// 数据统计质检记录类型
+export type InspectionDataStatType = {
+    orgName: string,
+    tableComment: string,
+    tableName: string,
+    totalRecordSum: number,
+    aimRecordSum: number,
+    wrongRecordSum: number,
+    inspectionTime: string
+}

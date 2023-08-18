@@ -1,7 +1,9 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      所选地市在该时间内的每个数据表<b>最新</b>的数据质检情况生成Excel
+      所选地市在该时间内的每个数据表的数据质检情况，生成规则如下:<br/>
+      1.若同一业务表的多条质检记录中质检时间为同一天且质检总量相同时，则只保留质检时间最大的那一条记录；<br/>
+      2.若同一业务表的多条质检记录中质检总量与合格数量皆相同时，则只保留质检时间最大的那一条记录。
     </n-alert>
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
       <n-form ref="formRef"
@@ -64,28 +66,47 @@
       <n-gi class="pl-5 pr-5">
         <span style="color: #999999">{{ progressText }}</span>
       </n-gi>
-
     </n-grid>
+
+    <n-card class="mt-4" v-if="summary.length>0">
+      <n-thing>
+        <template #header>
+          {{ summary }}
+        </template>
+        <template #header-extra>
+          <n-button circle size="small" @click="copyText(summary)">
+            <template #icon>
+              <Copy24Regular/>
+            </template>
+          </n-button>
+        </template>
+      </n-thing>
+    </n-card>
   </n-scrollbar>
 </template>
 
 <script setup lang="ts">
+import {InspectionRecord} from "@common/datacenter.types";
+import {InspectionDataStatType} from "@common/types";
 import {get_table_sql} from "@render/api/auxiliaryDb.api";
 import {get_inps_record_page, insp_home_list} from "@render/api/datacenter.api";
 import {create_data_inps_stat} from "@render/api/xlsx.api";
 import {formatDate} from "@render/utils/common/dateUtils";
-import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
+import {getMondayOfCurrentWeek} from "@render/utils/common/getFirstDayOfMonth";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
 import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
+import {copyText} from "@render/utils/common/clipboard";
+import {Copy24Regular} from '@vicons/fluent'
 
 const formRef = ref<FormInst | null>(null);
 
 const formModel = ref({
   orgIds: [],
-  timeRange: [getFirstDayOfMonth(), new Date()],
+  timeRange: [getMondayOfCurrentWeek(), new Date()],
   dataTypeGroupValue: [
     'basic',
     'action'
@@ -102,7 +123,7 @@ onMounted(() => {
 const orgSelectOptionsInit = async () => {
   orgSelectOptionsRef.value = [
     {
-      label: '所有已质检部门',
+      label: '已质检部门',
       key: '0',
       children: []
     }
@@ -134,6 +155,27 @@ const isClick = ref(false)
 const isBuilding = ref(false)
 const percentage = ref(0)
 const progressText = ref('')
+const summary = ref('')
+const summaryItem = ref({
+  // 省直部门数量
+  provinceNums: 0,
+  // 地市单位数量
+  cityNums: 0,
+  // 共质检编目数量
+  tableNums: 0,
+  // 基础数据数量
+  basicDataNums: 0,
+  // 基础数据合格数量
+  basicAimDataSums: 0,
+  // 基础数据合格率 带百分号
+  basicDataPassRate: '0%',
+  // 行为数据数量
+  actionDataNums: 0,
+  // 行为数据合格数量
+  actionAimDataSums: 0,
+  // 行为数据合格率 带百分号
+  actionDataPassRate: '0%',
+})
 
 const createExcel = async () => {
 
@@ -142,6 +184,7 @@ const createExcel = async () => {
 
   percentage.value = 0
   progressText.value = '正在获取数据...'
+  summary.value = ''
 
   if (!isEmpty(formModel.value.orgIds)) {
     if (!isEmpty(formModel.value.dataTypeGroupValue)) {
@@ -161,7 +204,7 @@ const createExcel = async () => {
         tableNames.push(...actionTableNames)
       }
 
-      let dataSata = []
+      let dataSata: InspectionDataStatType[] = []
 
       for (let i = 0; i < formModel.value.orgIds.length; i++) {
         const orgId = formModel.value.orgIds[i]
@@ -170,30 +213,48 @@ const createExcel = async () => {
           percentage.value = Number((((i * tableNames.length + j + 1) / (formModel.value.orgIds.length * tableNames.length)) * 100).toFixed(1));
 
           const tableName = tableNames[j]
-          const records = (await get_inps_record_page({
+
+          // 获取质检记录
+          const records: InspectionRecord[] = (await get_inps_record_page({
             page: 1,
-            size: 1,
+            size: 10000,
             orgIds: [orgId],
             inspTime: timeRangeConvert(formModel.value.timeRange),
-            likeName: tableName
+            likeName: `${tableName}_temp_ods`
           })).data.records
 
           if (!isEmpty(records)) {
 
             const comment = tableComments.find(item => item.tableName.toLowerCase() == tableName)?.comment as string || tableName
 
-            progressText.value = `正在分析【${records[0].orgName}】的【${comment}】`
+            progressText.value = `正在分析「${records[0].orgName}」的「${comment}」`
 
-            dataSata.push({
-              orgName: records[0].orgName,
-              tableName: comment,
-              totalRecordSum: records[0].totalRecordSum,
-              aimRecordSum: records[0].aimRecordSum,
-              wrongRecordSum: records[0].wrongRecordSum
-            })
+            // 过滤质检总量相同且处于同一天的数据的记录
+            const processedData = processInspectionRecords(records)
+
+            // 将 processedData 转换并添加到 dataSata 中
+            const convertedDataArray: InspectionDataStatType[] = processedData.map(record => {
+              return {
+                orgName: record.orgName,
+                tableComment: comment,
+                tableName: record.sourceTableName,
+                totalRecordSum: record.totalRecordSum,
+                aimRecordSum: record.aimRecordSum,
+                wrongRecordSum: record.wrongRecordSum,
+                inspectionTime: record.inspectionTime
+              };
+            });
+
+            dataSata.push(...convertedDataArray)
           }
         }
       }
+
+      summaryCompute(dataSata)
+
+      summary.value = `总结：对${summaryItem.value.provinceNums}个省直部门，${summaryItem.value.cityNums}个地市挂接数据进行质检，共质检${summaryItem.value.tableNums}个编目；
+      基础数据${summaryItem.value.basicDataNums}条，合格数量为${summaryItem.value.basicAimDataSums}条，合规率${summaryItem.value.basicDataPassRate}；
+      行为数据共${summaryItem.value.actionDataNums}条，合格数为${summaryItem.value.actionAimDataSums}条，合规率${summaryItem.value.actionDataPassRate}。`
 
       await create_data_inps_stat(dataSata)
 
@@ -209,6 +270,105 @@ const createExcel = async () => {
   percentage.value = 100
   progressText.value = '分析完成'
 
+}
+
+// 若某些元素totalRecordSum相同且在同一天，则只取inspectionTime最大的，若totalRecordSum 和 aimRecordSum 皆相同，取inspectionTime最大的
+const processInspectionRecords = (records: InspectionRecord[]): InspectionRecord[] => {
+  // records.sort((a, b) => new Date(b.inspectionTime).getTime() - new Date(a.inspectionTime).getTime());
+
+  const processedArray: InspectionRecord[] = [];
+  const inspectionTimeMap: Map<string, InspectionRecord> = new Map();
+
+  for (const record of records) {
+    const key = record.inspectionTime.split(' ')[0];
+    if (!inspectionTimeMap.has(key) || inspectionTimeMap.get(key)!.totalRecordSum !== record.totalRecordSum) {
+      // 若之前没有记录或者总记录数不同，直接添加到结果数组
+      inspectionTimeMap.set(key, record);
+      processedArray.push(record);
+    }
+  }
+
+  const processedArray2: InspectionRecord[] = [];
+  const recordMap: Map<string, InspectionRecord> = new Map();
+  // 遍历排序后的数组，处理相同 totalRecordSum 和 aimRecordSum 的记录
+  for (const record of processedArray) {
+    const key = `${record.totalRecordSum}_${record.aimRecordSum}`;
+    if (!recordMap.has(key)) {
+      recordMap.set(key, record);
+      processedArray2.push(record);
+    }
+  }
+
+  return processedArray2;
+}
+
+const summaryCompute = (records: InspectionDataStatType[]) => {
+
+  summaryItem.value.provinceNums = countUniqueDeparts(records.filter((item) => item.orgName.startsWith('广东省')));
+  summaryItem.value.cityNums = countUniqueDeparts(records.filter((item) => !item.orgName.startsWith('广东省')));
+
+  summaryItem.value.tableNums = countUniqueTables(records)
+
+  const basicData: InspectionDataStatType[] = records.filter((item) => isBasicTable(item.tableName));
+
+  summaryItem.value.basicDataNums = calculateTotalRecordSum(basicData)
+  summaryItem.value.basicAimDataSums = calculateAimRecordSum(basicData)
+
+  if (summaryItem.value.basicDataNums != 0) {
+    summaryItem.value.basicDataPassRate = (summaryItem.value.basicAimDataSums / summaryItem.value.basicDataNums).toFixed(2) + '%'
+  } else {
+    summaryItem.value.basicDataPassRate = '0%'
+  }
+
+  const actionData: InspectionDataStatType[] = records.filter((item) => !isBasicTable(item.tableName));
+
+  summaryItem.value.actionDataNums = calculateTotalRecordSum(actionData)
+  summaryItem.value.actionAimDataSums = calculateAimRecordSum(actionData)
+  if (summaryItem.value.actionDataNums != 0) {
+    summaryItem.value.actionDataPassRate = (summaryItem.value.actionAimDataSums / summaryItem.value.actionDataNums).toFixed(2) + '%'
+  } else {
+    summaryItem.value.actionDataPassRate = '0%'
+  }
+}
+
+const countUniqueDeparts = (records: InspectionDataStatType[]): number => {
+  const uniqueTables: Set<string> = new Set();
+
+  for (const record of records) {
+    uniqueTables.add(record.orgName);
+  }
+
+  return uniqueTables.size;
+}
+
+const countUniqueTables = (records: InspectionDataStatType[]): number => {
+  const uniqueTables: Set<string> = new Set();
+
+  for (const record of records) {
+    uniqueTables.add(record.tableName);
+  }
+
+  return uniqueTables.size;
+}
+
+const calculateTotalRecordSum = (records: InspectionDataStatType[]): number => {
+  let totalSum = 0;
+
+  for (const record of records) {
+    totalSum += Math.abs(record.totalRecordSum);
+  }
+
+  return totalSum;
+}
+
+const calculateAimRecordSum = (records: InspectionDataStatType[]): number => {
+  let totalSum = 0;
+
+  for (const record of records) {
+    totalSum += Math.abs(record.aimRecordSum);
+  }
+
+  return totalSum;
 }
 
 const timeRangeConvert = (timeRange: (number | Date)[]) => {
