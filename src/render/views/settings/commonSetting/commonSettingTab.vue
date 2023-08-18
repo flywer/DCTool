@@ -21,6 +21,9 @@
           <update-channel-item/>
         </n-gi>
         <n-gi>
+          <release-address-item/>
+        </n-gi>
+        <n-gi>
           <grid-item-divider/>
         </n-gi>
         <n-gi>
@@ -37,6 +40,7 @@ import CloseAsHiddenItem from "@render/views/settings/commonSetting/closeAsHidde
 import EnableSysTrayItem from "@render/views/settings/commonSetting/enableSysTrayItem.vue"
 import HardwareAccelerationItem from "@render/views/settings/commonSetting/hardwareAccelerationItem.vue";
 import OpenAtLoginItem from "@render/views/settings/commonSetting/openAtLoginItem.vue"
+import ReleaseAddressItem from "@render/views/settings/commonSetting/releaseAddressItem.vue";
 import UpdateChannelItem from "@render/views/settings/commonSetting/updateChannelItem.vue";
 import GridItemDivider from "@render/views/settings/components/gridItemDivider.vue";
 </script>
