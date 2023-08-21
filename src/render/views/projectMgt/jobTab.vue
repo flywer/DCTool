@@ -658,8 +658,8 @@ import {
   jobNameCompare,
   pushUnExistJobs,
   setJobStatus,
-  showButton,
-  showConfirmation,
+  showButton, showButtonPopover,
+  showConfirmation, showTextButton,
   workflowActive,
   workflowDelete,
   workflowJobGetLastExecTime,
@@ -673,6 +673,7 @@ import {createRkJob} from "@render/utils/datacenter/rkJob";
 import {createZjJob, updateZjJob} from "@render/utils/datacenter/zjJob";
 import {AddSquareMultiple16Regular, Options16Regular} from '@vicons/fluent'
 import {Refresh} from '@vicons/ionicons5'
+import {VNode} from "@vue/runtime-core";
 import {cloneDeep, isEmpty} from "lodash-es";
 import {
   DataTableColumns,
@@ -936,7 +937,7 @@ const createColumns = (): DataTableColumns<Job> => {
           justify: 'center'
         })
 
-        let children: any[] = []
+        let children: VNode[] = []
 
         switch (row.status) {
           case -1:// 未创建的任务
@@ -1021,9 +1022,6 @@ const createColumns = (): DataTableColumns<Job> => {
                 showConfirmation('删除', async () => {
                   await dataXJobDelete(row, () => tableDataInit())
                 }),
-                showButton('日志', () => {
-                  showDataXJobLog(row)
-                }),
               ]
             } else {
               children = [
@@ -1037,9 +1035,6 @@ const createColumns = (): DataTableColumns<Job> => {
                 }),
                 showConfirmation('删除', async () => {
                   await workflowDelete(row.id, () => tableDataInit())
-                }),
-                showButton('日志', () => {
-                  showWorkflowLog(row)
                 }),
               ]
             }
@@ -1058,9 +1053,6 @@ const createColumns = (): DataTableColumns<Job> => {
                     dataXJobDelete(row, () => tableDataInit())
                   })
                 }),
-                showButton('日志', () => {
-                  showDataXJobLog(row)
-                }),
               ]
             } else {
               children = [
@@ -1075,25 +1067,14 @@ const createColumns = (): DataTableColumns<Job> => {
                   })
                   await workflowDelete(row.id, () => tableDataInit())
                 }),
-                showButton('日志', () => {
-                  showWorkflowLog(row)
-                }),
               ]
             }
             break
           case 3:// 任务运行中
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = [
-                showButton('日志', () => {
-                  showDataXJobLog(row)
-                }),
-              ]
+              children = []
             } else {
-              children = [
-                showButton('日志', () => {
-                  showWorkflowLog(row)
-                }),
-              ]
+              children = []
             }
             break
           case 4:// 任务异常
@@ -1102,9 +1083,6 @@ const createColumns = (): DataTableColumns<Job> => {
                 showConfirmation('重跑', () => {
                   dataXJobRun(row, () => tableDataInit())
                 }),
-                showButton('日志', () => {
-                  showDataXJobLog(row)
-                })
               ]
             } else {
               children = [
@@ -1114,19 +1092,12 @@ const createColumns = (): DataTableColumns<Job> => {
                 showConfirmation('删除', async () => {
                   await workflowDelete(row.id, () => tableDataInit())
                 }),
-                showButton('日志', () => {
-                  showWorkflowLog(row)
-                }),
               ]
             }
             break
           case 5:// 任务未反馈
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = [
-                showButton('日志', () => {
-                  showDataXJobLog(row)
-                }),
-              ]
+              children = []
             } else {
               children = [
                 showConfirmation('重跑', async () => {
@@ -1134,28 +1105,29 @@ const createColumns = (): DataTableColumns<Job> => {
                 }),
                 showConfirmation('删除', async () => {
                   await workflowDelete(row.id, () => tableDataInit())
-                }),
-                showButton('日志', () => showWorkflowLog(row)),
+                })
               ]
             }
             break
         }
 
-        const cantUpdateStatus = [-1, 2, 3]
-        if (row.type === '数据质检任务' && !cantUpdateStatus.includes(row.status)) {
-          children.push(
-              showButton('更新规则', () => {
-                showUpdateZjJobModal(row)
-              })
-          )
-        }
+        if (children.length == 3) {
+          // '更多'按钮的子组件
+          let moreBtnPopoverChildren: VNode[] = []
 
-        if (row.type === '数据采集任务' && row.status != -1) {
-          children.push(
-              showButton('源表预览', () => {
-                tablePreview(row)
-              })
-          )
+          moreBtnPopoverChildrenPush(row, moreBtnPopoverChildren)
+
+          // 若只有一个则直接添加到children里
+          if (moreBtnPopoverChildren.length == 1) {
+            childrenPushMoreBtn(row, children)
+          } else {
+            if (!isEmpty(moreBtnPopoverChildren)) {
+              children.push(showButtonPopover('更多', moreBtnPopoverChildren))
+            }
+          }
+
+        } else {
+          childrenPushMoreBtn(row, children)
         }
 
         container.children = children
@@ -1164,6 +1136,43 @@ const createColumns = (): DataTableColumns<Job> => {
       }
     }
   ]
+}
+
+// children直接添加更多中的组件
+const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
+  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showDataXJobLog(row)))
+  }
+
+  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showWorkflowLog(row)))
+  }
+
+  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+    children.push(showButton('更新规则', () => showUpdateZjJobModal(row)))
+  }
+
+  if (row.type === '数据采集任务' && row.status != -1) {
+    children.push(showButton('源表预览', () => tablePreview(row)))
+  }
+}
+
+const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
+  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
+  }
+
+  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('日志', () => showWorkflowLog(row)))
+  }
+
+  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('更新规则', () => showUpdateZjJobModal(row)))
+  }
+
+  if (row.type === '数据采集任务' && row.status != -1) {
+    moreBtnChildren.push(showTextButton('源表预览', () => tablePreview(row)))
+  }
 }
 
 const columnsRef = ref(createColumns())

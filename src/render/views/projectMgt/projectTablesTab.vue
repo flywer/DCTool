@@ -218,7 +218,7 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '表描述',
       key: 'tableComment',
-      width: '25%'
+      width: '23%'
     },
     {
       title: '创建时间',
@@ -228,7 +228,7 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '操作',
       key: 'actions',
-      width: '18%',
+      width: '22%',
       align: 'center',
       render(row) {
         return h(NSpace, {

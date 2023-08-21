@@ -18,9 +18,10 @@ import {
     workflow_run
 } from "@render/api/datacenter.api";
 import {formatDate} from "@render/utils/common/dateUtils";
+import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {NButton, NPopconfirm, NTag} from "naive-ui";
+import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem} from "naive-ui";
 import {h} from "vue";
 import {uuid} from "vue3-uuid";
 
@@ -103,6 +104,46 @@ export const showConfirmation = (text, onPositiveClick) => {
             return h(NButton, {size: 'small'}, {default: () => text})
         },
         default: () => `确定要${text}吗？`
+    });
+}
+
+export const showTextButton = (text, onClick) => {
+    return h(NButton, {
+            size: 'small',
+            text: true,
+            onClick: async () => {
+                await onClick()
+            }
+        },
+        {default: () => text})
+}
+
+export const showButtonPopover = (text: string, vNodes: VNode[]) => {
+
+    let listItems = []
+    vNodes.forEach(vNode => {
+        const listItem = h(NListItem,
+            {
+                style: {
+                    padding: '6px 16px 6px 16px',
+                    textAlign: 'center'
+                }
+            }, {default: () => vNode})
+        listItems.push(listItem)
+    })
+
+    return h(NPopover, {
+        trigger: 'click',
+        placement: 'bottom',
+        style: {padding: '0'},
+    }, {
+        trigger: () => {
+            return h(NButton, {size: 'small'}, {default: () => text})
+        },
+        default: () => h(NList, {
+            hoverable: true,
+            clickable: true,
+        }, listItems)
     });
 }
 
@@ -245,6 +286,65 @@ export const workflowDelete = (id, onSuccess) => {
         }
     })
 }
+
+export const workflowJobGetLastExecTime = async (v) => {
+    const res = await get_workflow_log(v.id, 1, 1);
+    if (!isEmpty(res.data.records)) {
+        return res.data.records[0].startTime;
+    } else {
+        return '--';
+    }
+};
+
+export const workflowJobGetNextExecTime = (v) => {
+    if (v.schedulingMode == 2) {
+        const interval = parseExpression(convertToSixFields(v.crontab));
+        return formatDate(interval.next().toDate())
+    } else if (v.schedulingMode == 1) {
+        return `依赖于${v.dependencyWorkflowName}`
+    } else {
+        return '未配置调度任务'
+    }
+}
+
+export const getWorkflowJobType = (v) => {
+    switch (v.procName.split('_')[0]) {
+        case 'zj':
+            return '数据质检任务'
+        case 'bf':
+            return '数据备份任务'
+        case 'qc':
+            return '数据清除任务'
+        case 'rh':
+            return '数据融合任务'
+        case 'rh1':
+            return '单表融合任务'
+        case 'rh2':
+            return '多表融合任务'
+        case 'rk':
+            return '数据入库任务'
+        default :
+            return '未知任务'
+    }
+}
+
+export const getWorkflowJobStatus = (v) => {
+    switch (v.status) {
+        case '1':// 启用
+            return 2
+        case '2':// 停用
+            return 1
+        case '3':// 异常
+            return 4
+        case '4':// 运行中
+            return 3
+        case '5':// 未反馈
+            return 5
+        default :
+            return v.status as number
+    }
+}
+
 //endregion
 
 //region DataX
@@ -318,6 +418,58 @@ export const dataXJobDelete = async (row: Job, onSuccess) => {
 
 }
 
+export const getDataXJobStatus = async (v, schedJob) => {
+    if (v.configuration == 0) {
+        return 0
+    } else {
+        const log = (await get_datax_job_log({
+            current: 1,
+            size: 1,
+            blurry: v.jobDesc
+        })).data.records[0]
+        if (log != undefined) {
+            if (log.handleCode == 200) { //若成功
+                if (schedJob?.triggerStatus == 1) {
+                    return 2
+                } else {
+                    return 1
+                }
+            } else if (log.handleCode == 500) {
+                return 4
+            } else if (log.handleCode == 0) {
+                return 3
+            }
+        } else {
+            if (schedJob?.triggerStatus == 1) {
+                return 2
+            } else {
+                return 1
+            }
+        }
+    }
+}
+
+export const getDataXJobType = (v) => {
+    switch (v.jobDesc.split('_')[0]) {
+        case 'cj':
+            return '数据采集任务'
+        case 'gx':
+            return '数据共享任务'
+        default :
+            return '未知任务'
+    }
+}
+
+export const dataXJobGetNextExecTime = (schedJob: any) => {
+    const jobCron = schedJob?.jobCron || null
+    if (jobCron != null) {
+        const interval = parseExpression(convertToSixFields(jobCron));
+        return formatDate(interval.next().toDate())
+    } else {
+        return '未配置调度任务'
+    }
+}
+
 //endregion
 
 export const getSchedJob = async (jobName: string) => {
@@ -331,36 +483,6 @@ export const getSchedJob = async (jobName: string) => {
 export const convertToSixFields = (cron: string): string => {
     const fields = cron.split(' ');
     return `${fields[0]} ${fields[1]} ${fields[2]} ${fields[3]} ${fields[4]} ${fields[5]}`;
-}
-
-export const workflowJobGetLastExecTime = async (v) => {
-    const res = await get_workflow_log(v.id, 1, 1);
-    if (!isEmpty(res.data.records)) {
-        return res.data.records[0].startTime;
-    } else {
-        return '--';
-    }
-};
-
-export const workflowJobGetNextExecTime = (v) => {
-    if (v.schedulingMode == 2) {
-        const interval = parseExpression(convertToSixFields(v.crontab));
-        return formatDate(interval.next().toDate())
-    } else if (v.schedulingMode == 1) {
-        return `依赖于${v.dependencyWorkflowName}`
-    } else {
-        return '未配置调度任务'
-    }
-}
-
-export const dataXJobGetNextExecTime = (schedJob: any) => {
-    const jobCron = schedJob?.jobCron || null
-    if (jobCron != null) {
-        const interval = parseExpression(convertToSixFields(jobCron));
-        return formatDate(interval.next().toDate())
-    } else {
-        return '未配置调度任务'
-    }
 }
 
 export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: string, isBasicData: boolean) => {
@@ -469,86 +591,6 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
 
 }
 
-export const getDataXJobStatus = async (v, schedJob) => {
-    if (v.configuration == 0) {
-        return 0
-    } else {
-        const log = (await get_datax_job_log({
-            current: 1,
-            size: 1,
-            blurry: v.jobDesc
-        })).data.records[0]
-        if (log != undefined) {
-            if (log.handleCode == 200) { //若成功
-                if (schedJob?.triggerStatus == 1) {
-                    return 2
-                } else {
-                    return 1
-                }
-            } else if (log.handleCode == 500) {
-                return 4
-            } else if (log.handleCode == 0) {
-                return 3
-            }
-        } else {
-            if (schedJob?.triggerStatus == 1) {
-                return 2
-            } else {
-                return 1
-            }
-        }
-    }
-}
-
-export const getDataXJobType = (v) => {
-    switch (v.jobDesc.split('_')[0]) {
-        case 'cj':
-            return '数据采集任务'
-        case 'gx':
-            return '数据共享任务'
-        default :
-            return '未知任务'
-    }
-}
-
-export const getWorkflowJobType = (v) => {
-    switch (v.procName.split('_')[0]) {
-        case 'zj':
-            return '数据质检任务'
-        case 'bf':
-            return '数据备份任务'
-        case 'qc':
-            return '数据清除任务'
-        case 'rh':
-            return '数据融合任务'
-        case 'rh1':
-            return '单表融合任务'
-        case 'rh2':
-            return '多表融合任务'
-        case 'rk':
-            return '数据入库任务'
-        default :
-            return '未知任务'
-    }
-}
-
-export const getWorkflowJobStatus = (v) => {
-    switch (v.status) {
-        case '1':// 启用
-            return 2
-        case '2':// 停用
-            return 1
-        case '3':// 异常
-            return 4
-        case '4':// 运行中
-            return 3
-        case '5':// 未反馈
-            return 5
-        default :
-            return v.status as number
-    }
-}
-
 export const setJobStatus = (row) => {
     switch (row.status) {
         case -1:
@@ -611,3 +653,4 @@ export const setJobStatus = (row) => {
                 {default: () => '未反馈'})
     }
 }
+
