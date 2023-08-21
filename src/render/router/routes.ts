@@ -1,13 +1,8 @@
 import {RouteRecordRaw} from 'vue-router'
 
 const App = () => import ('@render/App.vue')
-
 const Main = () => import ('@render/pages/main.vue')
 const Updater = () => import ('@render/pages/updater.vue')
-
-const ldDecrypt = () => import ('@render/views/ldDecrypt/index.vue')
-const svg = () => import('@render/views/svgConvert/index.vue')
-const flattenText = () => import('@render/views/flattenText/index.vue')
 const jobCreate = () => import('@render/views/jobCreate/index.vue')
 const projectMgt = () => import('@render/views/projectMgt/index.vue')
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
@@ -18,15 +13,13 @@ const preDatabase = () => import('@render/views/preDatabase/index.vue')
 const sztkDict = () => import('@render/views/sztkDict/index.vue')
 const dataStat = () => import('@render/views/dataStat/index.vue')
 const schedulingMgt = () => import('@render/views/schedulingMgt/index.vue')
+const toolbox = () => import('@render/views/toolbox/index.vue')
 
 export const routeName = {
     app: 'app',
     main: 'main-page',
     updater: 'updater-page',
     home: 'home',
-    ldDecrypt: 'ldDecrypt',
-    svg: 'svg',
-    flattenText: 'flattenText',
     jobCreate: 'jobCreate',
     cjJob: 'cjJob',
     zjJob: 'zjJob',
@@ -47,6 +40,7 @@ export const routeName = {
     sztkDict: 'sztkDict',
     dataStat: 'dataStat',
     schedulingMgt: 'schedulingMgt',
+    toolbox: 'toolbox'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -106,19 +100,9 @@ export const routes: Array<RouteRecordRaw> = [
                         component: sztkDict
                     },
                     {
-                        name: routeName.ldDecrypt,
-                        path: '/ldDecrypt/index',
-                        component: ldDecrypt
-                    },
-                    {
-                        name: routeName.flattenText,
-                        path: '/flattenText/index',
-                        component: flattenText
-                    },
-                    {
-                        name: routeName.svg,
-                        path: '/svg/index',
-                        component: svg
+                        name: routeName.toolbox,
+                        path: '/toolbox/index',
+                        component: toolbox
                     },
                     {
                         name: routeName.settings,

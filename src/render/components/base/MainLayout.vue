@@ -36,11 +36,15 @@ import {useNotification} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
-import {AccessibleIcon} from '@vicons/fa'
-import {Svg, Sql, DataBase} from '@vicons/carbon'
-import {LetterF} from '@vicons/tabler'
+import {Sql, DataBase} from '@vicons/carbon'
 import {LibraryAddOutlined} from '@vicons/material'
-import {AppsListDetail20Filled, BookSearch24Regular, CalendarClock24Regular, TableAdd16Regular} from '@vicons/fluent'
+import {
+  AppsListDetail24Regular,
+  BookSearch24Regular,
+  CalendarClock24Regular,
+  TableAdd24Regular,
+  Toolbox24Regular
+} from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
 import {renderIcon} from "@render/utils/common/renderIcon";
@@ -63,7 +67,7 @@ const menuOptions: MenuOption[] = [
             {default: () => '任务管理'}
         ),
     key: routeName.projectMgt,
-    icon: renderIcon(AppsListDetail20Filled)
+    icon: renderIcon(AppsListDetail24Regular)
   },
   {
     label: () =>
@@ -91,7 +95,7 @@ const menuOptions: MenuOption[] = [
             {default: () => '中台建表'}
         ),
     key: routeName.createTable,
-    icon: renderIcon(TableAdd16Regular)
+    icon: renderIcon(TableAdd24Regular)
   },
   {
     label: () =>
@@ -183,41 +187,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.ldDecrypt,
+                name: routeName.toolbox,
               }
             },
-            {default: () => '绿盾解密'}
+            {default: () => '工具箱'}
         ),
-    key: routeName.ldDecrypt,
-    icon: renderIcon(AccessibleIcon)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.flattenText,
-              }
-            },
-            {default: () => '文本扁平'}
-        ),
-    key: routeName.flattenText,
-    icon: renderIcon(LetterF)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.svg,
-              }
-            },
-            {default: () => 'SVG转换'}
-        ),
-    key: routeName.svg,
-    icon: renderIcon(Svg)
+    key: routeName.toolbox,
+    icon: renderIcon(Toolbox24Regular)
   },
   {
     label: () =>
