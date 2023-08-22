@@ -18,7 +18,7 @@ import log from 'electron-log'
 import {createEinf} from 'einf'
 import fs from "fs";
 import {join} from "path";
-import {trayInit} from "../app/app.tray";
+import {tray, trayInit} from "../app/app.tray";
 import {handleAutoUpdate} from "../app/app.updater";
 import {AppController} from './controller/app.controller'
 import {WindowController} from "@main/controller/window.controller";
@@ -38,6 +38,9 @@ async function electronAppInit() {
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') {
             app.exit()
+            if (tray != null) {
+                tray.destroy()
+            }
         }
     })
 
