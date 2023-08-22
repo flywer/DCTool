@@ -70,17 +70,24 @@
         />
       </n-layout-sider>
       <n-layout-content content-style="padding: 12px;border-left: 1px solid rgb(237 237 237)">
-        <n-tabs type="line" animated>
-          <n-tab-pane name="1" tab="数据归集任务">
-            <job-tab/>
-          </n-tab-pane>
-          <n-tab-pane name="2" tab="中台相关表">
-            <project-tables-tab/>
-          </n-tab-pane>
-          <n-tab-pane name="3" tab="质检情况">
-            <job-inspection-tab/>
-          </n-tab-pane>
-        </n-tabs>
+        <template v-if="!useProjectTreeStore().defaultSelectedKeys[0].startsWith('2-')">
+          <n-tabs type="line" animated>
+            <n-tab-pane name="1" tab="数据归集任务">
+              <job-tab/>
+            </n-tab-pane>
+            <n-tab-pane name="2" tab="中台相关表">
+              <project-tables-tab/>
+            </n-tab-pane>
+            <n-tab-pane name="3" tab="质检情况">
+              <job-inspection-tab/>
+            </n-tab-pane>
+          </n-tabs>
+        </template>
+        <!--省政数局主体信息采集-->
+        <template v-if="useProjectTreeStore().defaultSelectedKeys[0]==='2-0'">
+          <szsj-subject-tab/>
+        </template>
+
       </n-layout-content>
     </n-layout>
   </n-scrollbar>
@@ -95,6 +102,7 @@ import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
 import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
 import JobTab from "@render/views/projectMgt/jobTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
+import SzsjSubjectTab from "@render/views/projectMgt/szsjSubjectTab.vue";
 import {onMounted, ref, h} from 'vue'
 import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
@@ -122,7 +130,7 @@ const handleTreeNodeInit = () => {
 const handleLoad = (node: TreeOption) => {
   return new Promise<void>(async (resolve) => {
     if (node.key.toString() === '1-0') {
-      // 省直
+      // 省直行为数据
       node.children = projectIdOptions.filter((element) =>
           !["5", "6", "11"].includes(element.value as string) &&
           (element.label as string).includes('数据归集') &&
@@ -141,7 +149,7 @@ const handleLoad = (node: TreeOption) => {
         isLeaf: false
       })) as TreeOption[]
     } else if (node.key.toString() === '1-1') {
-      // 地市
+      // 地市行为数据
       node.children = projectIdOptions.filter((element) =>
           !["5", "6", "11"].includes(element.value as string) &&
           (element.label as string).includes('数据归集') &&
@@ -224,15 +232,6 @@ const getExistTableProject = async (node: TreeOption) => {
 }
 
 const setDefaultActionTable = (node: TreeOption): TreeOption[] => {
-  /*   const tables = [
-      'c1010',
-      'c2010', 'c2011', 'c2020', 'c2030', 'c2040', 'c2050', 'c2051', 'c2060', 'c2070', 'c2080', 'c2100', 'c2090',
-      'c3010', 'c3011', 'c3020', 'c3030', 'c3040',
-      'c4010',
-      'c4110',
-      'c6010', 'c6020', 'c6030', 'c6040',
-      'c7090'
-    ] */
 
   let children: TreeOption[] = []
 
