@@ -54,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import {ProjectInfo} from "@common/types";
 import {
   find_by_project_id,
   get_project_by_pro_abbr,
@@ -69,17 +70,9 @@ import {Refresh, Search} from '@vicons/ionicons5'
 
 const tableRef = ref()
 
-const tableDataRef = ref([])
+const tableDataRef = ref<ProjectInfo[]>([])
 
 const isLoading = ref(true)
-
-type ProjectInfo = {
-  id: number
-  projectId: string
-  projectName: string
-  projectAbbr: string
-  tableAbbr: string
-}
 
 const queryParam = ref('')
 
@@ -98,12 +91,12 @@ const tableDataInit = async (param: string) => {
 
   const records = data?.records
       .map(
-          (v => ({
+          ((v: any): ProjectInfo => ({
             projectName: v.name,
             projectId: v.id.toString(),
             projectAbbr: '',
             tableAbbr: '',
-            id: ''
+            id: null
           }))) || [];
 
   paginationReactive.itemCount = data.total || 0
@@ -143,7 +136,7 @@ const createColumns = ({}: {
       render(row) {
         return h(showOrEdit, {
           value: row.projectAbbr,
-          async onUpdateValue(v) {
+          async onUpdateValue(v: string) {
             get_project_by_pro_abbr(v).then(res => {
               if (isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
@@ -152,6 +145,7 @@ const createColumns = ({}: {
                     window.$message.success('修改成功')
                   })
                 })
+
               } else {
                 window.$dialog.warning({
                   title: '警告',
@@ -181,7 +175,7 @@ const createColumns = ({}: {
       render(row) {
         return h(showOrEdit, {
           value: row.tableAbbr,
-          async onUpdateValue(v) {
+          async onUpdateValue(v: string) {
             get_project_by_table_abbr(v).then(res => {
               if (isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
