@@ -900,7 +900,7 @@ const isTableLoading = ref(false)
 
 const setTitle = async (project: any) => {
   const tableComment = (await get_table_sql({
-    tableName: queryParam.value.tableAbbr.toString().toUpperCase()
+    tableName: queryParam.value?.tableAbbr.toString().toUpperCase()
   }))[0]?.comment || '未知信息'
 
   const projectName = project.projectName.replaceAll('行政行为', '')

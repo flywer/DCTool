@@ -67,7 +67,7 @@ export const getCustomTableValidConfig = async (tableName: string) => {
  * 如果一个元素的开头部分不在规定顺序中，而另一个元素是有序的，则将未排序的元素排在已排序的元素之后。
  * 最后，对于两个都在规定顺序中的元素，按照它们在 order 数组中的下标大小来排列。
  **/
-export const jobNameCompare = (a, b) => {
+export const jobNameCompare = (a: { jobName: string; }, b: { jobName: string; }) => {
     const order = ["cj", "zj", "bf", "qc", "rh", "rh1", "rh2", "rk", "gx"];
     const aIndex = order.indexOf(a.jobName.split("_")[0]);
     const bIndex = order.indexOf(b.jobName.split("_")[0]);
@@ -83,7 +83,7 @@ export const jobNameCompare = (a, b) => {
     }
 }
 
-export const showButton = (text, onClick) => {
+export const showButton = (text: string, onClick: () => any) => {
     return h(NButton, {
             size: 'small',
             onClick: async () => {
@@ -93,7 +93,7 @@ export const showButton = (text, onClick) => {
         {default: () => text})
 }
 
-export const showConfirmation = (text, onPositiveClick) => {
+export const showConfirmation = (text: string, onPositiveClick: () => any) => {
     return h(NPopconfirm, {
         positiveText: '确定',
         negativeText: '取消',
@@ -108,7 +108,7 @@ export const showConfirmation = (text, onPositiveClick) => {
     });
 }
 
-export const showTextButton = (text, onClick) => {
+export const showTextButton = (text: string, onClick: () => any) => {
     return h(NButton, {
             size: 'small',
             text: true,
@@ -155,11 +155,11 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
 //region 工作流
 
 /**
- * @param id: 任务ID
- * @param type: 01：启用， 02：停用
+ * @param id
+ * @param type
  * @param onSuccess 任务启用成功的回调函数
  **/
-export const workflowActive = async (id: string, type: '01' | '02', onSuccess) => {
+export const workflowActive = async (id: string, type: '01' | '02', onSuccess: () => any) => {
     await workflow_active({
         id: id,
         type: type
@@ -180,7 +180,7 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess) =
  * @param tableName 质检任务的质检表名
  * @param onSuccess 成功时的触发函数
  **/
-export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: string, onSuccess) => {
+export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: string, onSuccess: () => any) => {
 
     //工作流任务
     const runningJobs = (await get_workflow_page({
@@ -215,7 +215,9 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
                 procName: `rh2_`
             })).data.records
 
-            if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some(job => job.procName.split('_')[2] == v.jobName.split('_')[2])) {
+            if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some((job: {
+                procName: string;
+            }) => job.procName.split('_')[2] == v.jobName.split('_')[2])) {
                 window.$dialog.warning({
                     title: '警告',
                     content: `目前已有${v.jobName.split('_')[2].toUpperCase()}的多表融合任务正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
@@ -245,11 +247,11 @@ export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: 
             }
         })
     } else {
-        runFunc()
+        await runFunc()
     }
 }
 
-export const workflowStart = (v: Job, onSuccess) => {
+export const workflowStart = (v: Job, onSuccess: { (): any; (): any; (): any; (): any; (): any; (): any; }) => {
     const param = {
         businessKey: uuid.v4(),
         code: v.code,
@@ -264,11 +266,13 @@ export const workflowStart = (v: Job, onSuccess) => {
             window.$message.error(res.message)
         }
     }).then(() => {
-        create_cron_job(v.jobName)
+        create_cron_job(v.jobName).catch(error => {
+            window.$message.error(error)
+        })
     })
 }
 
-export const workflowReRun = (v: Job, onSuccess) => {
+export const workflowReRun = (v: Job, onSuccess: () => void) => {
     workflow_rerun(v.id, 1).then(res => {
         if (res.code == 200) {
             window.$message.success(res.message)
@@ -277,11 +281,13 @@ export const workflowReRun = (v: Job, onSuccess) => {
             window.$message.error(res.message)
         }
     }).then(() => {
-        create_cron_job(v.jobName)
+        create_cron_job(v.jobName).catch(error => {
+            window.$message.error(error)
+        })
     })
 }
 
-export const workflowDelete = (id, onSuccess) => {
+export const workflowDelete = (id: string, onSuccess: () => void) => {
     workflow_delete(id).then(res => {
         if (res.code == 200) {
             window.$message.success(res.data)
@@ -292,7 +298,7 @@ export const workflowDelete = (id, onSuccess) => {
     })
 }
 
-export const workflowJobGetLastExecTime = async (v) => {
+export const workflowJobGetLastExecTime = async (v: { id: string; }) => {
     const res = await get_workflow_log(v.id, 1, 1);
     if (!isEmpty(res.data.records)) {
         return res.data.records[0].startTime;
@@ -301,7 +307,11 @@ export const workflowJobGetLastExecTime = async (v) => {
     }
 };
 
-export const workflowJobGetNextExecTime = (v) => {
+export const workflowJobGetNextExecTime = (v: {
+    schedulingMode: number | string;
+    crontab: string;
+    dependencyWorkflowName: any;
+}) => {
     if (v.schedulingMode == 2) {
         const interval = parseExpression(convertToSixFields(v.crontab));
         return formatDate(interval.next().toDate())
@@ -312,7 +322,7 @@ export const workflowJobGetNextExecTime = (v) => {
     }
 }
 
-export const getWorkflowJobType = (v) => {
+export const getWorkflowJobType = (v: { procName: string; }) => {
     switch (v.procName.split('_')[0]) {
         case 'zj':
             return '数据质检任务'
@@ -333,7 +343,7 @@ export const getWorkflowJobType = (v) => {
     }
 }
 
-export const getWorkflowJobStatus = (v) => {
+export const getWorkflowJobStatus = (v: { status: string; }) => {
     switch (v.status) {
         case '1':// 启用
             return 2
@@ -346,14 +356,14 @@ export const getWorkflowJobStatus = (v) => {
         case '5':// 未反馈
             return 5
         default :
-            return v.status as number
+            return null
     }
 }
 
 //endregion
 
 //region DataX
-export const dataXJobStart = async (row: Job, onSuccess) => {
+export const dataXJobStart = async (row: Job, onSuccess: () => void) => {
     const schedJobId = (await getSchedJob(row.jobName)).id
     datax_job_start(schedJobId).then(res => {
         if (res.data == 'success') {
@@ -365,7 +375,7 @@ export const dataXJobStart = async (row: Job, onSuccess) => {
     })
 }
 
-export const dataXJobStop = async (row: Job, onSuccess) => {
+export const dataXJobStop = async (row: Job, onSuccess: () => void) => {
     const schedJobId = (await getSchedJob(row.jobName)).id
     datax_job_stop(schedJobId).then(res => {
         if (res.data == 'success') {
@@ -377,7 +387,7 @@ export const dataXJobStop = async (row: Job, onSuccess) => {
     })
 }
 
-export const dataXJobRun = async (row: Job, onSuccess) => {
+export const dataXJobRun = async (row: Job, onSuccess: () => void) => {
     const schedJobId = (await getSchedJob(row.jobName)).id
     datax_job_run({
         jobId: schedJobId,
@@ -392,7 +402,7 @@ export const dataXJobRun = async (row: Job, onSuccess) => {
     })
 }
 
-export const dataXJobDelete = async (row: Job, onSuccess) => {
+export const dataXJobDelete = async (row: Job, onSuccess: () => void) => {
     const schedJobId = (await getSchedJob(row.jobName))?.id || null
     if (schedJobId != null) {
         sched_job_delete(schedJobId).then(res => {
@@ -423,7 +433,7 @@ export const dataXJobDelete = async (row: Job, onSuccess) => {
 
 }
 
-export const getDataXJobStatus = async (v, schedJob) => {
+export const getDataXJobStatus = async (v: { configuration: number; jobDesc: any; }, schedJob: { triggerStatus: number; }) => {
     if (v.configuration == 0) {
         return 0
     } else {
@@ -454,7 +464,7 @@ export const getDataXJobStatus = async (v, schedJob) => {
     }
 }
 
-export const getDataXJobType = (v) => {
+export const getDataXJobType = (v: { jobDesc: string; }) => {
     switch (v.jobDesc.split('_')[0]) {
         case 'cj':
             return '数据采集任务'
@@ -596,7 +606,7 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
 
 }
 
-export const setJobStatus = (row) => {
+export const setJobStatus = (row: { status: any; }) => {
     switch (row.status) {
         case -1:
             return h(NTag, {
