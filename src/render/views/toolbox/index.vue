@@ -7,6 +7,9 @@
       <n-tab-pane name="2" tab="文本扁平">
         <flatten-text-tab/>
       </n-tab-pane>
+      <n-tab-pane name="3" tab="JSON类型提取">
+        <get-type-from-json-tab/>
+      </n-tab-pane>
     </n-tabs>
 
   </n-layout>
@@ -14,6 +17,7 @@
 
 <script setup lang="ts">
 import FlattenTextTab from "@render/views/toolbox/flattenTextTab.vue";
+import GetTypeFromJsonTab from "@render/views/toolbox/getTypeFromJsonTab.vue";
 import LdDecryptTab from "@render/views/toolbox/ldDecryptTab.vue";
 </script>
 
