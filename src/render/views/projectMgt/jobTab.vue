@@ -615,9 +615,164 @@
 
   </n-modal>
 
+  <n-modal
+      v-model:show="showDataXJobSetupModalRef"
+      :mask-closable="false"
+      :closable="true"
+      preset="dialog"
+      role="dialog"
+      :show-icon="false"
+      :title="dataXJobSetupModalTitle"
+      :size="'small'"
+      style="width: 566px"
+  >
+    <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
+      <n-layout class="m-2">
+        <n-collapse :default-expanded-names="['1']">
+          <n-collapse-item title="采集配置" name="1">
+            <n-form
+                ref="dataXJobSetupFormRef"
+                class="mt-4"
+                :model="dataXJobSetupModelRef"
+                :rules="dataXJobSetupModelRules"
+                :size="'small'"
+            >
+              <n-grid :cols="12" :x-gap="12">
+                <n-form-item-gi :span="6" label="工作流名称">
+                  <n-input v-model:value="dataXJobSetupModelRef.jonInfo.jobDesc"
+                           readonly
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="6" label="项目" path="projectName">
+                  <n-input
+                      v-model:value="dataXJobSetupModelRef.projectName"
+                      readonly
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="12" label="来源表" path="readerTable">
+                  <n-select :size="'small'"
+                            v-model:value="dataXJobSetupModelRef.readerTable"
+                            :options="sourceTableOptions"
+                            filterable
+                            remote
+                            @search="handleSourceTableSearchByDataXJobSetup"
+                            @update:value="handleSourceTableUpdateByDataXJobSetup"
+                            :consistent-menu-width="false"
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="12" label="采集方式" path="incrementType">
+                  <n-radio-group v-model:value="dataXJobSetupModelRef.jonInfo.incrementType" name="incrementType">
+                    <n-radio-button :value="0">
+                      全量采集
+                    </n-radio-button>
+                    <n-radio-button :value="2">
+                      时间自增增量采集
+                    </n-radio-button>
+                  </n-radio-group>
+                </n-form-item-gi>
+
+                <template v-if="dataXJobSetupModelRef.jonInfo.incrementType === 2">
+                  <n-form-item-gi :span="6" label="增量时间字段">
+                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParam" readonly/>
+                  </n-form-item-gi>
+
+                  <n-form-item-gi :span="6" label="增量时间格式">
+                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParamType" readonly/>
+                  </n-form-item-gi>
+
+                  <n-form-item-gi :span="12" label="增量开始时间" path="incStartTime">
+                    <n-date-picker v-model:value="dataXJobSetupModelRef.incStartTime" type="datetime"
+                                   :shortcuts="incStartTimeShorCuts"
+                    />
+                  </n-form-item-gi>
+                </template>
+              </n-grid>
+            </n-form>
+          </n-collapse-item>
+          <n-collapse-item title="调度配置" name="2">
+            <n-form
+                ref="SchedJobSetupFormRef"
+                class="mt-4"
+                :model="dataXJobSetupModelRef.schedJob"
+                :rules="dataXJobSetupModelRules"
+                :size="'small'"
+            >
+              <n-grid :cols="17" :x-gap="4">
+                <n-form-item-gi :span="7" label="是否重试" path="retry">
+                  <n-radio-group v-model:value="dataXJobSetupModelRef.schedJob.retry">
+                    <n-radio-button
+                        :key="1"
+                        :value="'1'"
+                        label="是"
+                    />
+                    <n-radio-button
+                        :key="0"
+                        :value="'0'"
+                        label="否"
+                    />
+                  </n-radio-group>
+                </n-form-item-gi>
+                <n-form-item-gi :span="10" label="重试次数" path="executorFailRetryCount">
+                  <n-input-number v-model:value="dataXJobSetupModelRef.schedJob.executorFailRetryCount"
+                                  button-placement="both"
+                  />
+                </n-form-item-gi>
+
+                <n-form-item-gi :span="3" label="秒" path="sec" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center"
+                           v-model:value="dataXJobSetupModelRef.schedJob.sec"
+                           placeholder=""
+                           @keydown.enter.prevent
+                           readonly
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="3" label="分" path="min" :label-style="{margin:'0 auto'}">
+                  <n-input-number class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.min"
+                                  :min="schedMinRange.startMin" :max="schedMinRange.endMIn" placeholder=""
+                                  @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="3" label="时" path="hour" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.hour" placeholder=""
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="日" path="day" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.day" placeholder=""
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="月" path="month" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.month" placeholder=""
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="周" path="week" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.week" placeholder=""
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+                <n-form-item-gi :span="2" label="年" path="year" :label-style="{margin:'0 auto'}">
+                  <n-input class="text-center" v-model:value="dataXJobSetupModelRef.schedJob.year" placeholder=""
+                           @keydown.enter.prevent
+                  />
+                </n-form-item-gi>
+              </n-grid>
+            </n-form>
+          </n-collapse-item>
+        </n-collapse>
+      </n-layout>
+    </n-scrollbar>
+    <template #action>
+      <n-button type="primary" :size="'small'" @click="handleDataXJobSetupSave" :loading="isDataXJobSetupSaving">保存
+      </n-button>
+      <n-button :size="'small'" @click="showDataXJobSetupModalRef=!showDataXJobSetupModalRef">返回</n-button>
+    </template>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
+import {DataXJobLogType, JobTemplateType, ProjectInfo, WorkflowLogType, WorkflowType} from "@common/types";
 import {
   find_by_project_id,
   get_cj_cron_by_project_id,
@@ -632,14 +787,15 @@ import {
   get_valid_config_page,
   get_workflow_log,
   get_workflow_page,
-  gte_usrc_org_tree
+  gte_usrc_org_tree, update_sched_job
 } from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
+import {convertCronExpression} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
-import {CjFormModelType, createCjJob, createSchedJob} from "@render/utils/datacenter/cjJob";
+import {CjFormModelType, createCjJob, createSchedJob, updateDataXJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
@@ -693,7 +849,7 @@ const projectTree = useProjectTreeStore()
 const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
 
 // 当前项目示例，辅助库信息
-const projectRef = ref(null)
+const projectRef = ref<ProjectInfo>(null)
 
 // 当前项目示例，数据中台信息
 const datacenterProjectRef = ref(null)
@@ -701,49 +857,42 @@ const datacenterProjectRef = ref(null)
 // 此项目中的质检任务是否已配置组织机构
 const isValidConfigRef = ref(false)
 
-watch(defaultSelectedKeys, async (newValue) => {
-  if (newValue[0] != null) {
-    const segments = newValue[0].split('-');
-
-    projectTree.isBasicData = segments[0] === '0'
-
-    const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
-    if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
-      queryParam.value.projectId = segments[segments.length - 2]
-      queryParam.value.tableAbbr = segments[segments.length - 1]
-      projectRef.value = await find_by_project_id(queryParam.value.projectId)
-      datacenterProjectRef.value = await get_job_project_by_id(queryParam.value.projectId)
-      isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
-
-      tableDataInit()
-    }
-  }
-})
-
-// region 数据表
-
 const queryParam = ref({
   projectId: null,
   tableAbbr: null as string //此为表名的最简化，比如di_ssft_z2010_temp_ods 则为z2010
 })
 
-const title = ref('')
+watch(defaultSelectedKeys, (newValue, oldValue) => {
+  if (newValue.length == 0) {
+    newValue = oldValue
+    projectTree.defaultSelectedKeys = newValue
+  }
+  if (newValue[0] != null) {
+    pageInit(newValue)
+  }
+})
 
-onMounted(async () => {
-  const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
+onMounted(() => {
+  pageInit(useProjectTreeStore().defaultSelectedKeys)
+})
+
+const pageInit = async (defaultSelectedKeys: string[]) => {
+  const segments = defaultSelectedKeys[0].split('-');
+  projectTree.isBasicData = segments[0] === '0'
   const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
   if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
     queryParam.value.projectId = segments[segments.length - 2]
     queryParam.value.tableAbbr = segments[segments.length - 1]
     projectRef.value = await find_by_project_id(queryParam.value.projectId)
     datacenterProjectRef.value = await get_job_project_by_id(queryParam.value.projectId)
-
     isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
-
-    tableDataInit()
+    await tableDataInit()
   }
+}
 
-})
+// region 数据表
+
+const title = ref('')
 
 const tableDataRef = ref([])
 
@@ -768,7 +917,7 @@ const tableDataInit = async () => {
 
   const project = (await find_by_project_id(queryParam.value.projectId))
 
-  setTitle(project)
+  await setTitle(project)
 
   const projectAbbr = project?.projectAbbr || '';
   if (projectAbbr !== '') {
@@ -838,7 +987,7 @@ const tableDataInit = async () => {
     }
 
     //工作流任务
-    const workflowJobs = (await get_workflow_page({
+    const workflowJobs: WorkflowType[] = (await get_workflow_page({
       page: 1,
       size: 10000,
       status: null,
@@ -853,7 +1002,7 @@ const tableDataInit = async () => {
         jobName: v.procName,
         type: getWorkflowJobType(v),
         status: getWorkflowJobStatus(v),
-        schedMode: v.schedulingMode,
+        schedMode: parseInt(v.schedulingMode),
         cron: v.crontab == '' ? null : v.crontab,
         lastExecTime: await workflowJobGetLastExecTime(v),
         nextExecTime: workflowJobGetNextExecTime(v),
@@ -869,7 +1018,7 @@ const tableDataInit = async () => {
     // 添加未创建的任务
     newWorkflowJobs = pushUnExistJobs(newWorkflowJobs, projectAbbr, queryParam.value.tableAbbr, projectTree.isBasicData)
 
-    // 行为数据的共享任务不显示
+    // 行为数据的入库任务不显示
     if (!projectTree.isBasicData) {
       newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据入库任务')
     }
@@ -949,31 +1098,31 @@ const createColumns = (): DataTableColumns<Job> => {
                     await createCjJobModalInit(project, row)
                     break
                   case '数据质检任务':
-                    await createZjJobModalInit(project)
+                    createZjJobModalInit(project)
                     break
                   case '数据融合任务':
-                    await createRhJobModalInit(project)
+                    createRhJobModalInit(project)
                     showModalRef.value = true
                     modalTitle = '创建融合任务'
                     formSelect.value.createRhJob = true
                     break
                   case '单表融合任务':
-                    await createRhJobModalInit(project)
+                    createRhJobModalInit(project)
                     showModalRef.value = true
                     modalTitle = '创建单表融合任务'
                     formSelect.value.createRhJob = true
                     break
                   case '多表融合任务':
-                    await createRh2JobModalInit(project)
+                    createRh2JobModalInit(project)
                     showModalRef.value = true
                     modalTitle = '创建多表融合任务'
                     formSelect.value.createRh2Job = true
                     break
                   case '数据备份任务':
-                    await createBfJobModalInit(project)
+                    createBfJobModalInit(project)
                     break
                   case '数据清除任务':
-                    await createQcJobModalInit(project)
+                    createQcJobModalInit(project)
                     showModalRef.value = true
                     modalTitle = '创建清除任务'
                     formSelect.value.createQcJob = true
@@ -1002,26 +1151,16 @@ const createColumns = (): DataTableColumns<Job> => {
             break
           case 0:// 未配置调度任务的采集任务
             children = [
-              showButton('配置', async () => {
-                await addSchedJobModalFormModelInit(row)
-              }),
-              showConfirmation('删除', async () => {
-                await dataXJobDelete(row, () => tableDataInit())
-              }),
+              showButton('配置', async () => await addSchedJobModalFormModelInit(row)),
+              showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
             ]
             break
           case  1: // 任务停用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               children = [
-                showButton('启用', () => {
-                  dataXJobStart(row, () => tableDataInit())
-                }),
-                showConfirmation('执行', () => {
-                  dataXJobRun(row, () => tableDataInit())
-                }),
-                showConfirmation('删除', async () => {
-                  await dataXJobDelete(row, () => tableDataInit())
-                }),
+                showButton('启用', () => dataXJobStart(row, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
               ]
             } else {
               children = [
@@ -1029,30 +1168,22 @@ const createColumns = (): DataTableColumns<Job> => {
                   await workflowActive(row.id, '01', () => tableDataInit())
                 }),
                 showConfirmation('执行', async () => {
-                  await workflowActive(row.id, '01', () => {
-                  })
-                  await workflowRun(row, isValidConfigRef.value, `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`, () => tableDataInit())
+                  await workflowActive(row.id, '01',
+                      () => workflowRun(row, isValidConfigRef.value, `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`, () => tableDataInit())
+                  )
                 }),
-                showConfirmation('删除', async () => {
-                  await workflowDelete(row.id, () => tableDataInit())
-                }),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
               ]
             }
             break
           case 2:// 任务启用
             if (row.type === '数据采集任务' || row.type === '数据共享任务') {
               children = [
-                showButton('停用', () => {
-                  dataXJobStop(row, () => tableDataInit())
-                }),
-                showConfirmation('执行', () => {
-                  dataXJobRun(row, () => tableDataInit())
-                }),
-                showConfirmation('删除', async () => {
-                  await dataXJobStop(row, () => {
-                    dataXJobDelete(row, () => tableDataInit())
-                  })
-                }),
+                showButton('停用', () => dataXJobStop(row, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
+                showConfirmation('删除',
+                    async () => await dataXJobStop(row, () => dataXJobDelete(row, () => tableDataInit()))
+                ),
               ]
             } else {
               children = [
@@ -1063,9 +1194,8 @@ const createColumns = (): DataTableColumns<Job> => {
                   await workflowRun(row, isValidConfigRef.value, `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`, () => tableDataInit())
                 }),
                 showConfirmation('删除', async () => {
-                  await workflowActive(row.id, '02', () => {
-                  })
-                  await workflowDelete(row.id, () => tableDataInit())
+                  await workflowActive(row.id, '02', () => workflowDelete(row.id, () => tableDataInit()))
+
                 }),
               ]
             }
@@ -1086,12 +1216,8 @@ const createColumns = (): DataTableColumns<Job> => {
               ]
             } else {
               children = [
-                showConfirmation('重跑', () => {
-                  workflowReRun(row, () => tableDataInit())
-                }),
-                showConfirmation('删除', async () => {
-                  await workflowDelete(row.id, () => tableDataInit())
-                }),
+                showConfirmation('重跑', () => workflowReRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
               ]
             }
             break
@@ -1100,12 +1226,8 @@ const createColumns = (): DataTableColumns<Job> => {
               children = []
             } else {
               children = [
-                showConfirmation('重跑', async () => {
-                  workflowReRun(row, () => tableDataInit())
-                }),
-                showConfirmation('删除', async () => {
-                  await workflowDelete(row.id, () => tableDataInit())
-                })
+                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit()))
               ]
             }
             break
@@ -1138,28 +1260,10 @@ const createColumns = (): DataTableColumns<Job> => {
   ]
 }
 
-// children直接添加更多中的组件
-const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
-    children.push(showButton('日志', () => showDataXJobLog(row)))
-  }
-
-  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
-    children.push(showButton('日志', () => showWorkflowLog(row)))
-  }
-
-  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
-    children.push(showButton('更新规则', () => showUpdateZjJobModal(row)))
-  }
-
-  if (row.type === '数据采集任务' && row.status != -1) {
-    children.push(showButton('源表预览', () => tablePreview(row)))
-  }
-}
-
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
+    moreBtnChildren.push(showTextButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
@@ -1172,6 +1276,26 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 
   if (row.type === '数据采集任务' && row.status != -1) {
     moreBtnChildren.push(showTextButton('源表预览', () => tablePreview(row)))
+  }
+}
+
+// children直接添加更多中的组件
+const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
+  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showDataXJobLog(row)))
+    children.push(showButton('任务配置', () => showDataXJobSetupModal(row)))
+  }
+
+  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showWorkflowLog(row)))
+  }
+
+  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+    children.push(showButton('更新规则', () => showUpdateZjJobModal(row)))
+  }
+
+  if (row.type === '数据采集任务' && row.status != -1) {
+    children.push(showButton('源表预览', () => tablePreview(row)))
   }
 }
 
@@ -1216,6 +1340,7 @@ const onNegativeClick = () => {
 
 const isSaving = ref(false)
 
+// region 任务创建
 const onPositiveClick = async () => {
   isSaving.value = true
   if (formSelect.value.addSchedJob) {
@@ -1406,7 +1531,7 @@ const onPositiveClick = async () => {
     })
   }
 }
-
+// endregion
 const quickCreate = async () => {
   const project = (await find_by_project_id(queryParam.value.projectId))
 
@@ -1623,7 +1748,7 @@ const sourceTableOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const sourceTableColumnsRef = ref([])
 let targetTableColumnsRef = ref([])
 
-const createCjJobModalInit = async (project, row: Job) => {
+const createCjJobModalInit = async (project: ProjectInfo, row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
   cjJobModalFormModel.value.name = row.jobName
   cjJobModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${queryParam.value.tableAbbr.toLowerCase()}_temp_ods`
@@ -1672,7 +1797,7 @@ const zjJobModalFormRules = {
   }
 }
 
-const createZjJobModalInit = (project) => {
+const createZjJobModalInit = (project: ProjectInfo) => {
   zjJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   zjJobModalFormModel.value.projectId = queryParam.value.projectId
   zjJobModalFormModel.value.projectName = project.projectName
@@ -1704,7 +1829,7 @@ const bfJobModalFormRules = {
   }
 }
 
-const createBfJobModalInit = (project) => {
+const createBfJobModalInit = (project: ProjectInfo) => {
   bfJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   bfJobModalFormModel.value.projectId = queryParam.value.projectId
   bfJobModalFormModel.value.projectName = project.projectName
@@ -1735,7 +1860,7 @@ const rhJobModalFormRules = {
   }
 }
 
-const createRhJobModalInit = (project) => {
+const createRhJobModalInit = (project: ProjectInfo) => {
   rhJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   rhJobModalFormModel.value.projectId = queryParam.value.projectId
   rhJobModalFormModel.value.projectName = project.projectName
@@ -1762,7 +1887,7 @@ const rh2JobModalFormRules = {
   }
 }
 
-const createRh2JobModalInit = (project) => {
+const createRh2JobModalInit = (project: ProjectInfo) => {
   rh2JobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   rh2JobModalFormModel.value.projectId = queryParam.value.projectId
   rh2JobModalFormModel.value.projectName = project.projectName
@@ -1789,7 +1914,7 @@ const qcJobModalFormRules = {
   }
 }
 
-const createQcJobModalInit = (project) => {
+const createQcJobModalInit = (project: ProjectInfo) => {
   qcJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   qcJobModalFormModel.value.projectId = queryParam.value.projectId
   qcJobModalFormModel.value.projectName = project.projectName
@@ -1941,7 +2066,7 @@ const updateTreeOptionDisabledByKey = (treeOptions: TreeSelectOption[], disableK
   return treeOptions
 }
 
-const handleJobTreeUpdateValue = async (v) => {
+const handleJobTreeUpdateValue = async (v: string[]) => {
   if (v.includes('cj')) {
     const project = (await find_by_project_id(queryParam.value.projectId))
     sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
@@ -2013,7 +2138,10 @@ const validConfigModalInit = async () => {
     confirmBtnText = '保存'
   }
 
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map((v => ({
+  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: {
+    name: string;
+    id: string;
+  }) => ({
     label: `${v.name}`,
     value: v.id
   })))
@@ -2050,8 +2178,8 @@ const showDrawerRef = ref(false)
 const logItemsRef = ref<TimelineItemProps[]>([])
 const showTipRef = ref(false)
 
-const showDataXJobLog = async (v) => {
-  const logs = (await get_datax_job_log({
+const showDataXJobLog = async (v: Job) => {
+  const logs: DataXJobLogType[] = (await get_datax_job_log({
     current: 1,
     size: 100,
     blurry: v.jobName
@@ -2062,10 +2190,10 @@ const showDataXJobLog = async (v) => {
   logItemsRef.value = []
 
   logs.forEach(log => {
-    let type
-    let title
-    let content
-    let time
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
 
     if (log.handleCode == 0) {
       title = '运行中'
@@ -2095,18 +2223,18 @@ const showDataXJobLog = async (v) => {
   showDrawerRef.value = true
 }
 
-const showWorkflowLog = async (v) => {
-  const logs = (await get_workflow_log(v.id, 100, 1)).data.records
+const showWorkflowLog = async (v: Job) => {
+  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
 
   showTipRef.value = logs.length >= 100;
 
   logItemsRef.value = []
 
   logs.forEach(log => {
-    let type
-    let title
-    let content
-    let time
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
 
     if (log.result == null) {
       title = '运行中'
@@ -2200,7 +2328,7 @@ const tablePreview = async (row: Job) => {
     tableRows.value = res.slice(1)
 
     // 创建表头
-    previewColsRef.value = res[0].map((col) => ({
+    previewColsRef.value = res[0].map((col: string) => ({
       title: col,
       key: col,
       fixed: col === 'cd_time' ? 'right' : false,
@@ -2211,18 +2339,20 @@ const tablePreview = async (row: Job) => {
     }));
 
     // 处理数据
-    previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item) =>
-        Object.values(item).map(
-            (value) => {
-              if (value === null) {
-                return 'null'
-              } else if (value instanceof Date) {
-                return formatDate(value)
-              } else {
-                return value.toString()
-              }
-            }
-        )
+    previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item: {
+          [s: string]: unknown;
+        } | ArrayLike<unknown>) =>
+            Object.values(item).map(
+                (value) => {
+                  if (value === null) {
+                    return 'null'
+                  } else if (value instanceof Date) {
+                    return formatDate(value)
+                  } else {
+                    return value.toString()
+                  }
+                }
+            )
     ));
   }).finally(() => isPreviewTableLoading.value = false)
 
@@ -2249,6 +2379,159 @@ const transform = (objA: ObjA[], objB: ObjB): Record<string, string>[] => {
 }
 // endregion
 
+// region dataX任务配置
+
+const showDataXJobSetupModalRef = ref(false)
+
+const dataXJobSetupModalTitle = '任务配置';
+const isDataXJobSetupSaving = ref(false)
+const dataXJobSetupFormRef = ref<FormInst | null>(null);
+const SchedJobSetupFormRef = ref<FormInst | null>(null);
+const dataXJobSetupModelRef = ref({
+  projectName: '',
+  readerTable: '',
+  incStartTime: null,
+  lastExecTime: new Date(),
+  jonInfo: {} as JobTemplateType,
+  schedJob: {
+    retry: '0',
+    executorFailRetryCount: 0,
+    sec: '*',
+    min: 0,
+    hour: '0,12',
+    day: '?',
+    month: '*',
+    week: '*',
+    year: '*'
+  }
+})
+
+const dataXJobSetupModelRules = {
+  readerTable: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择来源表'
+  },
+  incStartTime: {
+    type: 'number',
+    required: true,
+    trigger: ['change'],
+    message: '请输入增量开始时间'
+  },
+  retry: {
+    required: true,
+    trigger: ['change']
+  },
+  sec: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  min: {
+    type: 'number',
+    required: true,
+    trigger: ['change']
+  },
+  hour: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  day: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  month: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  week: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  year: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  }
+}
+
+const incStartTimeShorCuts = ref({
+  '重置': new Date('1971-01-01 00:00:00').getTime(),
+  '上次执行时间': () => dataXJobSetupModelRef.value.lastExecTime.getTime()
+})
+
+const showDataXJobSetupModal = async (row: Job) => {
+  sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
+
+  dataXJobSetupModelRef.value.jonInfo = (await get_dataXJob(row.id)).data.jobTemplate as JobTemplateType
+
+  dataXJobSetupModelRef.value.projectName = projectRef.value.projectName
+  dataXJobSetupModelRef.value.readerTable = dataXJobSetupModelRef.value.jonInfo.readerTable
+  dataXJobSetupModelRef.value.incStartTime = new Date(dataXJobSetupModelRef.value.jonInfo.incStartTime).getTime()
+
+  const schedJob = await getSchedJob(row.jobName)
+  dataXJobSetupModelRef.value.lastExecTime = new Date(schedJob.incStartTime)
+
+  const cronItems = convertCronExpression(schedJob.jobCron)
+
+  dataXJobSetupModelRef.value.schedJob.retry = schedJob?.retry || '0'
+  dataXJobSetupModelRef.value.schedJob.executorFailRetryCount = schedJob.executorFailRetryCount
+  dataXJobSetupModelRef.value.schedJob.sec = cronItems.seconds
+  dataXJobSetupModelRef.value.schedJob.min = parseInt(cronItems.minutes)
+  dataXJobSetupModelRef.value.schedJob.hour = cronItems.hours
+  dataXJobSetupModelRef.value.schedJob.day = cronItems.dayOfMonth
+  dataXJobSetupModelRef.value.schedJob.month = cronItems.month
+  dataXJobSetupModelRef.value.schedJob.week = cronItems.dayOfWeek
+  dataXJobSetupModelRef.value.schedJob.year = cronItems.year
+
+  showDataXJobSetupModalRef.value = true
+}
+
+const handleSourceTableSearchByDataXJobSetup = async (query: string) => {
+  sourceTableOptions.value = await getTablesOptions(dataXJobSetupModelRef.value.jonInfo.readerId.toString(), query)
+}
+const handleSourceTableUpdateByDataXJobSetup = async () => {
+  sourceTableColumnsRef.value = (await get_columns(dataXJobSetupModelRef.value.jonInfo.readerId.toString(), dataXJobSetupModelRef.value.jonInfo.readerTable))
+}
+
+const handleDataXJobSetupSave = async () => {
+  isDataXJobSetupSaving.value = true
+
+  dataXJobSetupFormRef.value?.validate(async errors => {
+    if (!errors) {
+      dataXJobSetupModelRef.value.jonInfo.incStartTime = formatDate(new Date(dataXJobSetupModelRef.value.incStartTime))
+      updateDataXJob(dataXJobSetupModelRef.value.jonInfo as JobTemplateType).then(async () => {
+
+        // 更新采集任务后重新获取调度任务信息
+        const schedJob = await getSchedJob(dataXJobSetupModelRef.value.jonInfo.jobDesc)
+
+        schedJob.retry = dataXJobSetupModelRef.value.schedJob.retry
+        schedJob.executorFailRetryCount = dataXJobSetupModelRef.value.schedJob.executorFailRetryCount
+        schedJob.jobCron = `${dataXJobSetupModelRef.value.schedJob.sec} ${dataXJobSetupModelRef.value.schedJob.min} ${dataXJobSetupModelRef.value.schedJob.hour} ${dataXJobSetupModelRef.value.schedJob.day} ${dataXJobSetupModelRef.value.schedJob.month} ${dataXJobSetupModelRef.value.schedJob.week} ${dataXJobSetupModelRef.value.schedJob.year}`
+
+        await update_sched_job(schedJob).then(res => {
+          if (res.data == 'success') {
+            window.$message.success('调度任务更新成功')
+            showDataXJobSetupModalRef.value = false
+          } else {
+            window.$message.error(res.msg)
+            console.error(res)
+          }
+        })
+
+      })
+    } else {
+      console.error(errors)
+    }
+  })
+
+  isDataXJobSetupSaving.value = false
+}
+// endregion
 </script>
 
 <style scoped>

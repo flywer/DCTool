@@ -40,3 +40,268 @@ export type InspectionDataStatType = {
     wrongRecordSum: number,
     inspectionTime: string
 }
+
+// region 辅助库类型
+// 项目类型
+export type ProjectInfo = {
+    id: number
+    projectId: string
+    projectName: string
+    projectAbbr: string
+    tableAbbr: string
+}
+// endregion
+
+// region 数据中台类型
+// 质量门户-->质检情况分页查询记录类型
+export interface InspectionRecord {
+    inspectionRecordId: string;
+    sourceTableName: string;
+    dbId: string;
+    inspectionTime: string;
+    orgName: string;
+    totalRecordSum: number;
+    wrongRecordSum: number;
+    aimRecordSum: number;
+    repairRecordSum: number;
+    unRepairRecordSum: number;
+}
+
+// 采集任务模板
+export  type JobTemplateType = {
+    alarmEmail: null;
+    glueUpdatetime: string;
+    // 增量开始时间
+    incStartTime: string;
+    jobJson: {
+        job: {
+            content: {
+                reader: {
+                    parameter: {
+                        password: string;
+                        column: string[];
+                        connection: {
+                            jdbcUrl: string[];
+                            table: string[];
+                        }[];
+                        where: string;
+                        username: string;
+                    };
+                    name: string;
+                };
+                writer: {
+                    parameter: {
+                        path: string;
+                        fileName: string;
+                        tbds_securekey: string;
+                        column: {
+                            name: string;
+                            type: string;
+                        }[];
+                        defaultFS: string;
+                        tbds_username: string;
+                        writeMode: string;
+                        fieldDelimiter: string;
+                        haveTBDS: boolean;
+                        fileType: string;
+                        tbds_secureid: string;
+                    };
+                    name: string;
+                };
+            }[];
+            setting: {
+                errorLimit: {
+                    percentage: number;
+                    record: number;
+                };
+                speed: {
+                    byte: number;
+                    channel: number;
+                };
+            };
+        };
+    };
+    addTime: string;
+    executorBlockStrategy: null;
+    columns: null;
+    autoVerifyRecord: number;
+    jobContent: null;
+    glueRemark: null;
+    dynamicPathData: string;
+    path: string;
+    writerTable: string;
+    readerTable: string;
+    updateBy: string;
+    glueType: string;
+    dynamicPath: string;
+    executorHandler: null;
+    // 增量时间字段
+    replaceParam: string;
+    executorFailRetryCount: number;
+    id: number;
+    executorTimeout: number;
+    partitionInfo: null;
+    jvmParam: null;
+    writerId: number;
+    triggerLastTime: number;
+    incStartId: null;
+    executorParam: null;
+    // 采集方式：0：全量采集；1：主键自增增量采集；2：时间自增增量采集；3：Hive分区增量采集
+    incrementType: 0 | 1 | 2 | 3;
+    executorRouteStrategy: null;
+    childJobId: null;
+    triggerNextTime: number;
+    jobCron: null;
+    updateTime: string;
+    jobGroup: null;
+    // 增量时间格式
+    replaceParamType: string;
+    readerId: number;
+    userName: null;
+    // 任务名称
+    jobDesc: string;
+    glueSource: null;
+    shareTarget: null;
+    createBy: string;
+    mappingType: string;
+    projectName: null;
+    projectId: number;
+    subsystemName: string;
+    gatherSource: string;
+    primaryKey: null;
+};
+
+// 调度任务信息
+export type SchedJobType = {
+    glueUpdatetime: string;
+    incStartTime: string;
+    jobJson: string;
+    addTime: string;
+    num: any;
+    jobTemplateId: number;
+    lastHandleCode: number;
+    readerTable: string;
+    glueType: string;
+    datasourceId: number;
+    replaceParam: string;
+    handleStatus: number;
+    id: number;
+    executorTimeout: number;
+    jvmParam: string;
+    executorParam: any;
+    triggerStatus: number;
+    triggerNextTime: number;
+    jobCron: string;
+    projectId_dictText: string;
+    jobGroup: number;
+    jobDesc: string;
+    glueSource: any;
+    triggerNextTime_dictText: string;
+    success: any;
+    projectName: any;
+    projectId: number;
+    alarmEmail: any;
+    executorBlockStrategy: string;
+    jobContent: string;
+    glueRemark: any;
+    triggerTime: any;
+    triggerLastTime_dictText: string;
+    updateBy: string;
+    executorHandler: string;
+    retry: string;
+    executorFailRetryCount: number;
+    jobType: string;
+    jobFileId: any;
+    partitionInfo: string;
+    triggerLastTime: number;
+    incStartId: any;
+    incrementType: number;
+    executorRouteStrategy: string;
+    childJobId: string;
+    updateTime: string;
+    replaceParamType: string;
+    userName: any;
+    userId: any;
+    createBy: string;
+    subsystemName: string;
+    primaryKey: any;
+};
+
+// 采集任务日志
+export type DataXJobLogType = {
+    handleTime: string;
+    triggerCode: number;
+    handleCode_dictText: string;
+    projectId_dictText: string;
+    jobGroup: number;
+    jobContent: string;
+    handleMsg: string;
+    triggerTime: string;
+    triggerMsg: string;
+    jobDesc: string;
+    jobId: number;
+    triggerCode_dictText: string;
+    executorAddress: string;
+    handleCode: number;
+    id: number;
+    projectName: string;
+    projectId: number;
+    subsystemName: string;
+};
+
+// 工作流任务信息
+export type WorkflowType = {
+    id: string;
+    createBy: string;
+    updateBy: string;
+    createTime: string;
+    updateTime: string;
+    delFlag: number;
+    status: string;
+    procCode: string;
+    procName: string;
+    dependencyProjectId: any;
+    dependencyProjectName: any;
+    dependencyWorkflowId: any;
+    dependencyWorkflowName: any;
+    dependencyLastStartTime: any;
+    projectId: string;
+    projectName: string;
+    description: string;
+    modelXml: string;
+    modelJson: string;
+    editModel: number;
+    rev: number;
+    deploymentId: string;
+    personId: string;
+    personName: string;
+    email: string;
+    disabled: number;
+    schedulingMode: string;
+    crontab: string;
+    businessParamsJson: string;
+    result: number;
+    runTime: number;
+    handleNum: number;
+    nextExecTime: any;
+};
+
+// 工作流任务日志
+export type WorkflowLogType = {
+    id: string;
+    workflowId: string;
+    deploymentId: string;
+    procInstId: string;
+    componentId: string;
+    taskId: string;
+    taskDefKey: string;
+    result: number;
+    startTime: string;
+    runTime: number;
+    data: string;
+    delFlag: number;
+    ioNum: string;
+    componentName: string;
+};
+
+// endregion

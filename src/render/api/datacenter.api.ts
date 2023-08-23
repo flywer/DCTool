@@ -1,4 +1,4 @@
-import {PageVo} from "@common/types";
+import {JobTemplateType, PageVo} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
@@ -20,7 +20,7 @@ export const get_job_project_list_by_page = async (param: PageVo) => {
     return data.data
 }
 
-export const get_job_project_by_id = async (id: string) => {
+export const get_job_project_by_id = async (id: string | number) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getProject, id))
     return data.data
 }
@@ -65,7 +65,7 @@ export const get_columns = async (datasourceId: string, tableName: string, onlyC
     if (data.code == -1) {
         return null
     } else {
-        return data.data.map((item) => {
+        return data.data.map((item: string) => {
             if (item.indexOf(':') === -1) {
                 return item;
             } else {
@@ -93,9 +93,19 @@ export const add_datax_job = async (obj: any) => {
     return data
 }
 
+export const update_datax_job = async (obj: JobTemplateType) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.updateDataXJob, obj))
+    return data
+}
+
 // 创建采集调度任务
 export const add_sched_task = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.addSchedTask, obj))
+    return data
+}
+
+export const update_sched_job = async (obj: any) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.updateSchedJob, obj))
     return data
 }
 
@@ -297,7 +307,11 @@ export const update_workflow = async (jobId: string, params: any) => {
     return data
 }
 
-export const get_dataXJob = async (jobId: string) => {
+export const get_dataXJob = async (jobId: string): Promise<{
+    code: number,
+    data: { jobTemplate: JobTemplateType },
+    msg: string
+}> => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataXJob, jobId))
     return data
 }

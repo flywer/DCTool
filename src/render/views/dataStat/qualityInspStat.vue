@@ -86,8 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import {InspectionRecord} from "@common/datacenter.types";
-import {InspectionDataStatType} from "@common/types";
+import {InspectionDataStatType, InspectionRecord} from "@common/types";
 import {get_table_sql} from "@render/api/auxiliaryDb.api";
 import {get_inps_record_page, insp_home_list} from "@render/api/datacenter.api";
 import {create_data_inps_stat} from "@render/api/xlsx.api";

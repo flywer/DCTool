@@ -1,27 +1,20 @@
+import {ProjectInfo} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
-export const get_project_info = async () => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectInfo))
-    return data
-}
+// export const get_project_info = async () => {
+//     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectInfo))
+//     return data
+// }
+//
+// export const get_project_info_by_project_name = async (projectName: string) => {
+//     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectInfoByProjectName, projectName))
+//     return data
+// }
 
-export const get_project_info_by_project_name = async (projectName: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectInfoByProjectName, projectName))
-    return data
-}
-
-export const update_project_info = async (obj: object) => {
+export const update_project_info = async (obj: ProjectInfo) => {
     const {data} = (await ipcInstance.send(channels.auxiliaryDb.updateProjectInfo, obj))
     return data
-}
-
-type ProjectInfo = {
-    id: number
-    projectId: string
-    projectName: string
-    projectAbbr: string
-    tableAbbr: string
 }
 
 export const find_by_project_id = async (projectId: string): Promise<ProjectInfo> => {
@@ -37,11 +30,6 @@ export const get_project_by_pro_abbr = async (projectAbbr: string) => {
 
 export const get_project_by_table_abbr = async (tableAbbr: string) => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByTableAbbr, tableAbbr))
-    return data
-}
-
-export const get_project_by_project_name = async (projectName: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.getProjectByProjectName, projectName))
     return data
 }
 

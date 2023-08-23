@@ -84,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import {DataXJobLogType} from "@common/types";
 import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {
   get_cj_job_page,
@@ -352,11 +353,11 @@ const showDataXJobLog = async (v: Job) => {
 
   logItemsRef.value = []
 
-  logs.forEach((log: any) => {
-    let type
-    let title
-    let content
-    let time
+  logs.forEach((log: DataXJobLogType) => {
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
 
     if (log.handleCode == 0) {
       title = '运行中'
@@ -430,18 +431,20 @@ const tablePreview = async (row: Job) => {
         }));
 
         // 处理数据
-        previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item) =>
-            Object.values(item).map(
-                (value) => {
-                  if (value === null) {
-                    return 'null'
-                  } else if (value instanceof Date) {
-                    return formatDate(value)
-                  } else {
-                    return value.toString()
-                  }
-                }
-            )
+        previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item: {
+              [s: string]: unknown;
+            } | ArrayLike<unknown>) =>
+                Object.values(item).map(
+                    (value) => {
+                      if (value === null) {
+                        return 'null'
+                      } else if (value instanceof Date) {
+                        return formatDate(value)
+                      } else {
+                        return value.toString()
+                      }
+                    }
+                )
         ));
       })
       .catch(error => {

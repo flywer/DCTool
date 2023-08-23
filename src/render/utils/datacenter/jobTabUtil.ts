@@ -1,4 +1,5 @@
 // 这里存放jobTab.vue中使用的一些工具方法
+import {SchedJobType} from "@common/types";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
@@ -130,7 +131,7 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
             {
                 style: {
                     textAlign: 'center',
-                     padding: '0',
+                    padding: '0',
                 }
             }, {default: () => vNode})
         listItems.push(listItem)
@@ -476,7 +477,7 @@ export const dataXJobGetNextExecTime = (schedJob: any) => {
 
 //endregion
 
-export const getSchedJob = async (jobName: string) => {
+export const getSchedJob = async (jobName: string): Promise<SchedJobType> => {
     return (await get_sched_job_page({
         current: 1,
         size: 10000,

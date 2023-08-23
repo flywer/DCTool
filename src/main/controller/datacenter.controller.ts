@@ -18,7 +18,7 @@ export class DatacenterController {
     private static apiUrl = 'http://19.15.97.242:19080/szrzyt/data_center/gateway';
 
     public async getAuthToken(account: string) {
-        let res
+        let res: string
         try {
             await AppDataSource.getRepository(User).findOneBy({
                 account: account
@@ -27,7 +27,7 @@ export class DatacenterController {
             })
         } catch (e) {
             log.error(e)
-            dialog.showMessageBox({
+            await dialog.showMessageBox({
                 type: 'error',
                 title: '网络连接错误',
                 message: `无法连接到辅助库，中台辅助功能无法使用，查看政务外网连接是否正常`,
@@ -205,10 +205,32 @@ export class DatacenterController {
         return result
     }
 
+    @IpcHandle(channels.datacenter.updateDataXJob)
+    public async handleUpdateDataXJob(params: any) {
+        let result
+        await this.commonPostRequest('/gather/api/jobTemplate/update', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            log.error(err);
+        });
+        return result
+    }
+
     @IpcHandle(channels.datacenter.addSchedTask)
     public async handleAddSchedTask(params: any) {
         let result
         await this.commonPostRequest('/gather/api/job/add', params).then((res) => {
+            result = res;
+        }).catch((err) => {
+            log.error(err);
+        });
+        return result
+    }
+
+    @IpcHandle(channels.datacenter.updateSchedJob)
+    public async handleUpdateSchedJob(params: any) {
+        let result
+        await this.commonPostRequest(`/gather/api/job/update`, params).then((res) => {
             result = res;
         }).catch((err) => {
             log.error(err);

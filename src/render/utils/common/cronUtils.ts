@@ -74,3 +74,16 @@ const areMinutesAndHoursConflicting = (cron1: CronExpression, cron2: CronExpress
 
     return false;
 }
+
+export const convertCronExpression = (expression: string) => {
+    const parts = expression.split(" ");
+    return {
+        seconds: parts[0],
+        minutes: parts[1],
+        hours: parts[2],
+        dayOfMonth: parts[3],
+        month: parts[4],
+        dayOfWeek: parts[5],
+        year: parts[6],
+    }
+}
