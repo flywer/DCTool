@@ -1,6 +1,7 @@
 import {FrontSource} from "@main/dataSource/front-source";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
+import log from 'electron-log'
 
 @Controller()
 export class FrontController {
@@ -14,14 +15,18 @@ export class FrontController {
 
         data.push(cols)
 
-        const dataQuery = `SELECT *
-                           FROM ${tableName} ${cdTimeOrder ? 'ORDER BY cd_time DESC' : 'ORDER BY cd_time'} LIMIT ${limitNum}`;
+        try {
+            const dataQuery = `SELECT *
+                               FROM ${tableName} ${cdTimeOrder ? 'ORDER BY cd_time DESC' : ''} LIMIT ${limitNum}`;
 
-        const records = await FrontSource.manager.query(dataQuery)
+            const records = await FrontSource.manager.query(dataQuery)
 
-        records.forEach(record => {
-            data.push(Object.values(record))
-        })
+            records.forEach(record => {
+                data.push(Object.values(record))
+            })
+        } catch (error) {
+            log.error(error)
+        }
 
         return data
     }
