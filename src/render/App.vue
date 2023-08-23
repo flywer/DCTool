@@ -23,7 +23,7 @@ import {ref} from 'vue'
 
 const appSettings = useAppSettingsStore()
 
-const theme = ref(null)
+const theme = ref<null | typeof darkTheme>(null)
 
 const ipc = useIpc()
 
