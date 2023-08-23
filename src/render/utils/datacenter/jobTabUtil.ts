@@ -111,6 +111,10 @@ export const showTextButton = (text, onClick) => {
     return h(NButton, {
             size: 'small',
             text: true,
+            style: {
+                padding: '8px 16px',
+                width: '100%'
+            },
             onClick: async () => {
                 await onClick()
             }
@@ -125,8 +129,8 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
         const listItem = h(NListItem,
             {
                 style: {
-                    padding: '6px 16px 6px 16px',
-                    textAlign: 'center'
+                    textAlign: 'center',
+                     padding: '0',
                 }
             }, {default: () => vNode})
         listItems.push(listItem)
