@@ -1,6 +1,4 @@
 import {find_by_project_id} from "@render/api/auxiliaryDb.api";
-import {get_job_project_list_all} from "@render/api/datacenter.api";
-import pinyin from "pinyin";
 
 export const getAbbrByProId = async (projectId: string) => {
     let projectAbbr = ''
@@ -14,37 +12,9 @@ export const getAbbrByProId = async (projectId: string) => {
 
     let project = await find_by_project_id(projectId)
 
-    if (project == null) {
-        const project1 = (await get_job_project_list_all()).find(project => project.id == projectId)
-        projectAbbr = pinyin(
-            project1.name.replaceAll(/行政行为/g, 'xzxw')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-                style: pinyin.STYLE_FIRST_LETTER,
-            }).join('')
-        tableAbbr = pinyin(
-            project1.name.replaceAll(/行政行为/g, '')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-                style: pinyin.STYLE_FIRST_LETTER,
-            }).join('')
-    } else {
-        projectAbbr = project?.projectAbbr || pinyin(
-            project.projectName.replaceAll(/行政行为/g, 'xzxw')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-                style: pinyin.STYLE_FIRST_LETTER,
-            }).join('')
-        tableAbbr = project?.tableAbbr || pinyin(
-            project.projectName.replaceAll(/行政行为/g, 'xzxw')
-                .replaceAll(/数据归集/g, '')
-                .replaceAll(/广东/g, '')
-            , {
-                style: pinyin.STYLE_FIRST_LETTER,
-            }).join('')
+    if (project != null) {
+        projectAbbr = project?.projectAbbr || ''
+        tableAbbr = project?.tableAbbr || ''
     }
 
     return {
