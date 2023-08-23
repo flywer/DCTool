@@ -57,14 +57,7 @@ ipc.on(channels.app.updateTheme, () => {
   updateTheme()
 })
 
-
 </script>
 
 <style scoped>
-</style>
-
-<style>
-* {
-  font-family: v-sans v-mono;
-}
 </style>
