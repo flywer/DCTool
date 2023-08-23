@@ -673,11 +673,11 @@
 
                 <template v-if="dataXJobSetupModelRef.jonInfo.incrementType === 2">
                   <n-form-item-gi :span="6" label="增量时间字段">
-                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParam" readonly/>
+                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParam"/>
                   </n-form-item-gi>
 
                   <n-form-item-gi :span="6" label="增量时间格式">
-                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParamType" readonly/>
+                    <n-input v-model:value="dataXJobSetupModelRef.jonInfo.replaceParamType"/>
                   </n-form-item-gi>
 
                   <n-form-item-gi :span="12" label="增量开始时间" path="incStartTime">
@@ -1263,6 +1263,9 @@ const createColumns = (): DataTableColumns<Job> => {
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
+  }
+
+  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
@@ -1283,6 +1286,9 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showDataXJobLog(row)))
+  }
+
+  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1, 3].includes(row.status)) {
     children.push(showButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
@@ -2468,6 +2474,14 @@ const showDataXJobSetupModal = async (row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
 
   dataXJobSetupModelRef.value.jonInfo = (await get_dataXJob(row.id)).data.jobTemplate as JobTemplateType
+
+  if (!dataXJobSetupModelRef.value.jonInfo.replaceParam) {
+    dataXJobSetupModelRef.value.jonInfo.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
+  }
+
+  if (!dataXJobSetupModelRef.value.jonInfo.replaceParamType) {
+    dataXJobSetupModelRef.value.jonInfo.replaceParamType = 'yyyy-MM-dd HH:mm:ss'
+  }
 
   dataXJobSetupModelRef.value.projectName = projectRef.value.projectName
   dataXJobSetupModelRef.value.readerTable = dataXJobSetupModelRef.value.jonInfo.readerTable
