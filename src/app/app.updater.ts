@@ -20,6 +20,12 @@ export const handleAutoUpdate = () => {
     // 当发现一个可用更新的时候触发
     autoUpdater.on('update-available', async function (info) {
         log.info(`发现可用更新 v${info.version}`)
+        let notice = new Notification({
+            title: `应用更新`,
+            body: `发现新更新 v${info.version} 开始下载...`
+        })
+
+        notice.show()
     });
 
     //安装包下载完成
