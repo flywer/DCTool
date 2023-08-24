@@ -67,8 +67,36 @@ export interface InspectionRecord {
     unRepairRecordSum: number;
 }
 
+// 采集任务列表页类型
+export type DataXJobPageType = {
+    triggerLastTime: string;
+    incrementType: number;
+    configuration: number;
+    writerSystemName: string;
+    writerSystemDeptName: string;
+    num: number;
+    jobContent: string;
+    gatherSource_dictText: string;
+    error: number;
+    jobDesc: string;
+    lastHandleCode: number;
+    shareTarget: any;
+    shareTarget_dictText: any;
+    readerSystemName: string;
+    createBy: string;
+    readerDatasourceName: string;
+    writerTable: string;
+    readerTable: string;
+    success: number;
+    readerSystemDeptName: string;
+    id: number;
+    projectName: string;
+    writerDatasourceName: string;
+    gatherSource: string;
+}
+
 // 采集任务模板
-export  type JobTemplateType = {
+export type JobTemplateType = {
     alarmEmail: null;
     glueUpdatetime: string;
     // 增量开始时间

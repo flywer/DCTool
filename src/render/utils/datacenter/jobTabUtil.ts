@@ -1,12 +1,12 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {SchedJobType} from "@common/types";
-import {get_max_running_workflow_num} from "@render/api/auxiliaryDb.api";
+import {DataXJobPageType, SchedJobType} from "@common/types";
+import {get_max_running_workflow_num, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
     datax_job_run,
     datax_job_start,
-    datax_job_stop,
+    datax_job_stop, get_cj_job_page,
     get_datax_job_log,
     get_sched_job_page,
     get_valid_config_page,
@@ -18,7 +18,8 @@ import {
     workflow_rerun,
     workflow_run
 } from "@render/api/datacenter.api";
-import {formatDate} from "@render/utils/common/dateUtils";
+import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
+import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
@@ -28,7 +29,7 @@ import {uuid} from "vue3-uuid";
 
 export  type Job = {
     id: string
-    type: string
+    type: '数据采集任务' | '数据质检任务' | '数据备份任务' | '数据清除任务' | '数据融合任务' | '单表融合任务' | '多表融合任务' | '数据入库任务' | '数据共享任务' | '未知任务'
     jobName: string
     // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
     status: number
@@ -175,79 +176,303 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess: (
 }
 
 /**
- * @param v
+ * @param job
  * @param isValidConfigRef 若是质检任务，是否已配置
  * @param tableName 质检任务的质检表名
  * @param onSuccess 成功时的触发函数
  **/
-export const workflowRun = async (v: Job, isValidConfigRef: boolean, tableName: string, onSuccess: () => any) => {
+export const workflowRun = async (job: Job, isValidConfigRef: boolean, tableName: string, onSuccess: () => any) => {
+    checkRunningNum().then(isPass1 => {
+        if (isPass1) {
+            checkWorkflowDependency(job).then(isPass2 => {
+                if (isPass2) {
+                    checkZjJobInpsConfig(job, isValidConfigRef, tableName).then(isPass3 => {
+                        if (isPass3) {
+                            checkZjJobRulesUpdateTime(job).then(isPass4 => {
+                                if (isPass4) {
+                                    checkRh2Job(job).then(isPass5 => {
+                                        if (isPass5) {
+                                            workflowStart(job, () => onSuccess())
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    })
+}
 
-    //工作流任务
+/**
+ * 正在运行工作流数量检查
+ **/
+const checkRunningNum = async (): Promise<boolean> => {
+    let isPass = false
+
+    const maxRunningNum = (await get_max_running_workflow_num()).value
+
+    // 正在运行的工作流任务
     const runningJobs = (await get_workflow_page({
         page: 1,
-        size: 10000,
+        size: maxRunningNum,
         status: '4',
         procName: ``
     })).data.records
 
-    const runFunc = async () => {
-        if (v.type === '数据质检任务') {
-            if (!isValidConfigRef) {
+    if (runningJobs.length >= maxRunningNum) {
+        return new Promise<boolean>((resolve) => {
+            window.$dialog.warning({
+                title: '警告',
+                content: `目前正在运行的工作流有${runningJobs.length}个，是否继续执行此任务？`,
+                positiveText: '确定',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                    resolve(true);
+                },
+                onNegativeClick: () => {
+                    resolve(false);
+                }
+            });
+        });
+    } else {
+        isPass = true
+    }
+    return isPass
+}
+
+/**
+ * 依赖任务执行时间检查
+ **/
+const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
+    let isPass = false
+
+    // 行为数据入湖、数据湖质检无依赖检查
+    if (!['xzxw', 'lake'].includes(job.jobName.split('_')[1])) {
+        if (job.type === '数据质检任务' || job.type === '数据备份任务') {
+            const cjJob: DataXJobPageType = (await get_cj_job_page({
+                current: 1,
+                size: 1,
+                jobDesc: `cj${job.jobName.substring(job.jobName.indexOf('_'))}`,
+                subsystemName: "采集"
+            })).data?.records[0] || null
+
+            if (cjJob != null && compareTimeStrings(cjJob.triggerLastTime, job.lastExecTime) > 0) {
+                isPass = true
+            } else {
+                return new Promise<boolean>((resolve) => {
+                    window.$dialog.warning({
+                        title: '警告',
+                        content: `采集任务「cj${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`,
+                        positiveText: '确定',
+                        negativeText: '取消',
+                        onPositiveClick: () => {
+                            resolve(true);
+                        },
+                        onNegativeClick: () => {
+                            resolve(false);
+                        }
+                    });
+                });
+            }
+        } else if (job.type === '数据清除任务') {
+
+            const zjJob = (await get_workflow_page({
+                page: 1,
+                size: 1,
+                status: null,
+                procName: `zj${job.jobName.substring(job.jobName.indexOf('_'))}`
+            })).data?.records[0] || null
+
+            const bfJob = (await get_workflow_page({
+                page: 1,
+                size: 1,
+                status: null,
+                procName: `bf${job.jobName.substring(job.jobName.indexOf('_'))}`
+            })).data?.records[0] || null
+
+            if ((zjJob != null && bfJob != null
+                && compareTimeStrings(await workflowJobGetLastExecTime(zjJob), job.lastExecTime) > 0
+                && compareTimeStrings(await workflowJobGetLastExecTime(bfJob), job.lastExecTime) > 0)) {
+                isPass = true
+            } else {
+                return new Promise<boolean>(async (resolve) => {
+                    let content = ''
+                    if (zjJob == null || compareTimeStrings(await workflowJobGetLastExecTime(zjJob), job.lastExecTime) < 1) {
+                        content = `质检任务「zj${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`
+                    } else if (bfJob == null || compareTimeStrings(await workflowJobGetLastExecTime(bfJob), job.lastExecTime) < 1) {
+                        content = `备份任务「bf${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`
+                    }
+                    window.$dialog.warning({
+                        title: '警告',
+                        content: content,
+                        positiveText: '确定',
+                        negativeText: '取消',
+                        onPositiveClick: () => {
+                            resolve(true);
+                        },
+                        onNegativeClick: () => {
+                            resolve(false);
+                        }
+                    });
+                });
+            }
+        } else if (job.type === '单表融合任务') {
+            const zjJob = (await get_workflow_page({
+                page: 1,
+                size: 1,
+                status: null,
+                procName: `zj${job.jobName.substring(job.jobName.indexOf('_'))}`
+            })).data?.records[0] || null
+
+            if (zjJob != null && compareTimeStrings(await workflowJobGetLastExecTime(zjJob), job.lastExecTime) > 0) {
+                isPass = true
+            } else {
+                return new Promise<boolean>(async (resolve) => {
+                    window.$dialog.warning({
+                        title: '警告',
+                        content: `质检任务「zj${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`,
+                        positiveText: '确定',
+                        negativeText: '取消',
+                        onPositiveClick: () => {
+                            resolve(true);
+                        },
+                        onNegativeClick: () => {
+                            resolve(false);
+                        }
+                    });
+                });
+            }
+        } else if (job.type === '多表融合任务') {
+            const rh1Job = (await get_workflow_page({
+                page: 1,
+                size: 1,
+                status: null,
+                procName: `rh1${job.jobName.substring(job.jobName.indexOf('_'))}`
+            })).data?.records[0] || null
+
+            if (rh1Job != null && compareTimeStrings(await workflowJobGetLastExecTime(rh1Job), job.lastExecTime) > 0) {
+                isPass = true
+            } else {
+                return new Promise<boolean>(async (resolve) => {
+                    window.$dialog.warning({
+                        title: '警告',
+                        content: `单表融合任务「rh1${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`,
+                        positiveText: '确定',
+                        negativeText: '取消',
+                        onPositiveClick: () => {
+                            resolve(true);
+                        },
+                        onNegativeClick: () => {
+                            resolve(false);
+                        }
+                    });
+                });
+            }
+        }
+    } else {
+        isPass = true
+    }
+    return isPass
+}
+
+/**
+ * 质检任务特殊检查:机构配置
+ **/
+const checkZjJobInpsConfig = async (job: Job, isValidConfigRef: boolean, tableName: string): Promise<boolean> => {
+    if (job.type === '数据质检任务') {
+        if (!isValidConfigRef) {
+            return new Promise<boolean>((resolve) => {
                 window.$dialog.warning({
                     title: '警告',
                     content: `检测到未在【质量门户】对[${tableName}]进行配置，是否继续执行质检？`,
                     positiveText: '确定',
                     negativeText: '取消',
                     onPositiveClick: () => {
-                        workflowStart(v, () => onSuccess())
+                        resolve(true);
+                    },
+                    onNegativeClick: () => {
+                        resolve(false);
                     }
-                })
-            } else {
-                workflowStart(v, () => onSuccess())
-            }
-        } else if (v.type === '多表融合任务') {
+                });
+            });
+        } else {
+            return true
+        }
+    } else {
+        return true
+    }
+}
 
-            // 所有正在运行的多表融合的任务
-            const runningRh2JobsByPrefix = (await get_workflow_page({
-                page: 1,
-                size: 10000,
-                status: '4',
-                procName: `rh2_`
-            })).data.records
+const checkZjJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
+    if (job.type === '数据质检任务') {
 
-            if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some((job: {
-                procName: string;
-            }) => job.procName.split('_')[2] == v.jobName.split('_')[2])) {
+        const tableName = job.jobName.split('_').pop()
+
+        let rulesUpdateTime: string
+        // 行为数据且不是数据湖质检任务
+        if (actionTableNames.includes(tableName) && !job.jobName.startsWith('zj_lake')) {
+            rulesUpdateTime = formatDate((await get_simp_zj_json(tableName))[0].simpZjUpdateTime)
+        } else {
+            rulesUpdateTime = formatDate((await get_zj_json(tableName))[0].zjUpdateTime)
+        }
+        console.log(rulesUpdateTime)
+        if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
+            return true
+        } else {
+            return new Promise<boolean>((resolve) => {
                 window.$dialog.warning({
                     title: '警告',
-                    content: `目前已有${v.jobName.split('_')[2].toUpperCase()}的多表融合任务正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
+                    content: `检测到质检规则已更新，是否继续以旧规则执行质检？`,
                     positiveText: '确定',
                     negativeText: '取消',
                     onPositiveClick: () => {
-                        workflowStart(v, () => onSuccess())
+                        resolve(true);
+                    },
+                    onNegativeClick: () => {
+                        resolve(false);
                     }
-                })
-            } else {
-                workflowStart(v, () => onSuccess())
-            }
-        } else {
-            workflowStart(v, () => onSuccess())
+                });
+            });
         }
-    }
-
-    const maxRunningNum = (await get_max_running_workflow_num()).value
-    if (runningJobs.length >= maxRunningNum) {
-        window.$dialog.warning({
-            title: '警告',
-            content: `目前正在运行的工作流有${runningJobs.length}个，是否继续执行此任务？`,
-            positiveText: '确定',
-            negativeText: '取消',
-            onPositiveClick: () => {
-                runFunc()
-            }
-        })
     } else {
-        await runFunc()
+        return true
+    }
+}
+
+const checkRh2Job = async (job: Job): Promise<boolean> => {
+    if (job.type === '多表融合任务') {
+        // 所有正在运行的多表融合的任务
+        const runningRh2JobsByPrefix = (await get_workflow_page({
+            page: 1,
+            size: 10000,
+            status: '4',
+            procName: `rh2_`
+        })).data.records
+
+        if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some((job1: {
+            procName: string;
+        }) => job1.procName.split('_')[2] == job.jobName.split('_')[2])) {
+            return new Promise<boolean>((resolve) => {
+                window.$dialog.warning({
+                    title: '警告',
+                    content: `目前已有${job.jobName.split('_')[2].toUpperCase()}的多表融合任务正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
+                    positiveText: '确定',
+                    negativeText: '取消',
+                    onPositiveClick: () => {
+                        resolve(true);
+                    },
+                    onNegativeClick: () => {
+                        resolve(false);
+                    }
+                });
+            });
+        } else {
+            return true
+        }
+    } else {
+        return true
     }
 }
 
@@ -433,7 +658,9 @@ export const dataXJobDelete = async (row: Job, onSuccess: () => void) => {
 
 }
 
-export const getDataXJobStatus = async (v: { configuration: number; jobDesc: any; }, schedJob: { triggerStatus: number; }) => {
+export const getDataXJobStatus = async (v: { configuration: number; jobDesc: any; }, schedJob: {
+    triggerStatus: number;
+}) => {
     if (v.configuration == 0) {
         return 0
     } else {
