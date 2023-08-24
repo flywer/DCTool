@@ -86,7 +86,7 @@ export const buildQcJson = async (formModel: QcFormModelType) => {
 export const createQcJob = async (formModel: QcFormModelType) => {
     add_work_flow(await buildQcJson(formModel)).then((res) => {
         if (res.code == 200) {
-            window.$message.success('备份任务创建成功')
+            window.$message.success('清除任务创建成功')
         } else {
             window.$message.error(res.message)
         }
