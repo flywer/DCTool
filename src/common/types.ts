@@ -332,4 +332,40 @@ export type WorkflowLogType = {
     componentName: string;
 };
 
+export type  DataDevBizVoType = {
+    dataSyncDtoList: any[],
+    qualityInspectionDtoList: [
+        {
+            sourceDbId: string;
+            sourceTableName: string;
+            inspectionRangeType: string;
+            incrementColumnName: string;
+            incrementColumnValueInit: string;
+            wrongDbId: string;
+            wrongTableName: string;
+            aimDbId: string;
+            aimTableName: string;
+            principalDtoList: [];
+            qualityInspectionFieldList: any[];
+            taskInfoDto: { taskDefKey: string }
+        }
+    ],
+    sparkSqlDtoList: [
+        {
+            taskInfoDto: {
+                taskDefKey: string
+            },
+            sparkConfig: {
+                saveMode: string
+            },
+            sql: string,
+            id: string,
+            sourceDBId: number[],
+            sourceTable: string[],
+            targetDBId: number,
+            targetTable: string,
+            taskType: string
+        }
+    ]
+}
 // endregion

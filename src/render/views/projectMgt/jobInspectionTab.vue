@@ -12,6 +12,7 @@
           <n-form-item label="质检时间:" label-placement="left">
             <n-date-picker v-model:value="formModel.timeRange" type="datetimerange" clearable
                            @update:value="tableDataInit"
+                           :size="'small'"
             />
           </n-form-item>
         </n-space>
@@ -47,6 +48,7 @@
 </template>
 
 <script setup lang="ts">
+import {InspectionRecord} from "@common/types";
 import {open_default_browser} from "@render/api/app.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {get_inps_record_page} from "@render/api/datacenter.api";
@@ -55,6 +57,11 @@ import {formatDate} from "@render/utils/common/dateUtils";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";
 import {DataTableColumns, NSpace, NNumberAnimation} from "naive-ui";
 import {computed, onMounted, ref, watch, reactive, h} from "vue";
+
+// 当组件使用时，供其他页面使用
+const props = defineProps({
+  inpsTableName: String
+})
 
 const queryParam = ref('')
 
@@ -79,14 +86,22 @@ watch(defaultSelectedKeys, async (newValue) => {
 })
 
 onMounted(async () => {
-  const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
-  const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
-  if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
-    const projectId = segments[segments.length - 2]
-    const project = (await find_by_project_id(projectId))
-    queryParam.value = `di_${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}_temp_ods`
+  console.log(props.inpsTableName)
+  if (props.inpsTableName == undefined) {
+    const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
+    const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
+    if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
+      const projectId = segments[segments.length - 2]
+      const project = (await find_by_project_id(projectId))
+      queryParam.value = `di_${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}_temp_ods`
+      await tableDataInit()
+    }
+  } else {
+    queryParam.value = props.inpsTableName
+    console.log('lake')
     await tableDataInit()
   }
+  console.log(queryParam.value)
 })
 
 const formModel = ref({
@@ -109,7 +124,7 @@ const tableDataInit = async () => {
   paginationReactive.itemCount = data.total || 0
 
   if (records.length > 0) {
-    tableDataRef.value = records.map((v => ({
+    tableDataRef.value = records.map(((v: InspectionRecord) => ({
       id: v.inspectionRecordId,
       inspectionTime: v.inspectionTime,
       orgName: v.orgName,

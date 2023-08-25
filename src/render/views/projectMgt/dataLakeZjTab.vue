@@ -2,6 +2,24 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
       <n-space inline class="float-right">
+        <n-input-group>
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              clearable
+              :readonly="isTableLoading"
+              @keydown.enter="tableDataInit"
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
+          <n-button type="primary" ghost @click="tableDataInit">
+            搜索
+          </n-button>
+        </n-input-group>
         <n-button secondary type="info" @click="showCreateJobModal">
           创建任务
           <template #icon>
@@ -183,35 +201,46 @@
     </template>
   </n-modal>
 
+  <n-modal
+      v-model:show="showJobInpsModalRef"
+      :mask-closable="false"
+      :closable="true"
+      preset="dialog"
+      role="dialog"
+      :show-icon="false"
+      :title="'质检情况'"
+      :size="'small'"
+      style="width: 650px"
+  >
+    <job-inspection-tab :inps-table-name="inpsTableName"/>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
+import {DataDevBizVoType, WorkflowLogType, WorkflowType} from "@common/types";
 import {get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {
   add_work_flow, create_table,
   create_valid_config, get_tables,
-  get_valid_config_page,
+  get_valid_config_page, get_workflow, get_workflow_list_by_project_id,
   get_workflow_log,
-  get_workflow_page,
   gte_usrc_org_tree
 } from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {
-  getCustomTableValidConfig,
+  getCustomTableValidConfig, getTableCommentByProName,
   getWorkflowJobStatus,
-  Job,
+  Job, renderWorkflowActionButton,
   setJobStatus,
-  showButton,
-  showConfirmation,
-  workflowActive,
-  workflowDelete,
+  showButton, showButtonPopover,
+  showConfirmation, showTextButton, showTextConfirmation,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
-  workflowReRun,
-  workflowRun,
 } from "@render/utils/datacenter/jobTabUtil";
 import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
-import {Add, Refresh} from '@vicons/ionicons5'
+import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
+import {Add, Refresh, Search} from '@vicons/ionicons5'
+import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
 import {
   DataTableColumns,
@@ -230,6 +259,8 @@ const isTableLoading = ref(false)
 
 const projectId = '39'
 
+const queryParam = ref('')
+
 onMounted(() => {
   tableDataInit()
 })
@@ -237,19 +268,14 @@ onMounted(() => {
 const tableDataInit = async () => {
   isTableLoading.value = true
 
-  // const project = (await find_by_project_id(projectId))
+  // 工作流任务
+  const allJobs = (await get_workflow_list_by_project_id(projectId)).data
 
-  //工作流任务
-  const lakeZjJob = (await get_workflow_page({
-    page: 1,
-    size: 10000,
-    status: null,
-    procName: `zj_lake_`
-  })).data.records
+  const filterJobs = allJobs.filter((job: { procName: string; }) => job.procName.includes(queryParam.value))
 
   let newJobs = []
 
-  for (const v of lakeZjJob) {
+  for (const v of filterJobs) {
     const job: Job = {
       id: v.id,
       jobName: v.procName,
@@ -261,7 +287,7 @@ const tableDataInit = async () => {
       nextExecTime: workflowJobGetNextExecTime(v),
       createBy: v.createBy,
       code: v.procCode,
-      comment: await getTableComment(v.procName),
+      comment: await getTableCommentByProName(v.procName),
       createTime: v.createTime,
       updateTime: v.updateTime
     }
@@ -280,11 +306,6 @@ const tableDataInit = async () => {
   isTableLoading.value = false
 }
 
-const getTableComment = async (procName: string) => {
-  return (await get_table_sql({
-    tableName: procName.split('_')[2]
-  }))[0].comment as string
-}
 const createColumns = (): DataTableColumns<Job> => {
   return [
     {
@@ -337,76 +358,27 @@ const createColumns = (): DataTableColumns<Job> => {
         let container = h(NSpace, {
           justify: 'center'
         })
-        let children: any[] = []
 
-        switch (row.status) {
-          case  1: // 任务停用
-            children = [
-              showButton('启用', async () => {
-                await workflowActive(row.id, '01', () => tableDataInit())
-              }),
-              showConfirmation('执行', async () => {
-                await workflowActive(row.id, '01', () => {
-                })
-                await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-            ]
-            break
-          case 2:// 任务启用
-            children = [
-              showButton('停用', async () => {
-                await workflowActive(row.id, '02', () => tableDataInit())
-              }),
-              showConfirmation('执行', async () => {
-                await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowActive(row.id, '02', () => {
-                })
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-            ]
-            break
-          case 3:// 任务运行中
-            break
-          case 4:// 任务异常
-            children = [
-              showConfirmation('重跑', async () => {
-                workflowReRun(row, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-            ]
-            break
-          case 5:// 任务未反馈
-            children = [
-              showConfirmation('重跑', async () => {
-                workflowReRun(row, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-            ]
-            break
+        let children: VNode[] = renderWorkflowActionButton(row, tableDataInit)
+
+        if (children.length == 3) {
+          // '更多'按钮的子组件
+          let moreBtnPopoverChildren: VNode[] = []
+
+          moreBtnPopoverChildrenPush(row, moreBtnPopoverChildren)
+
+          // 若只有一个则直接添加到children里
+          if (moreBtnPopoverChildren.length == 1) {
+            childrenPushMoreBtn(row, children)
+          } else {
+            if (!isEmpty(moreBtnPopoverChildren)) {
+              children.push(showButtonPopover('更多', moreBtnPopoverChildren))
+            }
+          }
+
+        } else {
+          childrenPushMoreBtn(row, children)
         }
-
-        const cantUpdateStatus = [-1, 2, 3]
-        if (row.type === '数据质检任务' && !cantUpdateStatus.includes(row.status)) {
-          children.push(
-              showConfirmation('更新规则', () => {
-                onUpdateZjJob(row)
-              })
-          )
-        }
-
-        children.push(
-            showButton('日志', () => showWorkflowLog(row)),
-            showButton('配置', () => showValidConfigModal(row))
-        )
 
         container.children = children
 
@@ -416,18 +388,45 @@ const createColumns = (): DataTableColumns<Job> => {
   ]
 }
 
+const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
+  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+    moreBtnChildren.push(showTextConfirmation('更新规则', () => onUpdateZjJob(row)))
+  }
+
+  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('日志', () => showWorkflowLog(row)))
+    moreBtnChildren.push(showTextButton('质检情况', () => showJobInpsModal(row)))
+    moreBtnChildren.push(showTextButton('质检配置', () => showValidConfigModal(row)))
+  }
+}
+
+// children直接添加更多中的组件
+const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
+  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+    children.push(showConfirmation('更新规则', () => onUpdateZjJob(row)))
+  }
+
+  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showWorkflowLog(row)))
+    children.push(showButton('质检情况', () => showJobInpsModal(row)))
+    children.push(showButton('质检配置', () => showValidConfigModal(row)))
+  }
+}
+
 const columnsRef = ref(createColumns())
 
 const paginationReactive = reactive({
   page: 1,
-  pageSize: 6,
+  pageSize: 10,
   showSizePicker: false,
-  onChange: async (page: number) => {
+  onChange: (page: number) => {
     paginationReactive.page = page
+    tableDataInit()
   },
   onUpdatePageSize: (pageSize: number) => {
     paginationReactive.pageSize = pageSize
     paginationReactive.page = 1
+    tableDataInit()
   }
 })
 
@@ -468,8 +467,8 @@ const showCreateJobModal = () => {
 
   get_zj_json()
       .then((res) => {
-        tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
-            (v => ({
+        tableNameOptions.value = res?.filter((item: { zjJson: any; }) => item.zjJson != null).map(
+            ((v: { tableName: any; id: { toString: () => any; }; zjJson: any; }) => ({
               label: v.tableName,
               value: v.id.toString(),
               json: v.zjJson,
@@ -639,18 +638,18 @@ const addFieldsToSql = (sql: string): string => {
 const showDrawerRef = ref(false)
 const logItemsRef = ref<TimelineItemProps[]>([])
 const showTipRef = ref(false)
-const showWorkflowLog = async (v) => {
-  const logs = (await get_workflow_log(v.id, 100, 1)).data.records
+const showWorkflowLog = async (v: Job) => {
+  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
 
   showTipRef.value = logs.length >= 100;
 
   logItemsRef.value = []
 
   logs.forEach(log => {
-    let type
-    let title
-    let content
-    let time
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
 
     if (log.result == null) {
       title = '运行中'
@@ -721,7 +720,7 @@ const validConfigModalFormRules = {
   }
 }
 
-const showValidConfigModal = async (v) => {
+const showValidConfigModal = async (v: Job) => {
   const tableName = v.jobName.split('_')[2]
   const validTableName = `sztk_${tableName}`
 
@@ -747,7 +746,7 @@ const showValidConfigModal = async (v) => {
     validConfigModalFormModel.value.cdBatchName = 'cd_batch'
   }
 
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map((v => ({
+  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: { name: any; id: any; }) => ({
     label: `${v.name}`,
     value: v.id
   })))
@@ -818,6 +817,21 @@ const onUpdateZjJob = (v: Job) => {
   updateZjJobFormRef.value.tableName = v.jobName.split('_')[2].toUpperCase()
 
   updateZjJob(updateZjJobFormRef.value, true).then(() => tableDataInit())
+}
+//endregion
+
+// region 质检情况
+const showJobInpsModalRef = ref(false)
+const inpsTableName = ref('')
+
+const showJobInpsModal = async (row: Job) => {
+  const workflow: WorkflowType = (await get_workflow(row.id)).data
+
+  const dataDevBizVo: DataDevBizVoType = JSON.parse(workflow.businessParamsJson)
+
+  inpsTableName.value = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+
+  showJobInpsModalRef.value = true
 }
 //endregion
 </script>

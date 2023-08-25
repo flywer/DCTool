@@ -1,6 +1,6 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {DataXJobPageType, SchedJobType} from "@common/types";
-import {get_max_running_workflow_num, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {get_max_running_workflow_num, get_simp_zj_json, get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
@@ -23,7 +23,7 @@ import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem} from "naive-ui";
+import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem, NSpace} from "naive-ui";
 import {h} from "vue";
 import {uuid} from "vue3-uuid";
 
@@ -109,6 +109,28 @@ export const showConfirmation = (text: string, onPositiveClick: () => any) => {
     });
 }
 
+export const showTextConfirmation = (text: string, onPositiveClick: () => any) => {
+    return h(NPopconfirm, {
+        positiveText: '确定',
+        negativeText: '取消',
+        onPositiveClick: async () => {
+            await onPositiveClick();
+        },
+    }, {
+        trigger: () => {
+            return h(NButton, {
+                size: 'small',
+                text: true,
+                style: {
+                    padding: '8px 16px',
+                    width: '100%'
+                },
+            }, {default: () => text})
+        },
+        default: () => `确定要${text}吗？`
+    });
+}
+
 export const showTextButton = (text: string, onClick: () => any) => {
     return h(NButton, {
             size: 'small',
@@ -154,6 +176,53 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
 }
 
 //region 工作流
+
+export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): VNode[] => {
+    let children: VNode[] = []
+
+    switch (row.status) {
+        case  1: // 任务停用
+            children = [
+                showButton('启用', () => workflowActive(row.id, '01', () => tableDataInit())),
+                showConfirmation('执行', async () => {
+                    await workflowActive(row.id, '01', async () => {
+                        await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
+                    })
+                }),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+            ]
+            break
+        case 2:// 任务启用
+            children = [
+                showButton('停用', () => workflowActive(row.id, '02', () => tableDataInit())),
+                showConfirmation('执行', async () => {
+                    await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
+                }),
+                showConfirmation('删除', async () => {
+                    await workflowActive(row.id, '02', () => {
+                        workflowDelete(row.id, () => tableDataInit())
+                    })
+                }),
+            ]
+            break
+        case 3:// 任务运行中
+            break
+        case 4:// 任务异常
+            children = [
+                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+            ]
+            break
+        case 5:// 任务未反馈
+            children = [
+                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+            ]
+            break
+    }
+
+    return children
+}
 
 /**
  * @param id
@@ -896,3 +965,8 @@ export const setJobStatus = (row: { status: any; }) => {
     }
 }
 
+export const getTableCommentByProName = async (procName: string) => {
+    return (await get_table_sql({
+        tableName: procName.split('_')[2]
+    }))[0].comment as string
+}
