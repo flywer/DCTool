@@ -1,11 +1,12 @@
 import {MAIN_WINDOW_URL} from "@main/window/constants";
 import {join} from 'path'
 import {BrowserWindow, app} from 'electron'
+import log from 'electron-log'
 
 const isDev = !app.isPackaged
 
 export const createMainWindow = (): BrowserWindow => {
-    const mainWindow = new BrowserWindow({
+    const win = new BrowserWindow({
         width: 435,
         height: 550,
         resizable: false,
@@ -24,21 +25,23 @@ export const createMainWindow = (): BrowserWindow => {
         autoHideMenuBar: !isDev,
     })
 
-    mainWindow.loadURL(MAIN_WINDOW_URL)
+    win.loadURL(MAIN_WINDOW_URL).catch(error => {
+        log.error(error)
+    })
 
     // 监听 "ready-to-show" 事件
-    mainWindow.once('ready-to-show', async () => {
-        mainWindow.show() // 当渲染器加载完毕时显示窗口
+    win.once('ready-to-show', async () => {
+        win.show() // 当渲染器加载完毕时显示窗口
     });
 
     if (isDev) {
-        mainWindow.webContents.openDevTools()
+        win.webContents.openDevTools()
     } else {
-        mainWindow.removeMenu()
+        win.removeMenu()
     }
 
-    mainWindow.on('closed', () => {
-        mainWindow.destroy()
+    win.on('closed', () => {
+        win.destroy()
     })
-    return mainWindow
+    return win
 }

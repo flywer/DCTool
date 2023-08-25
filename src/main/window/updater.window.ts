@@ -1,5 +1,6 @@
 import {UPDATER_WINDOW_URL} from "@main/window/constants";
 import {app, BrowserWindow} from "electron";
+import log from "electron-log";
 import {join} from "path";
 
 const isDev = !app.isPackaged
@@ -24,7 +25,9 @@ export const createUpdaterWindow = (): BrowserWindow => {
         autoHideMenuBar: true,
     })
 
-    win.loadURL(UPDATER_WINDOW_URL)
+    win.loadURL(UPDATER_WINDOW_URL).catch(error => {
+        log.error(error)
+    })
 
     // 监听 "ready-to-show" 事件
     win.once('ready-to-show', () => {
