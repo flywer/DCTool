@@ -1265,7 +1265,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
     moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
   }
 
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1, 3].includes(row.status)) {
+  if ((row.type === '数据采集任务') && ![0, -1, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
@@ -2518,6 +2518,10 @@ const handleDataXJobSetupSave = async () => {
   dataXJobSetupFormRef.value?.validate(async errors => {
     if (!errors) {
       dataXJobSetupModelRef.value.jonInfo.incStartTime = formatDate(new Date(dataXJobSetupModelRef.value.incStartTime))
+      if (dataXJobSetupModelRef.value.jonInfo.incrementType == 2) {
+        dataXJobSetupModelRef.value.jonInfo.jobJson.job.content[0].reader.parameter.where = 'cd_time >= ${lastTime} and cd_time < ${currentTime}'
+      }
+
       updateDataXJob(dataXJobSetupModelRef.value.jonInfo as JobTemplateType).then(async () => {
 
         // 更新采集任务后重新获取调度任务信息
@@ -2530,6 +2534,7 @@ const handleDataXJobSetupSave = async () => {
         await update_sched_job(schedJob).then(res => {
           if (res.data == 'success') {
             window.$message.success('调度任务更新成功')
+            tableDataInit()
             showDataXJobSetupModalRef.value = false
           } else {
             window.$message.error(res.msg)

@@ -2,6 +2,24 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
       <n-space inline class="float-right">
+        <n-input-group>
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              clearable
+              :readonly="isTableLoading"
+              @keydown.enter="tableDataInit"
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
+          <n-button type="primary" ghost @click="tableDataInit">
+            搜索
+          </n-button>
+        </n-input-group>
         <n-button secondary strong @click="tableDataInit">
           刷新
           <template #icon>
@@ -23,7 +41,7 @@
         :size="'small'"
         :loading="isTableLoading"
         :striped="true"
-        :scroll-x="1200"
+        :scroll-x="1400"
     />
   </n-scrollbar>
 
@@ -134,10 +152,118 @@
 
   </n-modal>
 
+  <n-drawer
+      v-model:show="showDrawerRef"
+      :width="220"
+  >
+    <n-drawer-content title="日志" :native-scrollbar="false" closable>
+      <n-timeline v-if="!isEmpty(logItemsRef)">
+        <n-timeline-item v-for="item in logItemsRef"
+                         :type="item.type"
+                         :title="item.title"
+                         :content="item.content"
+                         :time="item.time"
+        />
+      </n-timeline>
+      <n-empty v-else description="无运行日志"/>
+      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
+    </n-drawer-content>
+  </n-drawer>
 
+  <n-modal
+      v-model:show="showDataXJobSetupModalRef"
+      :mask-closable="false"
+      :closable="true"
+      preset="dialog"
+      role="dialog"
+      :show-icon="false"
+      :title="dataXJobSetupModalTitle"
+      :size="'small'"
+      style="width: 566px"
+  >
+    <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
+      <n-layout class="m-2">
+        <n-form
+            ref="dataXJobSetupFormRef"
+            class="mt-4"
+            :model="dataXJobSetupModelRef"
+            :rules="dataXJobSetupModelRules"
+            :size="'small'"
+        >
+          <n-grid :cols="17" :x-gap="4">
+            <n-form-item-gi :span="7" label="是否重试" path="retry">
+              <n-radio-group v-model:value="dataXJobSetupModelRef.retry">
+                <n-radio-button
+                    :key="1"
+                    :value="'1'"
+                    label="是"
+                />
+                <n-radio-button
+                    :key="0"
+                    :value="'0'"
+                    label="否"
+                />
+              </n-radio-group>
+            </n-form-item-gi>
+            <n-form-item-gi :span="10" label="重试次数" path="executorFailRetryCount">
+              <n-input-number v-model:value="dataXJobSetupModelRef.executorFailRetryCount"
+                              button-placement="both"
+              />
+            </n-form-item-gi>
+
+            <n-form-item-gi :span="3" label="秒" path="sec" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center"
+                       v-model:value="dataXJobSetupModelRef.sec"
+                       placeholder=""
+                       @keydown.enter.prevent
+                       readonly
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="3" label="分" path="min" :label-style="{margin:'0 auto'}">
+              <n-input-number class="text-center" v-model:value="dataXJobSetupModelRef.min"
+                              :min="schedMinRange.startMin" :max="schedMinRange.endMIn" placeholder=""
+                              @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="3" label="时" path="hour" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center" v-model:value="dataXJobSetupModelRef.hour" placeholder=""
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="2" label="日" path="day" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center" v-model:value="dataXJobSetupModelRef.day" placeholder=""
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="2" label="月" path="month" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center" v-model:value="dataXJobSetupModelRef.month" placeholder=""
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="2" label="周" path="week" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center" v-model:value="dataXJobSetupModelRef.week" placeholder=""
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+            <n-form-item-gi :span="2" label="年" path="year" :label-style="{margin:'0 auto'}">
+              <n-input class="text-center" v-model:value="dataXJobSetupModelRef.year" placeholder=""
+                       @keydown.enter.prevent
+              />
+            </n-form-item-gi>
+          </n-grid>
+        </n-form>
+      </n-layout>
+    </n-scrollbar>
+    <template #action>
+      <n-button type="primary" :size="'small'" @click="handleDataXJobSetupSave" :loading="isDataXJobSetupSaving">保存
+      </n-button>
+      <n-button :size="'small'" @click="showDataXJobSetupModalRef=!showDataXJobSetupModalRef">返回</n-button>
+    </template>
+  </n-modal>
 </template>
 
 <script setup lang="ts">
+import {DataXJobLogType} from "@common/types";
 import {
   find_by_project_id,
   get_cj_cron_by_project_id,
@@ -145,28 +271,32 @@ import {
   get_table_sql
 } from "@render/api/auxiliaryDb.api";
 import {
-  get_cj_job_page,
-  get_sched_job_page,
+  get_cj_job_page, get_datax_job_log, update_sched_job,
 } from "@render/api/datacenter.api";
+import {convertCronExpression} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {createSchedJob} from "@render/utils/datacenter/cjJob";
 import {
-  dataXJobDelete, dataXJobRun,
-  dataXJobStart, dataXJobStop,
-  Job,
+  getDataXJobStatus,
+  getSchedJob,
+  Job, renderDataXJobActionButton,
   setJobStatus,
-  showButton,
-  showConfirmation
+  showButton, showButtonPopover,
+  showTextButton
 } from "@render/utils/datacenter/jobTabUtil";
-import {Refresh} from '@vicons/ionicons5'
+import {Refresh, Search} from '@vicons/ionicons5'
+import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
-import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
+import {isEmpty} from "lodash-es";
+import {DataTableColumns, FormInst, NButton, NSpace, TimelineItemProps} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const tableDataRef = ref([])
 const isTableLoading = ref(false)
 
 const projectId = '27'
+
+const queryParam = ref('')
 
 onMounted(() => {
   tableDataInit()
@@ -178,33 +308,25 @@ const tableDataInit = async () => {
   const project = (await find_by_project_id(projectId))
 
   // 共享任务
-  let dataXJobs = (await get_cj_job_page({
+  const allGxJobs = (await get_cj_job_page({
     current: 1,
     size: 10000,
     projectName: project.projectName,
     subsystemName: "采集"
   })).data.records
 
+  const filterJobs = allGxJobs.filter((job: { jobDesc: string; }) => job.jobDesc.includes(queryParam.value))
+
   let newJobs = []
 
-  for (const v of dataXJobs) {
-    const schedJob = await getSchedJob(v)
+  for (const v of filterJobs) {
+    const schedJob = await getSchedJob(v.jobDesc)
 
     const job: Job = {
       id: v.id,
       jobName: v.jobDesc,
       type: '数据共享任务',
-      status: (() => {
-        if (v.configuration == 0) {
-          return 0
-        } else {
-          if (schedJob?.triggerStatus == 1) {
-            return 2
-          } else {
-            return 1
-          }
-        }
-      })(),
+      status: await getDataXJobStatus(v, schedJob),
       schedMode: 2,
       cron: schedJob?.jobCron || null,
       lastExecTime: v.triggerLastTime || '--',
@@ -227,14 +349,6 @@ const tableDataInit = async () => {
   })
 
   isTableLoading.value = false
-}
-
-const getSchedJob = async (v) => {
-  return (await get_sched_job_page({
-    current: 1,
-    size: 10000,
-    jobContent: v.jobDesc
-  })).data.records[0] || null
 }
 
 const cjJobGetNextExecTime = (schedJob: any) => {
@@ -263,12 +377,12 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '10%'
+      width: '6%'
     },
     {
       title: '数据类型',
       key: 'comment',
-      width: '14%'
+      width: '10%'
     },
     {
       title: '状态',
@@ -282,22 +396,22 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '13%'
+      width: '10%'
     },
     {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '13%'
+      width: '10%'
     },
     {
       title: '任务创建时间',
       key: 'createTime',
-      width: '13%'
+      width: '10%'
     },
     {
       title: '任务更新时间',
       key: 'updateTime',
-      width: '13%'
+      width: '10%'
     },
     {
       title: '操作',
@@ -310,51 +424,49 @@ const createColumns = (): DataTableColumns<Job> => {
         let container = h(NSpace, {
           justify: 'center'
         })
+        let children: VNode[] = renderDataXJobActionButton(row, () => addSchedJobModalFormModelInit(row), tableDataInit)
 
-        switch (row.status) {
-          case 0:// 未配置调度任务的采集任务
-            container.children = [
-              showButton('配置', async () => {
-                await addSchedJobModalFormModelInit(row)
-              }),
-              showConfirmation('删除', async () => {
-                await dataXJobDelete(row, () => tableDataInit())
-              })
-            ]
-            break
-          case  1: // 任务停用
-            container.children = [
-              showButton('启用', () => {
-                dataXJobStart(row, () => tableDataInit())
-              }),
-              showConfirmation('执行', () => {
-                dataXJobRun(row, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await dataXJobDelete(row, () => tableDataInit())
-              }),
-            ]
-            break
-          case 2:// 任务启用
-            container.children = [
-              showButton('停用', () => {
-                dataXJobStop(row, () => tableDataInit())
-              }),
-              showConfirmation('执行', () => {
-                dataXJobRun(row, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await dataXJobStop(row, () => {
-                  dataXJobDelete(row, () => tableDataInit())
-                })
-              }),
-            ]
-            break
+        if (children.length == 3) {
+          // '更多'按钮的子组件
+          let moreBtnPopoverChildren: VNode[] = []
+
+          moreBtnPopoverChildrenPush(row, moreBtnPopoverChildren)
+
+          // 若只有一个则直接添加到children里
+          if (moreBtnPopoverChildren.length == 1) {
+            childrenPushMoreBtn(row, children)
+          } else {
+            if (!isEmpty(moreBtnPopoverChildren)) {
+              children.push(showButtonPopover('更多', moreBtnPopoverChildren))
+            }
+          }
+
+        } else {
+          childrenPushMoreBtn(row, children)
         }
+
+        container.children = children
+
         return container
       }
     }
   ]
+}
+
+const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
+  if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
+    moreBtnChildren.push(showTextButton('调度配置', () => showDataXJobSetupModal(row)))
+  }
+}
+
+// children直接添加更多中的组件
+const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
+  if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
+    children.push(showButton('日志', () => showDataXJobLog(row)))
+    children.push(showButton('调度配置', () => showDataXJobSetupModal(row)))
+  }
+
 }
 
 const columnsRef = ref(createColumns())
@@ -363,13 +475,14 @@ const paginationReactive = reactive({
   page: 1,
   pageSize: 10,
   showSizePicker: true,
-  pageSizes: [10, 20, 50],
-  onChange: async (page: number) => {
+  onChange: (page: number) => {
     paginationReactive.page = page
+    tableDataInit()
   },
   onUpdatePageSize: (pageSize: number) => {
     paginationReactive.pageSize = pageSize
     paginationReactive.page = 1
+    tableDataInit()
   }
 })
 
@@ -481,7 +594,7 @@ let schedMinRange = {
   endMIn: 59
 }
 
-const addSchedJobModalFormModelInit = async (v) => {
+const addSchedJobModalFormModelInit = async (v: Job) => {
   addSchedJobModalFormModel.value.jobContent = v.jobName
   addSchedJobModalFormModel.value.jobDesc = v.jobName
   addSchedJobModalFormModel.value.jobTemplateId = v.id
@@ -514,6 +627,167 @@ const addSchedJobModalFormModelInit = async (v) => {
 }
 
 // endregion
+
+// region 日志
+const showDrawerRef = ref(false)
+const logItemsRef = ref<TimelineItemProps[]>([])
+const showTipRef = ref(false)
+const showDataXJobLog = async (v: Job) => {
+  const logs: DataXJobLogType[] = (await get_datax_job_log({
+    current: 1,
+    size: 100,
+    blurry: v.jobName
+  })).data.records
+
+  showTipRef.value = logs.length >= 100;
+
+  logItemsRef.value = []
+
+  logs.forEach(log => {
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
+
+    if (log.handleCode == 0) {
+      title = '运行中'
+      type = 'info'
+    } else if (log.handleCode == 200) {
+      title = '执行成功'
+      type = 'success'
+    } else if (log.handleCode == 500) {
+      title = '执行失败'
+      type = 'error'
+    } else {
+      title = '未知'
+      type = 'warning'
+    }
+
+    time = log.handleTime
+    content = ''
+
+    logItemsRef.value.push({
+      type: type,
+      title: title,
+      content: content,
+      time: time
+    })
+  })
+
+  showDrawerRef.value = true
+}
+
+//endregion
+
+// region dataX任务配置
+const showDataXJobSetupModalRef = ref(false)
+
+const dataXJobSetupModalTitle = '调度配置';
+const isDataXJobSetupSaving = ref(false)
+const dataXJobSetupFormRef = ref<FormInst | null>(null);
+const dataXJobSetupModelRef = ref({
+  jobName: '',
+  retry: '0',
+  executorFailRetryCount: 0,
+  sec: '*',
+  min: 0,
+  hour: '0,12',
+  day: '?',
+  month: '*',
+  week: '*',
+  year: '*'
+})
+
+const dataXJobSetupModelRules = {
+  retry: {
+    required: true,
+    trigger: ['change']
+  },
+  sec: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  min: {
+    type: 'number',
+    required: true,
+    trigger: ['change']
+  },
+  hour: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  day: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  month: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  week: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  },
+  year: {
+    required: true,
+    trigger: ['input'],
+    message: ''
+  }
+}
+
+const showDataXJobSetupModal = async (row: Job) => {
+  showDataXJobSetupModalRef.value = true
+  const schedJob = await getSchedJob(row.jobName)
+  const cronItems = convertCronExpression(schedJob.jobCron)
+  dataXJobSetupModelRef.value.jobName = row.jobName
+  dataXJobSetupModelRef.value.retry = schedJob?.retry || '0'
+  dataXJobSetupModelRef.value.executorFailRetryCount = schedJob.executorFailRetryCount
+  dataXJobSetupModelRef.value.sec = cronItems.seconds
+  dataXJobSetupModelRef.value.min = parseInt(cronItems.minutes)
+  dataXJobSetupModelRef.value.hour = cronItems.hours
+  dataXJobSetupModelRef.value.day = cronItems.dayOfMonth
+  dataXJobSetupModelRef.value.month = cronItems.month
+  dataXJobSetupModelRef.value.week = cronItems.dayOfWeek
+  dataXJobSetupModelRef.value.year = cronItems.year
+}
+
+const handleDataXJobSetupSave = async () => {
+  isDataXJobSetupSaving.value = true
+
+  dataXJobSetupFormRef.value?.validate(async errors => {
+    if (!errors) {
+
+      const schedJob = await getSchedJob(dataXJobSetupModelRef.value.jobName)
+
+      schedJob.retry = dataXJobSetupModelRef.value.retry
+      schedJob.executorFailRetryCount = dataXJobSetupModelRef.value.executorFailRetryCount
+      schedJob.jobCron = `${dataXJobSetupModelRef.value.sec} ${dataXJobSetupModelRef.value.min} ${dataXJobSetupModelRef.value.hour} ${dataXJobSetupModelRef.value.day} ${dataXJobSetupModelRef.value.month} ${dataXJobSetupModelRef.value.week} ${dataXJobSetupModelRef.value.year}`
+
+      await update_sched_job(schedJob).then(res => {
+        if (res.data == 'success') {
+          window.$message.success('调度任务更新成功')
+          tableDataInit()
+          showDataXJobSetupModalRef.value = false
+        } else {
+          window.$message.error(res.msg)
+          console.error(res)
+        }
+      })
+
+    } else {
+      console.error(errors)
+    }
+  })
+
+  isDataXJobSetupSaving.value = false
+}
+
+//endregion
 </script>
 
 <style scoped>

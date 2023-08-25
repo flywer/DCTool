@@ -1,6 +1,12 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {DataXJobPageType, SchedJobType} from "@common/types";
-import {get_max_running_workflow_num, get_simp_zj_json, get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {
+    find_by_project_id,
+    get_max_running_workflow_num,
+    get_simp_zj_json,
+    get_table_sql,
+    get_zj_json
+} from "@render/api/auxiliaryDb.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
@@ -20,6 +26,7 @@ import {
 } from "@render/api/datacenter.api";
 import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
 import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
+import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
@@ -177,6 +184,9 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
 
 //region 工作流
 
+/**
+ * 工作流任务操作按钮 ，不包括状态为未创建的项
+ **/
 export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): VNode[] => {
     let children: VNode[] = []
 
@@ -217,6 +227,45 @@ export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): 
             children = [
                 showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
                 showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+            ]
+            break
+    }
+
+    return children
+}
+
+export const renderDataXJobActionButton = (row: Job, showCreateSchedJobModal: () => any, tableDataInit: () => any): VNode[] => {
+    let children: VNode[] = []
+
+    switch (row.status) {
+        case 0:// 未配置调度任务的采集任务
+            children = [
+                showButton('配置', async () => await showCreateSchedJobModal()),
+                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
+            ]
+            break
+        case  1: // 任务停用
+            children = [
+                showButton('启用', () => dataXJobStart(row, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
+                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
+            ]
+            break
+        case 2:// 任务启用
+            children = [
+                showButton('停用', () => dataXJobStop(row, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
+                showConfirmation('删除', () => dataXJobStop(row, () => dataXJobDelete(row, () => tableDataInit()))
+                ),
+            ]
+            break
+        case 3:// 任务运行中
+            break
+        case 4:// 任务异常
+            children = [
+                showConfirmation('重跑', async () => {
+                    await dataXJobRun(row, () => tableDataInit())
+                }),
             ]
             break
     }
