@@ -1,7 +1,7 @@
 import {FilePathType} from "@main/enum/filePathEnum";
+import log from 'electron-log'
 import fs from "fs";
 import jsonfile from 'jsonfile'
-import log from 'electron-log'
 
 /**
  *  获取此文件路径类型
@@ -39,19 +39,28 @@ export const getDriveLetter = (filePath: string) => {
  * @param filePath
  */
 export const readFsSync = (filePath: string) => {
-    return new Promise((resolve) => {
-        fs.open(filePath, 'r', (e) => {
-            if (!e) {
-                resolve(fs.readFileSync(filePath))
-            } else {
-                resolve(null)
-            }
-        })
-    })
-}
+    try {
+        return fs.readFileSync(filePath);
+    } catch (error) {
+        log.error(error);
+        return null;
+    }
+};
 
-export const jsonfileWrite = (filePath: string, obj, option?: {}) => {
-    jsonfile.writeFile(filePath, obj, option, function (err) {
+/**
+ * 异步读取文件，文件不存在则返回null
+ **/
+export const readFsAsync = async (filePath: string) => {
+    try {
+        return await fs.promises.readFile(filePath);
+    } catch (error) {
+        log.error(error);
+        return null;
+    }
+};
+
+export const jsonfileWrite = (filePath: string, obj: any, option?: {}) => {
+    jsonfile.writeFile(filePath, obj, option, function (err: any) {
         if (err) {
             log.error(err)
         } else {
