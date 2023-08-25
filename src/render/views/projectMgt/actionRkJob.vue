@@ -65,21 +65,19 @@
 </template>
 
 <script setup lang="ts">
+import {WorkflowLogType, WorkflowType} from "@common/types";
 import {get_table_sql} from "@render/api/auxiliaryDb.api";
 import {get_workflow_list_by_project_id, get_workflow_log} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,
-  Job,
+  Job, renderWorkflowActionButton,
   setJobStatus,
   showButton,
-  showConfirmation,
-  workflowActive,
-  workflowDelete,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
-  workflowReRun, workflowRun,
 } from "@render/utils/datacenter/jobTabUtil";
 import {Refresh, Search} from '@vicons/ionicons5'
+import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, NButton, NSpace, TimelineItemProps} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
@@ -99,9 +97,9 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   // 工作流任务
-  const allActionRkJobs = (await get_workflow_list_by_project_id(projectId)).data
+  const allActionRkJobs: WorkflowType[] = (await get_workflow_list_by_project_id(projectId)).data
 
-  const actionRkJobs = allActionRkJobs.filter(job => job.procName.includes(queryParam.value))
+  const actionRkJobs: WorkflowType[] = allActionRkJobs.filter(job => job.procName.includes(queryParam.value))
 
   let newJobs = []
 
@@ -111,7 +109,7 @@ const tableDataInit = async () => {
       jobName: v.procName,
       type: '数据入库任务',
       status: getWorkflowJobStatus(v),
-      schedMode: v.schedulingMode,
+      schedMode: parseInt(v.schedulingMode),
       cron: v.crontab == '' ? null : v.crontab,
       lastExecTime: await workflowJobGetLastExecTime(v),
       nextExecTime: workflowJobGetNextExecTime(v),
@@ -146,12 +144,12 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '10%'
+      width: '9%'
     },
     {
       title: '数据类型',
       key: 'comment',
-      width: '10%'
+      width: '11%'
     },
     {
       title: '状态',
@@ -194,65 +192,14 @@ const createColumns = (): DataTableColumns<Job> => {
           justify: 'center'
         })
 
-        switch (row.status) {
-          case  1: // 任务停用
-            container.children = [
-              showButton('启用', async () => {
-                await workflowActive(row.id, '01', () => tableDataInit())
-              }),
-              showConfirmation('执行', async () => {
-                await workflowActive(row.id, '01', () => {
-                  workflowRun(row, false, '', () => tableDataInit())
-                })
+        let children: VNode[] = renderWorkflowActionButton(row, tableDataInit)
 
-              }),
-              showConfirmation('删除', async () => {
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-              showButton('日志', () => showWorkflowLog(row)),
-            ]
-            break
-          case 2:// 任务启用
-            container.children = [
-              showButton('停用', async () => {
-                await workflowActive(row.id, '02', () => tableDataInit())
-              }),
-              showConfirmation('执行', () => {
-                workflowRun(row, false, '', () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowActive(row.id, '02', () => {
-                })
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-              showButton('日志', () => showWorkflowLog(row)),
-            ]
-            break
-          case 3:// 任务运行中
-            container.children = [
-              showButton('日志', () => showWorkflowLog(row)),
-            ]
-            break
-          case 4:// 任务异常
-            container.children = [
-              showConfirmation('重跑', async () => {
-                workflowReRun(row, () => tableDataInit())
-              }),
-              showButton('日志', () => showWorkflowLog(row)),
-            ]
-            break
-          case 5:// 任务未反馈
-            container.children = [
-              showConfirmation('重跑', async () => {
-                workflowReRun(row, () => tableDataInit())
-              }),
-              showConfirmation('删除', async () => {
-                await workflowDelete(row.id, () => tableDataInit())
-              }),
-              showButton('日志', () => showWorkflowLog(row)),
-            ]
-            break
+        if (![0, -1].includes(row.status)) {
+          children.push(showButton('日志', () => showWorkflowLog(row)))
         }
+
+        container.children = children
+
         return container
       }
     }
@@ -280,18 +227,18 @@ const paginationReactive = reactive({
 const showDrawerRef = ref(false)
 const logItemsRef = ref<TimelineItemProps[]>([])
 const showTipRef = ref(false)
-const showWorkflowLog = async (v) => {
-  const logs = (await get_workflow_log(v.id, 100, 1)).data.records
+const showWorkflowLog = async (v: Job) => {
+  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
 
   showTipRef.value = logs.length >= 100;
 
   logItemsRef.value = []
 
   logs.forEach(log => {
-    let type
-    let title
-    let content
-    let time
+    let type: "default" | "error" | "info" | "success" | "warning"
+    let title: string
+    let content: string
+    let time: string
 
     if (log.result == null) {
       title = '运行中'

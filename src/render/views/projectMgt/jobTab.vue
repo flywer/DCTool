@@ -1288,7 +1288,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
     children.push(showButton('日志', () => showDataXJobLog(row)))
   }
 
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1, 3].includes(row.status)) {
+  if ((row.type === '数据采集任务') && ![0, -1, 3].includes(row.status)) {
     children.push(showButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
