@@ -1,7 +1,6 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {DataXJobPageType, SchedJobType} from "@common/types";
 import {
-    find_by_project_id,
     get_max_running_workflow_num,
     get_simp_zj_json,
     get_table_sql,
@@ -26,11 +25,10 @@ import {
 } from "@render/api/datacenter.api";
 import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
 import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
-import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem, NSpace} from "naive-ui";
+import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem} from "naive-ui";
 import {h} from "vue";
 import {uuid} from "vue3-uuid";
 
