@@ -22,10 +22,15 @@ export const handleAutoUpdate = () => {
         log.info(`发现可用更新 v${info.version}`)
         let notice = new Notification({
             title: `应用更新`,
-            body: `发现新更新 v${info.version} 开始下载...`
+            body: `🆕 发现新更新 v1.0.4，开始下载...\n点击此处查看更新详情`
         })
 
         notice.show()
+
+        notice.on('click', () => {
+            notice.close()
+            shell.openExternal(`https://github.com/flywer/dctool-release/releases/tag/v${info.version}`)
+        })
     });
 
     //安装包下载完成
@@ -37,7 +42,7 @@ export const handleAutoUpdate = () => {
 
         notice.show()
 
-        notice.on('click', async () => {
+        notice.on('click', () => {
             notice.close()
             //退出并安装
             autoUpdater.quitAndInstall();
