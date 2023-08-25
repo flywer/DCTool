@@ -488,6 +488,8 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
                     });
                 });
             }
+        } else {
+            isPass = true
         }
     } else {
         isPass = true
