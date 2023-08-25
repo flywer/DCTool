@@ -29,7 +29,8 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 async function electronAppInit() {
     //设置操作系统全局名称
     app.setAppUserModelId('DCTool')
-
+    // 禁用缓存
+    app.commandLine.appendSwitch('--disable-http-cache')
     //应用单例运行，不可存在多个同时运行
     if (!app.requestSingleInstanceLock()) app.quit();
 
