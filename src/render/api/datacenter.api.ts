@@ -82,13 +82,13 @@ export const get_columns = async (datasourceId: string, tableName: string, onlyC
 }
 
 // 获取dataXJobJson
-export const build_datax_json = async (obj: any) => {
+export const build_datax_json = async (obj: object) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.buildDataXJson, JSON.stringify(obj)))
     return data.data
 }
 
 // 创建采集任务
-export const add_datax_job = async (obj: any) => {
+export const add_datax_job = async (obj: object) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.addDataXJob, JSON.stringify(obj)))
     return data
 }
@@ -99,8 +99,8 @@ export const update_datax_job = async (obj: JobTemplateType) => {
 }
 
 // 创建采集调度任务
-export const add_sched_task = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.addSchedTask, obj))
+export const add_sched_task = async (obj: object) => {
+    const {data} = (await ipcInstance.send<object>(channels.datacenter.addSchedTask, obj))
     return data
 }
 

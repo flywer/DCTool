@@ -417,7 +417,7 @@ const checkZjJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
         } else {
             rulesUpdateTime = formatDate((await get_zj_json(tableName))[0].zjUpdateTime)
         }
-        console.log(rulesUpdateTime)
+
         if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
             return true
         } else {

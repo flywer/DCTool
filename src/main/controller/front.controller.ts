@@ -11,7 +11,7 @@ export class FrontController {
     @IpcHandle(channels.front.getTableData)
     public async handleGetTableData(tableName: string, limitNum: number, cdTimeOrder: boolean) {
         let data = []
-        const cols = (await FrontSource.manager.query(`DESCRIBE ${tableName}`)).map(v => v.Field)
+        const cols = (await FrontSource.manager.query(`DESCRIBE ${tableName}`)).map((v: { Field: any; }) => v.Field)
 
         data.push(cols)
 
@@ -21,7 +21,7 @@ export class FrontController {
 
             const records = await FrontSource.manager.query(dataQuery)
 
-            records.forEach(record => {
+            records.forEach((record: { [s: string]: unknown; } | ArrayLike<unknown>) => {
                 data.push(Object.values(record))
             })
         } catch (error) {

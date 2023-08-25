@@ -162,7 +162,7 @@ const setStripeStyle = (worksheet: ExcelJS.Worksheet) => {
     })
 }
 
-const setRowColor = (row, color) => {
+const setRowColor = (row: ExcelJS.Row, color: string) => {
     row.eachCell({includeEmpty: true}, (cell) => {
         cell.fill = {
             type: 'pattern',

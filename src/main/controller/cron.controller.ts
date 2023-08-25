@@ -20,7 +20,7 @@ export class CronController {
         let dcJobNames: any[]
 
         const filePath = join(getAppDataPath(), 'cron', 'dcCron.json')
-        const buffer = await readFsSync(filePath)
+        const buffer = readFsSync(filePath)
         if (buffer == null || isEmpty(buffer.toString())) {
             dcJobNames = []
         } else {
@@ -121,7 +121,7 @@ export class CronController {
             let dcJobNames: any[]
 
             const filePath = join(getAppDataPath(), 'cron', 'dcCron.json')
-            const buffer = await readFsSync(filePath)
+            const buffer = readFsSync(filePath)
             if (buffer == null || isEmpty(buffer.toString())) {
                 dcJobNames = []
             } else {
@@ -182,7 +182,7 @@ export class CronController {
                         let dcJobNames: any[]
 
                         const filePath = join(getAppDataPath(), 'cron', 'dcCron.json')
-                        const buffer = await readFsSync(filePath)
+                        const buffer = readFsSync(filePath)
                         if (buffer == null || isEmpty(buffer.toString())) {
                             dcJobNames = []
                         } else {

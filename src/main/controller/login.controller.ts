@@ -5,10 +5,10 @@ import {User} from "@main/entity/User";
 import {getAppDataPath} from "@main/utils/appPath";
 import {accountEncrypt} from "@main/utils/cryptoUtils";
 import {jsonfileWrite, readFsSync} from "@main/utils/fsUtils";
-import {failure, success} from "@main/vo/resultVo";
+import {failure, Result, success} from "@main/vo/resultVo";
 import {channels} from "@render/api/channels";
 import {formatDate} from "@render/utils/common/dateUtils";
-import {Controller, IpcHandle, Window, Inject, IpcSend} from "einf";
+import {Controller, IpcHandle, Window, IpcSend} from "einf";
 import {BrowserWindow} from "electron";
 import log from "electron-log";
 import {isEmpty} from "lodash";
@@ -19,13 +19,12 @@ import {MAIN_WINDOW} from "@main/window/constants";
 export class LoginController {
     constructor(
         @Window(MAIN_WINDOW) private mainWindow: BrowserWindow, // 主窗口实例
-        @Inject("IS_DEV") private isDev: boolean
     ) {
     }
 
     @IpcHandle(channels.login.signIn)
     public async handleSignIn(obj: string) {
-        let result
+        let result: Result
 
         type modelType = {
             account: string
@@ -111,7 +110,7 @@ export class LoginController {
     @IpcHandle(channels.login.signUp)
     public async handleSignUp(obj: string) {
 
-        let result
+        let result: Result
 
         type modelType = {
             account: string
@@ -216,10 +215,10 @@ export class LoginController {
     @IpcHandle(channels.login.readUserConfig)
     public async handleReadUserConfig() {
 
-        let result
+        let result: any
 
         const filePath = join(getAppDataPath(), 'config', 'user.json')
-        const buffer = await readFsSync(filePath)
+        const buffer =  readFsSync(filePath)
         if (buffer == null || isEmpty(buffer.toString())) {
             result = null
         } else {

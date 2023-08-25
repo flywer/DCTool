@@ -1,3 +1,4 @@
+import {SetupModelType} from "@common/types";
 import {getAppDataPath} from "@main/utils/appPath";
 import {APP_CONFIG_PATH, getAppSettings} from "@main/utils/configUtils";
 import {jsonfileWrite, readFsSync} from "@main/utils/fsUtils";
@@ -11,6 +12,8 @@ import {autoUpdater} from "electron-updater";
 import {isEmpty} from "lodash";
 import {join} from "path";
 import {tray, trayInit} from "../../app/app.tray";
+
+type SetupModelTypeAlias = SetupModelType
 
 @Controller()
 export class AppController {
@@ -37,9 +40,9 @@ export class AppController {
     @IpcHandle(channels.app.getSettings)
     public async handleGetSettings() {
         try {
-            let result
+            let result: Result
             const filePath = join(getAppDataPath(), 'config', 'app.json')
-            const buffer = await readFsSync(filePath)
+            const buffer =  readFsSync(filePath)
             if (buffer == null || isEmpty(buffer.toString())) {
                 result = success()
                 result.data = null
@@ -55,7 +58,7 @@ export class AppController {
     }
 
     @IpcHandle(channels.app.updateSettings)
-    public async handleUpdateSettings(setupModel) {
+    public async handleUpdateSettings(setupModel: SetupModelTypeAlias) {
         try {
             const newSettings = Object.assign({}, await getAppSettings(), setupModel);
 
