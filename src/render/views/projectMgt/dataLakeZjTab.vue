@@ -212,7 +212,7 @@
       :size="'small'"
       style="width: 650px"
   >
-    <job-inspection-tab :inps-table-name="inpsTableName"/>
+    <job-inspection-tab :inps-table-name="inpsTableName" :inps-table-db-id="inpsTableDbId"/>
   </n-modal>
 </template>
 
@@ -823,6 +823,7 @@ const onUpdateZjJob = (v: Job) => {
 // region 质检情况
 const showJobInpsModalRef = ref(false)
 const inpsTableName = ref('')
+const inpsTableDbId = ref('')
 
 const showJobInpsModal = async (row: Job) => {
   const workflow: WorkflowType = (await get_workflow(row.id)).data
@@ -830,6 +831,7 @@ const showJobInpsModal = async (row: Job) => {
   const dataDevBizVo: DataDevBizVoType = JSON.parse(workflow.businessParamsJson)
 
   inpsTableName.value = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+  inpsTableDbId.value = '12'
 
   showJobInpsModalRef.value = true
 }

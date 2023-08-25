@@ -60,7 +60,8 @@ import {computed, onMounted, ref, watch, reactive, h} from "vue";
 
 // 当组件使用时，供其他页面使用
 const props = defineProps({
-  inpsTableName: String
+  inpsTableName: String,
+  inpsTableDbId: String
 })
 
 const queryParam = ref('')
@@ -86,7 +87,6 @@ watch(defaultSelectedKeys, async (newValue) => {
 })
 
 onMounted(async () => {
-  console.log(props.inpsTableName)
   if (props.inpsTableName == undefined) {
     const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
     const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
@@ -98,10 +98,8 @@ onMounted(async () => {
     }
   } else {
     queryParam.value = props.inpsTableName
-    console.log('lake')
     await tableDataInit()
   }
-  console.log(queryParam.value)
 })
 
 const formModel = ref({
@@ -263,7 +261,7 @@ const createColumns = (): DataTableColumns<InspectionItem> => {
           justify: 'center'
         }, [
           showButton('查看', () => {
-            const link = `http://19.15.97.242:19080/szrzyt/data_center/qaportal/#/qualityDetail?id=${row.id}&dbid=6&name=${queryParam.value}`
+            const link = `http://19.15.97.242:19080/szrzyt/data_center/qaportal/#/qualityDetail?id=${row.id}&dbid=${props.inpsTableDbId || 6}&name=${queryParam.value}`
             open_default_browser(link)
           }),
         ])
