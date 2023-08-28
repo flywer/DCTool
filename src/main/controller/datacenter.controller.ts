@@ -102,6 +102,7 @@ export class DatacenterController {
 
     @IpcHandle(channels.datacenter.addWorkFlow)
     public async handleAddWorkFlow(params: any) {
+        params = JSON.parse(params)
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest('/workflow/proc/add', params))
         });
