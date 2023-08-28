@@ -94,15 +94,12 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
-import {get_cj_job_page, get_sched_job_page, get_workflow_page} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
-import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
-import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
-import JobTab from "@render/views/projectMgt/jobTab.vue";
-import ProjectTablesTab from "@render/views/projectMgt/projectTablesTab.vue";
-import SzsjSubjectTab from "@render/views/projectMgt/szsjSubjectTab.vue";
+import JobInspectionTab from "@render/views/projectMgt/projectTree/jobInspectionTab.vue";
+import JobTab from "@render/views/projectMgt/projectTree/jobTab.vue";
+import ProjectTablesTab from "@render/views/projectMgt/projectTree/projectTablesTab.vue";
+import SzsjSubjectTab from "@render/views/projectMgt/projectTree/szsjSubjectTab.vue";
 import {onMounted, ref, h} from 'vue'
 import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
@@ -177,6 +174,7 @@ const handleLoad = (node: TreeOption) => {
 }
 
 //通过节点key获取此项目下所有已存在的表名
+/*
 const getExistTableProject = async (node: TreeOption) => {
   const projectId = node.key.toString().split('-')[2]
   const projectAbbr = (await find_by_project_id(projectId))?.projectAbbr || ''
@@ -230,6 +228,7 @@ const getExistTableProject = async (node: TreeOption) => {
     })) as TreeOption[]
   }
 }
+*/
 
 const setDefaultActionTable = (node: TreeOption): TreeOption[] => {
 

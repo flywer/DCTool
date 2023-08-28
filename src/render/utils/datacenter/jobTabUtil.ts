@@ -1,5 +1,5 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {DataXJobPageType, SchedJobType} from "@common/types";
+import {DataXJobPageType, ProjectInfo, SchedJobType} from "@common/types";
 import {
     get_max_running_workflow_num,
     get_simp_zj_json,
@@ -48,9 +48,14 @@ export  type Job = {
     comment?: string
     createTime: string
     updateTime: string
+    project: ProjectInfo
 }
 
 // 查询中台表的质检任务是否已配置
+/**
+ * @param tableAbbr 项目表名简称
+ * @param tableName 业务表名缩写
+ **/
 export const getDCTableIsValidConfig = async (tableAbbr: string, tableName: string) => {
 
     const validTableName = `di_${tableAbbr}_${tableName.toLowerCase()}_temp_ods`
@@ -73,7 +78,11 @@ export const getCustomTableValidConfig = async (tableName: string) => {
  * 如果一个元素的开头部分不在规定顺序中，而另一个元素是有序的，则将未排序的元素排在已排序的元素之后。
  * 最后，对于两个都在规定顺序中的元素，按照它们在 order 数组中的下标大小来排列。
  **/
-export const jobNameCompare = (a: { jobName: string; }, b: { jobName: string; }) => {
+export const jobNameCompare = (a: {
+    jobName: string;
+}, b: {
+    jobName: string;
+}) => {
     const order = ["cj", "zj", "bf", "qc", "rh", "rh1", "rh2", "rk", "gx"];
     const aIndex = order.indexOf(a.jobName.split("_")[0]);
     const bIndex = order.indexOf(b.jobName.split("_")[0]);
@@ -184,31 +193,33 @@ export const showButtonPopover = (text: string, vNodes: VNode[]) => {
 
 /**
  * 工作流任务操作按钮 ，不包括状态为未创建的项
+ * @param job 任务实例
+ * @param tableDataInit 表格刷新
  **/
-export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): VNode[] => {
+export const renderWorkflowActionButton = (job: Job, tableDataInit: () => any): VNode[] => {
     let children: VNode[] = []
 
-    switch (row.status) {
+    switch (job.status) {
         case  1: // 任务停用
             children = [
-                showButton('启用', () => workflowActive(row.id, '01', () => tableDataInit())),
+                showButton('启用', () => workflowActive(job.id, '01', () => tableDataInit())),
                 showConfirmation('执行', async () => {
-                    await workflowActive(row.id, '01', async () => {
-                        await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
+                    await workflowActive(job.id, '01', async () => {
+                        await workflowRun(job, () => tableDataInit())
                     })
                 }),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(job.id, () => tableDataInit())),
             ]
             break
         case 2:// 任务启用
             children = [
-                showButton('停用', () => workflowActive(row.id, '02', () => tableDataInit())),
+                showButton('停用', () => workflowActive(job.id, '02', () => tableDataInit())),
                 showConfirmation('执行', async () => {
-                    await workflowRun(row, await getCustomTableValidConfig(`sztk_${row.jobName.split('_')[2]}`), `sztk_${row.jobName.split('_')[2]}`, () => tableDataInit())
+                    await workflowRun(job, () => tableDataInit())
                 }),
                 showConfirmation('删除', async () => {
-                    await workflowActive(row.id, '02', () => {
-                        workflowDelete(row.id, () => tableDataInit())
+                    await workflowActive(job.id, '02', () => {
+                        workflowDelete(job.id, () => tableDataInit())
                     })
                 }),
             ]
@@ -217,14 +228,14 @@ export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): 
             break
         case 4:// 任务异常
             children = [
-                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+                showConfirmation('重跑', async () => workflowReRun(job, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(job.id, () => tableDataInit())),
             ]
             break
         case 5:// 任务未反馈
             children = [
-                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
+                showConfirmation('重跑', async () => workflowReRun(job, () => tableDataInit())),
+                showConfirmation('删除', async () => workflowDelete(job.id, () => tableDataInit())),
             ]
             break
     }
@@ -232,28 +243,33 @@ export const renderWorkflowActionButton = (row: Job, tableDataInit: () => any): 
     return children
 }
 
-export const renderDataXJobActionButton = (row: Job, showCreateSchedJobModal: () => any, tableDataInit: () => any): VNode[] => {
+/**
+ * @param job 任务实例
+ * @param showCreateSchedJobModal 采集任务配置弹窗
+ * @param tableDataInit 表格刷新
+ **/
+export const renderDataXJobActionButton = (job: Job, showCreateSchedJobModal: () => any, tableDataInit: () => any): VNode[] => {
     let children: VNode[] = []
 
-    switch (row.status) {
+    switch (job.status) {
         case 0:// 未配置调度任务的采集任务
             children = [
                 showButton('配置', async () => await showCreateSchedJobModal()),
-                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
+                showConfirmation('删除', async () => await dataXJobDelete(job, () => tableDataInit())),
             ]
             break
         case  1: // 任务停用
             children = [
-                showButton('启用', () => dataXJobStart(row, () => tableDataInit())),
-                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
+                showButton('启用', () => dataXJobStart(job, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(job, () => tableDataInit())),
+                showConfirmation('删除', async () => await dataXJobDelete(job, () => tableDataInit())),
             ]
             break
         case 2:// 任务启用
             children = [
-                showButton('停用', () => dataXJobStop(row, () => tableDataInit())),
-                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
-                showConfirmation('删除', () => dataXJobStop(row, () => dataXJobDelete(row, () => tableDataInit()))
+                showButton('停用', () => dataXJobStop(job, () => tableDataInit())),
+                showConfirmation('执行', () => dataXJobRun(job, () => tableDataInit())),
+                showConfirmation('删除', () => dataXJobStop(job, () => dataXJobDelete(job, () => tableDataInit()))
                 ),
             ]
             break
@@ -262,8 +278,9 @@ export const renderDataXJobActionButton = (row: Job, showCreateSchedJobModal: ()
         case 4:// 任务异常
             children = [
                 showConfirmation('重跑', async () => {
-                    await dataXJobRun(row, () => tableDataInit())
+                    await dataXJobRun(job, () => tableDataInit())
                 }),
+                showConfirmation('删除', async () => await dataXJobDelete(job, () => tableDataInit())),
             ]
             break
     }
@@ -293,16 +310,14 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess: (
 
 /**
  * @param job
- * @param isValidConfigRef 若是质检任务，是否已配置
- * @param tableName 质检任务的质检表名
  * @param onSuccess 成功时的触发函数
  **/
-export const workflowRun = async (job: Job, isValidConfigRef: boolean, tableName: string, onSuccess: () => any) => {
+export const workflowRun = async (job: Job, onSuccess: () => any) => {
     checkRunningNum().then(isPass1 => {
         if (isPass1) {
             checkWorkflowDependency(job).then(isPass2 => {
                 if (isPass2) {
-                    checkZjJobInpsConfig(job, isValidConfigRef, tableName).then(isPass3 => {
+                    checkZjJobInpsConfig(job).then(isPass3 => {
                         if (isPass3) {
                             checkZjJobRulesUpdateTime(job).then(isPass4 => {
                                 if (isPass4) {
@@ -498,13 +513,24 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
 /**
  * 质检任务特殊检查:机构配置
  **/
-const checkZjJobInpsConfig = async (job: Job, isValidConfigRef: boolean, tableName: string): Promise<boolean> => {
+const checkZjJobInpsConfig = async (job: Job): Promise<boolean> => {
     if (job.type === '数据质检任务') {
+        let isValidConfigRef: boolean
+        let validTableName: string = ''
+        if (!job.jobName.startsWith('zj_lake_')) {
+            validTableName = `di_${job.project.tableAbbr}_${job.jobName.split('_')[2].toLowerCase()}_temp_ods`
+            isValidConfigRef = await getCustomTableValidConfig(validTableName)
+        } else {
+            // 数据湖质检
+            validTableName = `sztk_${job.jobName.split('_')[2]}`
+            isValidConfigRef = await getCustomTableValidConfig(validTableName)
+        }
+
         if (!isValidConfigRef) {
             return new Promise<boolean>((resolve) => {
                 window.$dialog.warning({
                     title: '警告',
-                    content: `检测到未在【质量门户】对[${tableName}]进行配置，是否继续执行质检？`,
+                    content: `检测到未在【质量门户】对[${validTableName}]进行配置，是否继续执行质检？`,
                     positiveText: '确定',
                     negativeText: '取消',
                     onPositiveClick: () => {
@@ -594,7 +620,14 @@ const checkRh2Job = async (job: Job): Promise<boolean> => {
     }
 }
 
-export const workflowStart = (v: Job, onSuccess: { (): any; (): any; (): any; (): any; (): any; (): any; }) => {
+export const workflowStart = (v: Job, onSuccess: {
+    (): any;
+    (): any;
+    (): any;
+    (): any;
+    (): any;
+    (): any;
+}) => {
     const param = {
         businessKey: uuid.v4(),
         code: v.code,
@@ -641,7 +674,9 @@ export const workflowDelete = (id: string, onSuccess: () => void) => {
     })
 }
 
-export const workflowJobGetLastExecTime = async (v: { id: string; }) => {
+export const workflowJobGetLastExecTime = async (v: {
+    id: string;
+}) => {
     const res = await get_workflow_log(v.id, 1, 1);
     if (!isEmpty(res.data.records)) {
         return res.data.records[0].startTime;
@@ -665,7 +700,9 @@ export const workflowJobGetNextExecTime = (v: {
     }
 }
 
-export const getWorkflowJobType = (v: { procName: string; }) => {
+export const getWorkflowJobType = (v: {
+    procName: string;
+}) => {
     switch (v.procName.split('_')[0]) {
         case 'zj':
             return '数据质检任务'
@@ -686,7 +723,9 @@ export const getWorkflowJobType = (v: { procName: string; }) => {
     }
 }
 
-export const getWorkflowJobStatus = (v: { status: string; }) => {
+export const getWorkflowJobStatus = (v: {
+    status: string;
+}) => {
     switch (v.status) {
         case '1':// 启用
             return 2
@@ -776,7 +815,10 @@ export const dataXJobDelete = async (row: Job, onSuccess: () => void) => {
 
 }
 
-export const getDataXJobStatus = async (v: { configuration: number; jobDesc: any; }, schedJob: {
+export const getDataXJobStatus = async (v: {
+    configuration: number;
+    jobDesc: any;
+}, schedJob: {
     triggerStatus: number;
 }) => {
     if (v.configuration == 0) {
@@ -809,7 +851,9 @@ export const getDataXJobStatus = async (v: { configuration: number; jobDesc: any
     }
 }
 
-export const getDataXJobType = (v: { jobDesc: string; }) => {
+export const getDataXJobType = (v: {
+    jobDesc: string;
+}) => {
     switch (v.jobDesc.split('_')[0]) {
         case 'cj':
             return '数据采集任务'
@@ -951,7 +995,9 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
 
 }
 
-export const setJobStatus = (row: { status: any; }) => {
+export const setJobStatus = (row: {
+    status: any;
+}) => {
     switch (row.status) {
         case -1:
             return h(NTag, {

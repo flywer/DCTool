@@ -318,7 +318,8 @@ const tableDataInit = async () => {
       createBy: null,
       comment: await getTableComment(v.jobDesc),
       createTime: schedJob?.addTime || '--',
-      updateTime: schedJob?.updateTime || '--'
+      updateTime: schedJob?.updateTime || '--',
+      project: project
     }
 
     newJobs.push(job)

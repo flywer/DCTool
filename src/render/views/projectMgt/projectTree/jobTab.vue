@@ -782,11 +782,7 @@ import {CjFormModelType, createCjJob, createSchedJob, updateDataXJob} from "@ren
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
-  dataXJobDelete,
   dataXJobGetNextExecTime,
-  dataXJobRun,
-  dataXJobStart,
-  dataXJobStop,
   getDataXJobStatus,
   getDataXJobType,
   getDCTableIsValidConfig,
@@ -795,16 +791,12 @@ import {
   getWorkflowJobType,
   Job,
   jobNameCompare,
-  pushUnExistJobs,
+  pushUnExistJobs, renderDataXJobActionButton, renderWorkflowActionButton,
   setJobStatus,
   showButton, showButtonPopover,
   showConfirmation, showTextButton,
-  workflowActive,
-  workflowDelete,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
-  workflowReRun,
-  workflowRun
 } from "@render/utils/datacenter/jobTabUtil";
 import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
@@ -884,7 +876,7 @@ const tableDataRef = ref([])
 
 const isTableLoading = ref(false)
 
-const setTitle = async (project: any) => {
+const setTitle = async (project: ProjectInfo) => {
   const tableComment = (await get_table_sql({
     tableName: queryParam.value?.tableAbbr.toString().toUpperCase()
   }))[0]?.comment || '未知信息'
@@ -901,11 +893,9 @@ const tableDataInit = async () => {
 
   let jobs = []
 
-  const project = (await find_by_project_id(queryParam.value.projectId))
+  await setTitle(projectRef.value)
 
-  await setTitle(project)
-
-  const projectAbbr = project?.projectAbbr || '';
+  const projectAbbr = projectRef.value.projectAbbr || '';
   if (projectAbbr !== '') {
     // 采集任务
     let dataXJobs = (await get_cj_job_page({
@@ -931,7 +921,8 @@ const tableDataInit = async () => {
         nextExecTime: dataXJobGetNextExecTime(schedJob),
         createBy: null,
         createTime: schedJob?.addTime || '--',
-        updateTime: schedJob?.updateTime || '--'
+        updateTime: schedJob?.updateTime || '--',
+        project: projectRef.value
       }
 
       newDataXJobs.push(job)
@@ -995,7 +986,8 @@ const tableDataInit = async () => {
         createBy: v.createBy,
         code: v.procCode,
         createTime: v.createTime,
-        updateTime: v.updateTime
+        updateTime: v.updateTime,
+        project: projectRef.value
       }
 
       newWorkflowJobs.push(job)
@@ -1074,149 +1066,72 @@ const createColumns = (): DataTableColumns<Job> => {
 
         let children: VNode[] = []
 
-        switch (row.status) {
-          case -1:// 未创建的任务
-            if (row.type != '数据共享任务') {
-              children = [showButton('创建', async () => {
-                const project = (await find_by_project_id(queryParam.value.projectId))
-                switch (row.type) {
-                  case '数据采集任务':
-                    await createCjJobModalInit(project, row)
-                    break
-                  case '数据质检任务':
-                    createZjJobModalInit(project)
-                    break
-                  case '数据融合任务':
-                    createRhJobModalInit(project)
-                    showModalRef.value = true
-                    modalTitle = '创建融合任务'
-                    formSelect.value.createRhJob = true
-                    break
-                  case '单表融合任务':
-                    createRhJobModalInit(project)
-                    showModalRef.value = true
-                    modalTitle = '创建单表融合任务'
-                    formSelect.value.createRhJob = true
-                    break
-                  case '多表融合任务':
-                    createRh2JobModalInit(project)
-                    showModalRef.value = true
-                    modalTitle = '创建多表融合任务'
-                    formSelect.value.createRh2Job = true
-                    break
-                  case '数据备份任务':
-                    createBfJobModalInit(project)
-                    break
-                  case '数据清除任务':
-                    createQcJobModalInit(project)
-                    showModalRef.value = true
-                    modalTitle = '创建清除任务'
-                    formSelect.value.createQcJob = true
-                    break
-                  case '数据入库任务':
-                    window.$message.info("敬请期待")
-                    break
-                }
-              })]
-            } else {
-              children = [showConfirmation('创建', async () => {
-                const project = (await find_by_project_id(queryParam.value.projectId))
-                const tableName = queryParam.value.tableAbbr.toString().toLowerCase()
+        // 未创建的任务
+        if (row.status == -1) {
+          if (row.type != '数据共享任务') {
+            children = [showButton('创建', async () => {
+              const project = (await find_by_project_id(queryParam.value.projectId))
+              switch (row.type) {
+                case '数据采集任务':
+                  await createCjJobModalInit(project, row)
+                  break
+                case '数据质检任务':
+                  createZjJobModalInit(project)
+                  break
+                case '数据融合任务':
+                  createRhJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建融合任务'
+                  formSelect.value.createRhJob = true
+                  break
+                case '单表融合任务':
+                  createRhJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建单表融合任务'
+                  formSelect.value.createRhJob = true
+                  break
+                case '多表融合任务':
+                  createRh2JobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建多表融合任务'
+                  formSelect.value.createRh2Job = true
+                  break
+                case '数据备份任务':
+                  createBfJobModalInit(project)
+                  break
+                case '数据清除任务':
+                  createQcJobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建清除任务'
+                  formSelect.value.createQcJob = true
+                  break
+                case '数据入库任务':
+                  window.$message.info("敬请期待")
+                  break
+              }
+            })]
+          } else {
+            children = [showConfirmation('创建', async () => {
+              const project = (await find_by_project_id(queryParam.value.projectId))
+              const tableName = queryParam.value.tableAbbr.toString().toLowerCase()
 
-                createGxJob({
-                  name: `gx_${project.projectAbbr}_${tableName}`,
-                  sourceTableName: `sztk_${tableName}`,
-                  targetTableName: `gdsztk_${tableName}`,
-                  projectId: project.projectId
-                }).then(() => {
-                  tableDataInit()
-                })
+              createGxJob({
+                name: `gx_${project.projectAbbr}_${tableName}`,
+                sourceTableName: `sztk_${tableName}`,
+                targetTableName: `gdsztk_${tableName}`,
+                projectId: project.projectId
+              }).then(() => {
+                tableDataInit()
+              })
 
-              })]
-            }
-            break
-          case 0:// 未配置调度任务的采集任务
-            children = [
-              showButton('配置', async () => await addSchedJobModalFormModelInit(row)),
-              showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
-            ]
-            break
-          case  1: // 任务停用
-            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = [
-                showButton('启用', () => dataXJobStart(row, () => tableDataInit())),
-                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => await dataXJobDelete(row, () => tableDataInit())),
-              ]
-            } else {
-              children = [
-                showButton('启用', async () => {
-                  await workflowActive(row.id, '01', () => tableDataInit())
-                }),
-                showConfirmation('执行', async () => {
-                  await workflowActive(row.id, '01',
-                      () => workflowRun(row, isValidConfigRef.value, `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`, () => tableDataInit())
-                  )
-                }),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
-              ]
-            }
-            break
-          case 2:// 任务启用
-            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = [
-                showButton('停用', () => dataXJobStop(row, () => tableDataInit())),
-                showConfirmation('执行', () => dataXJobRun(row, () => tableDataInit())),
-                showConfirmation('删除',
-                    async () => await dataXJobStop(row, () => dataXJobDelete(row, () => tableDataInit()))
-                ),
-              ]
-            } else {
-              children = [
-                showButton('停用', async () => {
-                  await workflowActive(row.id, '02', () => tableDataInit())
-                }),
-                showConfirmation('执行', async () => {
-                  await workflowRun(row, isValidConfigRef.value, `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`, () => tableDataInit())
-                }),
-                showConfirmation('删除', async () => {
-                  await workflowActive(row.id, '02', () => workflowDelete(row.id, () => tableDataInit()))
-
-                }),
-              ]
-            }
-            break
-          case 3:// 任务运行中
-            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = []
-            } else {
-              children = []
-            }
-            break
-          case 4:// 任务异常
-            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = [
-                showConfirmation('重跑', () => {
-                  dataXJobRun(row, () => tableDataInit())
-                }),
-              ]
-            } else {
-              children = [
-                showConfirmation('重跑', () => workflowReRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit())),
-              ]
-            }
-            break
-          case 5:// 任务未反馈
-            if (row.type === '数据采集任务' || row.type === '数据共享任务') {
-              children = []
-            } else {
-              children = [
-                showConfirmation('重跑', async () => workflowReRun(row, () => tableDataInit())),
-                showConfirmation('删除', async () => workflowDelete(row.id, () => tableDataInit()))
-              ]
-            }
-            break
+            })]
+          }
+        } else {
+          if (row.type === '数据采集任务' || row.type === '数据共享任务') {
+            children = renderDataXJobActionButton(row, () => addSchedJobModalFormModelInit(row), tableDataInit)
+          } else {
+            children = renderWorkflowActionButton(row, tableDataInit)
+          }
         }
 
         if (children.length == 3) {

@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import {WorkflowType} from "@common/types";
-import {get_table_sql} from "@render/api/auxiliaryDb.api";
+import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
 import {get_workflow_list_by_project_id} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,
@@ -101,7 +101,8 @@ const tableDataInit = async () => {
       code: v.procCode,
       comment: await getTableComment(v.procName),
       createTime: v.createTime,
-      updateTime: v.updateTime
+      updateTime: v.updateTime,
+      project: await find_by_project_id(projectId)
     }
 
     newJobs.push(job)

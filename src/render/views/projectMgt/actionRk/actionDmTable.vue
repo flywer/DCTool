@@ -152,7 +152,7 @@ const tableDataInit = async () => {
     tableDataRef.value = (await get_tables_info({
       size: 100,
       page: 1,
-      sourceId: 12,
+      sourceId: 6,
       likeValue: queryParam.value
     })).data?.records || []
   }
@@ -246,14 +246,14 @@ const tableRows = ref([])
 const previewTableDataRef = ref([])
 
 const isPreviewTableLoading = ref(false)
-const tablePreview = (row) => {
+const tablePreview = (row: { id?: string; tableName: any; tableComment?: string; createTime?: string; }) => {
   previewColsRef.value = []
   previewTableDataRef.value = []
 
   isPreviewTableLoading.value = true
   modalTitle = row.tableName
 
-  table_preview(12, row.tableName).then(res => {
+  table_preview(6, row.tableName).then(res => {
     if (res.code == 200) {
       if (res.data.length != 0) {
 
@@ -261,7 +261,7 @@ const tablePreview = (row) => {
         tableRows.value = res.data.slice(1)
 
         // 创建表头
-        previewColsRef.value = res.data[0].map((col) => ({
+        previewColsRef.value = res.data[0].map((col: any) => ({
           title: col,
           key: col,
           // fixed: key.split('.')[1] === 'id' ? 'left' : false
@@ -272,13 +272,13 @@ const tablePreview = (row) => {
         }));
 
         // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item) =>
+        previewTableDataRef.value = res.data.slice(1).map((item: { [s: string]: unknown; } | ArrayLike<unknown>) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
         )
 
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item) =>
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | { [s: string]: unknown; }) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
@@ -353,8 +353,8 @@ const onNegativeClick = () => {
 const isSaving = ref(false)
 
 let paramModel = {
-  sourceId: '12',
-  dbType: 'mysql',
+  sourceId: '6',
+  dbType: 'tbds-hive',
   sourceName: '',
   dataTierCode: '',
   dataTierName: '',

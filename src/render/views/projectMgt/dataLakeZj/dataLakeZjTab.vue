@@ -202,7 +202,7 @@
 
 <script setup lang="ts">
 import {DataDevBizVoType, WorkflowType} from "@common/types";
-import {get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {find_by_project_id, get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {
   add_work_flow, create_table,
   create_valid_config, get_tables,
@@ -222,7 +222,7 @@ import {
 } from "@render/utils/datacenter/jobTabUtil";
 import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
 import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
-import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
+import JobInspectionTab from "@render/views/projectMgt/projectTree/jobInspectionTab.vue";
 import {Add, Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
@@ -272,7 +272,8 @@ const tableDataInit = async () => {
       code: v.procCode,
       comment: await getTableCommentByProName(v.procName),
       createTime: v.createTime,
-      updateTime: v.updateTime
+      updateTime: v.updateTime,
+      project: await find_by_project_id(projectId)
     }
 
     newJobs.push(job)

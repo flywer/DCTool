@@ -19,6 +19,7 @@
           class="mt-2 mb-2"
           :columns="columnsRef"
           :data="tableDataRef"
+          :pagination="paginationReactive"
           :bordered="true"
           :size="'small'"
           :loading="isTableLoading"
@@ -103,9 +104,8 @@ import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/ap
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
-import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
-import {h, onMounted, ref, watch, computed} from "vue";
+import {h, onMounted, reactive, ref, watch, computed} from "vue";
 
 const queryParam = ref('')
 
@@ -137,14 +137,8 @@ type Table = {
 }
 
 onMounted(async () => {
-  const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
-  const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
-  if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
-    const projectId = segments[segments.length - 2]
-    const project = (await find_by_project_id(projectId))
-    queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
-    await tableDataInit()
-  }
+  queryParam.value = `sztk_`
+  await tableDataInit()
 })
 
 const isTableLoading = ref(false)
@@ -155,57 +149,15 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    const records = (await get_tables_info({
-      size: 10000,
+    tableDataRef.value = (await get_tables_info({
+      size: 100,
       page: 1,
-      sourceId: 6,
+      sourceId: 12,
       likeValue: queryParam.value
     })).data?.records || []
-
-    if (!isEmpty(records)) {
-      tableDataRef.value = customSort(records);
-    }
   }
 
   isTableLoading.value = false
-}
-
-const customSort = (arr: any[]): string[] => {
-  const map = new Map<string, number>();
-
-  [
-    'temp_ods',
-    'ods',
-    'right_dwd',
-    'error_dwd',
-    'dwb'
-  ].forEach((item, index) => {
-    map.set(item, index);
-  });
-
-  const getSuffix = (tableName: string) => {
-    if (tableName.endsWith('temp_ods')) {
-      return 'temp_ods'
-    } else if (tableName.endsWith('ods')) {
-      return 'ods'
-    } else if (tableName.endsWith('right_dwd')) {
-      return 'right_dwd'
-    } else if (tableName.endsWith('error_dwd')) {
-      return 'error_dwd'
-    } else if (tableName.endsWith('dwb')) {
-      return 'dwb'
-    } else {
-      return ''
-    }
-  }
-
-  return arr.sort((a, b) => {
-    const aSuffix = getSuffix(a.tableName)
-    const bSuffix = getSuffix(b.tableName)
-    const aIndex = map.get(aSuffix)
-    const bIndex = map.get(bSuffix)
-    return aIndex - bIndex
-  });
 }
 
 const createColumns = (): DataTableColumns<Table> => {
@@ -218,7 +170,7 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '表描述',
       key: 'tableComment',
-      width: '23%'
+      width: '25%'
     },
     {
       title: '创建时间',
@@ -228,7 +180,7 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '操作',
       key: 'actions',
-      width: '22%',
+      width: '18%',
       align: 'center',
       render(row) {
         return h(NSpace, {
@@ -266,6 +218,20 @@ const createColumns = (): DataTableColumns<Table> => {
 
 const columnsRef = ref(createColumns())
 
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true,
+  pageSizes: [10, 20, 50],
+  onChange: async (page: number) => {
+    paginationReactive.page = page
+  },
+  onUpdatePageSize: (pageSize: number) => {
+    paginationReactive.pageSize = pageSize
+    paginationReactive.page = 1
+  }
+})
+
 //region 预览
 const showPreviewModalRef = ref(false)
 
@@ -280,22 +246,22 @@ const tableRows = ref([])
 const previewTableDataRef = ref([])
 
 const isPreviewTableLoading = ref(false)
-const tablePreview = (row) => {
+const tablePreview = (row: { id?: string; tableName: any; tableComment?: string; createTime?: string; }) => {
   previewColsRef.value = []
   previewTableDataRef.value = []
 
   isPreviewTableLoading.value = true
   modalTitle = row.tableName
 
-  table_preview(6, row.tableName).then(res => {
+  table_preview(12, row.tableName).then(res => {
     if (res.code == 200) {
-      if (res.data && res.data.length != 0) {
+      if (res.data.length != 0) {
 
         tableHeadCol.value = res.data[0]
         tableRows.value = res.data.slice(1)
 
         // 创建表头
-        previewColsRef.value = res.data[0].map((col) => ({
+        previewColsRef.value = res.data[0].map((col: any) => ({
           title: col,
           key: col,
           // fixed: key.split('.')[1] === 'id' ? 'left' : false
@@ -306,13 +272,13 @@ const tablePreview = (row) => {
         }));
 
         // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item) =>
+        previewTableDataRef.value = res.data.slice(1).map((item: { [s: string]: unknown; } | ArrayLike<unknown>) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
         )
 
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item) =>
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | { [s: string]: unknown; }) =>
             Object.values(item).map(
                 (value) => (value === null ? 'null' : value.toString())
             )
@@ -387,8 +353,8 @@ const onNegativeClick = () => {
 const isSaving = ref(false)
 
 let paramModel = {
-  sourceId: '6',
-  dbType: 'tbds-hive',
+  sourceId: '12',
+  dbType: 'mysql',
   sourceName: '',
   dataTierCode: '',
   dataTierName: '',
