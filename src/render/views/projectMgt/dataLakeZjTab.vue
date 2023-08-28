@@ -53,23 +53,7 @@
     />
   </n-scrollbar>
 
-  <n-drawer
-      v-model:show="showDrawerRef"
-      :width="220"
-  >
-    <n-drawer-content title="日志" :native-scrollbar="false" closable>
-      <n-timeline v-if="!isEmpty(logItemsRef)">
-        <n-timeline-item v-for="item in logItemsRef"
-                         :type="item.type"
-                         :title="item.title"
-                         :content="item.content"
-                         :time="item.time"
-        />
-      </n-timeline>
-      <n-empty v-else description="无运行日志"/>
-      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
-    </n-drawer-content>
-  </n-drawer>
+  <job-log-drawer v-model:show="showDrawerRef" :job="drawerJobRef"/>
 
   <n-modal
       v-model:show="showValidConfigModalRef"
@@ -217,13 +201,12 @@
 </template>
 
 <script setup lang="ts">
-import {DataDevBizVoType, WorkflowLogType, WorkflowType} from "@common/types";
+import {DataDevBizVoType, WorkflowType} from "@common/types";
 import {get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
 import {
   add_work_flow, create_table,
   create_valid_config, get_tables,
   get_valid_config_page, get_workflow, get_workflow_list_by_project_id,
-  get_workflow_log,
   gte_usrc_org_tree
 } from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
@@ -238,6 +221,7 @@ import {
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
 import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
+import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
 import JobInspectionTab from "@render/views/projectMgt/jobInspectionTab.vue";
 import {Add, Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
@@ -248,8 +232,7 @@ import {
   NButton,
   NSpace,
   SelectGroupOption,
-  SelectOption,
-  TimelineItemProps
+  SelectOption
 } from "naive-ui";
 import {format} from "sql-formatter";
 import {h, onMounted, reactive, ref} from "vue";
@@ -394,7 +377,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   }
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
-    moreBtnChildren.push(showTextButton('日志', () => showWorkflowLog(row)))
+    moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
     moreBtnChildren.push(showTextButton('质检情况', () => showJobInpsModal(row)))
     moreBtnChildren.push(showTextButton('质检配置', () => showValidConfigModal(row)))
   }
@@ -407,7 +390,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   }
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
-    children.push(showButton('日志', () => showWorkflowLog(row)))
+    children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('质检情况', () => showJobInpsModal(row)))
     children.push(showButton('质检配置', () => showValidConfigModal(row)))
   }
@@ -636,49 +619,10 @@ const addFieldsToSql = (sql: string): string => {
 
 // region 日志
 const showDrawerRef = ref(false)
-const logItemsRef = ref<TimelineItemProps[]>([])
-const showTipRef = ref(false)
-const showWorkflowLog = async (v: Job) => {
-  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
+const drawerJobRef = ref<Job>(null)
 
-  showTipRef.value = logs.length >= 100;
-
-  logItemsRef.value = []
-
-  logs.forEach(log => {
-    let type: "default" | "error" | "info" | "success" | "warning"
-    let title: string
-    let content: string
-    let time: string
-
-    if (log.result == null) {
-      title = '运行中'
-      type = 'info'
-    } else if (log.result == 1) {
-      title = '执行成功'
-      type = 'success'
-    } else if (log.result == 2) {
-      title = '执行失败'
-      type = 'error'
-    } else if (log.result == 3) {
-      title = '未反馈'
-      type = 'warning'
-    } else {
-      title = '未知'
-      type = 'warning'
-    }
-
-    time = log.startTime
-    content = log.componentName
-
-    logItemsRef.value.push({
-      type: type,
-      title: title,
-      content: content,
-      time: time
-    })
-  })
-
+const showJobLogDrawer = (v: Job) => {
+  drawerJobRef.value = v
   showDrawerRef.value = true
 }
 //endregion

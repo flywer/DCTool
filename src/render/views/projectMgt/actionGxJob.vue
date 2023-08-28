@@ -152,23 +152,7 @@
 
   </n-modal>
 
-  <n-drawer
-      v-model:show="showDrawerRef"
-      :width="220"
-  >
-    <n-drawer-content title="日志" :native-scrollbar="false" closable>
-      <n-timeline v-if="!isEmpty(logItemsRef)">
-        <n-timeline-item v-for="item in logItemsRef"
-                         :type="item.type"
-                         :title="item.title"
-                         :content="item.content"
-                         :time="item.time"
-        />
-      </n-timeline>
-      <n-empty v-else description="无运行日志"/>
-      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
-    </n-drawer-content>
-  </n-drawer>
+  <job-log-drawer v-model:show="showDrawerRef" :job="drawerJobRef"/>
 
   <n-modal
       v-model:show="showDataXJobSetupModalRef"
@@ -263,7 +247,6 @@
 </template>
 
 <script setup lang="ts">
-import {DataXJobLogType} from "@common/types";
 import {
   find_by_project_id,
   get_cj_cron_by_project_id,
@@ -271,7 +254,7 @@ import {
   get_table_sql
 } from "@render/api/auxiliaryDb.api";
 import {
-  get_cj_job_page, get_datax_job_log, update_sched_job,
+  get_cj_job_page, update_sched_job,
 } from "@render/api/datacenter.api";
 import {convertCronExpression} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
@@ -284,11 +267,12 @@ import {
   showButton, showButtonPopover,
   showTextButton
 } from "@render/utils/datacenter/jobTabUtil";
+import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, FormInst, NButton, NSpace, TimelineItemProps} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const tableDataRef = ref([])
@@ -455,7 +439,7 @@ const createColumns = (): DataTableColumns<Job> => {
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
-    moreBtnChildren.push(showTextButton('日志', () => showDataXJobLog(row)))
+    moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
     moreBtnChildren.push(showTextButton('调度配置', () => showDataXJobSetupModal(row)))
   }
 }
@@ -463,7 +447,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
-    children.push(showButton('日志', () => showDataXJobLog(row)))
+    children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('调度配置', () => showDataXJobSetupModal(row)))
   }
 
@@ -630,53 +614,12 @@ const addSchedJobModalFormModelInit = async (v: Job) => {
 
 // region 日志
 const showDrawerRef = ref(false)
-const logItemsRef = ref<TimelineItemProps[]>([])
-const showTipRef = ref(false)
-const showDataXJobLog = async (v: Job) => {
-  const logs: DataXJobLogType[] = (await get_datax_job_log({
-    current: 1,
-    size: 100,
-    blurry: v.jobName
-  })).data.records
+const drawerJobRef = ref<Job>(null)
 
-  showTipRef.value = logs.length >= 100;
-
-  logItemsRef.value = []
-
-  logs.forEach(log => {
-    let type: "default" | "error" | "info" | "success" | "warning"
-    let title: string
-    let content: string
-    let time: string
-
-    if (log.handleCode == 0) {
-      title = '运行中'
-      type = 'info'
-    } else if (log.handleCode == 200) {
-      title = '执行成功'
-      type = 'success'
-    } else if (log.handleCode == 500) {
-      title = '执行失败'
-      type = 'error'
-    } else {
-      title = '未知'
-      type = 'warning'
-    }
-
-    time = log.handleTime
-    content = ''
-
-    logItemsRef.value.push({
-      type: type,
-      title: title,
-      content: content,
-      time: time
-    })
-  })
-
+const showJobLogDrawer = (v: Job) => {
+  drawerJobRef.value = v
   showDrawerRef.value = true
 }
-
 //endregion
 
 // region dataX任务配置

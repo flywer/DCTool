@@ -45,29 +45,13 @@
     />
   </n-scrollbar>
 
-  <n-drawer
-      v-model:show="showDrawerRef"
-      :width="220"
-  >
-    <n-drawer-content title="日志" :native-scrollbar="false" closable>
-      <n-timeline v-if="!isEmpty(logItemsRef)">
-        <n-timeline-item v-for="item in logItemsRef"
-                         :type="item.type"
-                         :title="item.title"
-                         :content="item.content"
-                         :time="item.time"
-        />
-      </n-timeline>
-      <n-empty v-else description="无运行日志"/>
-      <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
-    </n-drawer-content>
-  </n-drawer>
+  <job-log-drawer v-model:show="showDrawerRef" :job="drawerJobRef"/>
 </template>
 
 <script setup lang="ts">
-import {WorkflowLogType, WorkflowType} from "@common/types";
+import {WorkflowType} from "@common/types";
 import {get_table_sql} from "@render/api/auxiliaryDb.api";
-import {get_workflow_list_by_project_id, get_workflow_log} from "@render/api/datacenter.api";
+import {get_workflow_list_by_project_id} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,
   Job, renderWorkflowActionButton,
@@ -76,10 +60,10 @@ import {
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
+import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
-import {isEmpty} from "lodash-es";
-import {DataTableColumns, NButton, NSpace, TimelineItemProps} from "naive-ui";
+import {DataTableColumns, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 const tableDataRef = ref([])
@@ -195,7 +179,7 @@ const createColumns = (): DataTableColumns<Job> => {
         let children: VNode[] = renderWorkflowActionButton(row, tableDataInit)
 
         if (![0, -1].includes(row.status)) {
-          children.push(showButton('日志', () => showWorkflowLog(row)))
+          children.push(showButton('日志', () => showJobLogDrawer(row)))
         }
 
         container.children = children
@@ -225,52 +209,12 @@ const paginationReactive = reactive({
 
 // region 日志
 const showDrawerRef = ref(false)
-const logItemsRef = ref<TimelineItemProps[]>([])
-const showTipRef = ref(false)
-const showWorkflowLog = async (v: Job) => {
-  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
+const drawerJobRef = ref<Job>(null)
 
-  showTipRef.value = logs.length >= 100;
-
-  logItemsRef.value = []
-
-  logs.forEach(log => {
-    let type: "default" | "error" | "info" | "success" | "warning"
-    let title: string
-    let content: string
-    let time: string
-
-    if (log.result == null) {
-      title = '运行中'
-      type = 'info'
-    } else if (log.result == 1) {
-      title = '执行成功'
-      type = 'success'
-    } else if (log.result == 2) {
-      title = '执行失败'
-      type = 'error'
-    } else if (log.result == 3) {
-      title = '未反馈'
-      type = 'warning'
-    } else {
-      title = '未知'
-      type = 'warning'
-    }
-
-    time = log.startTime
-    content = log.componentName
-
-    logItemsRef.value.push({
-      type: type,
-      title: title,
-      content: content,
-      time: time
-    })
-  })
-
+const showJobLogDrawer = (v: Job) => {
+  drawerJobRef.value = v
   showDrawerRef.value = true
 }
-
 //endregion
 
 </script>
