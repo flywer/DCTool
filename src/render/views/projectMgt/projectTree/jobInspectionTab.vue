@@ -1,6 +1,6 @@
 <template>
   <n-layout>
-    <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
+    <n-scrollbar class="pr-2" :style="{height: inpsTableName?'590px':'calc(100vh - 170px)'}" trigger="hover">
       <div class="w-auto h-8 mb-2">
         <div class="float-left leading-8 font-bold text-base" style="max-width: 30%">
           <n-skeleton v-if="isTableLoading" :width="200" size="small"/>

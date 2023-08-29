@@ -194,7 +194,7 @@
       :show-icon="false"
       :title="'质检情况'"
       :size="'small'"
-      style="width: 650px"
+      style="width: 750px"
   >
     <job-inspection-tab :inps-table-name="inpsTableName" :inps-table-db-id="inpsTableDbId"/>
   </n-modal>
