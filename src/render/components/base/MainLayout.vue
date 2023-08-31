@@ -32,7 +32,7 @@
 import {channels} from "@render/api/channels";
 import {useIpc} from "@render/plugins";
 import {routeName} from "@render/router";
-import {useNotification} from "naive-ui";
+import {NIcon, useNotification} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
@@ -43,7 +43,8 @@ import {
   BookSearch24Regular,
   CalendarClock24Regular,
   TableAdd24Regular,
-  Toolbox24Regular
+  Toolbox24Regular,
+  Organization24Regular
 } from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
@@ -82,6 +83,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.jobCreate,
     icon: renderIcon(LibraryAddOutlined)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.jobDependency,
+              }
+            },
+            {default: () => '任务依赖'}
+        ),
+    key: routeName.jobDependency,
+    icon: () => h(NIcon, {class: '-rotate-90'}, {default: () => h(Organization24Regular)})
   },
   {
     label: () =>

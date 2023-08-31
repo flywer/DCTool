@@ -14,6 +14,7 @@ const sztkDict = () => import('@render/views/sztkDict/index.vue')
 const dataStat = () => import('@render/views/dataStat/index.vue')
 const schedulingMgt = () => import('@render/views/schedulingMgt/index.vue')
 const toolbox = () => import('@render/views/toolbox/index.vue')
+const jobDependency = () => import('@render/views/jobDependency/index.vue')
 
 export const routeName = {
     app: 'app',
@@ -40,7 +41,8 @@ export const routeName = {
     sztkDict: 'sztkDict',
     dataStat: 'dataStat',
     schedulingMgt: 'schedulingMgt',
-    toolbox: 'toolbox'
+    toolbox: 'toolbox',
+    jobDependency: 'jobDependency',
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -108,6 +110,11 @@ export const routes: Array<RouteRecordRaw> = [
                         name: routeName.settings,
                         path: '/settings/index',
                         component: settings
+                    },
+                    {
+                        name: routeName.jobDependency,
+                        path: '/jobDependency/index',
+                        component: jobDependency
                     },
                 ]
             },

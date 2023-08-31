@@ -723,6 +723,31 @@ export const getWorkflowJobType = (v: {
     }
 }
 
+export const getJobType = (jobName: string) => {
+    switch (jobName.split('_')[0]) {
+        case 'cj':
+            return '数据采集任务'
+        case 'gx':
+            return '数据共享任务'
+        case 'zj':
+            return '数据质检任务'
+        case 'bf':
+            return '数据备份任务'
+        case 'qc':
+            return '数据清除任务'
+        case 'rh':
+            return '数据融合任务'
+        case 'rh1':
+            return '单表融合任务'
+        case 'rh2':
+            return '多表融合任务'
+        case 'rk':
+            return '数据入库任务'
+        default :
+            return '未知任务'
+    }
+}
+
 export const getWorkflowJobStatus = (v: {
     status: string;
 }) => {

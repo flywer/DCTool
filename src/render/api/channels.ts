@@ -124,6 +124,13 @@ export const channels = reactive({
         updateSimpZjJson: 'auxiliaryDb/updateSimpZjJson',
 
         getMaxRunningWorkFlowJobNum: 'auxiliaryDb/getMaxRunningWorkFlowJobNum',
+
+        jobDetail: {
+            findAll: 'auxiliaryDb/jobDetail/findAll',
+        },
+        projectJobDependency: {
+            findAll: 'auxiliaryDb/jobDetail/projectJobDependency',
+        }
     },
     cron: {
         createCronJob: 'cron/createCronJob',

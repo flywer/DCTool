@@ -2,8 +2,10 @@ import {AdbController} from "@main/controller/adb.controller";
 import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {FrontController} from "@main/controller/front.controller";
+import {JobDetailController} from "@main/controller/jobDetail.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import {LoginController} from "@main/controller/login.controller";
+import {ProjectJobDependencyController} from "@main/controller/projectJobDependency.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {SysController} from "@main/controller/sys.controller";
 import {UpdaterController} from "@main/controller/updater.controller";
@@ -95,7 +97,9 @@ async function bootstrap() {
                         FrontController,
                         LoginController,
                         UpdaterController,
-                        SysController
+                        SysController,
+                        JobDetailController,
+                        ProjectJobDependencyController
                     ],
                 injects: [{
                     name: 'IS_DEV',

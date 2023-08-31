@@ -2,8 +2,10 @@ import "reflect-metadata"
 import {ActivationKey} from "@main/entity/ActivationKey";
 import {Dict} from "@main/entity/Dict";
 import {GdsztkDict} from "@main/entity/GdsztkDict";
+import {JobDetail} from "@main/entity/JobDetail";
 import {JobJson} from "@main/entity/JobJson";
 import {PreDatabase} from "@main/entity/PreDatabase";
+import {ProjectJobDependency} from "@main/entity/ProjectJobDependency";
 import {TableSql} from "@main/entity/TableSql";
 import {User} from "@main/entity/User";
 import {DataSource} from "typeorm"
@@ -26,7 +28,9 @@ export const AppDataSource = new DataSource({
         PreDatabase,
         GdsztkDict,
         User,
-        ActivationKey
+        ActivationKey,
+        JobDetail,
+        ProjectJobDependency
     ],
     migrations: [],
     subscribers: [],
