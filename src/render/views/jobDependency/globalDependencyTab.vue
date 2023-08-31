@@ -253,7 +253,7 @@ const loadGraphData = async () => {
       } else {
         return ({
           id: `${record.tableProjectAbbr}_${record.tableAbbr}`,
-          label: `${record.tableProjectAbbr}_${record.tableAbbr.toUpperCase()}`,
+          label: `${record.tableProjectAbbr.toUpperCase()}_${record.tableAbbr.toUpperCase()}`,
           collapsed: false
         })
       }

@@ -1,5 +1,4 @@
 import {AppDataSource} from "@main/dataSource/data-source";
-import {JobDetail} from "@main/entity/JobDetail";
 import {ProjectJobDependency} from "@main/entity/ProjectJobDependency";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
