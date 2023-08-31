@@ -13,7 +13,6 @@ export const generateJobNodes = (tableAbbr: string, tableName: string, isBasicTa
     const actionJobPrefix = ['cj', 'zj', 'bf', 'qc', 'rh1', 'rh2']
 
     let nodes: JobNodeConfig[] = []
-
     if (isBasicTable) {
         for (let i = 0; i < basicJobPrefix.length; i++) {
             nodes.push({
@@ -29,9 +28,9 @@ export const generateJobNodes = (tableAbbr: string, tableName: string, isBasicTa
     } else {
         for (let i = 0; i < actionJobPrefix.length; i++) {
             nodes.push({
-                id: `${basicJobPrefix[i]}_${tableAbbr}_${tableName}`,
-                jobName: `${basicJobPrefix[i]}_${tableAbbr}_${tableName}`,
-                jobType: getJobType(`${basicJobPrefix[i]}_${tableAbbr}_${tableName}`),
+                id: `${actionJobPrefix[i]}_${tableAbbr}_${tableName}`,
+                jobName: `${actionJobPrefix[i]}_${tableAbbr}_${tableName}`,
+                jobType: getJobType(`${actionJobPrefix[i]}_${tableAbbr}_${tableName}`),
                 jobStatus: 2,
                 lastExecTime: '--',
                 lastExecResult: '--',
