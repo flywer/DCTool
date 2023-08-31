@@ -22,14 +22,16 @@ export const handleAutoUpdate = () => {
         log.info(`发现可用更新 v${info.version}`)
         let notice = new Notification({
             title: `应用更新`,
-            body: `🆕 发现新更新 v1.0.4，开始下载...\n点击此处查看更新详情`
+            body: `🆕 发现新更新 v${info.version}，开始下载...\n点击此处查看更新详情`
         })
 
         notice.show()
 
         notice.on('click', () => {
+            shell.openExternal(`https://github.com/flywer/dctool-release/releases/tag/v${info.version}`).catch(error => {
+                log.error(error)
+            });
             notice.close()
-            shell.openExternal(`https://github.com/flywer/dctool-release/releases/tag/v${info.version}`)
         })
     });
 
