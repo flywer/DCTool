@@ -1,4 +1,3 @@
-import {AppController} from "@main/controller/app.controller";
 import log from "electron-log";
 import {autoUpdater} from "electron-updater";
 import {Notification, shell} from 'electron'

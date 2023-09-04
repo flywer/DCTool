@@ -33,7 +33,7 @@ import {quit_and_install} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
 import {useIpc} from "@render/plugins";
 import {routeName} from "@render/router";
-import {NIcon, useNotification, NButton, NSpace} from "naive-ui";
+import {NIcon, useNotification, NButton} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
