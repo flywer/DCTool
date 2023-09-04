@@ -429,6 +429,14 @@ export class DatacenterController {
         });
     }
 
+    @IpcHandle(channels.datacenter.updateIsProcessed)
+    public async handleUpdateIsProcessed(id: string, isProcessed: number) {
+        const query: string = `id=${id}&isProcessor=${isProcessed}`;
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonGetRequest(`/qaportal/dwInspectionRecord/updateByIsProcessor`, query))
+        });
+    }
+
     @IpcHandle(channels.datacenter.getWorkflow)
     public async handleGetWorkflow(jobId: string) {
         return new Promise<any>(async (resolve) => {

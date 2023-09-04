@@ -50,12 +50,12 @@
 <script setup lang="ts">
 import {InspectionRecord} from "@common/types";
 import {open_default_browser} from "@render/api/app.api";
-import {get_inps_record_page} from "@render/api/datacenter.api";
+import {get_inps_record_page, update_is_processed} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";
-import {DataTableColumns, NSpace, NNumberAnimation} from "naive-ui";
+import {DataTableColumns, NSpace, NNumberAnimation, NSwitch} from "naive-ui";
 import {computed, onMounted, ref, watch, reactive, h} from "vue";
 
 // 当组件使用时，供其他页面使用
@@ -131,7 +131,8 @@ const tableDataInit = async () => {
       aimRecordSum: v.aimRecordSum,
       wrongRecordSum: v.wrongRecordSum,
       repairRecordSum: v.repairRecordSum,
-      unRepairRecordSum: v.unRepairRecordSum
+      unRepairRecordSum: v.unRepairRecordSum,
+      isProcessed: v.isProcessor
     })))
   } else {
     tableDataRef.value = []
@@ -180,6 +181,8 @@ type InspectionItem = {
   repairRecordSum: number
   // 未修复数量
   unRepairRecordSum: number
+  // 是否已处理
+  isProcessed: number
 }
 
 const createColumns = (): DataTableColumns<InspectionItem> => {
@@ -187,7 +190,35 @@ const createColumns = (): DataTableColumns<InspectionItem> => {
     {
       title: '质检时间',
       key: 'inspectionTime',
-      width: '13%',
+      width: '10%',
+    },
+    {
+      title: '处理情况',
+      key: 'isProcessed',
+      width: '8%',
+      align: 'center',
+      render(row) {
+        return h(NSpace, {
+          justify: 'center'
+        }, [
+          h(NSwitch, {
+            value: row.isProcessed == 1,
+            onUpdateValue(value: boolean) {
+              row.isProcessed = value ? 1 : 0
+              update_is_processed(row.id, row.isProcessed).then(res => {
+                if (res.code == 200) {
+                  window.$message.success(res.message)
+                } else {
+                  window.$message.error(res.message)
+                }
+              })
+            }
+          }, {
+            checked: () => '已处理',
+            unchecked: () => '未处理'
+          })
+        ])
+      }
     },
     {
       title: '质检数据总量',

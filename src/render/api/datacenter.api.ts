@@ -324,3 +324,8 @@ export const get_workflow_list_by_project_id = async (projectId: string, procNam
     const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowListByProjectId, projectId, procName))
     return data
 }
+
+export const update_is_processed = async (id: string, isProcessed: number) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.updateIsProcessed, id, isProcessed))
+    return data
+}

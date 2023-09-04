@@ -72,6 +72,7 @@ export interface InspectionRecord {
     aimRecordSum: number;
     repairRecordSum: number;
     unRepairRecordSum: number;
+    isProcessor: number;
 }
 
 // 采集任务列表页类型
