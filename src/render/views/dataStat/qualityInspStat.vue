@@ -203,8 +203,10 @@ const createExcel = async () => {
 
       let dataSata: InspectionDataStatType[] = []
 
+      // 遍历各个部门
       for (let i = 0; i < formModel.value.orgIds.length; i++) {
         const orgId = formModel.value.orgIds[i]
+        // 遍历各个部门的各个表
         for (let j = 0; j < tableNames.length; j++) {
 
           percentage.value = Number((((i * tableNames.length + j + 1) / (formModel.value.orgIds.length * tableNames.length)) * 100).toFixed(1));
@@ -212,7 +214,7 @@ const createExcel = async () => {
           const tableName = tableNames[j]
 
           // 获取质检记录
-          const records: InspectionRecord[] = (await get_inps_record_page({
+          let records: InspectionRecord[] = (await get_inps_record_page({
             page: 1,
             size: 10000,
             orgIds: [orgId],
@@ -221,6 +223,8 @@ const createExcel = async () => {
           })).data.records
 
           if (!isEmpty(records)) {
+
+            records = records.filter(item => item.isProcessor == 0) //统计过滤
 
             const comment = tableComments.find(item => item.tableName.toLowerCase() == tableName)?.comment as string || tableName
 
