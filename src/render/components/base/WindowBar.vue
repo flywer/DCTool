@@ -2,11 +2,21 @@
 <template>
   <n-layout id="window-bar" :class="darkMode!=null?(darkMode?'window-bar-dark':'window-bar-light'):('')">
     <n-layout-content>
-      <n-grid :cols="2">
+      <n-grid :cols="3">
         <n-gi>
           <n-space justify="start" inline>
-            <span class="ml-4" style="line-height: 32px;font-family: 'Microsoft PhagsPa'"
+            <span class="ml-4" style="line-height: 32px;"
             >{{ title }}</span>
+          </n-space>
+        </n-gi>
+        <n-gi>
+          <n-space justify="center" align="center" class="h-full">
+<!--            <div>
+              新版本下载完毕，
+              <n-button quaternary type="info" size="small" style="-webkit-app-region: no-drag;" @click="appInstall">
+                立即安装
+              </n-button>
+            </div>-->
           </n-space>
         </n-gi>
         <n-gi>
@@ -124,6 +134,10 @@ const setTitle = async () => {
     title.value = ''
   }
 }
+
+/* const appInstall = () => {
+
+} */
 
 </script>
 

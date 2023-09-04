@@ -29,10 +29,11 @@
 </template>
 
 <script setup lang="ts">
+import {quit_and_install} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
 import {useIpc} from "@render/plugins";
 import {routeName} from "@render/router";
-import {NIcon, useNotification} from "naive-ui";
+import {NIcon, useNotification, NButton, NSpace} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
@@ -244,6 +245,26 @@ ipc.on(channels.datacenter.authTokenNotice, (msg: string) => {
     title: "访问令牌出错",
     content: msg,
     type: "warning"
+  })
+})
+
+ipc.on(channels.app.sendAppInstallNotice, () => {
+  notification.create({
+    title: "应用更新",
+    content: () => {
+      return h('div', {}, [
+        '新版本下载完毕！',
+        h(NButton, {
+          quaternary: true,
+          type: 'info',
+          size: 'small',
+          onClick: () => {
+            quit_and_install()
+          }
+        }, () => '立即安装')
+      ])
+    },
+    type: "success"
   })
 })
 </script>

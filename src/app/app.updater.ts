@@ -1,3 +1,4 @@
+import {AppController} from "@main/controller/app.controller";
 import log from "electron-log";
 import {autoUpdater} from "electron-updater";
 import {Notification, shell} from 'electron'
@@ -28,10 +29,11 @@ export const handleAutoUpdate = () => {
         notice.show()
 
         notice.on('click', () => {
-            shell.openExternal(`https://github.com/flywer/dctool-release/releases/tag/v${info.version}`).catch(error => {
+            shell.openExternal(`https://github.com/flywer/dctool-release/releases/tag/v${info.version}`).then(() => {
+                notice.close()
+            }).catch(error => {
                 log.error(error)
             });
-            notice.close()
         })
     });
 
@@ -45,10 +47,11 @@ export const handleAutoUpdate = () => {
         notice.show()
 
         notice.on('click', () => {
-            notice.close()
             //退出并安装
             autoUpdater.quitAndInstall();
+            notice.close()
         })
+
     });
 
     autoUpdater.on('error', function (error) {

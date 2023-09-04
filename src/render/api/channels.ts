@@ -8,6 +8,8 @@ export const channels = reactive({
         getSettings: 'app/getSettings',
         updateTheme: "app/updateTheme",
         getAppVersion: "app/getAppVersion",
+        sendAppInstallNotice: "app/sendAppInstallNotice",
+        quitAndInstall: "app/quitAndInstall",
     },
     sys: {
         shouldUseDarkColors: 'sys/shouldUseDarkColors'
@@ -79,7 +81,7 @@ export const channels = reactive({
         getWorkflowListByProjectId: 'datacenter/getWorkflowListByProjectId',
         updateDataXJob: 'datacenter/updateDataXJob',
         updateSchedJob: 'datacenter/updateSchedJob',
-        updateIsProcessed:'datacenter/updateIsProcessed',
+        updateIsProcessed: 'datacenter/updateIsProcessed',
     },
     auxiliaryDb: {
         projectInfo: {

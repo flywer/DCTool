@@ -29,3 +29,7 @@ export const get_app_version = async () => {
     const {data} = await ipcInstance.send(channels.app.getAppVersion)
     return data as Result
 }
+
+export const quit_and_install = () => {
+    return ipcInstance.send(channels.app.quitAndInstall)
+}

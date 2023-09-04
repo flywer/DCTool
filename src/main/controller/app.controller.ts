@@ -42,7 +42,7 @@ export class AppController {
         try {
             let result: Result
             const filePath = join(getAppDataPath(), 'config', 'app.json')
-            const buffer =  readFsSync(filePath)
+            const buffer = readFsSync(filePath)
             if (buffer == null || isEmpty(buffer.toString())) {
                 result = success()
                 result.data = null
@@ -110,5 +110,15 @@ export class AppController {
             result.data = e
         }
         return result
+    }
+
+    @IpcSend(channels.app.sendAppInstallNotice, MAIN_WINDOW)
+    public handleSendAppInstallNotice() {
+        return true
+    }
+
+    @IpcHandle(channels.app.quitAndInstall)
+    public handleQuitAndInstall() {
+        autoUpdater.quitAndInstall();
     }
 }
