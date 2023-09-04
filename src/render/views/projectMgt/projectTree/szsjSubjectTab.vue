@@ -69,13 +69,13 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {
   get_cj_job_page,
   get_dataXJob,
   get_job_project_by_id,
 } from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {

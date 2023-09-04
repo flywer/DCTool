@@ -160,7 +160,10 @@
 </template>
 
 <script setup lang="ts">
-import {get_project_by_cj_cron_is_null, get_project_cj_cron, update_cj_cron} from "@render/api/auxiliaryDb.api";
+import {
+  get_project_by_cj_cron_and_project_name,
+  get_project_by_cj_cron_is_null, update_cj_cron
+} from "@render/api/auxiliaryDb/projectInfo.api";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {isTimeConflict} from "@render/utils/common/cronUtils";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
@@ -177,7 +180,7 @@ type Project = {
   projectName: string
   projectId: string
   cron: string
-  comment: string
+  comment?: string
 }
 
 const queryParam = ref('')
@@ -189,12 +192,12 @@ onMounted(async () => {
 const tableDataInit = async (v: string) => {
   isTableLoading.value = true
 
-  tableDataRef.value = (await get_project_cj_cron(v)).map((v => ({
-    id: v.id,
+  tableDataRef.value = (await get_project_by_cj_cron_and_project_name(v)).map((v) => ({
+    id: v.id.toString(),
     projectName: v.projectName,
     projectId: v.projectId,
     cron: v.cjCron
-  })))
+  }))
 
   isTableLoading.value = false
 }
@@ -350,7 +353,9 @@ const showCreateModal = async () => {
 
   get_project_by_cj_cron_is_null(false).then(res => {
     // 已配置的项目
-    const projectIds: string[] = res.map(project => project.projectId)
+    const projectIds: string[] = res.map((project: {
+      projectId: any;
+    }) => project.projectId)
     projectIdOptionsUpdate().then(() => {
       modalProjectIdOptions.value = projectIdOptions.filter(project => !projectIds.includes(project.value as string))
     }).finally(() => isProjectOptionsLoading.value = false)
@@ -377,14 +382,20 @@ const onSave = () => {
       cronConfigModalFormModel.value.cron = `* ${cronConfigModalFormModel.value.min.join('-')} ${cronConfigModalFormModel.value.hour.join(',')} ? * * *`;
       get_project_by_cj_cron_is_null(false)
           .then(res => {
-            const crons: string[] = res.filter(project => project.projectId != cronConfigModalFormModel.value.projectId).map(project => project.cjCron)
+            const crons: string[] = res.filter((project: {
+              projectId: string;
+            }) => project.projectId != cronConfigModalFormModel.value.projectId).map((project: {
+              cjCron: any;
+            }) => project.cjCron)
             const conflictingExpressions = isTimeConflict(crons, cronConfigModalFormModel.value.cron)
             if (conflictingExpressions.length > 0) {
 
               let conflictingProjectsStr = ``
 
               conflictingExpressions.forEach(exp => {
-                const project = res.find(project => project.cjCron === exp)
+                const project = res.find((project: {
+                  cjCron: string;
+                }) => project.cjCron === exp)
                 conflictingProjectsStr += `${project.projectName}：${exp}\n`
               })
 

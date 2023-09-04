@@ -54,14 +54,14 @@
 </template>
 
 <script setup lang="ts">
-import {ProjectInfo} from "@common/types";
+
+import {ProjectInfo} from "@main/entity/ProjectInfo";
+import {get_job_project_list_by_page} from "@render/api/datacenter.api";
 import {
   find_by_project_id,
-  get_project_by_pro_abbr,
-  get_project_by_table_abbr,
+  get_project_by_pro_abbr, get_project_by_table_abbr,
   update_project_info
-} from "@render/api/auxiliaryDb.api";
-import {get_job_project_list_by_page} from "@render/api/datacenter.api";
+} from "@render/api/auxiliaryDb/projectInfo.api";
 import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
 import {isNull} from "lodash-es";
 import type {DataTableColumns} from 'naive-ui'
@@ -96,7 +96,8 @@ const tableDataInit = async (param: string) => {
             projectId: v.id.toString(),
             projectAbbr: '',
             tableAbbr: '',
-            id: null
+            id: null,
+            cjCron: null
           }))) || [];
 
   paginationReactive.itemCount = data.total || 0
@@ -138,7 +139,7 @@ const createColumns = ({}: {
           value: row.projectAbbr,
           async onUpdateValue(v: string) {
             get_project_by_pro_abbr(v).then(res => {
-              if (isNull(res)) {
+              if (res.projectId == row.projectId || isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
                 update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                   tableDataInit(queryParam.value).then(() => {
@@ -177,7 +178,7 @@ const createColumns = ({}: {
           value: row.tableAbbr,
           async onUpdateValue(v: string) {
             get_project_by_table_abbr(v).then(res => {
-              if (isNull(res)) {
+              if (res.projectId == row.projectId || isNull(res)) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).tableAbbr = v
                 update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
                   tableDataInit(queryParam.value).then(() => {

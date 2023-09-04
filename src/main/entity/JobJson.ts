@@ -25,7 +25,7 @@ export class JobJson {
         type: 'datetime',
         comment: '单表融合JSON变更时间'
     })
-    rh1UpdateTime: string
+    rh1UpdateTime: Date
 
     // 多表融合JSON
     @Column({
@@ -48,7 +48,7 @@ export class JobJson {
         type: 'datetime',
         comment: '质检JSON变更时间'
     })
-    zjUpdateTime: string
+    zjUpdateTime: Date
 
     @Column({
         type: "longtext",
@@ -63,7 +63,7 @@ export class JobJson {
         type: 'datetime',
         comment: '简化版质检JSON变更时间'
     })
-    simpZjUpdateTime: string
+    simpZjUpdateTime: Date
 
     @Column({name: 'order_num'})
     orderNum: number

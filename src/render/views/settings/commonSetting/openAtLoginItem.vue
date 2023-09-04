@@ -29,7 +29,7 @@ const appSettings = useAppSettingsStore()
 
 const loading = ref(false)
 
-const handleUpdateValue = (v) => {
+const handleUpdateValue = (v: boolean) => {
   loading.value = true
   set_app_settings({
     openAtLogin: v

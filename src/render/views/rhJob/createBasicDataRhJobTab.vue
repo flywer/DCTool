@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_rh_json} from "@render/api/auxiliaryDb.api";
+import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {add_work_flow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
@@ -117,8 +117,8 @@ const rules = {
 
 onMounted(() => {
   get_rh_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => item.rh1Json != null && isBasicTable(item.tableName)).map(
-        (v => ({
+    tableNameOptions.value = res?.filter((item: { rh1Json: any; tableName: string; }) => item.rh1Json != null && isBasicTable(item.tableName)).map(
+        ((v: { tableName: any; id: { toString: () => any; }; rh1Json: any; }) => ({
           label: `${v.tableName}`,
           value: v.id.toString(),
           json: v.rh1Json,
@@ -173,7 +173,7 @@ const addWorkFlow = async () => {
   }
 }
 
-const addWorkflow2 = (paramsModel) => {
+const addWorkflow2 = (paramsModel:any) => {
   add_work_flow(paramsModel).then((res) => {
     if (res.code == 200) {
       window.$message.success('融合任务创建成功')

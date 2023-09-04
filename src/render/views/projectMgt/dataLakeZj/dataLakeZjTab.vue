@@ -202,13 +202,15 @@
 
 <script setup lang="ts">
 import {DataDevBizVoType, WorkflowType} from "@common/types";
-import {find_by_project_id, get_table_sql, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
   add_work_flow, create_table,
   create_valid_config, get_tables,
   get_valid_config_page, get_workflow, get_workflow_list_by_project_id,
   gte_usrc_org_tree
 } from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {
   getCustomTableValidConfig, getTableCommentByProName,

@@ -44,7 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import {get_dict_by_bz_id, get_dict_by_parent_id, get_parent_dict} from "@render/api/auxiliaryDb.api";
+import {GdsztkDict} from "@main/entity/GdsztkDict";
+import {get_dict_by_bz_id, get_dict_by_parent_id, get_parent_dict} from "@render/api/auxiliaryDb/sztkDict.api";
 import {copyText} from "@render/utils/common/clipboard";
 import {isNull} from "lodash-es";
 import {TreeSelectOption} from "naive-ui";
@@ -70,7 +71,17 @@ const dictSelectOptionsInit = async () => {
   ]
 
   dictSelectOptionsRef.value[0].children = (await get_parent_dict())
-      .sort((a, b) => a.dictCode.split('.')[1] > b.dictCode.split('.')[1])
+      .sort((a, b) => {
+        const aCode = a.dictCode.split('.')[1];
+        const bCode = b.dictCode.split('.')[1];
+        if (aCode > bCode) {
+          return 1;
+        } else if (aCode < bCode) {
+          return -1;
+        } else {
+          return 0;
+        }
+      })
       .map((v): TreeSelectOption => ({
         label: `${v.dictName}-${v.dictCode}`,
         key: v.bzId
@@ -86,7 +97,7 @@ const buildSql = async () => {
 
   for (const dictId of dictSelectRef.value) {
 
-    const parentData = (await get_dict_by_bz_id(dictId))[0]
+    const parentData = await get_dict_by_bz_id(dictId)
     const {
       dictName,
       dictCode
@@ -109,7 +120,7 @@ const buildSql = async () => {
   isBuildSql.value = false
 }
 
-const createSql = (data) => {
+const createSql = (data: GdsztkDict) => {
   let {
     bzId,
     dictName,
@@ -125,7 +136,7 @@ const createSql = (data) => {
   return `INSERT INTO gdsztk_dict (bz_id, dict_name, dict_code, parent_id, order_num, add_time, cd_time, cd_operation, cd_batch) VALUES (${valueConvert(bzId)}, ${valueConvert(dictName)}, ${valueConvert(dictCode)}, ${valueConvert(parentId)}, ${valueConvert(orderNum)}, '${new Date(addTime).toISOString().replace('T', ' ').slice(0, -5)}', '${new Date(cdTime).toISOString().replace('T', ' ').slice(0, -5)}', '${cdOperation}', '${cdBatch}');\n`
 }
 
-const valueConvert = (value) => {
+const valueConvert = (value: string | number) => {
   if (isNull(value)) {
     return null
   } else {

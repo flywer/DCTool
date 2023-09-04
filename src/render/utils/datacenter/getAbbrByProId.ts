@@ -1,5 +1,4 @@
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
-
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 export const getAbbrByProId = async (projectId: string) => {
     let projectAbbr = ''
     let tableAbbr = ''

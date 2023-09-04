@@ -194,8 +194,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {add_datax_job, add_sched_task, build_datax_json, get_columns} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {
   datasourceOptions, datasourceOptionsUpdate,
   projectIdOptions,

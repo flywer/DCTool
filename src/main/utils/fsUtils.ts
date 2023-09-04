@@ -63,8 +63,6 @@ export const jsonfileWrite = (filePath: string, obj: any, option?: {}) => {
     jsonfile.writeFile(filePath, obj, option, function (err: any) {
         if (err) {
             log.error(err)
-        } else {
-            log.log(filePath + '\twrite success!');
         }
     })
 }

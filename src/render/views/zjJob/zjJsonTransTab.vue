@@ -227,7 +227,7 @@ const validJsonTrans = (e: MouseEvent) => {
 }
 
 const getBaseInfo = () => {
-  let json;
+  let json: { name: string; projectId: { toString: () => string; }; personId: string; email: string; description: string; dataDevBizVo: { qualityInspectionDtoList: { sourceTableName: string; }[]; }; };
   try {
     json = JSON.parse(validJsonInputRef?.value);
     formModel.value.name = json.name;

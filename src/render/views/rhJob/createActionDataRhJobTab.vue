@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_rh_json} from "@render/api/auxiliaryDb.api";
+import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {add_work_flow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
@@ -142,8 +142,8 @@ const jobDependencyCheckRef = ref(true)
 
 onMounted(() => {
   get_rh_json().then((res) => {
-    tableNameOptions.value = res?.filter(item => !isBasicTable(item.tableName)).map(
-        (v => ({
+    tableNameOptions.value = res?.filter((item: { tableName: string; }) => !isBasicTable(item.tableName)).map(
+        ((v: { tableName: any; id: { toString: () => any; }; rh1Json: any; rh2Json: any; }) => ({
           label: `${v.tableName}`,
           value: v.id.toString(),
           rh1Json: v.rh1Json,
@@ -220,7 +220,7 @@ const addWorkFlow = async () => {
 
 }
 
-const addRh1Job = (paramsModel) => {
+const addRh1Job = (paramsModel: any) => {
   add_work_flow(paramsModel).then(async (res1) => {
     if (res1.code == 200) {
       window.$message.success('单表融合任务创建成功')
@@ -244,15 +244,15 @@ const addRh1Job = (paramsModel) => {
             content: `检测到[${paramsModel2.name}]任务名已存在，是否继续创建？`,
             positiveText: '确定',
             negativeText: '取消',
-            onPositiveClick: async () => {
-              await addRh2Job(paramsModel2)
+            onPositiveClick: () => {
+              addRh2Job(paramsModel2)
             },
             onAfterLeave: () => {
               isAdding.value = false
             }
           })
         } else {
-          await addRh2Job(paramsModel2)
+          addRh2Job(paramsModel2)
         }
 
       }
@@ -262,7 +262,7 @@ const addRh1Job = (paramsModel) => {
   }).finally(() => isAdding.value = false)
 }
 
-const addRh2Job = (paramsModel) => {
+const addRh2Job = (paramsModel: any) => {
   add_work_flow(paramsModel).then(res2 => {
     if (res2.code == 200) {
       window.$message.success('多表融合任务创建成功')

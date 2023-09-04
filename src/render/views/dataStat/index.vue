@@ -9,7 +9,6 @@
 </template>
 
 <script setup lang="ts">
-
 import QualityInspStat from "@render/views/dataStat/qualityInspStat.vue";
 </script>
 

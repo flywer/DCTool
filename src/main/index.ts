@@ -1,10 +1,16 @@
-import {AdbController} from "@main/controller/adb.controller";
+import {DictController} from "@main/controller/auxiliaryDb/dict.controller";
+import {JobJsonController} from "@main/controller/auxiliaryDb/jobJson.controller";
+import {PreDatabaseController} from "@main/controller/auxiliaryDb/preDatabase.controller";
+import {SztkDictController} from "@main/controller/auxiliaryDb/sztkDict.controller";
+import {TableSqlController} from "@main/controller/auxiliaryDb/tableSql.controller";
+import {UserController} from "@main/controller/auxiliaryDb/user.controller";
 import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {FrontController} from "@main/controller/front.controller";
 import {JobDetailController} from "@main/controller/jobDetail.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import {LoginController} from "@main/controller/login.controller";
+import {ProjectInfoController} from "@main/controller/auxiliaryDb/projectInfo.controller";
 import {ProjectJobDependencyController} from "@main/controller/projectJobDependency.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {SysController} from "@main/controller/sys.controller";
@@ -91,7 +97,6 @@ async function bootstrap() {
                         LdDecryptController,
                         SvgController,
                         DatacenterController,
-                        AdbController,
                         CronController,
                         XlsxController,
                         FrontController,
@@ -99,7 +104,14 @@ async function bootstrap() {
                         UpdaterController,
                         SysController,
                         JobDetailController,
-                        ProjectJobDependencyController
+                        ProjectJobDependencyController,
+                        ProjectInfoController,
+                        UserController,
+                        TableSqlController,
+                        JobJsonController,
+                        PreDatabaseController,
+                        SztkDictController,
+                        DictController
                     ],
                 injects: [{
                     name: 'IS_DEV',

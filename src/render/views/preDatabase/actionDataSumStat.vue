@@ -48,10 +48,10 @@
 </template>
 
 <script setup lang="ts">
-import {get_pre_database_depart, get_pre_database_table_info_json, get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_pre_database_depart, get_pre_database_table_info_json} from "@render/api/auxiliaryDb/preDatabase.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {copyText} from "@render/utils/common/clipboard";
-import {formatDate} from "@render/utils/common/dateUtils";
-import {getFirstDayOfMonth} from "@render/utils/common/getFirstDayOfMonth";
+import {formatDate, getFirstDayOfMonth} from "@render/utils/common/dateUtils";
 import {TreeSelectOption} from "naive-ui";
 import {format} from "sql-formatter";
 import {onMounted, ref} from "vue";
@@ -65,7 +65,7 @@ const formModel = ref({
 
 const sqlRef = ref('')
 
-onMounted(async () => {
+onMounted(() => {
   departOptionsInit()
 })
 
@@ -91,12 +91,12 @@ const departOptionsInit = async () => {
     }
   ]
 
-  departOptionsRef.value[0].children[0].children = departs.filter(depart => depart.departName.startsWith('广东省')).map((v => ({
+  departOptionsRef.value[0].children[0].children = departs.filter((depart: { departName: string; }) => depart.departName.startsWith('广东省')).map((v => ({
     label: v.departName,
     key: v.id.toString()
   })))
 
-  departOptionsRef.value[0].children[1].children = departs.filter(depart => depart.departName.startsWith('广东省') == false).map((v => ({
+  departOptionsRef.value[0].children[1].children = departs.filter((depart: { departName: string; }) => depart.departName.startsWith('广东省') == false).map((v => ({
     label: v.departName,
     key: v.id.toString()
   })))
@@ -146,7 +146,7 @@ const buildSql = async () => {
 
       const primId = (await get_table_sql({tableName: c2010.tableAbbr.toUpperCase()}))[0].pColName as string
 
-      let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '行政处罚案件数量' AS '数据类型',  COUNT(DISTINCT (${primId})) AS '数量'
+      let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '行政处罚案件数量' AS '数据类型', COUNT(DISTINCT (${primId})) AS '数量'
                          FROM ${c2010.tableName}
                          WHERE cd_time >= '${timeRange[0]}'
                            AND cd_time <= '${timeRange[1]}'
@@ -161,7 +161,7 @@ const buildSql = async () => {
 
       const primId = (await get_table_sql({tableName: c3010.tableAbbr.toUpperCase()}))[0].pColName as string
 
-      let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '行政强制案件数量' AS '数据类型',  COUNT(DISTINCT (${primId})) AS '数量'
+      let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '行政强制案件数量' AS '数据类型', COUNT(DISTINCT (${primId})) AS '数量'
                          FROM ${c3010.tableName}
                          WHERE cd_time >= '${timeRange[0]}'
                            AND cd_time <= '${timeRange[1]}'
@@ -218,11 +218,11 @@ const buildSql = async () => {
 
       const tableSql = (await get_table_sql({tableName: table.tableAbbr.toUpperCase()}))[0]
 
-       let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '${tableSql.comment}数据总量' AS '数据类型', COUNT(*) AS '数量'
-                          FROM ${table.tableName}
-                          WHERE cd_time >= '${timeRange[0]}'
-                            AND cd_time <= '${timeRange[1]}'
-                          UNION ALL `
+      let templateSql = `SELECT '${tableInfo.departName}' AS '单位名称', '${tableSql.comment}数据总量' AS '数据类型', COUNT(*) AS '数量'
+                         FROM ${table.tableName}
+                         WHERE cd_time >= '${timeRange[0]}'
+                           AND cd_time <= '${timeRange[1]}'
+                         UNION ALL `
       sql += templateSql
     }
   }

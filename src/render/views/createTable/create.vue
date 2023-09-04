@@ -201,8 +201,9 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {create_table, get_tables_info, table_delete} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
 import {cloneDeep} from "lodash-es";
@@ -243,7 +244,7 @@ const rules = {
 onMounted(() => {
   get_table_sql().then((res) => {
     tableNameOptions.value = res?.map(
-        (v => ({
+        ((v: { tableName: string; comment: any; id: { toString: () => any; }; sql: any; }) => ({
           label: `${v.tableName}(${v.comment})`,
           value: v.id.toString(),
           sql: v.sql,
@@ -370,7 +371,7 @@ const paramsModel = {
   tableName: ''
 }
 
-const tempOdsCreate = async (tableAbbr, tableSql) => {
+const tempOdsCreate = async (tableAbbr: string, tableSql: SelectOption | SelectGroupOption) => {
   let paramsJson = cloneDeep(paramsModel)
 
   paramsJson.namedJson = JSON.stringify([
@@ -422,7 +423,7 @@ const tempOdsCreate = async (tableAbbr, tableSql) => {
   }).finally(() => createStatus.value.tempOds.isCreating = false)
 }
 
-const odsCreate = async (tableAbbr, tableSql) => {
+const odsCreate = async (tableAbbr: string, tableSql: SelectOption | SelectGroupOption) => {
   let paramsJson = cloneDeep(paramsModel)
 
   paramsJson.namedJson = JSON.stringify([
@@ -474,7 +475,7 @@ const odsCreate = async (tableAbbr, tableSql) => {
   }).finally(() => createStatus.value.ods.isCreating = false)
 }
 
-const rightDwdCreate = async (tableAbbr, tableSql) => {
+const rightDwdCreate = async (tableAbbr: string, tableSql: SelectOption | SelectGroupOption) => {
   let paramsJson = cloneDeep(paramsModel)
 
   paramsJson.namedJson = JSON.stringify([
@@ -525,7 +526,7 @@ const rightDwdCreate = async (tableAbbr, tableSql) => {
     }
   }).finally(() => createStatus.value.rightDwd.isCreating = false)
 }
-const errorDwdCreate = async (tableAbbr, tableSql) => {
+const errorDwdCreate = async (tableAbbr: string, tableSql: SelectOption | SelectGroupOption) => {
   let paramsJson = cloneDeep(paramsModel)
 
   paramsJson.namedJson = JSON.stringify([
@@ -576,7 +577,7 @@ const errorDwdCreate = async (tableAbbr, tableSql) => {
     }
   }).finally(() => createStatus.value.errorDwd.isCreating = false)
 }
-const dwbCreate = async (tableAbbr, tableSql) => {
+const dwbCreate = async (tableAbbr: string, tableSql: SelectOption | SelectGroupOption) => {
   let paramsJson = cloneDeep(paramsModel)
 
   paramsJson.namedJson = JSON.stringify([

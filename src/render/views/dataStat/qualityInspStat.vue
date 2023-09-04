@@ -87,14 +87,12 @@
 
 <script setup lang="ts">
 import {InspectionDataStatType, InspectionRecord} from "@common/types";
-import {get_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_inps_record_page, insp_home_list} from "@render/api/datacenter.api";
 import {create_data_inps_stat} from "@render/api/xlsx.api";
-import {formatDate} from "@render/utils/common/dateUtils";
-import {getMondayOfCurrentWeek} from "@render/utils/common/getFirstDayOfMonth";
+import {formatDate, getMondayOfCurrentWeek} from "@render/utils/common/dateUtils";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
-import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
-import {basicTableNames} from "@render/utils/datacenter/basicTableNames";
+import {actionTableNames, basicTableNames} from "@render/utils/datacenter/constants";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
@@ -130,7 +128,7 @@ const orgSelectOptionsInit = async () => {
 
   orgSelectOptionsRef.value[0].children = (await insp_home_list()).data
       .sort(customSort)
-      .map((v): TreeSelectOption => ({
+      .map((v: { orgName: any; orgId: any; }): TreeSelectOption => ({
         label: v.orgName,
         key: v.orgId
       }))

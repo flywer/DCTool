@@ -1,9 +1,7 @@
-import {
-    find_by_project_id,
-    get_rh_json,
-    get_rh_json_by_id, get_table_sql
-} from "@render/api/auxiliaryDb.api";
+import {get_rh_json, get_rh_json_by_id} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {add_work_flow} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -119,8 +117,8 @@ export const buildRh2Json = async (formModel: RhFormModelType) => {
 }
 
 export const createRhJob = async (formModel: RhFormModelType, isBasicData: boolean, isMultiTableJson: boolean) => {
-    let templateJsonStr
-    let rh2Json
+    let templateJsonStr: string
+    let rh2Json: any
     if (formModel.jobJsonId != undefined) {
         const jobJson = await get_rh_json_by_id(Number(formModel.jobJsonId));
         if (isMultiTableJson) {
@@ -145,7 +143,7 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
         }
     }
 
-    let paramsJson
+    let paramsJson: any
     if (isMultiTableJson) {
         paramsJson = rh2Json
     } else {

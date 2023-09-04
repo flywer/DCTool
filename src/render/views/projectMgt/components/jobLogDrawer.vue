@@ -122,11 +122,14 @@ const showDataXJobLog = async (v: Job) => {
     let time: string
 
     if (log.handleCode == 0) {
-      title = '运行中'
-      type = 'info'
+      title = '未运行'
+      type = 'default'
     } else if (log.handleCode == 200) {
       title = '执行成功'
       type = 'success'
+    } else if (log.handleCode == 201) {
+      title = '运行中'
+      type = 'info'
     } else if (log.handleCode == 500) {
       title = '执行失败'
       type = 'error'
@@ -160,20 +163,26 @@ const getDataXJobLogInfo = (logString: string) => {
   // 任务启动时刻
   const taskStartTime = logString?.match(/taskStartTime=(.*?),/)?.[1] || '--';
   // 任务结束时刻
-  const taskEndTime = logString?.match(/taskEndTime=(.*?),/)?.[1]|| '--';
+  const taskEndTime = logString?.match(/taskEndTime=(.*?),/)?.[1] || '--';
   // 任务总计耗时
-  const taskTotalTime = logString?.match(/taskTotalTime=(.*?),/)?.[1]|| '--';
+  const taskTotalTime = logString?.match(/taskTotalTime=(.*?),/)?.[1] || '--';
   // 任务平均流量
-  const taskAverageFlow = logString?.match(/taskAverageFlow=(.*?),/)?.[1]|| '--';
+  const taskAverageFlow = logString?.match(/taskAverageFlow=(.*?),/)?.[1] || '--';
   // 记录写入速度
-  const taskRecordWritingSpeed = logString?.match(/taskRecordWritingSpeed=(.*?),/)?.[1]|| '--';
+  const taskRecordWritingSpeed = logString?.match(/taskRecordWritingSpeed=(.*?),/)?.[1] || '--';
   // 读出记录总数
-  const taskRecordReaderNum = logString?.match(/taskRecordReaderNum=(.*?),/)?.[1]|| '--';
+  const taskRecordReaderNum = logString?.match(/taskRecordReaderNum=(.*?),/)?.[1] || '--';
   // 读写失败总数
-  const taskRecordWriteFailNum = logString?.match(/taskRecordWriteFailNum=(.*?)}$/)?.[1]|| '--';
+  const taskRecordWriteFailNum = logString?.match(/taskRecordWriteFailNum=(.*?)}$/)?.[1] || '--';
 
   return {
-    taskStartTime, taskEndTime, taskTotalTime, taskAverageFlow, taskRecordWritingSpeed, taskRecordReaderNum, taskRecordWriteFailNum
+    taskStartTime,
+    taskEndTime,
+    taskTotalTime,
+    taskAverageFlow,
+    taskRecordWritingSpeed,
+    taskRecordReaderNum,
+    taskRecordWriteFailNum
   }
 }
 

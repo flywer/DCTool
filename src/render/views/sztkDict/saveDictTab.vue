@@ -30,8 +30,9 @@
 </template>
 
 <script setup lang="ts">
+import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {getCurrentDateTime, getDayString} from "@main/utils/dateUtils";
-import {get_sztk_dict, save_sztk_dict} from "@render/api/auxiliaryDb.api";
+import {get_sztk_dict, save_sztk_dict} from "@render/api/auxiliaryDb/sztkDict.api";
 import {get_dict_by_name, get_dict_list_by_id} from "@render/api/datacenter.api";
 import {isEmpty} from "lodash-es";
 import {SelectGroupOption, SelectOption} from "naive-ui";
@@ -42,38 +43,26 @@ const codeSetIdRef = ref('')
 
 const codeSetOptionsRef = ref<Array<SelectOption | SelectGroupOption>>()
 
-type SztkDictType = {
-  bzId: string
-  dictName: string
-  dictCode: string
-  parentId: string | null
-  orderNum: number
-  addTime: string
-  cdTime: string
-  cdOperation: string
-  cdBatch: string
-}
+const sztkDictArrRef = ref<GdsztkDict[]>([])
 
-const sztkDictArrRef = ref<SztkDictType[]>([])
-
-onMounted(async () => {
+onMounted(() => {
   handleCodeSetSearch('')
 })
 
-const handleCodeSetSearch = async (v) => {
+const handleCodeSetSearch = async (v: string) => {
   const records = (await get_dict_by_name({
     codeSetName: v,
     page: 1,
     size: 100
   })).data.records
 
-  codeSetOptionsRef.value = records.map((v) => ({
+  codeSetOptionsRef.value = records.map((v: { codeSetName: any; codeSetCode: any; id: { toString: () => any; }; }) => ({
     label: `${v.codeSetName}-${v.codeSetCode}`,
     value: v.id.toString()
   }))
 }
 
-const handleCodeSetUpdate = (v) => {
+const handleCodeSetUpdate = (v: string) => {
   if (v != null) {
     get_dict_list_by_id(v).then(async res => {
       if (res.code == 200) {
@@ -94,10 +83,11 @@ const handleCodeSetUpdate = (v) => {
           addTime: addTime,
           cdTime: cdTime,
           cdOperation: 'I',
-          cdBatch: cdBatch
+          cdBatch: cdBatch,
+          id: null
         })
 
-        res.data.forEach((v, index) => {
+        res.data.forEach((v: { name: any; code: any; }, index: number) => {
           sztkDictArrRef.value.push({
             bzId: uuid.v4(),
             dictName: v.name,
@@ -107,7 +97,8 @@ const handleCodeSetUpdate = (v) => {
             addTime: addTime,
             cdTime: cdTime,
             cdOperation: 'I',
-            cdBatch: cdBatch
+            cdBatch: cdBatch,
+            id: null
           })
         })
         const firstItem = sztkDictArrRef.value[0]; // 保存第一个元素

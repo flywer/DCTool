@@ -133,8 +133,8 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {add_work_flow} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {buildBfJson} from "@render/utils/datacenter/bfJob";
@@ -243,7 +243,7 @@ const addWorkFlow = async () => {
   }
 }
 
-const addWorkflow2 = (paramsModel) => {
+const addWorkflow2 = (paramsModel: any) => {
   add_work_flow(paramsModel).then((res) => {
     if (res.code == 200) {
       window.$message.success('备份任务创建成功')

@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import {app_relaunch} from "@render/api/app.api";
-import {get_auth_token, update_auth_token} from "@render/api/auxiliaryDb.api";
+import {get_token_by_account, update_token_by_account} from "@render/api/auxiliaryDb/user.api";
 import {useUserStore} from "@render/stores/user";
 import {nextTick, onMounted, ref} from "vue";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
@@ -44,7 +44,7 @@ const authTokenValueRef = ref('')
 const authTokenIsUpdating = ref(false)
 
 onMounted(() => {
-  get_auth_token(user.account).then((res) => {
+  get_token_by_account(user.account).then((res) => {
     authTokenRef.value = res.dcToken
   })
 })
@@ -60,7 +60,7 @@ const handleClickOnAuthToken = () => {
 const handleUpdateAuthToken = () => {
   authTokenRef.value = authTokenValueRef.value
   authTokenIsUpdating.value = true
-  update_auth_token(authTokenRef.value, user.account).then(() => {
+  update_token_by_account(authTokenRef.value, user.account).then(() => {
     authTokenIsEdit.value = false
     window.$dialog.success({
       title: '更新成功',

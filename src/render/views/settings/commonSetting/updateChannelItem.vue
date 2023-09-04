@@ -34,7 +34,7 @@ const options = ref([
   }
 ])
 
-const handleUpdateValue = (v) => {
+const handleUpdateValue = (v: any) => {
   const updateChannelBackUp = appSettings.setup.updateChannel
   appSettings.setup.updateChannel = v
 

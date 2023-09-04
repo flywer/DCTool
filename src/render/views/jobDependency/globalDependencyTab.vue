@@ -321,7 +321,6 @@ const queryParam = ref<string>(null)
 const nodesOptionsRef = ref<Array<SelectOption | SelectGroupOption>>()
 
 const nodesOptionsUpdate = (v: string) => {
-  console.log(v)
   const nodes = graph.findAll("node", (node) => (node.getModel().jobName as string).includes(v))
 
   nodesOptionsRef.value = nodes.map((item) => ({

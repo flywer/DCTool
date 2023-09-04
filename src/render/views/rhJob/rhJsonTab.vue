@@ -7,17 +7,11 @@
         clearable
     >
       <template #prefix>
-        <n-icon :component="Search"/>
+        <n-icon>
+          <Search/>
+        </n-icon>
       </template>
     </n-input>
-    <!--    <n-button secondary strong @click="add">
-          新增
-          <template #icon>
-            <n-icon>
-              <Add/>
-            </n-icon>
-          </template>
-        </n-button>-->
     <n-button secondary strong @click="tableDataInit">
       刷新
       <template #icon>
@@ -64,10 +58,10 @@
               @keydown.enter.prevent
           />
         </n-form-item-gi>
-        <n-form-item-gi :span="12" label="任务JSON" path="json">
+        <n-form-item-gi :span="12" label="任务JSON" path="rh1Json">
           <n-input
               class="mt-2"
-              v-model:value="modalFormModel.json"
+              v-model:value="modalFormModel.rh1Json"
               type="textarea"
               placeholder=""
               :autosize="{ minRows: 7, maxRows: 14 }"
@@ -84,11 +78,14 @@
 </template>
 
 <script setup lang="ts">
+import {JobJson} from "@main/entity/JobJson";
+import {get_rh_json, update_rh1_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {copyText} from "@render/utils/common/clipboard";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Refresh, Search} from '@vicons/ionicons5'
-import {get_rh_json, update_rh1_json, update_rh2_json} from "@render/api/auxiliaryDb.api";
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
@@ -116,12 +113,11 @@ const createColumns = (): DataTableColumns<RhJson> => {
       width: '25%',
       ellipsis: true
     },
-    /* {
-      title: '多表融合JSON',
-      key: 'rh2Json',
-      width: '25%',
-      ellipsis: true
-    }, */
+    {
+      title: '变更时间',
+      key: 'updateTime',
+      width: '10%'
+    },
     {
       title: '操作',
       key: 'actions',
@@ -131,36 +127,30 @@ const createColumns = (): DataTableColumns<RhJson> => {
         return h(NSpace, {
               justify: 'center'
             },
-            [h(
+            [
+              h(
+                  NButton,
+                  {
+                    size: 'small',
+                    onClick: () => {
+                      showModalRef.value = true
+                      modalTitle = `${row.tableName}`
+                      modalFormModel.value.tableName = row.tableName
+                      modalFormModel.value.rh1Json = row.rh1Json
+                      modalFormModel.value.id = row.id
+                    }
+                  },
+                  {default: () => '编辑'}
+              ), h(
                 NButton,
                 {
                   size: 'small',
                   onClick: () => {
-                    showModalRef.value = true
-                    modalTitle = `${row.tableName}`
-                    modalFormModel.value.tableName = row.tableName
-                    modalFormModel.value.json = row.rh1Json
-                    modalFormModel.value.id = row.id
-                    modalFormModel.value.type = 1
+                    copyText(row.rh1Json)
                   }
                 },
-                {default: () => '查看单表融合JSON'}
-            ),
-              /*               h(
-                                NButton,
-                                {
-                                  size: 'small',
-                                  onClick: () => {
-                                    showModalRef.value = true
-                                    modalTitle = `${row.tableName}`
-                                    modalFormModel.value.tableName = row.tableName
-                                    modalFormModel.value.json = row.rh2Json
-                                    modalFormModel.value.id = row.id
-                                    modalFormModel.value.type = 2
-                                  }
-                                },
-                                {default: () => '查看多表融合JSON'}
-                            ) */
+                {default: () => '复制JSON'}
+            )
             ])
 
       }
@@ -194,12 +184,10 @@ let modalTitle = '';
 
 const modalFormRef = ref<FormInst | null>(null);
 
-const modalFormModel = ref({
+const modalFormModel = ref<Partial<JobJson>>({
   id: null,
   tableName: '',
-  json: '',
-  // 1为单表 2为多表
-  type: 1 | 2
+  rh1Json: ''
 })
 
 const modalFormRules = {
@@ -213,7 +201,7 @@ const modalFormRules = {
     trigger: ['input'],
     message: '请输入注释'
   },
-  json: {
+  rh1Json: {
     required: true,
     trigger: ['input'],
     message: '请输入任务JSON'
@@ -232,7 +220,7 @@ const tableDataInit = () => {
           id: v.id,
           tableName: v.tableName,
           rh1Json: v.rh1Json,
-          // rh2Json: v.rh2Json
+          updateTime: v.rh1UpdateTime == null ? '--' : formatDate(v.rh1UpdateTime)
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -247,7 +235,7 @@ const onPositiveClick = () => {
 
   modalFormRef.value?.validate((errors) => {
     if (!errors) {
-      let jobJson = JSON.parse(modalFormModel.value.json)
+      let jobJson = JSON.parse(modalFormModel.value.rh1Json)
       jobJson.name = ''
       jobJson.email = ''
       jobJson.description = ''
@@ -287,23 +275,15 @@ const onPositiveClick = () => {
         jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable = splitArray.join('_');
       }
 
-      modalFormModel.value.json = JSON.stringify(jobJson, null, 2)
+      modalFormModel.value.rh1Json = JSON.stringify(jobJson, null, 2)
 
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
 
-      if (modalFormModel.value.type == 1) {
-        update_rh1_json(modalFormModel.value).then(() => {
-          window.$message.success('保存成功')
-          tableDataInit()
-          showModalRef.value = false;
-        })
-      } else {
-        update_rh2_json(modalFormModel.value).then(() => {
-          window.$message.success('保存成功')
-          tableDataInit()
-          showModalRef.value = false;
-        })
-      }
+      update_rh1_json(modalFormModel.value).then(() => {
+        window.$message.success('保存成功')
+        tableDataInit()
+        showModalRef.value = false;
+      })
 
     } else {
       console.error(errors)
@@ -314,27 +294,14 @@ const onPositiveClick = () => {
 
 }
 
-/* const add = () => {
-
-  modalTitle = '新增';
-
-  modalFormModel.value = {
-    id: null,
-    tableName: '',
-    json: ''
-  }
-
-  showModalRef.value = true
-} */
-
-const search = (v) => {
+const search = (v: string) => {
   get_rh_json(v).then((res) => {
     tableDataRef.value = res.map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
           rh1Json: v.rh1Json,
-          rh2Json: v.rh2Json
+          updateTime: v.rh1UpdateTime == null ? '--' : formatDate(v.rh1UpdateTime)
         })))
   })
 }

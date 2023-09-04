@@ -8,16 +8,10 @@
 </template>
 
 <script setup lang="ts">
+import {CommonJsonDataType} from "@common/types";
 import {zjRulesList} from "@render/utils/datacenter/zjRulesList";
 import {DataTableColumns, NButton, NSelect, NThing} from "naive-ui";
 import {h, ref, onMounted, reactive} from 'vue'
-
-type ZjJob = {
-  id: number
-  tableName: string
-  json: string
-  updateTime: string
-}
 
 type Rule = {
 
@@ -38,7 +32,7 @@ type Rule = {
 
 const props = defineProps({
   job: {
-    type: Object as () => ZjJob,
+    type: Object as () => CommonJsonDataType,
     default: null
   }
 })
@@ -49,7 +43,7 @@ const fieldOptions = ref([])
 
 onMounted(() => {
   fieldOptions.value = rulesList.value.map((v => ({
-    label: v.field.split('.')[1]==undefined?v.field:v.field.split('.')[1],
+    label: v.field.split('.')[1] == undefined ? v.field : v.field.split('.')[1],
     value: v.field
   })))
 })

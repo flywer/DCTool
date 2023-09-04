@@ -50,7 +50,8 @@
 
 <script setup lang="ts">
 import {WorkflowType} from "@common/types";
-import {find_by_project_id, get_table_sql} from "@render/api/auxiliaryDb.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_workflow_list_by_project_id} from "@render/api/datacenter.api";
 import {
   getWorkflowJobStatus,

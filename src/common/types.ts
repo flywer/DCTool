@@ -41,6 +41,13 @@ export type InspectionDataStatType = {
     inspectionTime: string
 }
 
+export type CommonJsonDataType = {
+    id: number,
+    tableName: string,
+    json: string,
+    updateTime?: string
+}
+
 // region 辅助库类型
 // 项目类型
 export type ProjectInfo = {
@@ -347,7 +354,9 @@ export type  DataDevBizVoType = {
             aimTableName: string;
             principalDtoList: [];
             qualityInspectionFieldList: any[];
-            taskInfoDto: { taskDefKey: string }
+            taskInfoDto: {
+                taskDefKey: string
+            }
         }
     ],
     sparkSqlDtoList: [

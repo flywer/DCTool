@@ -139,8 +139,8 @@
 </template>
 
 <script lang="ts" setup>
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {add_datax_job, add_sched_task} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {buildGxJson} from "@render/utils/datacenter/gxJob";
@@ -268,7 +268,7 @@ const addSchedTaskCheck = ref(false)
 
 const showModalRef = ref(false)
 
-const onAddSchedTaskCheckUpdate = (v) => {
+const onAddSchedTaskCheckUpdate = (v: any) => {
   if (v) {
     showModalRef.value = true
   }
@@ -365,7 +365,7 @@ const createDataXJob = async () => {
   }
 }
 
-const addDataxJob = (paramsModel) => {
+const addDataxJob = (paramsModel: any) => {
   add_datax_job(paramsModel).then(async (res) => {
     if (res.code == 0 || (submitCount > 0 && res.msg == '任务名称不能相同')) {
       submitCount++;

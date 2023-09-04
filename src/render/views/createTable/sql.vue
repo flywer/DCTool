@@ -9,7 +9,9 @@
         @keydown.enter="search"
     >
       <template #prefix>
-        <n-icon :component="Search"/>
+        <n-icon>
+          <Search/>
+        </n-icon>
       </template>
     </n-input>
     <n-button secondary strong @click="add">
@@ -90,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb.api";
+import {get_table_sql, update_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {DataTableColumns, NButton, FormInst} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 import {Refresh, Add, Search} from '@vicons/ionicons5'
@@ -247,7 +249,7 @@ const add = () => {
   showModalRef.value = true
 }
 
-const search = (v) => {
+const search = (v: any) => {
   let param = ''
   if (v == undefined) {
     param = ''

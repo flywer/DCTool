@@ -43,7 +43,7 @@ const options = ref([
   },
 ])
 
-const handleUpdateValue = (v) => {
+const handleUpdateValue = (v: any) => {
   const appSettingsBackUp = appSettings.setup
   appSettings.setup.themeAccentColor = v
 

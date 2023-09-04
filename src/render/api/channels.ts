@@ -81,50 +81,55 @@ export const channels = reactive({
         updateSchedJob: 'datacenter/updateSchedJob',
     },
     auxiliaryDb: {
-        getProjectInfo: 'auxiliaryDb/getProjectInfo',
-        getProjectInfoByProjectName: 'auxiliaryDb/getProjectInfoByProjectName',
-        updateProjectInfo: 'auxiliaryDb/updateProjectInfo',
-        findByProjectId: 'auxiliaryDb/findByProjectId',
-        getProjectByProAbbr: 'auxiliaryDb/getProjectByProAbbr',
-        getProjectByTableAbbr: 'auxiliaryDb/getProjectByTableAbbr',
-        getProjectByProjectName: 'auxiliaryDb/getProjectByProjectName',
+        projectInfo: {
+            getProjectInfo: 'auxiliaryDb/projectInfo/getProjectInfo',
+            getProjectInfoByProjectName: 'auxiliaryDb/projectInfo/getProjectInfoByProjectName',
+            updateProjectInfo: 'auxiliaryDb/projectInfo/updateProjectInfo',
+            findByProjectId: 'auxiliaryDb/projectInfo/findByProjectId',
+            getProjectByProAbbr: 'auxiliaryDb/projectInfo/getProjectByProAbbr',
+            getProjectByTableAbbr: 'auxiliaryDb/projectInfo/getProjectByTableAbbr',
+            getProjectByProjectName: 'auxiliaryDb/projectInfo/getProjectByProjectName',
+            getProjectCjCron: 'auxiliaryDb/projectInfo/getProjectCjCron',
+            getProjectByCjCronIsNull: 'auxiliaryDb/projectInfo/getProjectByCjCronIsNull',
+            updateCjCron: 'auxiliaryDb/projectInfo/updateCjCron'
+        },
+        user: {
+            getAuthTokenByAccount: 'auxiliaryDb/user/getAuthTokenByAccount',
+            updateAuthTokenByAccount: 'auxiliaryDb/user/updateAuthTokenByAccount',
+        },
+        tableSql: {
+            getTableSql: 'auxiliaryDb/tableSql/getTableSql',
+            updateTableSql: 'auxiliaryDb/tableSql/updateTableSql',
+        },
+        jobJson: {
+            getRhJson: 'auxiliaryDb/jobJson/getRhJson',
+            getRhJsonById: 'auxiliaryDb/jobJson/getRhJsonById',
+            updateRh1Json: 'auxiliaryDb/jobJson/updateRh1Json',
+            updateRh2Json: 'auxiliaryDb/jobJson/updateRh2Json',
 
-        getProjectCjCron: 'auxiliaryDb/getProjectCjCron',
-        getProjectByCjCronIsNull: 'auxiliaryDb/getProjectByCjCronIsNull',
-        updateCjCron: 'auxiliaryDb/updateCjCron',
-        getCjCronByProjectId: 'auxiliaryDb/getCjCronByProjectId',
+            getZjJson: 'auxiliaryDb/jobJson/getZjJson',
+            getZjJsonById: 'auxiliaryDb/jobJson/getZjJsonById',
+            updateZjJson: 'auxiliaryDb/jobJson/updateZjJson',
 
-        getAuthTokenByAccount: 'auxiliaryDb/getAuthTokenByAccount',
-        updateAuthTokenByAccount: 'auxiliaryDb/updateAuthTokenByAccount',
-
-        getTableSql: 'auxiliaryDb/getTableSql',
-        updateTableSql: 'auxiliaryDb/updateTableSql',
-
-        getRhJson: 'auxiliaryDb/getRhJson',
-        getRhJsonById: 'auxiliaryDb/getRhJsonById',
-        updateRh1Json: 'auxiliaryDb/updateRh1Json',
-        updateRh2Json: 'auxiliaryDb/updateRh2Json',
-
-        getZjJson: 'auxiliaryDb/getZjJson',
-        getZjJsonById: 'auxiliaryDb/getZjJsonById',
-        updateZjJson: 'auxiliaryDb/updateZjJson',
-
-        getPreDatabaseDepart: 'auxiliaryDb/getPreDatabaseDepart',
-        getPreDatabaseTableInfoJson: 'auxiliaryDb/getPreDatabaseTableInfoJson',
-        updateTableInfoJson: 'auxiliaryDb/updateTableInfoJson',
-
-        getSztkDict: 'auxiliaryDb/getSztkDict',
-        saveSztkDict: 'auxiliaryDb/saveSztkDict',
-        getParentDict: 'auxiliaryDb/getParentDict',
-        getDictByParentId: 'auxiliaryDb/getDictByParentId',
-        getDictByBzId: 'auxiliaryDb/getDictByBzId',
-
-        getSimpZjJson: 'auxiliaryDb/getSimpZjJson',
-        getSimpZjJsonById: 'auxiliaryDb/getSimpZjJsonById',
-        updateSimpZjJson: 'auxiliaryDb/updateSimpZjJson',
-
-        getMaxRunningWorkFlowJobNum: 'auxiliaryDb/getMaxRunningWorkFlowJobNum',
-
+            getSimpZjJson: 'auxiliaryDb/jobJson/getSimpZjJson',
+            getSimpZjJsonById: 'auxiliaryDb/jobJson/getSimpZjJsonById',
+            updateSimpZjJson: 'auxiliaryDb/jobJson/updateSimpZjJson',
+        },
+        preDatabase: {
+            getPreDatabaseDepart: 'auxiliaryDb/preDatabase/getPreDatabaseDepart',
+            getPreDatabaseTableInfoJson: 'auxiliaryDb/preDatabase/getPreDatabaseTableInfoJson',
+            updateTableInfoJson: 'auxiliaryDb/preDatabase/updateTableInfoJson',
+        },
+        sztkDict: {
+            getSztkDict: 'auxiliaryDb/sztkDict/getSztkDict',
+            saveSztkDict: 'auxiliaryDb/sztkDict/saveSztkDict',
+            getParentDict: 'auxiliaryDb/sztkDict/getParentDict',
+            getDictByParentId: 'auxiliaryDb/sztkDict/getDictByParentId',
+            getDictByBzId: 'auxiliaryDb/sztkDict/getDictByBzId',
+        },
+        dict: {
+            getMaxRunningWorkFlowJobNum: 'auxiliaryDb/dict/getMaxRunningWorkFlowJobNum',
+        },
         jobDetail: {
             findAll: 'auxiliaryDb/jobDetail/findAll',
         },

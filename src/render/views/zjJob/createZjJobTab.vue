@@ -89,8 +89,9 @@
 </template>
 
 <script setup lang="ts">
-import {find_by_project_id, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb.api";
+import {get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {add_work_flow} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
@@ -139,8 +140,16 @@ onMounted(() => {
   tableSelectLoading.value = true
   get_zj_json()
       .then((res) => {
-        tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
-            (v => ({
+        tableNameOptions.value = res?.filter((item: {
+          zjJson: any;
+        }) => item.zjJson != null).map(
+            ((v: {
+              tableName: any;
+              id: {
+                toString: () => any;
+              };
+              zjJson: any;
+            }) => ({
               label: `${v.tableName}`,
               value: v.id.toString(),
               json: v.zjJson,
@@ -153,8 +162,16 @@ watch(zjType, (value) => {
   tableSelectLoading.value = true
   if (value == '1') {
     get_zj_json().then((res) => {
-      tableNameOptions.value = res?.filter(item => item.zjJson != null).map(
-          (v => ({
+      tableNameOptions.value = res?.filter((item: {
+        zjJson: any;
+      }) => item.zjJson != null).map(
+          ((v: {
+            tableName: any;
+            id: {
+              toString: () => any;
+            };
+            zjJson: any;
+          }) => ({
             label: `${v.tableName}`,
             value: v.id.toString(),
             json: v.zjJson,
@@ -163,8 +180,16 @@ watch(zjType, (value) => {
     }).finally(() => tableSelectLoading.value = false)
   } else {
     get_simp_zj_json().then((res) => {
-      tableNameOptions.value = res?.filter(item => item.simpZjJson != null).map(
-          (v => ({
+      tableNameOptions.value = res?.filter((item: {
+        simpZjJson: any;
+      }) => item.simpZjJson != null).map(
+          ((v: {
+            tableName: any;
+            id: {
+              toString: () => any;
+            };
+            simpZjJson: any;
+          }) => ({
             label: `${v.tableName}`,
             value: v.id.toString(),
             json: v.simpZjJson,
@@ -231,7 +256,7 @@ const addWorkFlow = async () => {
   }
 }
 
-const addWorkflow2 = (paramsModel) => {
+const addWorkflow2 = (paramsModel: any) => {
   add_work_flow(paramsModel).then((res) => {
     if (res.code == 200) {
       window.$message.success('质检任务创建成功')

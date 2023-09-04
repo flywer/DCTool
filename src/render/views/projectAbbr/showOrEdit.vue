@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import {NInput} from "naive-ui";
-import {nextTick, ref, onMounted, watch} from "vue";
+import {nextTick, ref} from "vue";
 import {CheckmarkSharp} from '@vicons/ionicons5'
 
 const props = defineProps({
@@ -53,10 +53,10 @@ function handleChange() {
   isEdit.value = false
 }
 
-const handleClose = () => {
+/* const handleClose = () => {
   isEdit.value = false
   inputValue.value = props.value.toString()
-}
+} */
 
 const handleBlur = () => {
   isEdit.value = false

@@ -56,18 +56,18 @@
         <n-grid :cols="2" :x-gap="12">
           <n-gi :span="2">
             <n-dynamic-input v-model:value="inputValueRef" class="mb-4" @create="onCreate" show-sort-button>
-              <template #default="{ value }">
+              <template #default="{ value,index}">
                 <div style="display: flex; align-items: center; width: 100%">
-                  <n-input v-model:value="value.tableName" type="text" placeholder="输入表名"
+                  <n-input v-model:value="value['tableName']" type="text" placeholder="输入表名"
                            style="margin-right: 12px"
                   />
-                  <n-input v-model:value="value.tableAbbr" type="text" placeholder="输入表名简称"
+                  <n-input v-model:value="value['tableAbbr']" type="text" placeholder="输入表名简称"
                            style="margin-right: 12px"
                   />
-                  <n-input v-model:value="value.region" type="text" placeholder="输入行政区划字段"
+                  <n-input v-model:value="value['region']" type="text" placeholder="输入行政区划字段"
                            style="margin-right: 12px"
                   />
-                  <n-input v-model:value="value.cdBatch" placeholder="输入批次号字段" type="text"/>
+                  <n-input v-model:value="value['cdBatch']" placeholder="输入批次号字段" type="text"/>
                 </div>
               </template>
             </n-dynamic-input>
@@ -111,9 +111,9 @@
 import {
   get_pre_database_depart,
   get_pre_database_table_info_json,
-  get_table_sql,
   update_table_info_json
-} from "@render/api/auxiliaryDb.api";
+} from "@render/api/auxiliaryDb/preDatabase.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {copyText} from "@render/utils/common/clipboard";
 import {isEmpty} from "lodash-es";
 import {SelectGroupOption, SelectOption, TreeSelectOption} from "naive-ui";
@@ -152,7 +152,7 @@ const inputValueRef = ref<DynamicInputValueType[]>([])
 const sqlRef = ref('')
 
 onMounted(async () => {
-  tableSelectOptionsInit()
+  await tableSelectOptionsInit()
 
   departOptionsRef.value = (await get_pre_database_depart()).sort(customSort).map((v => ({
     label: v.departName,
@@ -175,7 +175,7 @@ const customSort = (a: any, b: any) => {
   }
 };
 
-const handleTabUpdate = async (v) => {
+const handleTabUpdate = async (v: string) => {
   curTabRef.value = v
   if (v === '1') {
     departOptionsRef.value = (await get_pre_database_depart()).sort(customSort).map((v => ({
@@ -350,16 +350,17 @@ const isSaveForm = ref(false)
 
 const formSave = () => {
   isSaveForm.value = true
-  let departName
+  let departName: string
   if (curTabRef.value === '1') {
-    departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value)[0].label
+    departName = departOptionsRef.value.filter(opt => opt.value == departIdRef.value)[0].label as string
   } else {
     departName = departNameRef.value
   }
 
   update_table_info_json({
     departName: departName,
-    tableInfoJson: JSON.stringify(inputValueRef.value)
+    tableInfoJson: JSON.stringify(inputValueRef.value),
+    id: null
   }).then(() => {
     window.$message.success('保存成功')
   }).finally(() => isSaveForm.value = false)

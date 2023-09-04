@@ -1,11 +1,8 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {DataXJobPageType, ProjectInfo, SchedJobType} from "@common/types";
-import {
-    get_max_running_workflow_num,
-    get_simp_zj_json,
-    get_table_sql,
-    get_zj_json
-} from "@render/api/auxiliaryDb.api";
+import {DataXJobLogType, DataXJobPageType, ProjectInfo, SchedJobType} from "@common/types";
+import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
+import {get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
@@ -24,7 +21,7 @@ import {
     workflow_run
 } from "@render/api/datacenter.api";
 import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
-import {actionTableNames} from "@render/utils/datacenter/actionTableNames";
+import {actionTableNames} from "@render/utils/datacenter/constants";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
@@ -847,9 +844,9 @@ export const getDataXJobStatus = async (v: {
     triggerStatus: number;
 }) => {
     if (v.configuration == 0) {
-        return 0
+        return 0 //未配置
     } else {
-        const log = (await get_datax_job_log({
+        const log: DataXJobLogType = (await get_datax_job_log({
             current: 1,
             size: 1,
             blurry: v.jobDesc
@@ -862,9 +859,13 @@ export const getDataXJobStatus = async (v: {
                     return 1
                 }
             } else if (log.handleCode == 500) {
-                return 4
+                return 4 // 异常
             } else if (log.handleCode == 0) {
-                return 3
+                return 4 // 未运行
+            } else if (log.handleCode == 201) {
+                return 3 // 运行中
+            } else {
+                return 5 // 其他
             }
         } else {
             if (schedJob?.triggerStatus == 1) {
@@ -1020,9 +1021,7 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
 
 }
 
-export const setJobStatus = (row: {
-    status: any;
-}) => {
+export const setJobStatus = (row: Job) => {
     switch (row.status) {
         case -1:
             return h(NTag, {

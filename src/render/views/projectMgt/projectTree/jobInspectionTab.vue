@@ -50,8 +50,8 @@
 <script setup lang="ts">
 import {InspectionRecord} from "@common/types";
 import {open_default_browser} from "@render/api/app.api";
-import {find_by_project_id} from "@render/api/auxiliaryDb.api";
 import {get_inps_record_page} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {showButton} from "@render/utils/datacenter/jobTabUtil";

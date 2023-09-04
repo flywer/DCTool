@@ -1,11 +1,11 @@
 import {
-    find_by_project_id,
     get_simp_zj_json,
     get_simp_zj_json_by_id,
     get_zj_json,
     get_zj_json_by_id
-} from "@render/api/auxiliaryDb.api";
+} from "@render/api/auxiliaryDb/jobJson.api";
 import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
@@ -42,7 +42,7 @@ const buildZjJobJson = async (formModel: ZjFormModelType, templateJson: any) => 
  * @param jobType 1：完整版；2：简化版
  **/
 export const createZjJob = async (formModel: ZjFormModelType, jobType: string) => {
-    let templateJsonStr
+    let templateJsonStr: string
 
     if (jobType == '1') {
         if (formModel.jobJsonId != undefined) {
@@ -178,7 +178,7 @@ export const convertCustomSqlTableName = (sql: string, oldTableAbbr: string, new
     let newSql = sql
 
     // 使用正则表达式匹配字符串中的所有表名，并打印结果
-    let match;
+    let match: any
     while ((match = pattern.exec(sql)) !== null) {
         if (!isBasicTable(match[0])) {
             const tableName = match[0].replaceAll(oldTableAbbr, newTableAbbr) //转为通用表名
@@ -283,15 +283,17 @@ const dataLakeQualityInspectionFieldListConvert = (qualityInspectionFieldList: a
 }
 
 const removeRulesByField = (list: any, fields: string[]) => {
-    return list.filter(item => !fields.includes(item.field))
+    return list.filter((item: { field: string; }) => !fields.includes(item.field))
 }
 
 const removeRulesByIds = (list: any, ids: string[]) => {
-    return list.filter(item => !ids.includes(item.ruleList[0].inspectionRuleId))
+    return list.filter((item: {
+        ruleList: { inspectionRuleId: string; }[];
+    }) => !ids.includes(item.ruleList[0].inspectionRuleId))
 }
 
 const removeRulesByCustomSql = (list: any, str: string) => {
-    return list.filter(item => {
+    return list.filter((item: { ruleList: { customSql: string | string[]; }[]; }) => {
         if (item.ruleList[0].customSql != undefined) {
             return !item.ruleList[0].customSql.includes(str)
         } else {
