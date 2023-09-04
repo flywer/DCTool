@@ -100,6 +100,7 @@ export class LoginController {
     private async buildMainWindow(width: number, height: number) {
         this.mainWindow.resizable = true
         this.mainWindow.setSize(width, height, true)
+        this.mainWindow.setMinimumSize(545, 315)
     }
 
     @IpcSend(channels.login.sendCanLogin, MAIN_WINDOW)
@@ -218,7 +219,7 @@ export class LoginController {
         let result: any
 
         const filePath = join(getAppDataPath(), 'config', 'user.json')
-        const buffer =  readFsSync(filePath)
+        const buffer = readFsSync(filePath)
         if (buffer == null || isEmpty(buffer.toString())) {
             result = null
         } else {
