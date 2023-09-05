@@ -646,17 +646,21 @@ export const workflowStart = (v: Job, onSuccess: {
 }
 
 export const workflowReRun = (v: Job, onSuccess: () => void) => {
-    workflow_rerun(v.id, 1).then(res => {
-        if (res.code == 200) {
-            window.$message.success(res.message)
-            onSuccess()
-        } else {
-            window.$message.error(res.message)
+    checkRunningNum().then(isPass => {
+        if (isPass) {
+            workflow_rerun(v.id, 1).then(res => {
+                if (res.code == 200) {
+                    window.$message.success(res.message)
+                    onSuccess()
+                } else {
+                    window.$message.error(res.message)
+                }
+            }).then(() => {
+                create_cron_job(v.jobName).catch(error => {
+                    window.$message.error(error)
+                })
+            })
         }
-    }).then(() => {
-        create_cron_job(v.jobName).catch(error => {
-            window.$message.error(error)
-        })
     })
 }
 
