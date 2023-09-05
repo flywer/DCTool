@@ -347,7 +347,7 @@ const createColumns = (): DataTableColumns<Job> => {
 
         let children: VNode[] = renderWorkflowActionButton(row, tableDataInit)
 
-        if (children.length == 3) {
+        if (children.length >= 2) {
           // '更多'按钮的子组件
           let moreBtnPopoverChildren: VNode[] = []
 
