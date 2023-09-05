@@ -164,6 +164,8 @@ const tableDataInit = async () => {
 
     if (!isEmpty(records)) {
       tableDataRef.value = customSort(records);
+    } else {
+      tableDataRef.value = []
     }
   }
 
@@ -312,10 +314,12 @@ const tablePreview = (row: { id?: string; tableName: any; tableComment?: string;
             )
         )
 
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | { [s: string]: unknown; }) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | {
+              [s: string]: unknown;
+            }) =>
+                Object.values(item).map(
+                    (value) => (value === null ? 'null' : value.toString())
+                )
         ));
       }
     } else {
