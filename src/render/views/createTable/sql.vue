@@ -5,8 +5,10 @@
   <n-space justify="end" class="mt-2">
     <n-input
         placeholder="搜索"
-        @update:value="search"
-        @keydown.enter="search"
+        v-model:value="searchValue"
+        @update:value="tableDataInit"
+        @keydown.enter="tableDataInit"
+        clearable
     >
       <template #prefix>
         <n-icon>
@@ -86,7 +88,7 @@
     </n-form>
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
-      <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
+      <n-button :size="'small'" @click=" showModalRef = false">返回</n-button>
     </template>
   </n-modal>
 </template>
@@ -103,6 +105,8 @@ type TableSql = {
   comment: string
   sql: string
 }
+
+const searchValue = ref('')
 
 const tableDataRef = ref([])
 
@@ -143,9 +147,13 @@ onMounted(() => {
   tableDataInit()
 })
 
-const tableDataInit = () => {
+const tableDataInit = (searchValue?: string) => {
   isLoading.value = true
-  get_table_sql().then((res) => {
+  get_table_sql({
+    tableName: searchValue || '',
+    comment: searchValue || '',
+    sql: searchValue || ''
+  }).then((res) => {
     tableDataRef.value = res
   }).finally(() => isLoading.value = false)
 }
@@ -203,16 +211,14 @@ const paginationReactive = reactive({
   pageSizes: [9, 20, 50],
   onChange: async (page: number) => {
     paginationReactive.page = page
+    tableDataInit(searchValue.value)
   },
   onUpdatePageSize: (pageSize: number) => {
     paginationReactive.pageSize = pageSize
     paginationReactive.page = 1
+    tableDataInit(searchValue.value)
   }
 })
-
-const onNegativeClick = () => {
-  showModalRef.value = false
-}
 
 const isSaving = ref(false)
 const onPositiveClick = () => {
@@ -223,7 +229,7 @@ const onPositiveClick = () => {
       modalFormModel.value.tableName = modalFormModel.value.tableName.toUpperCase()
       update_table_sql(modalFormModel.value).then(() => {
         window.$message.success('保存成功')
-        tableDataInit()
+        tableDataInit(searchValue.value)
         showModalRef.value = false;
       })
     } else {
@@ -232,43 +238,18 @@ const onPositiveClick = () => {
   }).finally(() => {
     isSaving.value = false
   })
-
 }
 
 const add = () => {
-
   modalTitle = '新增';
-
   modalFormModel.value = {
     id: null,
     tableName: '',
     comment: '',
     sql: ''
   }
-
   showModalRef.value = true
 }
-
-const search = (v: any) => {
-  let param = ''
-  if (v == undefined) {
-    param = ''
-  }
-  if (typeof v == "string") {
-    param = v
-  }
-  if (typeof v == "object") {
-    param = v.target.value
-  }
-  get_table_sql({
-    tableName: param,
-    comment: param,
-    sql: param
-  }).then((res) => {
-    tableDataRef.value = res
-  })
-}
-
 </script>
 
 <style scoped>
