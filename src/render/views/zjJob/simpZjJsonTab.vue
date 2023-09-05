@@ -39,7 +39,7 @@ const tableDataInit = (v?: string) => {
 
 const isSaving = ref(false)
 
-const handleSave = (model: CommonJsonDataType) => {
+const handleSave = (model: CommonJsonDataType, searchValue: string) => {
   model.json = convertZjJson(model.json, model.tableName)
   model.tableName = model.tableName.toUpperCase()
 
@@ -55,7 +55,7 @@ const handleSave = (model: CommonJsonDataType) => {
     simpZjJson
   }).then(() => {
     window.$message.success('保存成功')
-    tableDataInit('')
+    tableDataInit(searchValue)
   })
 }
 

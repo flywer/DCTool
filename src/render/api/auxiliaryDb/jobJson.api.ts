@@ -49,8 +49,8 @@ export const get_simp_zj_json_by_id = async (id: number): Promise<JobJson> => {
     return data
 }
 
-export const update_simp_zj_json = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.jobJson.updateSimpZjJson, JSON.stringify(obj)))
+export const update_simp_zj_json = async (obj: Partial<JobJson>) => {
+    const {data} = (await ipcInstance.send(channels.auxiliaryDb.jobJson.updateSimpZjJson, obj))
     return data
 }
 

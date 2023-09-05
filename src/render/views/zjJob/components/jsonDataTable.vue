@@ -257,7 +257,7 @@ const onPositiveClick = () => {
   modalFormRef.value?.validate((errors) => {
     isSaving.value = true
     if (!errors) {
-      emit('save', modalFormModel.value)
+      emit('save', modalFormModel.value, searchValueRef.value)
       showModalRef.value = false;
     } else {
       console.error(errors)

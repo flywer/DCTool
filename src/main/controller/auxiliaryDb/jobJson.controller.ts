@@ -147,16 +147,13 @@ export class JobJsonController {
     }
 
     @IpcHandle(channels.auxiliaryDb.jobJson.updateSimpZjJson)
-    public async handleUpdateSimpZjJson(obj: any) {
-        obj = JSON.parse(obj)
-        obj.simpZjUpdateTime = new Date()
-
+    public async handleUpdateSimpZjJson(obj: Partial<JobJson>) {
         if (obj.id === null) {
             return await AppDataSource.getRepository(JobJson).createQueryBuilder()
                 .insert()
                 .into(JobJson)
                 .values([{
-                    simpZjJson: obj.json,
+                    simpZjJson: obj.simpZjJson,
                     tableName: obj.tableName,
                     simpZjUpdateTime: obj.simpZjUpdateTime
                 }])
@@ -165,7 +162,7 @@ export class JobJsonController {
             return await AppDataSource.getRepository(JobJson).createQueryBuilder()
                 .update(JobJson)
                 .set({
-                    simpZjJson: obj.json,
+                    simpZjJson: obj.simpZjJson,
                     tableName: obj.tableName,
                     simpZjUpdateTime: obj.simpZjUpdateTime
                 })
