@@ -57,6 +57,7 @@
             block-line
             :data="useProjectTreeStore().treeNodes"
             expand-on-click
+            :cancelable="false"
             selectable
             :pattern="pattern"
             :show-irrelevant-nodes="!filterNode"
