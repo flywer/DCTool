@@ -1,6 +1,9 @@
 import {InspectionDataStatType} from "@common/types";
+import {FilePathType} from "@main/enum/filePathEnum";
 import {getDayString} from "@main/utils/dateUtils";
+import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {Controller, IpcHandle} from "einf";
 import {dialog} from "electron";
 import * as ExcelJS from 'exceljs';
@@ -52,6 +55,76 @@ export class XlsxController {
         })
 
     }
+
+    @IpcHandle(channels.xlsx.generateInsertStatements)
+    public async handleGenerateInsertStatements(tableName: string) {
+        return new Promise<any>(async (resolve) => {
+            dialog.showOpenDialog({
+                title: '选择待提取的文件',
+                properties: ['openFile'],
+                buttonLabel: '提取',
+                filters: [
+                    {
+                        name: 'Excel',
+                        extensions: ['xlsx', 'xls']
+                    }
+                ]
+            })
+                .then(result => {
+                    if (!result.canceled) {
+                        checkPath(result.filePaths[0]).then(async type => {
+                            if (type == FilePathType.file) {
+                                const workbook = new ExcelJS.Workbook();
+                                await workbook.xlsx.readFile(result.filePaths[0]);
+
+                                workbook.eachSheet(function (worksheet) {
+
+                                    worksheet.getCell('A1').value
+
+                                    const columns = (worksheet.getRow(1).values as any[]).slice(1).map(value => {
+                                        if (typeof value === 'string' || typeof value === 'number') {
+                                            return value;
+                                        } else {
+                                            return value.richText[0].text
+                                        }
+                                    });
+
+                                    let insertStatements = '';
+
+                                    worksheet.eachRow((row, rowNumber) => {
+                                        if (rowNumber > 1) {
+                                            const values = (row.values as any[]).slice(1)
+                                            for (let index = 0; index < values.length; index++) {
+                                                if (typeof values[index] === 'undefined') {
+                                                    values[index] = null;
+                                                }
+                                            }
+                                            const insertValues = values.map((value, index) => {
+                                                if (typeof value === 'string') {
+                                                    return `'${value}'`;
+                                                } else if (value instanceof Date) {
+                                                    return `'${formatDate(value)}'`;
+                                                } else if (value == undefined) {
+                                                    return `null`;
+                                                } else {
+                                                    return `${value.toString()}`;
+                                                }
+                                            }).join(', ');
+
+                                            const insertQuery = `INSERT INTO ${tableName || 'table'} (${(columns as []).join(', ')}) VALUES (${insertValues});\n`;
+                                            insertStatements += insertQuery;
+                                        }
+                                    });
+
+                                    resolve(insertStatements);
+                                });
+                            }
+                        })
+                    }
+                })
+        })
+    }
+
 }
 
 const createExcelData = (data: InspectionDataStatType[]): InspectionDataStatType[][] => {

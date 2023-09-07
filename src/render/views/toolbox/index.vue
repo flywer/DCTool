@@ -10,12 +10,16 @@
       <n-tab-pane name="3" tab="JSON类型提取">
         <get-type-from-json-tab/>
       </n-tab-pane>
+      <n-tab-pane name="4" tab="Execel提取">
+        <convert-excel-data-tab/>
+      </n-tab-pane>
     </n-tabs>
 
   </n-layout>
 </template>
 
 <script setup lang="ts">
+import ConvertExcelDataTab from "@render/views/toolbox/convertExcelDataTab.vue";
 import FlattenTextTab from "@render/views/toolbox/flattenTextTab.vue";
 import GetTypeFromJsonTab from "@render/views/toolbox/getTypeFromJsonTab.vue";
 import LdDecryptTab from "@render/views/toolbox/ldDecryptTab.vue";
