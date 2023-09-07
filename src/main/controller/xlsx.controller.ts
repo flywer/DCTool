@@ -99,7 +99,7 @@ export class XlsxController {
                                                     values[index] = null;
                                                 }
                                             }
-                                            const insertValues = values.map((value, index) => {
+                                            const insertValues = values.map((value) => {
                                                 if (typeof value === 'string') {
                                                     return `'${value}'`;
                                                 } else if (value instanceof Date) {
