@@ -32,3 +32,8 @@ export const task_run = async (task: Task): Promise<Result> => {
     const {data} = await ipcInstance.send(channels.taskScheduler.taskRun, JSON.stringify(task))
     return data
 }
+
+export const task_interrupt = async (task: Task): Promise<Result> => {
+    const {data} = await ipcInstance.send(channels.taskScheduler.taskInterrupt, JSON.stringify(task))
+    return data
+}

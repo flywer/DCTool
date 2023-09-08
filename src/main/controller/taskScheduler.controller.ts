@@ -83,6 +83,7 @@ export class TaskSchedulerController {
                 cronJob: this.getCronJobInstance(task)
             })
         } else {
+            schedulerTaskCronJob.cronJob.stop()
             this.schedulerTaskCronJobs.splice(index, 1, {
                 id: task.id,
                 cronJob: this.getCronJobInstance(task)
@@ -93,7 +94,6 @@ export class TaskSchedulerController {
             } else {
                 this.handleCronJobStop(task)
             }
-
         }
     }
 
@@ -148,187 +148,9 @@ export class TaskSchedulerController {
      **/
     public runDependencySchedulingTask(task: TaskAlias) {
 
-        type JobExecResult = {
-            success: boolean,
-            msg: string
-        }
-
-        async function runJob(job: DCJob): Promise<JobExecResult> {
-            const datacenter = new DatacenterController()
-            if (job.jobType == 'dataX') {
-
-                const dataxJob = (await datacenter.handleGetSchedJobPage({
-                    current: 1,
-                    size: 1,
-                    jobContent: job.name
-                })).data?.records[0] || null
-
-                // 任务需存在
-                if (dataxJob != null) {
-                    if (dataxJob.handleCode == 201) {
-                        // 已经开始运行 则跳过
-                        return {
-                            success: true,
-                            msg: "任务已开始运行"
-                        }
-                    }
-
-                    // 运行任务
-                    await datacenter.handleRunDataxJobByJobContent(job.name)
-
-                    return new Promise((resolve) => {
-
-                        const interval = setInterval(async () => {
-                            const log: DataXJobLogType = (await datacenter.handleGetDataXJobLog({
-                                current: 1,
-                                size: 1,
-                                jobContent: job.name
-                            })).data?.records[0] || null
-
-                            if (log != null) {
-                                if (log.handleCode == 201) { //运行中
-                                    // 继续执行
-                                    console.log(`任务${job.name}运行中`)
-                                } else if (log.handleCode == 500) { // 异常
-                                    clearInterval(interval); // 停止循环
-                                    resolve({
-                                        success: false,
-                                        msg: "任务执行异常"
-                                    })
-                                } else if (log.handleCode == 200) {
-                                    clearInterval(interval); // 停止循环
-                                    resolve({
-                                        success: true,
-                                        msg: "任务执行成功"
-                                    });
-                                } else {
-                                    clearInterval(interval); // 停止循环
-                                    resolve({
-                                        success: false,
-                                        msg: "任务执行失败"
-                                    });
-                                }
-                            } else {
-                                clearInterval(interval); // 停止循环
-                                resolve({
-                                    success: false,
-                                    msg: "任务未正常运行"
-                                });
-                            }
-                        }, 1000);
-                    });
-
-                } else {
-                    console.log("任务不存在")
-                    return {
-                        success: false,
-                        msg: "任务不存在"
-                    }
-                }
-
-            } else {
-
-                const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
-
-                //任务需存在，且需处于启动状态
-                if (workflow != null) {
-                    if (workflow.status == '1') {
-                        // 运行任务
-                        await datacenter.handleWorkflowRun({
-                            businessKey: uuid.v4(),
-                            code: workflow.procCode,
-                            createBy: workflow.createBy,
-                            creator: workflow.createBy
-                        })
-                    } else if (workflow.status == '2') {
-                        // 停用的 则先启用
-                        await datacenter.handleWorkflowActive({id: workflow.id, type: '01'})
-
-                        // 运行任务
-                        await datacenter.handleWorkflowRun({
-                            businessKey: uuid.v4(),
-                            code: workflow.procCode,
-                            createBy: workflow.createBy,
-                            creator: workflow.createBy
-                        })
-
-                    } else if (workflow.status == '3' || workflow.status == '5') {
-                        // 异常或未反馈 则重跑
-                        await datacenter.handleWorkflowRerun(workflow.id, 1)
-                    } else if (workflow.status == '4') {
-                        // 已经开始运行 则跳过
-                        return {
-                            success: true,
-                            msg: "任务已开始运行"
-                        }
-                    }
-
-                    return new Promise((resolve) => {
-                        const interval = setInterval(async () => {
-
-                            const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
-
-                            if (workflow.status == '4') { //运行中
-                                console.log(`任务${job.name}运行中`)
-                            } else if (workflow.status == '1') {
-                                clearInterval(interval); // 停止循环
-                                resolve({
-                                    success: true,
-                                    msg: "任务执行成功"
-                                });
-                            } else if (workflow.status == '3' || workflow.status == '5') {
-                                clearInterval(interval); // 停止循环
-                                resolve({
-                                    success: false,
-                                    msg: "任务执行异常"
-                                });
-                            } else {
-                                clearInterval(interval); // 停止循环
-                                resolve({
-                                    success: false,
-                                    msg: "任务执行失败"
-                                });
-                            }
-                        }, 1000)
-                    })
-                } else {
-                    return {
-                        success: false,
-                        msg: "任务不存在"
-                    }
-                }
-            }
-
-        }
-
-        async function runJobs(jobList: DCJob[]) {
-
-            for (let i = 0; i < jobList.length; i++) {
-                const job = jobList[i];
-                try {
-                    const jobResult = await runJob(job);
-
-                    task.execLog.push({
-                        time: getCurrentDateTime(),
-                        type: jobResult.success ? '200' : '500',
-                        text: `${job.name}执行结果：${jobResult.msg}`
-                    })
-
-                    if (jobResult.success) {
-                        await runJobs(job.dependentJobs);
-                    }
-
-                } catch (error) {
-                    log.error(error);
-                    return failure('执行失败')
-                }
-            }
-            return success('执行成功')
-        }
-
         log.info(`${task.taskName}任务开始执行`)
         task.lastStartTime = formatDate(new Date())
-        runJobs(task.jobList).then((res) => {
+        this.runJobs(task, task.jobList).then((res) => {
             task.isRunning = false
             task.lastEndTime = formatDate(new Date())
             task.lastExecResult = res.message ? '成功' : '失败'
@@ -350,6 +172,175 @@ export class TaskSchedulerController {
 
         })
 
+    }
+
+    private async runJob(job: DCJob): Promise<{
+        success: boolean,
+        msg: string
+    }> {
+        const datacenter = new DatacenterController()
+        if (job.jobType == 'dataX') {
+
+            const dataxJob = (await datacenter.handleGetSchedJobPage({
+                current: 1,
+                size: 1,
+                jobContent: job.name
+            })).data?.records[0] || null
+
+            // 任务需存在
+            if (dataxJob != null) {
+                if (dataxJob.handleCode != 201) {
+                    // 运行任务
+                    await datacenter.handleRunDataxJobByJobContent(job.name)
+                }
+
+                return new Promise((resolve) => {
+
+                    const interval = setInterval(async () => {
+                        const log: DataXJobLogType = (await datacenter.handleGetDataXJobLog({
+                            current: 1,
+                            size: 1,
+                            jobContent: job.name
+                        })).data?.records[0] || null
+
+                        if (log != null) {
+                            if (log.handleCode == 201) { //运行中
+                                // 继续执行
+                                console.log(`任务${job.name}运行中`)
+                            } else if (log.handleCode == 500) { // 异常
+                                clearInterval(interval); // 停止循环
+                                resolve({
+                                    success: false,
+                                    msg: "任务执行异常"
+                                })
+                            } else if (log.handleCode == 200) {
+                                clearInterval(interval); // 停止循环
+                                resolve({
+                                    success: true,
+                                    msg: "任务执行成功"
+                                });
+                            } else {
+                                clearInterval(interval); // 停止循环
+                                resolve({
+                                    success: false,
+                                    msg: "任务执行失败"
+                                });
+                            }
+                        } else {
+                            clearInterval(interval); // 停止循环
+                            resolve({
+                                success: false,
+                                msg: "任务未正常运行"
+                            });
+                        }
+                    }, 1000);
+                });
+
+            } else {
+                console.log("任务不存在")
+                return {
+                    success: false,
+                    msg: "任务不存在"
+                }
+            }
+
+        } else {
+
+            const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
+
+            //任务需存在，且需处于启动状态
+            if (workflow != null) {
+                if (workflow.status == '1') {
+                    // 运行任务
+                    await datacenter.handleWorkflowRun({
+                        businessKey: uuid.v4(),
+                        code: workflow.procCode,
+                        createBy: workflow.createBy,
+                        creator: workflow.createBy
+                    })
+                } else if (workflow.status == '2') {
+                    // 停用的 则先启用
+                    await datacenter.handleWorkflowActive({id: workflow.id, type: '01'})
+
+                    // 运行任务
+                    await datacenter.handleWorkflowRun({
+                        businessKey: uuid.v4(),
+                        code: workflow.procCode,
+                        createBy: workflow.createBy,
+                        creator: workflow.createBy
+                    })
+
+                } else if (workflow.status == '3' || workflow.status == '5') {
+                    // 异常或未反馈 则重跑
+                    await datacenter.handleWorkflowRerun(workflow.id, 1)
+                } else if (workflow.status == '4') {
+                    // 已经开始运行
+                }
+
+                return new Promise((resolve) => {
+                    const interval = setInterval(async () => {
+
+                        const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
+
+                        if (workflow.status == '4') { //运行中
+                            console.log(`任务${job.name}运行中`)
+                        } else if (workflow.status == '1') {
+                            clearInterval(interval); // 停止循环
+                            resolve({
+                                success: true,
+                                msg: "任务执行成功"
+                            });
+                        } else if (workflow.status == '3' || workflow.status == '5') {
+                            clearInterval(interval); // 停止循环
+                            resolve({
+                                success: false,
+                                msg: "任务执行异常"
+                            });
+                        } else {
+                            clearInterval(interval); // 停止循环
+                            resolve({
+                                success: false,
+                                msg: "任务执行失败"
+                            });
+                        }
+                    }, 1000)
+                })
+            } else {
+                return {
+                    success: false,
+                    msg: "任务不存在"
+                }
+            }
+        }
+
+    }
+
+    private async runJobs(task: TaskAlias, jobList: DCJob[]) {
+
+        for (let i = 0; i < jobList.length; i++) {
+            const job = jobList[i];
+            try {
+                const jobResult = await this.runJob(job);
+
+                task.execLog.push({
+                    time: getCurrentDateTime(),
+                    type: jobResult.success ? '200' : '500',
+                    text: `${job.name}执行结果：${jobResult.msg}`
+                })
+
+                // 若此时本地文件内的任务配置更新
+                const newTask = this.handleGetScheduler().tasks.find(task1 => task1.id == task.id)
+
+                if (jobResult.success && newTask.isEnable) {
+                    await this.runJobs(task, job.dependentJobs);
+                }
+
+            } catch (error) {
+                log.error(error);
+                return failure('执行失败')
+            }
+        }
+        return success('执行成功')
     }
 
     @IpcSend(channels.taskScheduler.sendTaskExecEnd, MAIN_WINDOW)
@@ -476,6 +467,26 @@ export class TaskSchedulerController {
 
         } catch (e) {
             return failure(`执行失败,${e}`)
+        }
+
+    }
+
+    @IpcHandle(channels.taskScheduler.taskInterrupt)
+    public handleTaskInterrupt(taskParam: TaskAlias | string) {
+        try {
+            let task: TaskAlias
+            if (typeof taskParam == 'string') {
+                task = JSON.parse(taskParam) as TaskAlias
+            } else {
+                task = taskParam
+            }
+
+            task.isRunning = false
+            task.isEnable = false
+            this.handleSaveTask(task)
+            return success(`任务中断成功`)
+        } catch (e) {
+            return failure(`任务中断失败,${e}`)
         }
 
     }

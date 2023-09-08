@@ -194,7 +194,15 @@ import {SchedJobType, WorkflowType} from "@common/types";
 import {clipboard_write_text} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
 import {get_sched_job_by_id, get_sched_job_page, get_workflow, get_workflow_page} from "@render/api/datacenter.api";
-import {get_scheduler, get_task, save_task, task_delete, task_enable, task_run} from "@render/api/taskScheduler.api";
+import {
+  get_scheduler,
+  get_task,
+  save_task,
+  task_delete,
+  task_enable,
+  task_interrupt,
+  task_run
+} from "@render/api/taskScheduler.api";
 import {customNode, SchedulerJobNodeConfig, schedulerTaskNode} from "@render/graph/customNodes";
 import {useIpc} from "@render/plugins";
 import {isCronExpressionValid} from "@render/utils/common/cronUtils";
@@ -391,7 +399,14 @@ const taskEnable = (taskId: string, enable: boolean) => {
 
 // 任务中断
 const taskInterrupt = (task: Task) => {
-
+  task_interrupt(task).then(res => {
+    if (res.success) {
+      window.$message.success(res.message)
+      tableDataInit(queryParam.value)
+    } else {
+      window.$message.error(res.message)
+    }
+  })
 }
 
 // 任务强制执行

@@ -170,5 +170,6 @@ export const channels = reactive({
         schedulerTaskCronJobUpdate: 'taskScheduler/schedulerTaskCronJobUpdate',
         taskRun: 'taskScheduler/taskRun',
         sendTaskExecEnd: 'taskScheduler/sendTaskExecEnd',
+        taskInterrupt: 'taskScheduler/taskInterrupt',
     }
 })

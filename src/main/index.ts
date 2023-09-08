@@ -46,10 +46,8 @@ async function electronAppInit() {
     const isDev = !app.isPackaged
 
     app.on('window-all-closed', () => {
+        TaskSchedulerController.getInstance().cronJobsStopAll()
         if (process.platform !== 'darwin') {
-
-            TaskSchedulerController.getInstance().cronJobsStopAll()
-
             app.exit()
             if (tray != null) {
                 tray.destroy()
