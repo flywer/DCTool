@@ -197,7 +197,6 @@ import {get_sched_job_by_id, get_sched_job_page, get_workflow, get_workflow_page
 import {get_scheduler, get_task, save_task, task_delete, task_enable, task_run} from "@render/api/taskScheduler.api";
 import {customNode, SchedulerJobNodeConfig, schedulerTaskNode} from "@render/graph/customNodes";
 import {useIpc} from "@render/plugins";
-import {copyText} from "@render/utils/common/clipboard";
 import {isCronExpressionValid} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {getSchedJob, showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";

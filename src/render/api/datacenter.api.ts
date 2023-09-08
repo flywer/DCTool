@@ -1,4 +1,4 @@
-import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo, WorkflowType} from "@common/types";
+import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 

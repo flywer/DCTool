@@ -22,12 +22,5 @@ defineProps({
 </script>
 
 <style scoped>
-.card {
-  border: 2px solid #7979b7;
-  margin: 0 auto;
-  display: flex;
-  padding: 4px 0 0 4px;
-  flex-wrap: wrap;
-  align-items: center;
-}
+
 </style>

@@ -1,5 +1,3 @@
-import {GraphData} from "@antv/g6-core/lib/types";
-
 export interface Scheduler {
     tasks: Task[];
     monitoringFrequency: number
