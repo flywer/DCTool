@@ -6,7 +6,7 @@ import {failure, Result, success} from "@main/vo/resultVo";
 import {MAIN_WINDOW} from "@main/window/constants";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle, IpcSend} from 'einf'
-import {app, shell} from "electron";
+import {app, shell, clipboard} from "electron";
 import log from "electron-log";
 import {autoUpdater} from "electron-updater";
 import {isEmpty} from "lodash";
@@ -120,5 +120,10 @@ export class AppController {
     @IpcHandle(channels.app.quitAndInstall)
     public handleQuitAndInstall() {
         autoUpdater.quitAndInstall();
+    }
+
+    @IpcHandle(channels.app.clipboard.writeText)
+    public handleClipboardWriteText(text: string) {
+        clipboard.writeText(text)
     }
 }

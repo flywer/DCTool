@@ -33,3 +33,7 @@ export const get_app_version = async () => {
 export const quit_and_install = () => {
     return ipcInstance.send(channels.app.quitAndInstall)
 }
+
+export const clipboard_write_text = (text: string) => {
+    return ipcInstance.send(channels.app.clipboard.writeText, text)
+}
