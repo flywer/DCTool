@@ -108,7 +108,7 @@ const showDataXJobLog = async (v: Job) => {
   const logs: DataXJobLogType[] = (await get_datax_job_log({
     current: 1,
     size: 100,
-    blurry: v.jobName
+    jobContent: v.jobName
   })).data.records
 
   showTipRef.value = logs.length >= 100;

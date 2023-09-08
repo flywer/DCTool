@@ -15,6 +15,7 @@ const dataStat = () => import('@render/views/dataStat/index.vue')
 const schedulingMgt = () => import('@render/views/schedulingMgt/index.vue')
 const toolbox = () => import('@render/views/toolbox/index.vue')
 const jobDependency = () => import('@render/views/jobDependency/index.vue')
+const taskScheduler = () => import('@render/views/taskScheduler/index.vue')
 
 export const routeName = {
     app: 'app',
@@ -43,6 +44,7 @@ export const routeName = {
     schedulingMgt: 'schedulingMgt',
     toolbox: 'toolbox',
     jobDependency: 'jobDependency',
+    taskScheduler: 'taskScheduler'
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -115,6 +117,10 @@ export const routes: Array<RouteRecordRaw> = [
                         name: routeName.jobDependency,
                         path: '/jobDependency/index',
                         component: jobDependency
+                    }, {
+                        name: routeName.taskScheduler,
+                        path: '/taskScheduler/index',
+                        component: taskScheduler
                     },
                 ]
             },

@@ -1,3 +1,4 @@
+import {CommonQueryParam, DataXJobQueryParams} from "@common/types";
 import {AppDataSource} from "@main/dataSource/data-source";
 import {User} from "@main/entity/User";
 import {getAppDataPath} from "@main/utils/appPath";
@@ -9,6 +10,9 @@ import {dialog, net} from "electron";
 import log from 'electron-log'
 import {isEmpty} from "lodash";
 import {join} from "path";
+
+type CommonQueryParamAlias = CommonQueryParam
+type DataXJobQueryParamsAlias = DataXJobQueryParams
 
 @Controller()
 export class DatacenterController {
@@ -154,6 +158,13 @@ export class DatacenterController {
         });
     }
 
+    @IpcHandle(channels.datacenter.getSchedJobById)
+    public async handleGetSchedJobById(id: number | string) {
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonGetRequest(`/gather/api/job/${id}`, 'subsystemName=%E9%87%87%E9%9B%86'))
+        });
+    }
+
     @IpcHandle(channels.datacenter.updateSchedJob)
     public async handleUpdateSchedJob(params: any) {
         return new Promise<any>(async (resolve) => {
@@ -184,25 +195,21 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getWorkflowPage)
-    public async handleGetWorkflowPage(params: string) {
-        params = JSON.parse(params)
+    public async handleGetWorkflowPage(params: object) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest('/workflow/proc/page', params))
         });
     }
 
     @IpcHandle(channels.datacenter.getCjJobPage)
-    public async handleGetCjJobPage(params: any) {
-        params = JSON.parse(params)
+    public async handleGetCjJobPage(params: DataXJobQueryParamsAlias) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest('/gather/api/jobTemplate/findPage', params))
         });
     }
 
     @IpcHandle(channels.datacenter.getSchedJobPage)
-    public async handleGetSchedJobPage(obj: string) {
-        const params = JSON.parse(obj)
-
+    public async handleGetSchedJobPage(params: DataXJobQueryParamsAlias) {
         let paramStr = '';
         if (params.current !== undefined) {
             paramStr += `current=${params.current}&`;
@@ -217,10 +224,10 @@ export class DatacenterController {
             paramStr += `jobContent=${params.jobContent}&`;
         }
         if (params.jobDesc !== undefined) {
-            paramStr += `jobContent=${params.jobDesc}&`;
+            paramStr += `jobDesc=${params.jobDesc}&`;
         }
         if (params.projectName !== undefined) {
-            paramStr += `jobContent=${params.projectName}&`;
+            paramStr += `projectName=${params.projectName}&`;
         }
         if (params.subsystemName !== undefined) {
             paramStr += `subsystemName=${encodeURIComponent(params.subsystemName)}&`;
@@ -248,10 +255,9 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.workflowActive)
-    public async handleWorkflowActive(params: any) {
-        params = JSON.parse(params)
+    public async handleWorkflowActive(obj: { id: string, type: '01' | '02' }) {
         return new Promise<any>(async (resolve) => {
-            resolve(await this.commonPostRequest('/workflow/proc/activate', params))
+            resolve(await this.commonPostRequest('/workflow/proc/activate', obj))
         });
     }
 
@@ -260,6 +266,17 @@ export class DatacenterController {
         params = JSON.parse(params)
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest('/gather/api/job/trigger', params))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.runDataxJobByJobContent)
+    public async handleRunDataxJobByJobContent(jobContent: string) {
+        const params = {
+            jobContent: jobContent,
+            subsystemName: "采集"
+        }
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonPostRequest('/gather/api/jobTemplate/trigger', params))
         });
     }
 
@@ -273,8 +290,12 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.workflowRun)
-    public async handleWorkflowRun(params: any) {
-        params = JSON.parse(params)
+    public async handleWorkflowRun(params: {
+        businessKey: string,
+        code: string,
+        createBy: string,
+        creator: string
+    }) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest(`/workflow/proc-inst/start`, params))
         });
@@ -289,8 +310,7 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getDataxJobLog)
-    public async handleGetDataXJobLog(params: any) {
-        params = JSON.parse(params)
+    public async handleGetDataXJobLog(params: CommonQueryParamAlias) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest(`/gather/api/log/pageList`, params))
         });
@@ -400,7 +420,10 @@ export class DatacenterController {
             page?: any;
             size?: any;
             orgIds?: any;
-            orders?: { asc: boolean; column: string; }[];
+            orders?: {
+                asc: boolean;
+                column: string;
+            }[];
         }
         params = {
             page: obj.page,
@@ -462,7 +485,10 @@ export class DatacenterController {
     @IpcHandle(channels.datacenter.getWorkflowListByProjectId)
     public async handleGetWorkflowListByProjectId(projectId: string, procName: string) {
 
-        let params: { projectId: string; procName?: string; }
+        let params: {
+            projectId: string;
+            procName?: string;
+        }
 
         if (procName != undefined && procName.length > 0) {
             params = {

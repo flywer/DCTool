@@ -1,13 +1,6 @@
-import {JobTemplateType, PageVo} from "@common/types";
+import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo, WorkflowType} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
-
-export type CommonQueryParam = {
-    current: number,
-    size: number,
-    blurry: string,
-    subsystemName?: '采集'
-}
 
 // 获取项目列表
 export const get_job_project_list_all = async () => {
@@ -127,33 +120,32 @@ export const create_table = async (obj: any) => {
     return data
 }
 
-export const get_workflow_page = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getWorkflowPage, JSON.stringify(obj)))
+export const get_workflow_page = async (obj: {
+    page: number,
+    size: number,
+    status?: number | string,
+    procName?: string
+}) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowPage, obj))
     return data
 }
 
-export type DataXJobQueryParams = {
-    current: number,
-    size: number,
-    blurry?: string,
-    jobDesc?: string,
-    jobContent?: string,
-    projectName?: string,
-    subsystemName?: '采集'
-}
-
 export const get_cj_job_page = async (obj: DataXJobQueryParams) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getCjJobPage, JSON.stringify(obj)))
+    const {data} = (await ipcInstance.send(channels.datacenter.getCjJobPage, obj))
     return data
 }
 
 export const get_sched_job_page = async (obj: DataXJobQueryParams) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getSchedJobPage, JSON.stringify(obj)))
+    const {data} = (await ipcInstance.send(channels.datacenter.getSchedJobPage, obj))
     return data
 }
 
-export const workflow_active = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowActive, JSON.stringify(obj)))
+//   type: '01' : '启用', '02' : '停用'
+export const workflow_active = async (obj: {
+    id: string,
+    type: '01' | '02'
+}) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.workflowActive, obj))
     return data
 }
 export const datax_job_start = async (id: number | string) => {
@@ -189,7 +181,7 @@ export const sched_job_delete = async (id: number | string) => {
 }
 
 export const workflow_run = async (obj: any) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.workflowRun, JSON.stringify(obj)))
+    const {data} = (await ipcInstance.send(channels.datacenter.workflowRun, obj))
     return data
 }
 export const workflow_delete = async (id: string) => {
@@ -220,7 +212,7 @@ export const table_delete = async (id: string) => {
 }
 
 export const get_datax_job_log = async (obj: CommonQueryParam) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataxJobLog, JSON.stringify(obj)))
+    const {data} = (await ipcInstance.send(channels.datacenter.getDataxJobLog, obj))
     return data
 }
 
@@ -309,7 +301,9 @@ export const update_workflow = async (jobId: string, params: any) => {
 
 export const get_dataXJob = async (jobId: string): Promise<{
     code: number,
-    data: { jobTemplate: JobTemplateType },
+    data: {
+        jobTemplate: JobTemplateType
+    },
     msg: string
 }> => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getDataXJob, jobId))
@@ -327,5 +321,10 @@ export const get_workflow_list_by_project_id = async (projectId: string, procNam
 
 export const update_is_processed = async (id: string, isProcessed: number) => {
     const {data} = (await ipcInstance.send(channels.datacenter.updateIsProcessed, id, isProcessed))
+    return data
+}
+
+export const get_sched_job_by_id = async (id: string | number) => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getSchedJobById, id))
     return data
 }

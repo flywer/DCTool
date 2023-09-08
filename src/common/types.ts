@@ -378,4 +378,22 @@ export type  DataDevBizVoType = {
         }
     ]
 }
+
+export type CommonQueryParam = {
+    current: number,
+    size: number,
+    blurry?: string,
+    jobContent?: string,
+    subsystemName?: '采集'
+}
+
+export type DataXJobQueryParams = {
+    current: number,
+    size: number,
+    blurry?: string,
+    jobDesc?: string,
+    jobContent?: string,
+    projectName?: string,
+    subsystemName?: '采集'
+}
 // endregion

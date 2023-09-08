@@ -1,3 +1,5 @@
+import {CronJob} from "cron";
+
 type CronExpression = [number[], number[], number[], string, string, string, string];
 
 const parseCronExpression = (expression: string): CronExpression => {
@@ -85,5 +87,15 @@ export const convertCronExpression = (expression: string) => {
         month: parts[4],
         dayOfWeek: parts[5],
         year: parts[6],
+    }
+}
+
+export const isCronExpressionValid = (cronExpression: string): boolean => {
+    try {
+        new CronJob(cronExpression, () => {
+        }, null, false)
+        return true;
+    } catch (error) {
+        return false;
     }
 }

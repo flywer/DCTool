@@ -264,7 +264,10 @@ const loadGraphData = async () => {
   const projectJobDependencies: ProjectJobDependency[] = await find_all_project_job_dependency()
 
   if (projectJobDependencies != null) {
-    edges.push(...convertJobRelation2Edges(projectJobDependencies.map(((item: { source: any; target: any; }) => ({
+    edges.push(...convertJobRelation2Edges(projectJobDependencies.map(((item: {
+      source: any;
+      target: any;
+    }) => ({
       source: item.source,
       target: item.target,
     })))))

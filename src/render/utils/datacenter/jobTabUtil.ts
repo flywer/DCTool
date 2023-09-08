@@ -344,7 +344,7 @@ const checkRunningNum = async (): Promise<boolean> => {
     // 正在运行的工作流任务
     const runningJobs = (await get_workflow_page({
         page: 1,
-        size: maxRunningNum,
+        size: parseInt(maxRunningNum),
         status: '4',
         procName: ``
     })).data.records
@@ -853,7 +853,7 @@ export const getDataXJobStatus = async (v: {
         const log: DataXJobLogType = (await get_datax_job_log({
             current: 1,
             size: 1,
-            blurry: v.jobDesc
+            jobContent: v.jobDesc
         })).data.records[0]
         if (log != undefined) {
             if (log.handleCode == 200) { //若成功

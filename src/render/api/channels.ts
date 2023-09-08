@@ -10,6 +10,9 @@ export const channels = reactive({
         getAppVersion: "app/getAppVersion",
         sendAppInstallNotice: "app/sendAppInstallNotice",
         quitAndInstall: "app/quitAndInstall",
+        clipboard: {
+            writeText: "app/clipboard/writeText",
+        }
     },
     sys: {
         shouldUseDarkColors: 'sys/shouldUseDarkColors'
@@ -82,6 +85,8 @@ export const channels = reactive({
         updateDataXJob: 'datacenter/updateDataXJob',
         updateSchedJob: 'datacenter/updateSchedJob',
         updateIsProcessed: 'datacenter/updateIsProcessed',
+        runDataxJobByJobContent: 'datacenter/runDataxJobByJobContent',
+        getSchedJobById: 'datacenter/getSchedJobById',
     },
     auxiliaryDb: {
         projectInfo: {
@@ -145,7 +150,8 @@ export const channels = reactive({
         datacenterCronJobInit: 'cron/datacenterCronJobInit',
     },
     xlsx: {
-        createDataInpsStat: 'xlsx/createDataInpsStat'
+        createDataInpsStat: 'xlsx/createDataInpsStat',
+        generateInsertStatements: 'xlsx/generateInsertStatements',
     },
     front: {
         getTableData: 'front/getTableData'
@@ -153,5 +159,16 @@ export const channels = reactive({
     updater: {
         msg: 'updater/msg'
     },
-
+    taskScheduler: {
+        getScheduler: 'taskScheduler/getScheduler',
+        saveTask: 'taskScheduler/saveTask',
+        getTask: 'taskScheduler/getTask',
+        taskDelete: 'taskScheduler/taskDelete',
+        taskEnable: 'taskScheduler/taskEnable',
+        cronJobStart: 'taskScheduler/cronJobStart',
+        cronJobStop: 'taskScheduler/cronJobStop',
+        schedulerTaskCronJobUpdate: 'taskScheduler/schedulerTaskCronJobUpdate',
+        taskRun: 'taskScheduler/taskRun',
+        sendTaskExecEnd: 'taskScheduler/sendTaskExecEnd',
+    }
 })

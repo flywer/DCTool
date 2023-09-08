@@ -45,7 +45,8 @@ import {
   CalendarClock24Regular,
   TableAdd24Regular,
   Toolbox24Regular,
-  Organization24Regular
+  Organization24Regular,
+TaskListLtr24Regular
 } from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
@@ -126,6 +127,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.schedulingMgt,
     icon: renderIcon(CalendarClock24Regular)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.taskScheduler,
+              }
+            },
+            {default: () => '任务调度'}
+        ),
+    key: routeName.taskScheduler,
+    icon: renderIcon(TaskListLtr24Regular)
   },
   {
     label: () =>

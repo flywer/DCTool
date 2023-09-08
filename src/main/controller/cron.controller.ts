@@ -37,24 +37,24 @@ export class CronController {
 
         for (const jobName of dcJobNames) {
             const datacenter = new DatacenterController()
-            await datacenter.handleGetWorkflowPage(JSON.stringify({
+            await datacenter.handleGetWorkflowPage({
                 page: 1,
                 procName: jobName,
                 size: 1,
                 status: '4'
-            })).then(async res => {
+            }).then(async res => {
                 //若此任务处于运行中，则开启监听
                 if (res != undefined && !isEmpty(res.data.records) && res.data.records[0].procName == jobName) {
                     log.info(`${jobName} 监听任务已默认开启`)
                     let job = new CronJob(
                         '*/1 * * * * *',
                         async function () {
-                            await datacenter.handleGetWorkflowPage(JSON.stringify({
+                            await datacenter.handleGetWorkflowPage({
                                 page: 1,
                                 procName: jobName,
                                 size: 1,
                                 status: null
-                            })).then(res => {
+                            }).then(res => {
                                 //任务不存在，或者任务已不在运行中则停止监听
                                 if (isEmpty(res.data.records) || (res.data.records[0].procName === jobName && res.data.records[0].status != '4')) {
                                     let jobRes = ''
@@ -108,12 +108,12 @@ export class CronController {
     public async handleCreateCronJob(jobName: string) {
         let res: { msg: string; success: boolean }
         const datacenter = new DatacenterController()
-        const records = (await datacenter.handleGetWorkflowPage(JSON.stringify({
+        const records = (await datacenter.handleGetWorkflowPage({
             page: 1,
             procName: jobName,
             size: 1,
             status: '4'
-        }))).data.records
+        })).data.records
 
         //若此任务处于运行中，则开启监听
         if (!isEmpty(records) && records[0].procName == jobName) {
@@ -155,12 +155,12 @@ export class CronController {
             '*/1 * * * * *',
             async function () {
                 const datacenter = new DatacenterController()
-                await datacenter.handleGetWorkflowPage(JSON.stringify({
+                await datacenter.handleGetWorkflowPage({
                     page: 1,
                     procName: jobName,
                     size: 1,
                     status: null
-                })).then(async res => {
+                }).then(async res => {
                     //任务不存在，或者任务已不在运行中则停止监听
                     if (isEmpty(res.data.records) || (res.data.records[0].procName === jobName && res.data.records[0].status != '4')) {
                         let jobRes = ''

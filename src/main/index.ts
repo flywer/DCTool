@@ -14,6 +14,7 @@ import {ProjectInfoController} from "@main/controller/auxiliaryDb/projectInfo.co
 import {ProjectJobDependencyController} from "@main/controller/projectJobDependency.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {SysController} from "@main/controller/sys.controller";
+import {TaskSchedulerController} from "@main/controller/taskScheduler.controller";
 import {UpdaterController} from "@main/controller/updater.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
@@ -46,6 +47,9 @@ async function electronAppInit() {
 
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') {
+
+            TaskSchedulerController.getInstance().cronJobsStopAll()
+
             app.exit()
             if (tray != null) {
                 tray.destroy()
@@ -111,7 +115,8 @@ async function bootstrap() {
                         JobJsonController,
                         PreDatabaseController,
                         SztkDictController,
-                        DictController
+                        DictController,
+                        TaskSchedulerController
                     ],
                 injects: [{
                     name: 'IS_DEV',
@@ -124,7 +129,11 @@ async function bootstrap() {
             log.info("应用程序数据源连接初始化成功")
 
             const cron = new CronController()
-            await cron.datacenterCronJobInit();
+            await cron.datacenterCronJobInit()
+
+            const taskSchedulerInstance = TaskSchedulerController.getInstance()
+            taskSchedulerInstance.cronJobsStartAll()
+
         }).catch(error => log.error('应用程序数据源连接失败', error))
 
     } catch (error) {
