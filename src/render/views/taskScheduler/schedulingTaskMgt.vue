@@ -266,7 +266,7 @@
 import G6, {Graph} from "@antv/g6";
 import {INode} from "@antv/g6-core/lib/interface/item";
 import {GraphData, Item} from "@antv/g6-core/lib/types";
-import {DCJob, ExecLog, Task} from "@common/taskSchedulerTypes";
+import {DCJob, Task} from "@common/taskSchedulerTypes";
 import {SchedJobType, WorkflowType} from "@common/types";
 import {clipboard_write_text} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
@@ -646,28 +646,29 @@ const graphInit = () => {
       if (evt.target && evt.target.isCanvas && evt.target.isCanvas()) {
         return `
        <div>
-         <div code="fitView"  class="menuItem" onclick=""><span>页面自适应</span></div>
-       <div code="fitCenter"  class="menuItem" onclick=""><span>居中</span></div>
-       <div code="layout"  class="menuItem" onclick=""><span>重新布局</span></div>
+         <div code="fitView" class="menuItem">页面自适应</div>
+       <div code="fitCenter" class="menuItem">居中</span></div>
+       <div code="layout" class="menuItem">重新布局</div>
        </div>
      `
       } else if (evt.item.getType() == 'node') {
         return `
        <div>
-       <div code="edit"  class="menuItem" onclick=""><span>编辑</span></div>
-       <div code="copyJobName"  class="menuItem" onclick=""><span>复制任务名</span></div>
-       <div code="delete"  class="menuItem" onclick=""><span>删除</span></div>
+       <div code="edit" class="menuItem">编辑</div>
+       <div code="copyJobName" class="menuItem">复制任务名</div>
+       <div code="delete" class="menuItem">删除</div>
        </div>
      `
       } else if (evt.item.getType() == 'edge') {
         return `
        <div>
-       <div code="delete"  class="menuItem" onclick=""><span>删除</span></div>
+       <div code="delete" class="menuItem">删除</div>
        </div>
      `
       }
     },
     handleMenuClick: (target: HTMLElement, item: Item) => {
+      console.log(target, item)
       switch (target.getAttribute('code')) {
         case 'edit':
           if (item.getType() == 'node') {
@@ -1078,7 +1079,13 @@ const nodeItemList = [
   }
 ]
 
-const handleDragEnd = (e: { x: number; y: number; }, item: { label: string; type: string; }) => {
+const handleDragEnd = (e: {
+  x: number;
+  y: number;
+}, item: {
+  label: string;
+  type: string;
+}) => {
   const renderPoints = graph.getPointByClient(e.x, e.y); //渲染
   const canvasPoints = graph.getCanvasByPoint(renderPoints.x, renderPoints.y) // 画布
   if (canvasPoints.x > 0 && canvasPoints.y > 0 && canvasPoints.x < graph.getWidth() && canvasPoints.y < graph.getHeight()) {

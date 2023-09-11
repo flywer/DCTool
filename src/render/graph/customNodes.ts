@@ -316,7 +316,7 @@ export const schedulerTaskNode: CustomNodeType = {
             anchorPoints.forEach((anchorPos: number[], i: any) => {
                 group.addShape('circle', {
                     attrs: {
-                        r: 5,
+                        r: 6,
                         x: bbox.x + bbox.width * anchorPos[0],
                         y: bbox.y + bbox.height * anchorPos[1],
                         fill: '#fff',
