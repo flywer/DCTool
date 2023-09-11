@@ -3,11 +3,10 @@ import {DataXJobLogType, WorkflowType} from "@common/types";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {getAppDataPath} from "@main/utils/appPath";
 import {getCurrentDateTime} from "@main/utils/dateUtils";
-import {jsonfileWrite, readFsSync} from "@main/utils/fsUtils";
+import {jsonfileWrite, readFsAsync} from "@main/utils/fsUtils";
 import {failure, success} from "@main/vo/resultVo";
 import {MAIN_WINDOW} from "@main/window/constants";
 import {channels} from "@render/api/channels";
-import {formatDate} from "@render/utils/common/dateUtils";
 import {CronJob} from "cron";
 import {Controller, IpcHandle, IpcSend} from "einf";
 import {Notification} from "electron";
@@ -29,7 +28,8 @@ export class TaskSchedulerController {
     private SCHEDULER_FILE_PATH: string = join(getAppDataPath(), 'cron', 'taskDependencyScheduler.json')
 
     constructor() {
-        this.schedulerTaskCronJobsInit()
+        this.schedulerTaskCronJobsInit().then(() => {
+        })
     }
 
     public static getInstance(): TaskSchedulerController {
@@ -47,60 +47,39 @@ export class TaskSchedulerController {
     }
 
     // 初始化cron调度任务
-    private schedulerTaskCronJobsInit() {
-        this.schedulerTaskCronJobs = []
-        let scheduler = this.handleGetScheduler()
-        if (scheduler != null && !isEmpty(scheduler?.tasks)) {
-            scheduler.tasks.forEach(task => {
-                let cronJob = this.getCronJobInstance(task)
-                this.schedulerTaskCronJobs.push({
-                    id: task.id,
-                    cronJob: cronJob
+    private async schedulerTaskCronJobsInit() {
+        try {
+            this.schedulerTaskCronJobs = []
+            let scheduler = await this.handleGetScheduler()
+            if (scheduler != null && !isEmpty(scheduler?.tasks)) {
+                scheduler.tasks.forEach(task => {
+                    let cronJob = this.getCronJobInstance(task)
+                    this.schedulerTaskCronJobs.push({
+                        id: task.id,
+                        cronJob: cronJob
+                    })
                 })
-            })
+            }
+            return failure('CronJob单例初始化成功')
+        } catch (e) {
+            log.error('CronJob单例初始化失败')
+            return failure('CronJob单例初始化失败')
         }
+
     }
 
     public getCronJobInstance(task: TaskAlias) {
-        return new CronJob(task.cron, () => {
+        return new CronJob(task.cron, async () => {
             // 任务已启用且未运行
             if (task.isEnable && !task.isRunning) {
-                task.isRunning = true
-                this.handleSaveTask(task)
-                this.runDependencySchedulingTask(task)
+                await this.runDependencySchedulingTask(task)
             }
         })
     }
 
-    // 任务更新或新增，调度任务实例数组也需更新
-    @IpcHandle(channels.taskScheduler.schedulerTaskCronJobUpdate)
-    public handleSchedulerTaskCronJobUpdate(task: TaskAlias) {
-        let schedulerTaskCronJob = this.schedulerTaskCronJobs.find(job => job.id == task.id);
-        let index = this.schedulerTaskCronJobs.findIndex(job => job.id == task.id);
-        if (schedulerTaskCronJob == null) {
-            this.schedulerTaskCronJobs.push({
-                id: task.id,
-                cronJob: this.getCronJobInstance(task)
-            })
-        } else {
-            schedulerTaskCronJob.cronJob.stop()
-            this.schedulerTaskCronJobs.splice(index, 1, {
-                id: task.id,
-                cronJob: this.getCronJobInstance(task)
-            })
-
-            if (task.isEnable) {
-                this.handleCronJobStart(task)
-            } else {
-                this.handleCronJobStop(task)
-            }
-        }
-    }
-
     //  启动cron，同时检测任务是否也已启动
-    public cronJobsStartAll() {
-        this.schedulerTaskCronJobsInit()
-        let scheduler = this.handleGetScheduler()
+    public async cronJobsStartAll() {
+        let scheduler = await this.handleGetScheduler()
         this.schedulerTaskCronJobs.forEach(job => {
             const task = scheduler.tasks.find(task => task.id == job.id && task.isEnable);
             if (task != null) {
@@ -111,8 +90,8 @@ export class TaskSchedulerController {
     }
 
     //  停止运行所有任务
-    public cronJobsStopAll() {
-        let scheduler = this.handleGetScheduler()
+    public async cronJobsStopAll() {
+        let scheduler = await this.handleGetScheduler()
         for (let i = 0; i < scheduler.tasks.length; i++) {
             scheduler.tasks[i].isRunning = false
         }
@@ -146,16 +125,24 @@ export class TaskSchedulerController {
     /**
      * 执行任务
      **/
-    public runDependencySchedulingTask(task: TaskAlias) {
-
+    public async runDependencySchedulingTask(task: TaskAlias) {
         log.info(`${task.taskName}任务开始执行`)
-        task.lastStartTime = formatDate(new Date())
-        this.runJobs(task, task.jobList).then((res) => {
+        task.lastStartTime = getCurrentDateTime()
+        task.execLog.push({
+            startTime: getCurrentDateTime(),
+            status: 0,
+            jobLog: []
+        })
+        task.isRunning = true
+        await this.handleUpdateTask(task)
+        this.runJobs(task, task.jobList).then(async (res) => {
             task.isRunning = false
-            task.lastEndTime = formatDate(new Date())
-            task.lastExecResult = res.message ? '成功' : '失败'
-
-            this.handleSaveTask(task)
+            task.lastEndTime = getCurrentDateTime()
+            task.lastExecResult = res.success ? '成功' : '失败'
+            task.execLog.at(-1).endTime = getCurrentDateTime()
+            task.execLog.at(-1).status = res.success ? 1 : 2
+            task.execLog.at(-1).msg = res.message
+            await this.handleUpdateTask(task)
 
             log.info(`[${task.taskName}]结束执行`)
 
@@ -171,7 +158,6 @@ export class TaskSchedulerController {
             })
 
         })
-
     }
 
     private async runJob(job: DCJob): Promise<{
@@ -206,41 +192,41 @@ export class TaskSchedulerController {
                         if (log != null) {
                             if (log.handleCode == 201) { //运行中
                                 // 继续执行
-                                console.log(`任务${job.name}运行中`)
+                                console.log(`任务[${job.name}]运行中...`)
                             } else if (log.handleCode == 500) { // 异常
                                 clearInterval(interval); // 停止循环
                                 resolve({
                                     success: false,
-                                    msg: "任务执行异常"
+                                    msg: `任务执行异常`
                                 })
                             } else if (log.handleCode == 200) {
                                 clearInterval(interval); // 停止循环
                                 resolve({
                                     success: true,
-                                    msg: "任务执行成功"
+                                    msg: `任务执行成功`
                                 });
                             } else {
                                 clearInterval(interval); // 停止循环
                                 resolve({
                                     success: false,
-                                    msg: "任务执行失败"
+                                    msg: `任务执行失败`
                                 });
                             }
                         } else {
                             clearInterval(interval); // 停止循环
                             resolve({
                                 success: false,
-                                msg: "任务未正常运行"
+                                msg: `任务未正常运行`
                             });
                         }
                     }, 1000);
                 });
 
             } else {
-                console.log("任务不存在")
+                log.error("任务不存在")
                 return {
                     success: false,
-                    msg: "任务不存在"
+                    msg: `任务不存在`
                 }
             }
 
@@ -260,7 +246,10 @@ export class TaskSchedulerController {
                     })
                 } else if (workflow.status == '2') {
                     // 停用的 则先启用
-                    await datacenter.handleWorkflowActive({id: workflow.id, type: '01'})
+                    await datacenter.handleWorkflowActive({
+                        id: workflow.id,
+                        type: '01'
+                    })
 
                     // 运行任务
                     await datacenter.handleWorkflowRun({
@@ -283,7 +272,7 @@ export class TaskSchedulerController {
                         const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
 
                         if (workflow.status == '4') { //运行中
-                            console.log(`任务${job.name}运行中`)
+                            console.log(`任务[${job.name}]运行中...`)
                         } else if (workflow.status == '1') {
                             clearInterval(interval); // 停止循环
                             resolve({
@@ -316,23 +305,34 @@ export class TaskSchedulerController {
     }
 
     private async runJobs(task: TaskAlias, jobList: DCJob[]) {
-
         for (let i = 0; i < jobList.length; i++) {
             const job = jobList[i];
             try {
+
+                task.execLog.at(-1).jobLog.push({
+                    startTime: getCurrentDateTime(),
+                    endTime: null,
+                    status: 0
+                })
+                // await this.handleUpdateTask(task)
+
                 const jobResult = await this.runJob(job);
 
-                task.execLog.push({
-                    time: getCurrentDateTime(),
-                    type: jobResult.success ? '200' : '500',
-                    text: `${job.name}执行结果：${jobResult.msg}`
-                })
+                task.execLog.at(-1).jobLog.at(-1).endTime = getCurrentDateTime()
+                task.execLog.at(-1).jobLog.at(-1).status = jobResult.success ? 1 : 2
+                task.execLog.at(-1).jobLog.at(-1).msg = jobResult.msg
+                task.execLog.at(-1).jobLog.at(-1).jobName = job.name
+                // await this.handleUpdateTask(task)
 
-                // 若此时本地文件内的任务配置更新
-                const newTask = this.handleGetScheduler().tasks.find(task1 => task1.id == task.id)
+                if (jobResult.success) {
+                    // 若此时本地文件内的任务配置更新
+                    const newTaskConfig = (await this.handleGetScheduler()).tasks.find(task1 => task1.id == task.id)
 
-                if (jobResult.success && newTask.isEnable) {
-                    await this.runJobs(task, job.dependentJobs);
+                    if (typeof newTaskConfig.isEnable != "undefined") {
+                        await this.runJobs(task, job.dependentJobs);
+                    } else {
+                        return failure('任务配置异常')
+                    }
                 }
 
             } catch (error) {
@@ -349,16 +349,14 @@ export class TaskSchedulerController {
     }
 
     @IpcHandle(channels.taskScheduler.getScheduler)
-    public handleGetScheduler(): Scheduler {
-        const buffer = readFsSync(this.SCHEDULER_FILE_PATH)
-
+    public async handleGetScheduler(): Promise<Scheduler> {
+        const buffer = await readFsAsync(this.SCHEDULER_FILE_PATH)
         const defaultSetting: Scheduler = {
             tasks: [],
             monitoringFrequency: 1000
         }
 
         if (buffer == null || isEmpty(buffer.toString())) {
-            jsonfileWrite(this.SCHEDULER_FILE_PATH, defaultSetting, {spaces: 2})
             return defaultSetting
         } else {
             try {
@@ -368,11 +366,12 @@ export class TaskSchedulerController {
                 return null
             }
         }
+
     }
 
     @IpcHandle(channels.taskScheduler.getTask)
-    public handleGetTask(id: string): Task {
-        let scheduler = this.handleGetScheduler()
+    public async handleGetTask(id: string): Promise<Task> {
+        let scheduler = await this.handleGetScheduler()
         const tasks = scheduler.tasks.find(task => task.id == id);
         if (tasks != null) {
             return tasks
@@ -382,7 +381,7 @@ export class TaskSchedulerController {
     }
 
     @IpcHandle(channels.taskScheduler.saveTask)
-    public handleSaveTask(taskParam: TaskAlias | string) {
+    public async handleSaveTask(taskParam: TaskAlias | string) {
         try {
             let task: TaskAlias = null
             if (typeof taskParam == 'string') {
@@ -391,7 +390,7 @@ export class TaskSchedulerController {
                 task = taskParam
             }
 
-            let scheduler = this.handleGetScheduler()
+            let scheduler = await this.handleGetScheduler()
 
             const index = scheduler.tasks.findIndex(task1 => task1.id == task.id)
             if (index !== -1) {
@@ -399,7 +398,6 @@ export class TaskSchedulerController {
                 scheduler.tasks.splice(index, 1, Object.assign(scheduler.tasks[index], task));
             } else {
                 scheduler.tasks.push(task)
-
             }
             jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
 
@@ -412,10 +410,54 @@ export class TaskSchedulerController {
         }
     }
 
-    @IpcHandle(channels.taskScheduler.taskDelete)
-    public handleTaskDelete(id: string) {
+    // 仅更新task 不插入
+    public async handleUpdateTask(task: TaskAlias) {
         try {
-            let scheduler = this.handleGetScheduler()
+            let scheduler = await this.handleGetScheduler()
+            const index = scheduler.tasks.findIndex(task1 => task1.id == task.id)
+            if (index !== -1) {
+                // 使用新的 job 对象替换该索引处的元素
+                scheduler.tasks.splice(index, 1, Object.assign(scheduler.tasks[index], task));
+
+                jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
+
+            } else {
+                return failure(`任务不存在`)
+            }
+        } catch (e) {
+            log.error(e)
+            return failure(`更新失败,${e}`)
+        }
+    }
+
+    // 任务更新或新增，调度任务实例数组也需更新
+    public handleSchedulerTaskCronJobUpdate(task: TaskAlias) {
+        let schedulerTaskCronJob = this.schedulerTaskCronJobs.find(job => job.id == task.id);
+        let index = this.schedulerTaskCronJobs.findIndex(job => job.id == task.id);
+        if (schedulerTaskCronJob == null) {
+            this.schedulerTaskCronJobs.push({
+                id: task.id,
+                cronJob: this.getCronJobInstance(task)
+            })
+        } else {
+            schedulerTaskCronJob.cronJob.stop()
+            this.schedulerTaskCronJobs.splice(index, 1, {
+                id: task.id,
+                cronJob: this.getCronJobInstance(task)
+            })
+
+            if (task.isEnable) {
+                this.handleCronJobStart(task)
+            } else {
+                this.handleCronJobStop(task)
+            }
+        }
+    }
+
+    @IpcHandle(channels.taskScheduler.taskDelete)
+    public async handleTaskDelete(id: string) {
+        try {
+            let scheduler = await this.handleGetScheduler()
             scheduler.tasks = scheduler.tasks.filter(task => task.id != id);
             jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
             return success('删除成功')
@@ -426,14 +468,14 @@ export class TaskSchedulerController {
     }
 
     @IpcHandle(channels.taskScheduler.taskEnable)
-    public handleTaskEnable(taskId: string, enable: boolean) {
+    public async handleTaskEnable(taskId: string, enable: boolean) {
         try {
-            let scheduler = this.handleGetScheduler()
+            let scheduler = await this.handleGetScheduler()
             const task = scheduler.tasks.find(task => task.id == taskId);
 
             if (task != null) {
                 task.isEnable = enable
-                if (this.handleSaveTask(task).success) {
+                if ((await this.handleSaveTask(task)).success) {
                     return success(`${enable ? '启用' : '停用'}成功`)
                 } else {
                     return failure(`${enable ? '启用' : '停用'}失败`)
@@ -449,7 +491,7 @@ export class TaskSchedulerController {
     }
 
     @IpcHandle(channels.taskScheduler.taskRun)
-    public handleTaskRun(taskParam: TaskAlias | string) {
+    public async handleTaskRun(taskParam: TaskAlias | string) {
         try {
             let task: TaskAlias
             if (typeof taskParam == 'string') {
@@ -459,9 +501,7 @@ export class TaskSchedulerController {
             }
 
             if (task.isEnable && !task.isRunning) {
-                task.isRunning = true
-                this.handleSaveTask(task)
-                this.runDependencySchedulingTask(task)
+                await this.runDependencySchedulingTask(task)
                 return success(`执行成功`)
             }
 
@@ -472,7 +512,7 @@ export class TaskSchedulerController {
     }
 
     @IpcHandle(channels.taskScheduler.taskInterrupt)
-    public handleTaskInterrupt(taskParam: TaskAlias | string) {
+    public async handleTaskInterrupt(taskParam: TaskAlias | string) {
         try {
             let task: TaskAlias
             if (typeof taskParam == 'string') {
@@ -483,7 +523,7 @@ export class TaskSchedulerController {
 
             task.isRunning = false
             task.isEnable = false
-            this.handleSaveTask(task)
+            await this.handleSaveTask(task)
             return success(`任务中断成功`)
         } catch (e) {
             return failure(`任务中断失败,${e}`)

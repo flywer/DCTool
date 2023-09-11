@@ -130,7 +130,7 @@ async function bootstrap() {
             await cron.datacenterCronJobInit()
 
             const taskSchedulerInstance = TaskSchedulerController.getInstance()
-            taskSchedulerInstance.cronJobsStartAll()
+            await taskSchedulerInstance.cronJobsStartAll()
 
         }).catch(error => log.error('应用程序数据源连接失败', error))
 

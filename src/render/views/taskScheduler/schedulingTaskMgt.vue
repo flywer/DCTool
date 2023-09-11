@@ -45,6 +45,7 @@
           :size="'small'"
           :loading="isTableLoading"
           :striped="true"
+          :scroll-x="1200"
       >
       </n-data-table>
 
@@ -183,13 +184,89 @@
       <n-button :size="'small'" @click="showJobUpdateModelRef = !showJobUpdateModelRef">返回</n-button>
     </template>
   </n-modal>
+
+  <n-drawer
+      v-model:show="showDrawerRef"
+      :width="220"
+  >
+    <n-drawer-content title="日志" :native-scrollbar="false" closable>
+      <n-spin :size="14" :show="loading">
+        <n-timeline v-if="!isEmpty(logItemsRef)">
+          <n-timeline-item v-for="item in logItemsRef"
+                           :type="item.type"
+                           :time="item.time"
+          >
+            <template #icon>
+              <template v-if="item.type==='success'">
+                <n-icon :size="18">
+                  <CheckmarkCircle24Regular/>
+                </n-icon>
+              </template>
+              <template v-if="item.type==='error'">
+                <n-icon :size="18">
+                  <DismissCircle24Regular/>
+                </n-icon>
+              </template>
+            </template>
+            <template #header>
+              <n-space justify="space-between">
+                {{ item.title }}
+                <n-button :size="'tiny'"
+                          class="transition"
+                          :class="item.show?'rotate-180':'rotate-0'"
+                          @click="item.show=!item.show"
+                          text
+                >
+                  <n-icon :size="18">
+                    <ChevronUp24Regular/>
+                  </n-icon>
+                </n-button>
+              </n-space>
+            </template>
+            <template #default>
+              <n-space>
+                <n-collapse-transition :show="item.show">
+                  <n-timeline>
+                    <n-timeline-item v-for="item in item.content"
+                                     :type="item.type"
+                                     :time="item.time"
+                                     :title="item.title"
+                                     :content="item.content"
+                    >
+                      <template #icon>
+                        <template v-if="item.type==='success'">
+                          <n-icon :size="18">
+                            <CheckmarkCircle24Regular/>
+                          </n-icon>
+                        </template>
+                        <template v-if="item.type==='error'">
+                          <n-icon :size="18">
+                            <DismissCircle24Regular/>
+                          </n-icon>
+                        </template>
+                      </template>
+                      <template #default>
+                        <p class="m-0" style="font-size: 12px" v-html="item.content"/>
+                      </template>
+                    </n-timeline-item>
+                  </n-timeline>
+                </n-collapse-transition>
+              </n-space>
+            </template>
+          </n-timeline-item>
+        </n-timeline>
+        <n-empty v-else description="无运行日志"/>
+        <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
+      </n-spin>
+    </n-drawer-content>
+  </n-drawer>
 </template>
 
 <script setup lang="ts">
 import G6, {Graph} from "@antv/g6";
 import {INode} from "@antv/g6-core/lib/interface/item";
 import {GraphData, Item} from "@antv/g6-core/lib/types";
-import {DCJob, Task} from "@common/taskSchedulerTypes";
+import {DCJob, ExecLog, Task} from "@common/taskSchedulerTypes";
 import {SchedJobType, WorkflowType} from "@common/types";
 import {clipboard_write_text} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
@@ -209,9 +286,11 @@ import {isCronExpressionValid} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {getSchedJob, showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import NodeItem from "@render/views/taskScheduler/nodeItem.vue";
+import {CheckmarkCircle24Regular, ChevronUp24Regular, DismissCircle24Regular} from "@vicons/fluent";
 import {Add, Refresh, Search} from "@vicons/ionicons5";
 import {VNode} from "@vue/runtime-core";
 import {CronJob} from "cron";
+import {isEmpty} from "lodash-es";
 import {DateTime} from "luxon";
 import {
   DataTableColumns,
@@ -240,7 +319,7 @@ const tableDataRef = ref<Task[]>([])
 const isTableLoading = ref(false)
 
 onMounted(() => {
-  tableDataInit('')
+  tableDataInit(queryParam.value)
 })
 
 const tableDataInit = async (v: string) => {
@@ -261,7 +340,7 @@ const createColumns = (): DataTableColumns<Task> => {
     {
       title: '任务状态',
       key: 'isEnable',
-      width: '10%',
+      width: '6%',
       align: 'center',
       render(row) {
         return setTaskStatus(row)
@@ -270,12 +349,12 @@ const createColumns = (): DataTableColumns<Task> => {
     {
       title: 'cron表达式',
       key: 'cron',
-      width: '12%',
+      width: '8%',
     },
     {
       title: '下次执行时间',
       key: 'nextExecTime',
-      width: '15%',
+      width: '12%',
       render(row) {
         const cronJob = new CronJob(row.cron, () => {
         })
@@ -286,7 +365,7 @@ const createColumns = (): DataTableColumns<Task> => {
     {
       title: '上次执行结束时间',
       key: 'lastEndTime',
-      width: '15%',
+      width: '12%',
       render(row) {
         return row.lastEndTime || '--'
       }
@@ -294,7 +373,7 @@ const createColumns = (): DataTableColumns<Task> => {
     {
       title: '执行结果',
       key: 'lastExecResult',
-      width: '10%',
+      width: '6%',
       render(row) {
         return row.lastExecResult || '--'
       }
@@ -302,26 +381,28 @@ const createColumns = (): DataTableColumns<Task> => {
     {
       title: '操作',
       key: 'actions',
-      width: '23%',
+      width: '20%',
       align: 'center',
+      fixed: 'right',
       render(row) {
         let children: VNode[] = []
 
         if (row.isRunning) {
           children.push(showConfirmation('停止运行', () => taskInterrupt(row)))
+          children.push(showButton('配置', () => taskConfigModalInit(row)))
+          children.push(showButton('日志', () => showTaskLog(row.id)))
         } else if (row.isEnable) {
           children.push(showConfirmation('执行', () => taskRun(row)))
-
           children.push(showButton('停用', () => taskEnable(row.id, false)))
-
           children.push(showConfirmation('删除', () => taskDelete(row.id)))
+          children.push(showButton('配置', () => taskConfigModalInit(row)))
+          children.push(showButton('日志', () => showTaskLog(row.id)))
         } else {
           children.push(showButton('启用', () => taskEnable(row.id, true)))
-
           children.push(showConfirmation('删除', () => taskDelete(row.id)))
+          children.push(showButton('配置', () => taskConfigModalInit(row)))
+          children.push(showButton('日志', () => showTaskLog(row.id)))
         }
-
-        children.push(showButton('任务配置', () => taskConfigModalInit(row)))
 
         return h(NSpace, {
           justify: 'center'
@@ -1087,7 +1168,111 @@ const generateJobHierarchy = (headNodes: INode[]) => {
 
 // endregion
 
+// region 日志
+const showDrawerRef = ref(false)
+const loading = ref(false)
+const logItemsRef = ref([])
+const showTipRef = ref(false)
 
+const showTaskLog = async (taskId: string) => {
+
+  showDrawerRef.value = true
+
+  const task: Task = await get_task(taskId)
+  if (task != null) {
+    // 反转
+    const execLog = task.execLog.reverse()
+
+    logItemsRef.value = []
+
+    execLog.forEach(log => {
+      let type: "default" | "error" | "info" | "success" | "warning"
+      let title: string
+      let taskContent = []
+      let time: string
+
+      if (log.status == 0) {
+        title = '运行中'
+        type = 'info'
+      } else if (log.status == 1) {
+        title = '执行成功'
+        type = 'success'
+      } else if (log.status == 2) {
+        title = '执行失败'
+        type = 'error'
+      } else {
+        title = '未知状态'
+        type = 'warning'
+      }
+
+      time = log.endTime
+
+      // job日志
+      const jobLog = log.jobLog.reverse()
+      jobLog.forEach(jobLog => {
+        let type: "default" | "error" | "info" | "success" | "warning"
+        let title: string
+        let content: string
+        let time: string
+
+        if (jobLog.status == 0) {
+          type = 'info'
+        } else if (jobLog.status == 1) {
+          type = 'success'
+        } else if (jobLog.status == 2) {
+          type = 'error'
+        } else {
+          type = 'warning'
+        }
+
+        time = jobLog.endTime
+        title = jobLog.jobName
+        content = `
+        执行结果：<br>${jobLog.msg}<br>
+        开始时间：<br>${jobLog.startTime}<br>
+        任务耗时：${calculateDuration(jobLog.startTime, jobLog.endTime)}<br>
+        `
+
+        taskContent.push({
+          type: type,
+          title: title,
+          content: content,
+          time: time
+        })
+      })
+
+      logItemsRef.value.push({
+        type: type,
+        title: title,
+        content: taskContent,
+        time: time,
+        show: false
+      })
+    })
+
+    showTipRef.value = execLog.length >= 100;
+
+  } else {
+
+  }
+}
+
+function calculateDuration(startTime: string, endTime: string): string {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  const durationInSeconds = Math.abs(end.getTime() - start.getTime()) / 1000;
+
+  if (durationInSeconds < 1) {
+    return "0秒";
+  } else if (durationInSeconds < 60) {
+    return durationInSeconds.toFixed(0) + "秒";
+  } else {
+    const durationInMinutes = durationInSeconds / 60;
+    return durationInMinutes.toFixed(2) + "分钟";
+  }
+}
+
+//endregion
 </script>
 
 <style>

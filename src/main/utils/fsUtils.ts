@@ -52,7 +52,7 @@ export const readFsSync = (filePath: string) => {
  **/
 export const readFsAsync = async (filePath: string) => {
     try {
-        return await fs.promises.readFile(filePath);
+        return await fs.promises.readFile(filePath,'utf-8');
     } catch (error) {
         log.error(error);
         return null;

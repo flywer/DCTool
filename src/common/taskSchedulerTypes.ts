@@ -28,9 +28,13 @@ export interface DCJob {
     dependentJobs: DCJob[]; //依赖此任务的任务列表
 }
 
-interface ExecLog {
-    time: string;
-    type: string;
-    text: string;
+export interface ExecLog {
+    startTime: string;
+    endTime?: string;
+    // 0:运行中  1：执行成功 2：执行失败
+    status: number;
+    msg?: string;
+    jobName?: string;
+    jobLog?: ExecLog[];
 }
 
