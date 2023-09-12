@@ -94,7 +94,14 @@ export class TaskSchedulerController {
         let scheduler = await this.handleGetScheduler()
         for (let i = 0; i < scheduler.tasks.length; i++) {
             scheduler.tasks[i].isRunning = false
+            for (let j = 0; j < scheduler.tasks[i].execLog.length; j++) {
+                if (scheduler.tasks[i].execLog[j].status == 0 && scheduler.tasks[i].execLog[j].jobLog.length == 0) {
+                    scheduler.tasks[i].execLog[j].status = 2
+                    scheduler.tasks[i].execLog[j].msg = '任务中断'
+                }
+            }
         }
+
         jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
 
         this.schedulerTaskCronJobs.forEach(job => {

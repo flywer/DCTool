@@ -64,6 +64,8 @@ async function electronAppInit() {
         if (setup != null && setup.autoUpdate) {
             handleAutoUpdate()
         }
+
+        await TaskSchedulerController.getInstance().cronJobsStopAll()
     })
 
     if (isDev) {
