@@ -790,7 +790,7 @@ const graphInit = () => {
     layout: {
       type: 'dagre',
       rankdir: 'LR',
-      nodesep: 80, //同层级间节点间距
+      nodesep: 25, //同层级间节点间距
       ranksep: 80, //层级间间距
     },
     edgeStateStyles: {
@@ -1237,8 +1237,8 @@ const showTaskLog = async (taskId: string) => {
         time = jobLog.startTime
         title = jobLog.jobName
         content = `
-        执行结果：<br>${jobLog.msg}<br>
-        结束时间：<br>${jobLog.endTime}<br>
+        执行结果：<br>${jobLog.msg||''}<br>
+        结束时间：<br>${jobLog.endTime||''}<br>
         任务耗时：${calculateDuration(jobLog.startTime, jobLog.endTime)}<br>
         `
 
