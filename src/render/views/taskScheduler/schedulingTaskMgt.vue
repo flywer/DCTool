@@ -64,7 +64,7 @@
       style="width: 80%"
       @afterEnter="jobGraphInit"
   >
-    <n-scrollbar class="pr-2" style="max-height: calc(100vh - 180px);" trigger="hover">
+    <n-scrollbar class="pr-2" style="height: calc(100vh - 180px);" trigger="hover">
       <n-form
           class="mt-4"
           ref="taskConfigModalFormRef"
@@ -91,18 +91,18 @@
                       预测
                     </n-button>
                   </template>
-                  <p v-html="cronTimePrediction"></p>
+                  <p v-html="cronTimePrediction"/>
                 </n-tooltip>
               </template>
 
             </n-input>
           </n-form-item-gi>
 
-          <n-form-item-gi :span="12" label="任务节点配置" :label-style="{userSelect:'none'}">
-            <n-layout style="height: 500px">
-              <n-grid :cols="10" :x-gap="12">
+          <n-form-item-gi id="taskNodeGraph" :span="12" label="任务节点配置" :label-style="{userSelect:'none'}">
+            <n-layout style="height: calc(100vh - 180px - 115px);overflow: hidden">
+              <n-grid :cols="10" :x-gap="12" style="height: 100%">
                 <n-gi :span="2">
-                  <n-layout style="height: 500px">
+                  <n-layout style="height: 100%">
                     <n-scrollbar class="h-full bg-gray-100">
                       <div style="padding: 12px;">
                         <n-space vertical>
@@ -118,8 +118,10 @@
                 </n-gi>
 
                 <n-gi :span="8">
-                  <n-layout style="height: 500px">
-                    <div ref="g6Container" id="g6Container" class="h-full bg-gray-100 overflow-auto relative"/>
+                  <n-layout style="height: 100%">
+                    <div ref="g6Container" id="g6Container" style="height: calc(100vh - 180px - 115px);overflow: hidden"
+                         class="relative bg-gray-100"
+                    />
                   </n-layout>
                 </n-gi>
               </n-grid>
@@ -225,6 +227,7 @@
             </template>
             <template #default>
               <n-space>
+                <p v-if="item.type==='error'" class="m-0" style="font-size: 12px" v-html="item.msg"/>
                 <n-collapse-transition :show="item.show">
                   <n-timeline>
                     <n-timeline-item v-for="item in item.content"
@@ -620,8 +623,8 @@ const jobGraphInit = async () => {
   if (typeof window !== 'undefined') {
     window.onresize = () => {
       if (!graph || graph.get('destroyed')) return;
-      if (!g6Container.value || !g6Container.value.scrollWidth || !g6Container.value.scrollHeight) return;
-      graph.changeSize(g6Container.value.clientWidth, g6Container.value.clientHeight - 5);
+      if (!g6Container.value || !g6Container.value.scrollWidth || !g6Container.value.clientHeight) return;
+      graph.changeSize(g6Container.value.scrollWidth, g6Container.value.clientHeight - 5);
     };
   }
 }
@@ -668,7 +671,6 @@ const graphInit = () => {
       }
     },
     handleMenuClick: (target: HTMLElement, item: Item) => {
-      console.log(target, item)
       switch (target.getAttribute('code')) {
         case 'edit':
           if (item.getType() == 'node') {
@@ -1212,7 +1214,7 @@ const showTaskLog = async (taskId: string) => {
         type = 'warning'
       }
 
-      time = log.endTime
+      time = log.startTime
 
       // job日志
       const jobLog = log.jobLog.reverse()
@@ -1232,11 +1234,11 @@ const showTaskLog = async (taskId: string) => {
           type = 'warning'
         }
 
-        time = jobLog.endTime
+        time = jobLog.startTime
         title = jobLog.jobName
         content = `
         执行结果：<br>${jobLog.msg}<br>
-        开始时间：<br>${jobLog.startTime}<br>
+        结束时间：<br>${jobLog.endTime}<br>
         任务耗时：${calculateDuration(jobLog.startTime, jobLog.endTime)}<br>
         `
 
@@ -1253,6 +1255,7 @@ const showTaskLog = async (taskId: string) => {
         title: title,
         content: taskContent,
         time: time,
+        msg: log.msg,
         show: false
       })
     })
@@ -1282,7 +1285,7 @@ function calculateDuration(startTime: string, endTime: string): string {
 //endregion
 </script>
 
-<style>
+<style scoped>
 .menuItem {
   width: 100px;
   height: 20px;
@@ -1297,5 +1300,10 @@ function calculateDuration(startTime: string, endTime: string): string {
 
 .menuItem:hover {
   background-color: #f3f3f3;
+}
+
+:deep( #taskNodeGraph .n-form-item-feedback-wrapper) {
+  display: none;
+  background-color: #545454;
 }
 </style>
