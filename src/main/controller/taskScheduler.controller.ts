@@ -1,4 +1,4 @@
-import {DCJob, Scheduler, Task} from "@common/taskSchedulerTypes";
+import {DCJob, ExecLog, Scheduler, Task} from "@common/taskSchedulerTypes";
 import {DataXJobLogType, WorkflowType} from "@common/types";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {getAppDataPath} from "@main/utils/appPath";
@@ -142,7 +142,7 @@ export class TaskSchedulerController {
         })
         task.isRunning = true
         await this.handleUpdateTask(task)
-        this.runJobs(task, task.jobList).then(async (res) => {
+        this.parallelExecuteDependentJobs(task, task.jobList).then(async (res) => {
             task.isRunning = false
             task.lastEndTime = getCurrentDateTime()
             task.lastExecResult = res.success ? '成功' : '失败'
@@ -208,6 +208,7 @@ export class TaskSchedulerController {
                                 })
                             } else if (log.handleCode == 200) {
                                 clearInterval(interval); // 停止循环
+                                console.log(`任务[${job.name}]执行成功`)
                                 resolve({
                                     success: true,
                                     msg: `任务执行成功`
@@ -311,24 +312,26 @@ export class TaskSchedulerController {
 
     }
 
-    private async runJobs(task: TaskAlias, jobList: DCJob[]) {
+    // 串行执行
+    private async serialExecuteDependentJobs(task: TaskAlias, jobList: DCJob[]) {
         for (let i = 0; i < jobList.length; i++) {
             const job = jobList[i];
             try {
 
-                task.execLog.at(-1).jobLog.push({
+                const jobLog: ExecLog = {
                     startTime: getCurrentDateTime(),
                     endTime: null,
                     status: 0
-                })
-                // await this.handleUpdateTask(task)
+                }
 
                 const jobResult = await this.runJob(job);
 
-                task.execLog.at(-1).jobLog.at(-1).endTime = getCurrentDateTime()
-                task.execLog.at(-1).jobLog.at(-1).status = jobResult.success ? 1 : 2
-                task.execLog.at(-1).jobLog.at(-1).msg = jobResult.msg
-                task.execLog.at(-1).jobLog.at(-1).jobName = job.name
+                jobLog.endTime = getCurrentDateTime()
+                jobLog.status = jobResult.success ? 1 : 2
+                jobLog.msg = jobResult.msg
+                jobLog.jobName = job.name
+
+                task.execLog.at(-1).jobLog.push(jobLog)
                 // await this.handleUpdateTask(task)
 
                 if (jobResult.success) {
@@ -336,7 +339,7 @@ export class TaskSchedulerController {
                     const newTaskConfig = (await this.handleGetScheduler()).tasks.find(task1 => task1.id == task.id)
 
                     if (typeof newTaskConfig.isEnable != "undefined") {
-                        await this.runJobs(task, job.dependentJobs);
+                        await this.serialExecuteDependentJobs(task, job.dependentJobs);
                     } else {
                         return failure('任务配置异常')
                     }
@@ -348,6 +351,46 @@ export class TaskSchedulerController {
             }
         }
         return success('执行成功')
+    }
+
+    /**
+     * 同级任务中并行执行
+     **/
+    private async parallelExecuteDependentJobs(task: TaskAlias, jobList: DCJob[]) {
+        await Promise.all(jobList.map(async (job) => {
+            try {
+
+                const jobLog: ExecLog = {
+                    startTime: getCurrentDateTime(),
+                    endTime: null,
+                    status: 0
+                }
+
+                const jobResult = await this.runJob(job);
+
+                jobLog.endTime = getCurrentDateTime()
+                jobLog.status = jobResult.success ? 1 : 2
+                jobLog.msg = jobResult.msg
+                jobLog.jobName = job.name
+
+                task.execLog.at(-1).jobLog.push(jobLog)
+
+                if (jobResult.success) {
+                    const newTaskConfig = (await this.handleGetScheduler()).tasks.find((task1) => task1.id === task.id);
+
+                    if (typeof newTaskConfig.isEnable !== "undefined") {
+                        await Promise.all(job.dependentJobs.map(async dependentJob => await this.parallelExecuteDependentJobs(task, [dependentJob])));
+                    } else {
+                        return failure('任务配置异常');
+                    }
+                }
+            } catch (error) {
+                log.error(error);
+                return failure('执行失败');
+            }
+        }));
+
+        return success('执行成功');
     }
 
     @IpcSend(channels.taskScheduler.sendTaskExecEnd, MAIN_WINDOW)
