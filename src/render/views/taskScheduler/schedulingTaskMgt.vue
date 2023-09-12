@@ -120,7 +120,7 @@
                 <n-gi :span="8">
                   <n-layout style="height: 100%">
                     <div ref="g6Container" id="g6Container" style="height: calc(100vh - 180px - 115px);overflow: hidden"
-                         class="relative bg-gray-100"
+                         class="bg-gray-100 relative"
                     />
                   </n-layout>
                 </n-gi>
@@ -1285,7 +1285,7 @@ function calculateDuration(startTime: string, endTime: string): string {
 //endregion
 </script>
 
-<style scoped>
+<style>
 .menuItem {
   width: 100px;
   height: 20px;
@@ -1301,7 +1301,9 @@ function calculateDuration(startTime: string, endTime: string): string {
 .menuItem:hover {
   background-color: #f3f3f3;
 }
+</style>
 
+<style scoped>
 :deep( #taskNodeGraph .n-form-item-feedback-wrapper) {
   display: none;
   background-color: #545454;
