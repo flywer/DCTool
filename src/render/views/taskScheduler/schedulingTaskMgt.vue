@@ -266,7 +266,7 @@
 </template>
 
 <script setup lang="ts">
-import G6, {Graph} from "@antv/g6";
+import G6, {Graph, Algorithm} from "@antv/g6";
 import {INode} from "@antv/g6-core/lib/interface/item";
 import {GraphData, Item} from "@antv/g6-core/lib/types";
 import {DCJob, Task} from "@common/taskSchedulerTypes";
@@ -1150,6 +1150,14 @@ const checkNodes = (nodes: SchedulerJobNodeConfig[]) => {
     return false
   }
 
+  // @ts-ignore
+  const {detectDirectedCycle} = Algorithm;
+  // 此时图中没有环，result 为 null
+  if (detectDirectedCycle(graph.save()) != null) {
+    window.$message.error('图中存在循环依赖!')
+    return false
+  }
+
   return true
 }
 
@@ -1237,8 +1245,8 @@ const showTaskLog = async (taskId: string) => {
         time = jobLog.startTime
         title = jobLog.jobName
         content = `
-        执行结果：<br>${jobLog.msg||''}<br>
-        结束时间：<br>${jobLog.endTime||''}<br>
+        执行结果：<br>${jobLog.msg || ''}<br>
+        结束时间：<br>${jobLog.endTime || ''}<br>
         任务耗时：${calculateDuration(jobLog.startTime, jobLog.endTime)}<br>
         `
 
