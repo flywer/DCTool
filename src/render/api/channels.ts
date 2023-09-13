@@ -20,7 +20,8 @@ export const channels = reactive({
     window: {
         max: 'window/max',
         min: "window/min",
-        close: "window/close"
+        close: "window/close",
+        top: "window/top"
     },
     login: {
         signIn: 'login/signIn',

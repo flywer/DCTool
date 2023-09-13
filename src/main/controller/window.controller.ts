@@ -28,11 +28,16 @@ export class WindowController {
     @IpcHandle(channels.window.close)
     public async windowClose() {
         const setup = await getAppSettings()
-        if (setup!=null && setup.closeAsHidden) {
+        if (setup != null && setup.closeAsHidden) {
             this.mainWindow.hide()
         } else {
             this.mainWindow.close()
         }
+    }
+
+    @IpcHandle(channels.window.top)
+    public async windowTop(value: boolean) {
+        this.mainWindow.setAlwaysOnTop(value)
     }
 
 }

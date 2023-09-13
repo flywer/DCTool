@@ -11,17 +11,25 @@
         </n-gi>
         <n-gi>
           <n-space justify="center" align="center" class="h-full">
-<!--            <div>
-              新版本下载完毕，
-              <n-button quaternary type="info" size="small" style="-webkit-app-region: no-drag;" @click="appInstall">
-                立即安装
-              </n-button>
-            </div>-->
+            <!--            <div>
+                          新版本下载完毕，
+                          <n-button quaternary type="info" size="small" style="-webkit-app-region: no-drag;" @click="appInstall">
+                            立即安装
+                          </n-button>
+                        </div>-->
           </n-space>
         </n-gi>
         <n-gi>
           <n-space justify="end" class="h-full float-right" id="btn-group" inline>
             <n-button-group class="h-full">
+              <n-button size="tiny" :bordered=false class="window-btn" style="height: 100%;" @click="setWindowTop"
+                        v-if="showPin"
+                        :style=" {backgroundColor:windowTop?useThemeVars().value.buttonColor2Hover:null}"
+              >
+                <n-icon size="18" :color="windowTop?useThemeVars().value.primaryColor:null">
+                  <Pin24Regular/>
+                </n-icon>
+              </n-button>
               <n-button size="tiny" :bordered=false class="window-btn" style="height: 100%;" @click="window_min"
                         v-if="showWindowMin"
               >
@@ -61,8 +69,9 @@ import {should_use_dark_theme} from "@render/api/sys.api";
 import {useIpc} from "@render/plugins";
 import {useAppSettingsStore} from "@render/stores/appSettings";
 import {MinusOutlined, BorderOutlined, CloseOutlined} from "@vicons/antd";
-import {window_max, window_min, window_close} from "@render/api/window.api";
-import {darkTheme} from "naive-ui";
+import {Pin24Regular} from "@vicons/fluent"
+import {window_max, window_min, window_close, window_top} from "@render/api/window.api";
+import {darkTheme, useThemeVars} from "naive-ui";
 import {onMounted, ref, watch} from 'vue'
 
 const appSettings = useAppSettingsStore()
@@ -74,7 +83,11 @@ const props = defineProps({
   showBgColor: Boolean,
   showWindowMin: Boolean,
   showWindowMax: Boolean,
-  showWindowClose: Boolean
+  showWindowClose: Boolean,
+  showPin: {
+    type: Boolean,
+    default: false
+  }
 })
 
 // 背景颜色模式   false为浅色
@@ -135,6 +148,12 @@ const setTitle = async () => {
   }
 }
 
+const windowTop = ref(false)
+const setWindowTop = () => {
+  windowTop.value = !windowTop.value
+  window_top(windowTop.value)
+}
+
 /* const appInstall = () => {
 
 } */
@@ -177,6 +196,10 @@ const setTitle = async () => {
     .n-icon {
       color: white;
     }
+  }
+
+  .pin-btn {
+
   }
 }
 

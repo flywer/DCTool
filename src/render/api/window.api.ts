@@ -22,3 +22,7 @@ export const window_min = () => {
 export const window_close = () => {
     return ipcInstance.send<string>(channels.window.close);
 }
+
+export const window_top = (value:boolean) => {
+    return ipcInstance.send<string>(channels.window.top,value);
+}

@@ -5,6 +5,7 @@
       :show-window-min="true"
       :show-window-max="user.isLogin"
       :show-window-close="true"
+      :show-pin="user.isLogin"
   />
   <MainLayout v-if="user.isLogin"/>
   <LoginLayout v-else/>
