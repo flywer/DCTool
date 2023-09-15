@@ -281,7 +281,11 @@ const updateByExcel = () => {
       window.$message.success(res.message)
       tableDataInit(queryParam.value)
     } else {
-      window.$message.error(res.message)
+      window.$notification.create({
+        title: "文件导入失败",
+        content: res.message,
+        type: "error"
+      })
     }
   })
 }

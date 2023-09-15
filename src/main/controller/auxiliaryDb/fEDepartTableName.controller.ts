@@ -26,21 +26,23 @@ export class FEDepartTableNameController {
     public async handleUpdateFETableNameByExcel() {
 
         const templateCheck = (worksheet: ExcelJS.Worksheet) => {
-            if (worksheet.getCell('A2').text != '数源单位' || worksheet.getCell('B2').text != '数据元分类号' || worksheet.getCell('C2').text != '表名') {
-                return failure('模板错误：表头错误')
-            }
-
-            (worksheet.getColumn(2) as ExcelJS.Column).eachCell((cell, rowNumber) => {
-                if (rowNumber > 2) {
-                    if (basicTableNames.includes(cell.text.toLowerCase()) || actionTableNames.includes(cell.text.toLowerCase()) || cell.text == 'DATA_CHECK') {
-
-                    } else {
-                        return failure(`数据错误：[B,${rowNumber}]数据元分类号不在规定范围内`)
-                    }
+            return new Promise((resolve, reject) => {
+                if (worksheet.getCell('A2').text != '数源单位' || worksheet.getCell('B2').text != '数据元分类号' || worksheet.getCell('C2').text != '表名') {
+                    reject(failure('模板错误：表头错误'))
                 }
-            })
 
-            return success()
+                (worksheet.getColumn(2) as ExcelJS.Column).eachCell((cell, rowNumber) => {
+                    if (rowNumber > 2) {
+                        if (!basicTableNames.includes(cell.text.toLowerCase()) &&
+                            !actionTableNames.includes(cell.text.toLowerCase()) &&
+                            cell.text != 'DATA_CHECK') {
+                            reject(failure(`数据错误：[B,${rowNumber}]数据元分类号(${cell.text})不在规定值域范围内`))
+                        }
+                    }
+                })
+
+                resolve(success())
+            })
         }
 
         return new Promise<any>(async (resolve) => {
@@ -62,12 +64,7 @@ export class FEDepartTableNameController {
                             await (workbook.xlsx as ExcelJS.Xlsx).readFile(result.filePaths[0]);
 
                             workbook.eachSheet((worksheet: ExcelJS.Worksheet) => {
-                                console.log(worksheet.getCell('A2').text)
-                                console.log(worksheet.getCell('B2').text)
-                                console.log(worksheet.getCell('C2').text)
-
-                                const check = templateCheck(worksheet)
-                                if (check.success) {
+                                templateCheck(worksheet).then(() => {
                                     worksheet.eachRow(async (row: ExcelJS.Row, rowNumber) => {
                                         if (rowNumber > 2) {
                                             const updateArr: FEDepartTableName[] = []
@@ -96,11 +93,9 @@ export class FEDepartTableNameController {
 
                                         }
                                     })
-
-                                } else {
-                                    resolve(check)
-                                }
-
+                                }).catch(error => {
+                                    resolve(error)
+                                })
                             })
 
                         } catch (e) {
