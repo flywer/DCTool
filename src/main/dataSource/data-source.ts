@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import {ActivationKey} from "@main/entity/ActivationKey";
 import {Dict} from "@main/entity/Dict";
+import {FEDepartTableName} from "@main/entity/FEDepartTableName";
 import {GdsztkDict} from "@main/entity/GdsztkDict";
 import {JobDetail} from "@main/entity/JobDetail";
 import {JobJson} from "@main/entity/JobJson";
@@ -30,7 +31,8 @@ export const AppDataSource = new DataSource({
         User,
         ActivationKey,
         JobDetail,
-        ProjectJobDependency
+        ProjectJobDependency,
+        FEDepartTableName
     ],
     migrations: [],
     subscribers: [],

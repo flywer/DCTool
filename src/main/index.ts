@@ -1,4 +1,5 @@
 import {DictController} from "@main/controller/auxiliaryDb/dict.controller";
+import {FEDepartTableNameController} from "@main/controller/auxiliaryDb/fEDepartTableName.controller";
 import {JobJsonController} from "@main/controller/auxiliaryDb/jobJson.controller";
 import {PreDatabaseController} from "@main/controller/auxiliaryDb/preDatabase.controller";
 import {SztkDictController} from "@main/controller/auxiliaryDb/sztkDict.controller";
@@ -116,7 +117,8 @@ async function bootstrap() {
                         PreDatabaseController,
                         SztkDictController,
                         DictController,
-                        TaskSchedulerController
+                        TaskSchedulerController,
+                        FEDepartTableNameController
                     ],
                 injects: [{
                     name: 'IS_DEV',

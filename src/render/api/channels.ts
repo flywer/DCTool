@@ -128,6 +128,12 @@ export const channels = reactive({
             getPreDatabaseDepart: 'auxiliaryDb/preDatabase/getPreDatabaseDepart',
             getPreDatabaseTableInfoJson: 'auxiliaryDb/preDatabase/getPreDatabaseTableInfoJson',
             updateTableInfoJson: 'auxiliaryDb/preDatabase/updateTableInfoJson',
+            updateFETableNameByExcel: 'auxiliaryDb/preDatabase/updateFETableNameByExcel',
+            getFEDepartTableNameByPage: 'auxiliaryDb/preDatabase/getFEDepartTableNameByPage',
+            downloadTemplate: 'auxiliaryDb/preDatabase/downloadTemplate',
+            getInfoByDepartNameAndTableType: 'auxiliaryDb/preDatabase/getInfoByDepartNameAndTableType',
+            updateFETableName: 'auxiliaryDb/preDatabase/updateFETableName',
+            deleteFETableName: 'auxiliaryDb/preDatabase/deleteFETableName',
         },
         sztkDict: {
             getSztkDict: 'auxiliaryDb/sztkDict/getSztkDict',

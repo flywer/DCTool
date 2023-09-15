@@ -1,10 +1,13 @@
 <template>
   <n-layout class="m-2">
     <n-tabs type="line" animated>
-      <n-tab-pane name="1" tab="行为数据字段情况查询">
+      <n-tab-pane name="1" tab="表名关联">
+        <table-name-association/>
+      </n-tab-pane>
+      <n-tab-pane name="2" tab="行为数据字段情况查询">
         <action-data-problem-query/>
       </n-tab-pane>
-      <n-tab-pane name="2" tab="行为数据统计查询">
+      <n-tab-pane name="3" tab="行为数据统计查询">
         <action-data-sum-stat/>
       </n-tab-pane>
     </n-tabs>
@@ -14,6 +17,7 @@
 <script setup lang="ts">
 import ActionDataProblemQuery from "@render/views/preDatabase/actionDataProblemQuery.vue";
 import ActionDataSumStat from "@render/views/preDatabase/actionDataSumStat.vue";
+import TableNameAssociation from "@render/views/preDatabase/tableNameAssociation.vue";
 </script>
 
 <style scoped>

@@ -30,6 +30,11 @@ export type PageVo = {
     searchParam: string
 }
 
+export type PageResult<T> = {
+    records: T[],
+    total: number
+}
+
 // 数据统计质检记录类型
 export type InspectionDataStatType = {
     orgName: string,
