@@ -1,7 +1,8 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      数据量来源于数源单位的中台备份表<B>去重</B>后的数据量
+      数据量来源于数源单位的中台备份表<B>去重</B>后的数据量<br>
+    一次不要执行太多，会超时
     </n-alert>
 
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -213,7 +214,6 @@ const execSql = async () => {
   }
 
   await exec_sql(paramModel).then((res) => {
-    console.log(res)
     if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
       window.$message.success('执行成功')
     } else {
