@@ -53,7 +53,6 @@ import {actionTableNames} from "@render/utils/datacenter/constants";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
-import {uuid} from "vue3-uuid";
 
 onMounted(() => {
   tableOptionsInit()
