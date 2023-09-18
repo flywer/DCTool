@@ -38,3 +38,8 @@ export const update_cj_cron = async (obj: { projectName?: string, projectId: str
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.projectInfo.updateCjCron, JSON.stringify(obj)))
     return data
 }
+
+export const get_project_info = async (): Promise<ProjectInfo[]> => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.projectInfo.getProjectInfo))
+    return data
+}
