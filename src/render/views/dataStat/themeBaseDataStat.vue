@@ -12,7 +12,7 @@
               label-placement="left"
       >
         <n-grid :cols="10" :x-gap="12">
-          <n-form-item-gi :span="10" label="行为表选择">
+          <n-form-item-gi :span="10" label="数据表选择">
             <n-tree-select
                 v-model:value="formModel.tableSelect"
                 multiple
