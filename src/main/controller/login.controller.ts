@@ -1,5 +1,6 @@
 import {AppDataSource} from "@main/dataSource/data-source";
 import {FrontSource} from "@main/dataSource/front-source";
+import {ShareSource} from "@main/dataSource/share-source";
 import {ActivationKey} from "@main/entity/ActivationKey";
 import {User} from "@main/entity/User";
 import {getAppDataPath} from "@main/utils/appPath";
@@ -67,6 +68,10 @@ export class LoginController {
                                     FrontSource.initialize().then(async () => {
                                         log.info("前置机数据源连接初始化成功")
                                     }).catch(error => log.error('前置机数据源连接失败', error))
+
+                                    ShareSource.initialize().then(async () => {
+                                        log.info("共享库数据源连接初始化成功")
+                                    }).catch(error => log.error('共享库数据源连接失败', error))
 
                                     setTimeout(() => {
                                         this.mainWindow.center()

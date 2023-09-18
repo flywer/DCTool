@@ -1,4 +1,5 @@
 import "reflect-metadata"
+import {ThemeBaseStat} from "@main/entity/frontEnd/ThemeBaseStat";
 import {DataSource} from "typeorm"
 
 export const FrontSource = new DataSource({
@@ -10,7 +11,7 @@ export const FrontSource = new DataSource({
     database: "lptdatashare",
     synchronize: false,
     logging: false,
-    entities: [],
+    entities: [ThemeBaseStat],
     migrations: [],
     subscribers: [],
 })

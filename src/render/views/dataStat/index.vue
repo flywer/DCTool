@@ -10,6 +10,9 @@
       <n-tab-pane name="3" tab="数据湖数据量统计">
         <data-lake-data-stat/>
       </n-tab-pane>
+      <n-tab-pane name="4" tab="主题库数据量统计">
+        <theme-base-data-stat/>
+      </n-tab-pane>
     </n-tabs>
   </n-layout>
 </template>
@@ -18,6 +21,7 @@
 import DataLakeDataStat from "@render/views/dataStat/dataLakeDataStat.vue";
 import FrontEndDataStat from "@render/views/dataStat/frontEndDataStat.vue";
 import QualityInspStat from "@render/views/dataStat/qualityInspStat.vue";
+import ThemeBaseDataStat from "@render/views/dataStat/themeBaseDataStat.vue";
 </script>
 
 <style scoped>

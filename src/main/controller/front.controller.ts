@@ -1,4 +1,5 @@
 import {FrontSource} from "@main/dataSource/front-source";
+import {ThemeBaseStat} from "@main/entity/frontEnd/ThemeBaseStat";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
 import log from 'electron-log'
@@ -29,6 +30,10 @@ export class FrontController {
         }
 
         return data
+    }
+
+    public async handleInsertToThemeBaseDataVolume(res: any[]) {
+        return FrontSource.getRepository(ThemeBaseStat).insert(res)
     }
 
 }

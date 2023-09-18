@@ -177,5 +177,8 @@ export const channels = reactive({
         taskRun: 'taskScheduler/taskRun',
         sendTaskExecEnd: 'taskScheduler/sendTaskExecEnd',
         taskInterrupt: 'taskScheduler/taskInterrupt',
+    },
+    share: {
+        getDataVolume: 'share/getDataVolume'
     }
 })

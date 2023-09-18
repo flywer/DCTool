@@ -13,6 +13,7 @@ import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import {LoginController} from "@main/controller/login.controller";
 import {ProjectInfoController} from "@main/controller/auxiliaryDb/projectInfo.controller";
 import {ProjectJobDependencyController} from "@main/controller/projectJobDependency.controller";
+import {ShareController} from "@main/controller/share.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {SysController} from "@main/controller/sys.controller";
 import {TaskSchedulerController} from "@main/controller/taskScheduler.controller";
@@ -118,7 +119,8 @@ async function bootstrap() {
                         SztkDictController,
                         DictController,
                         TaskSchedulerController,
-                        FEDepartTableNameController
+                        FEDepartTableNameController,
+                        ShareController
                     ],
                 injects: [{
                     name: 'IS_DEV',
