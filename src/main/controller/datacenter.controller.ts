@@ -547,7 +547,8 @@ export class DatacenterController {
                             resolve(res);
                         } catch (err) {
                             log.error(data)
-                            reject(err);
+                            this.handleAuthTokenNotice()
+                            resolve(null);
                         }
                     });
                 });
@@ -592,7 +593,8 @@ export class DatacenterController {
                             resolve(res);
                         } catch (err) {
                             log.error(err)
-                            reject(err);
+                            this.handleAuthTokenNotice()
+                            resolve(null);
                         }
                     });
                 });

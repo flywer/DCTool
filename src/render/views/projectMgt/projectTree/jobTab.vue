@@ -899,7 +899,7 @@ const tableDataInit = async () => {
       size: 10000,
       jobDesc: `${projectAbbr}_${queryParam.value.tableAbbr}`,
       subsystemName: "采集"
-    })).data.records
+    })).data?.records || []
 
     let newDataXJobs = []
 
@@ -965,7 +965,7 @@ const tableDataInit = async () => {
       size: 10000,
       status: null,
       procName: `${projectAbbr}_${queryParam.value.tableAbbr}`
-    })).data.records
+    })).data?.records || []
 
     let newWorkflowJobs = []
 

@@ -57,14 +57,14 @@ export const getDCTableIsValidConfig = async (tableAbbr: string, tableName: stri
 
     const validTableName = `di_${tableAbbr}_${tableName.toLowerCase()}_temp_ods`
 
-    const records = (await get_valid_config_page(validTableName)).data.records
+    const records = (await get_valid_config_page(validTableName)).data?.records||[]
 
     return !(isEmpty(records) || records[0].tableName != validTableName);
 }
 
 // 查询自定义表的质检任务是否已配置
 export const getCustomTableValidConfig = async (tableName: string) => {
-    const records = (await get_valid_config_page(tableName)).data.records
+    const records = (await get_valid_config_page(tableName)).data?.records||[]
 
     return !(isEmpty(records) || records[0].tableName != tableName);
 }
