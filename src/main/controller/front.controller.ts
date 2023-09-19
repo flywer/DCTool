@@ -1,8 +1,11 @@
 import {FrontSource} from "@main/dataSource/front-source";
-import {ThemeBaseStat} from "@main/entity/frontEnd/ThemeBaseStat";
+import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
+import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
+import {ThemeBaseDataVolume} from "@main/entity/frontEnd/ThemeBaseDataVolume";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
 import log from 'electron-log'
+import {Like} from "typeorm";
 
 @Controller()
 export class FrontController {
@@ -33,7 +36,45 @@ export class FrontController {
     }
 
     public async handleInsertToThemeBaseDataVolume(res: any[]) {
-        return FrontSource.getRepository(ThemeBaseStat).insert(res)
+        return FrontSource.getRepository(ThemeBaseDataVolume).insert(res)
+    }
+
+    @IpcHandle(channels.front.getAllFrontEndDataVol)
+    public async handleGetAllFrontEndDataVol() {
+        return FrontSource.getRepository(FrontEndDataVolume).find()
+    }
+
+    @IpcHandle(channels.front.getFrontEndDataVolByDepartNameAndTableType)
+    public async handleGetFrontEndDataVolByDepartNameAndTableType(departName: string, tableType: string) {
+        return FrontSource.getRepository(FrontEndDataVolume).findOne({
+            where: {
+                departName: Like(`${departName}%`),
+                tableType: tableType
+            },
+            order: {updateTime: 'desc'}
+        })
+    }
+
+    @IpcHandle(channels.front.getDataLakeDataVolByDepartNameAndTableType)
+    public async handleGetDataLakeDataVolByDepartNameAndTableType(departName: string, tableType: string) {
+        return FrontSource.getRepository(DataLakeDataVolume).findOne({
+            where: {
+                departName: Like(`${departName}%`),
+                tableType: tableType
+            },
+            order: {updateTime: 'desc'}
+        })
+    }
+
+    @IpcHandle(channels.front.getThemeBaseDataVolByDepartNameAndTableType)
+    public async handleGetThemeBaseDataVolByDepartNameAndTableType(departName: string, tableType: string) {
+        return FrontSource.getRepository(ThemeBaseDataVolume).findOne({
+            where: {
+                departName: Like(`${departName}%`),
+                tableType: tableType
+            },
+            order: {updateTime: 'desc'}
+        })
     }
 
 }

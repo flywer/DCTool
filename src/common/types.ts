@@ -402,3 +402,13 @@ export type DataXJobQueryParams = {
     subsystemName?: '采集'
 }
 // endregion
+
+export  type DepartDataVolExcelDataType = {
+    departName: string,
+    tableType: string,
+    tableComment: string,
+    feTableName: string,
+    feDataCount: string,
+    dataLakeDataCount: string,
+    themeBaseDataCount: string
+}

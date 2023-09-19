@@ -13,12 +13,16 @@
       <n-tab-pane name="4" tab="主题库数据量统计">
         <theme-base-data-stat/>
       </n-tab-pane>
+     <n-tab-pane name="5" tab="全省单位数据量统计">
+        <depart-data-volume-stat/>
+      </n-tab-pane>
     </n-tabs>
   </n-layout>
 </template>
 
 <script setup lang="ts">
 import DataLakeDataStat from "@render/views/dataStat/dataLakeDataStat.vue";
+import DepartDataVolumeStat from "@render/views/dataStat/departDataVolumeStat.vue";
 import FrontEndDataStat from "@render/views/dataStat/frontEndDataStat.vue";
 import QualityInspStat from "@render/views/dataStat/qualityInspStat.vue";
 import ThemeBaseDataStat from "@render/views/dataStat/themeBaseDataStat.vue";

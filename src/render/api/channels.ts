@@ -134,6 +134,7 @@ export const channels = reactive({
             getInfoByDepartNameAndTableType: 'auxiliaryDb/preDatabase/getInfoByDepartNameAndTableType',
             updateFETableName: 'auxiliaryDb/preDatabase/updateFETableName',
             deleteFETableName: 'auxiliaryDb/preDatabase/deleteFETableName',
+            getAllFEDepartTableName: 'auxiliaryDb/preDatabase/getAllFEDepartTableName',
         },
         sztkDict: {
             getSztkDict: 'auxiliaryDb/sztkDict/getSztkDict',
@@ -159,9 +160,15 @@ export const channels = reactive({
     xlsx: {
         createDataInpsStat: 'xlsx/createDataInpsStat',
         generateInsertStatements: 'xlsx/generateInsertStatements',
+        createDepartDataVolExcel: 'xlsx/createDepartDataVolExcel',
     },
     front: {
-        getTableData: 'front/getTableData'
+        getTableData: 'front/getTableData',
+        getAllFrontEndDataVol: 'front/getAllFrontEndDataVol',
+        getFrontEndDataVolByDepartNameAndTableType: 'front/getFrontEndDataVolByDepartNameAndTableType',
+        getDataLakeDataVolByDepartNameAndTableType: 'front/getDataLakeDataVolByDepartNameAndTableType',
+        getThemeBaseDataVolByDepartNameAndTableType: 'front/getThemeBaseDataVolByDepartNameAndTableType',
+
     },
     updater: {
         msg: 'updater/msg'

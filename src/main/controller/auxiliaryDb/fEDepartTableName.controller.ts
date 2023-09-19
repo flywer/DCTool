@@ -108,6 +108,11 @@ export class FEDepartTableNameController {
         })
     }
 
+    @IpcHandle(channels.auxiliaryDb.preDatabase.getAllFEDepartTableName)
+    public handleGetAllFEDepartTableName() {
+        return AppDataSource.getRepository(FEDepartTableName).find()
+    }
+
     @IpcHandle(channels.auxiliaryDb.preDatabase.getFEDepartTableNameByPage)
     public async handleGetFEDepartTableNameByPage(page: PageVoAlias) {
 

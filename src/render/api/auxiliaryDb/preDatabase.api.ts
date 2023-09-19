@@ -50,4 +50,7 @@ export const delete_FE_TableName = async (id: number): Promise<Result> => {
     return data
 }
 
-
+export const get_all_FE_TableName = async (): Promise<FEDepartTableName[]> => {
+    const {data} = await ipcInstance.send(channels.auxiliaryDb.preDatabase.getAllFEDepartTableName)
+    return data
+}
