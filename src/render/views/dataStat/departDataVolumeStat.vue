@@ -61,9 +61,7 @@ const generateData = () => {
     })
 
     // 生成Excel
-    create_depart_data_vol_excel(excelDataArr).then(res => {
-
-    }).catch(() => {
+    create_depart_data_vol_excel(excelDataArr).catch(() => {
       window.$message.error('生成Excel失败')
       isGenerating.value = false
     })

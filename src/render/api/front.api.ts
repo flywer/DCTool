@@ -1,4 +1,3 @@
-import {FEDepartTableName} from "@main/entity/FEDepartTableName";
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
 import {ThemeBaseDataVolume} from "@main/entity/frontEnd/ThemeBaseDataVolume";
