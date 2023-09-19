@@ -222,9 +222,9 @@ const handleSignUp = () => {
               window.$message.error(res.message)
             }
           })
-          .finally(() => isSignIn.value = false)
+          .finally(() => isSignUp.value = false)
     } else {
-      isSignIn.value = false
+      isSignUp.value = false
     }
   })
 }
