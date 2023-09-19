@@ -85,9 +85,10 @@
           </n-tabs>
         </template>
         <!--省政数局主体信息采集-->
-        <template v-if="useProjectTreeStore().defaultSelectedKeys[0]==='2-0'">
-          <szsj-subject-tab/>
-        </template>
+        <szsj-subject-tab v-if="useProjectTreeStore().defaultSelectedKeys[0]==='2-0'"/>
+
+        <front-end-data-vol-tab v-if="useProjectTreeStore().defaultSelectedKeys[0]==='2-1-0'"/>
+        <data-lake-data-vol-tab v-if="useProjectTreeStore().defaultSelectedKeys[0]==='2-1-1'"/>
 
       </n-layout-content>
     </n-layout>
@@ -99,8 +100,10 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import JobInspectionTab from "@render/views/projectMgt/projectTree/jobInspectionTab.vue";
 import JobTab from "@render/views/projectMgt/projectTree/jobTab.vue";
+import DataLakeDataVolTab from "@render/views/projectMgt/projectTree/other/dataLakeDataVolTab.vue";
+import FrontEndDataVolTab from "@render/views/projectMgt/projectTree/other/frontEndDataVolTab.vue";
 import ProjectTablesTab from "@render/views/projectMgt/projectTree/projectTablesTab.vue";
-import SzsjSubjectTab from "@render/views/projectMgt/projectTree/szsjSubjectTab.vue";
+import SzsjSubjectTab from "@render/views/projectMgt/projectTree/other/szsjSubjectTab.vue";
 import {onMounted, ref, h} from 'vue'
 import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
