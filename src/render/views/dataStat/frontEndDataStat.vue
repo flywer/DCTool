@@ -2,7 +2,7 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
       数据量来源于数源单位的中台备份表<B>去重</B>后的数据量<br>
-    一次不要执行太多，会超时
+      一次不要执行太多，会超时
     </n-alert>
 
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
@@ -34,8 +34,16 @@
 
     <n-space justify="center" align="center" class="mt-2">
       <n-button type="primary" class="w-28" @click="generateSql" :loading="isGenerating">生成SQL</n-button>
-      <n-button type="primary" class="w-28" @click="execSql" :loading="isExecuting" :disabled="insertSql.length==0">
+      <n-button type="primary" @click="execSql" :loading="isExecuting" :disabled="insertSql.length==0">
         执行SQL
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-icon size="16" class="m-0.5" style="line-height: 22px">
+              <QuestionCircleTwotone/>
+            </n-icon>
+          </template>
+          将数据插入到中台xzzf_sjtj_front_end表中，执行后需等待3-5分钟数据才会存入此表
+        </n-tooltip>
       </n-button>
     </n-space>
 
@@ -57,6 +65,7 @@ import {getCurrentDateTime} from "@main/utils/dateUtils";
 import {get_project_by_pro_abbr, get_project_info} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql, get_workflow_page} from "@render/api/datacenter.api";
+import {QuestionCircleTwotone} from "@vicons/antd";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";

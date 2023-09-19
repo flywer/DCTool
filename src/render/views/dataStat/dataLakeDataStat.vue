@@ -32,6 +32,14 @@
       <n-button type="primary" class="w-28" @click="generateSql" :loading="isGenerating">生成SQL</n-button>
       <n-button type="primary" class="w-28" @click="execSql" :loading="isExecuting" :disabled="insertSql.length==0">
         执行SQL
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-icon size="16" class="m-0.5" style="line-height: 22px">
+              <QuestionCircleTwotone/>
+            </n-icon>
+          </template>
+          将数据插入到中台xzzf_sjtj_data_lake表中，执行后需等待3-5分钟数据才会存入此表
+        </n-tooltip>
       </n-button>
     </n-space>
 
@@ -50,6 +58,7 @@
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql} from "@render/api/datacenter.api";
 import {actionTableNames} from "@render/utils/datacenter/constants";
+import {QuestionCircleTwotone} from "@vicons/antd";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";

@@ -1,12 +1,13 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      统计各单位前置机（去重后）、数据湖、主题库数据量<br>
-      因数据库与数据限制，目前只能全量统计，无法选择部门
+      统计各单位前置机（去重后）、数据湖、主题库数据量；<br>
+      因数据库与数据限制，目前只能全量统计，无法选择部门；<br>
+      未统计基础数据
     </n-alert>
 
     <n-space justify="center" align="center" class="mt-2">
-      <n-button type="primary" class="w-28" @click="generateData" :loading="isGenerating">生成Excel</n-button>
+      <n-button type="primary" @click="generateData" :loading="isGenerating">{{ buttonText }}</n-button>
     </n-space>
   </n-scrollbar>
 </template>
@@ -24,10 +25,11 @@ import {basicTableNames} from "@render/utils/datacenter/constants";
 import {ref} from "vue";
 
 const isGenerating = ref(false)
+const buttonText = ref('生成Excel')
 const generateData = () => {
 
   isGenerating.value = true
-
+  buttonText.value = '获取单位表名关联信息...'
   const excelDataArr: DepartDataVolExcelDataType[] = []
 
   // 获取单位表名关联数据
@@ -35,6 +37,9 @@ const generateData = () => {
     for (const depart of departs) {
       // 过滤基础数据
       if (!basicTableNames.includes(depart.tableType.toLowerCase())) {
+
+        buttonText.value = `处理${depart.departName}数据...`
+
         const dataRow: DepartDataVolExcelDataType = {
           departName: depart.departName,
           tableType: depart.tableType,
@@ -60,16 +65,23 @@ const generateData = () => {
       return a.tableType.localeCompare(b.tableType);
     })
 
+    buttonText.value = `生成Excel中...`
+
     // 生成Excel
     create_depart_data_vol_excel(excelDataArr).catch(() => {
       window.$message.error('生成Excel失败')
       isGenerating.value = false
+      buttonText.value = `生成Excel`
     })
 
   }).catch(() => {
     window.$message.error('获取单位表名关联数据失败')
     isGenerating.value = false
-  }).finally(() => isGenerating.value = false)
+    buttonText.value = `生成Excel`
+  }).finally(() => {
+    isGenerating.value = false
+    buttonText.value = `生成Excel`
+  })
 
 }
 </script>

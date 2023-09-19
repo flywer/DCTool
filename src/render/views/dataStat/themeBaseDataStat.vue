@@ -33,6 +33,14 @@
       <n-button type="primary" class="w-28" @click="generateSql" :loading="isGenerating">生成SQL</n-button>
       <n-button type="primary" @click="execSql" :loading="isExecuting" :disabled="insertSql.length==0">
         同步至前置机
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-icon size="16" class="m-0.5" style="line-height: 22px">
+              <QuestionCircleTwotone/>
+            </n-icon>
+          </template>
+          将数据插入到前置机xzzf_sjtj_theme_base表中
+        </n-tooltip>
       </n-button>
     </n-space>
 
@@ -51,6 +59,7 @@
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_data_volume} from "@render/api/shareBase.api";
 import {actionTableNames, basicTableNames} from "@render/utils/datacenter/constants";
+import {QuestionCircleTwotone} from "@vicons/antd";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
