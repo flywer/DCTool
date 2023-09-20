@@ -52,17 +52,23 @@ export const readFsSync = (filePath: string) => {
  **/
 export const readFsAsync = async (filePath: string) => {
     try {
-        return await fs.promises.readFile(filePath,'utf-8');
+        return await fs.promises.readFile(filePath, 'utf-8');
     } catch (error) {
         log.error(error);
         return null;
     }
 };
 
-export const jsonfileWrite = (filePath: string, obj: any, option?: {}) => {
-    jsonfile.writeFile(filePath, obj, option, function (err: any) {
-        if (err) {
-            log.error(err)
-        }
+export const jsonfileWrite = async (filePath: string, obj: any, option?: {}) => {
+    return new Promise((resolve, reject) => {
+        jsonfile.writeFile(filePath, obj, option)
+            .then(() => {
+                resolve(true)
+            })
+            .catch((error: any) => {
+                console.error(error)
+                reject(false)
+            })
     })
+
 }

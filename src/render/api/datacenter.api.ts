@@ -30,6 +30,11 @@ export const get_datasource_list = async (current: number, size: number) => {
     return data.data?.records || []
 }
 
+export const get_all_datasource = async (datasource: string) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getAllDataSource, datasource))
+    return data.data || []
+}
+
 // 检验insert语句
 export const check_insert_sql = async (obj: any) => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.checkInsertSql, obj))

@@ -97,6 +97,14 @@ export class DatacenterController {
         });
     }
 
+    @IpcHandle(channels.datacenter.getAllDataSource)
+    public async handleGetAllDataSource(datasource: string) {
+        const query = `datasource=${datasource}`
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonGetRequest('/gather/api/jobJdbcDatasource/findAll', query))
+        });
+    }
+
     @IpcHandle(channels.datacenter.checkInsertSql)
     public async handleCheckInsertSql(params: any) {
         return new Promise<any>(async (resolve) => {

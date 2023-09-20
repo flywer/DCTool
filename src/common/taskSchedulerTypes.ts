@@ -23,9 +23,18 @@ export interface Task {
 
 export interface DCJob {
     id: string,
-    jobType: 'dataX' | 'workflow'
+    jobType: 'dataX' | 'workflow' | 'sparkSql' | 'mysql'
     name: string;
     dependentJobs: DCJob[]; //依赖此任务的任务列表
+    sqlConfig?: SqlConfig
+}
+
+export interface SqlConfig {
+    dbType: 'tbds-hive' | 'mysql',
+    dbId: string,
+    sql: string,
+    timeout:number,
+    isRunning: boolean
 }
 
 export interface ExecLog {

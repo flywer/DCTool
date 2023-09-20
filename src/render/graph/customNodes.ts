@@ -1,5 +1,6 @@
 import {ShapeDefine, ShapeOptions} from "@antv/g6-core/lib/interface/shape";
 import {NodeConfig} from "@antv/g6-core/lib/types";
+import {SqlConfig} from "@common/taskSchedulerTypes";
 import cube from "@render/assets/graph/cube.svg"
 
 // 自定义节点注册类型
@@ -171,10 +172,12 @@ export const jobNode: CustomNodeType = {
 export interface SchedulerJobNodeConfig extends NodeConfig {
     jobName: string,
     // 任务类型
-    jobType: 'dataX' | 'workflow',
+    jobType: 'dataX' | 'workflow' | 'sparkSql' | 'mysql',
     //  1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常 5：未反馈
     jobStatus: 1 | 2 | 3 | 4 | 5,
-    jobId: string
+    jobId: string,
+    title?: string,
+    sqlConfig?: SqlConfig
 }
 
 export const schedulerTaskNode: CustomNodeType = {
@@ -197,7 +200,7 @@ export const schedulerTaskNode: CustomNodeType = {
                     height: _mainHeight,
                     stroke: _mainColor,
                     radius: _rectRadius,
-                    lineWidth:2
+                    lineWidth: 2
                 },
                 name: 'main-box',
                 draggable: true,
@@ -239,7 +242,7 @@ export const schedulerTaskNode: CustomNodeType = {
                     fontSize: 14,
                     fontFamily: 'Microsoft PhagsPa',
                     lineHeight: 20,
-                    text: cfg.jobType == 'dataX' ? 'DataX任务' : '工作流任务',
+                    text: cfg.title,
                     fill: '#fff',
                 },
                 name: 'jobType',
@@ -267,31 +270,49 @@ export const schedulerTaskNode: CustomNodeType = {
                     y: 25,
                     x: 8,
                     lineHeight: 20,
-                    text: `任务名：${cfg.jobName || '--'}`,
+                    text: `任务名称：${cfg.jobName || '--'}`,
                     fill: 'rgba(0,0,0, 0.4)',
-                    cursor:'pointer'
+                    cursor: 'pointer'
                 },
                 name: `jobName`,
                 draggable: true,
             });
 
             function setJobStatusText(jobStatus: number) {
-                switch (jobStatus) {
-                    case 1: //停用
-                        return '停用 ⏹️'
 
-                    case 2: //启用
+                if (cfg.jobType == 'sparkSql' || cfg.jobType == 'mysql') {
+
+                    if (typeof cfg?.sqlConfig?.isRunning == 'undefined') {
+                        //启用
                         return '启用 ✔️'
+                    } else {
+                        if (cfg.sqlConfig.isRunning) {
+                            // 运行中
+                            return '运行中 🟢'
+                        } else {
+                            //启用
+                            return '启用 ✔️'
+                        }
+                    }
 
-                    case 3: // 运行中
-                        return '运行中 🟢'
+                } else {
+                    switch (jobStatus) {
+                        case 1: //停用
+                            return '停用 ⏹️'
 
-                    case 4: //异常
-                        return '异常 ❌'
-                    case 5: //未反馈
-                        return '未反馈 ⚪'
-                    default:
-                        return '未知 ❔'
+                        case 2: //启用
+                            return '启用 ✔️'
+
+                        case 3: // 运行中
+                            return '运行中 🟢'
+
+                        case 4: //异常
+                            return '异常 ❌'
+                        case 5: //未反馈
+                            return '未反馈 ⚪'
+                        default:
+                            return '未知 ❔'
+                    }
                 }
             }
 

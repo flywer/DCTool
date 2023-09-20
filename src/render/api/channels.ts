@@ -88,6 +88,7 @@ export const channels = reactive({
         updateIsProcessed: 'datacenter/updateIsProcessed',
         runDataxJobByJobContent: 'datacenter/runDataxJobByJobContent',
         getSchedJobById: 'datacenter/getSchedJobById',
+        getAllDataSource: 'datacenter/getAllDataSource',
     },
     auxiliaryDb: {
         projectInfo: {
@@ -184,6 +185,7 @@ export const channels = reactive({
         taskRun: 'taskScheduler/taskRun',
         sendTaskExecEnd: 'taskScheduler/sendTaskExecEnd',
         taskInterrupt: 'taskScheduler/taskInterrupt',
+        findJobById: 'taskScheduler/findJobById'
     },
     share: {
         getDataVolume: 'share/getDataVolume'

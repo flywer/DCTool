@@ -1,4 +1,4 @@
-import {Scheduler, Task} from "@common/taskSchedulerTypes";
+import {DCJob, Scheduler, Task} from "@common/taskSchedulerTypes";
 import {Result} from "@main/vo/resultVo";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
@@ -35,5 +35,10 @@ export const task_run = async (task: Task): Promise<Result> => {
 
 export const task_interrupt = async (task: Task): Promise<Result> => {
     const {data} = await ipcInstance.send(channels.taskScheduler.taskInterrupt, JSON.stringify(task))
+    return data
+}
+
+export const find_job_by_id = async (jobId: string, taskId: string): Promise<DCJob> => {
+    const {data} = await ipcInstance.send(channels.taskScheduler.findJobById, jobId, taskId)
     return data
 }

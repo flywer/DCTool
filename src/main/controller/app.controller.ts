@@ -62,7 +62,7 @@ export class AppController {
         try {
             const newSettings = Object.assign({}, await getAppSettings(), setupModel);
 
-            jsonfileWrite(APP_CONFIG_PATH, newSettings, {spaces: 2})
+            await jsonfileWrite(APP_CONFIG_PATH, newSettings, {spaces: 2})
 
             /*设置开机自启*/
             //mac系统

@@ -104,7 +104,7 @@
                 <n-gi :span="2">
                   <n-layout style="height: 100%">
                     <n-scrollbar class="h-full bg-gray-100">
-                      <div style="padding: 12px;">
+                      <div class="p-2">
                         <n-space vertical>
                           <node-item v-for="(item) in nodeItemList"
                                      :label="item.label"
@@ -145,12 +145,13 @@
       preset="dialog"
       role="dialog"
       :show-icon="false"
-      title="任务选择"
+      title="节点编辑"
       :size="'small'"
-      style="width: 400px"
+      style="width: 500px"
   >
     <n-scrollbar class="pr-2" style="max-height: 500px" trigger="hover">
       <n-form
+          v-if="['dataX', 'workflow'].includes((jobUpdateModalFormModel.item.getModel() as SchedulerJobNodeConfig).jobType)"
           class="mt-4"
           ref="jobUpdateModalFormRef"
           :model="jobUpdateModalFormModel"
@@ -178,6 +179,62 @@
             />
           </n-form-item-gi>
         </n-grid>
+      </n-form>
+
+      <n-form
+          v-if="['sparkSql','mysql'].includes((jobUpdateModalFormModel.item.getModel() as SchedulerJobNodeConfig).jobType)"
+          class="mt-4"
+          ref="jobUpdateModalFormRef"
+          :model="jobUpdateModalFormModel"
+          :rules="jobUpdateModalFormRules"
+          :size="'small'"
+      >
+        <n-grid :cols="12" :x-gap="12">
+          <n-form-item-gi :span="12" label="任务类型" :label-style="{userSelect:'none'}">
+            <n-input v-model:value="jobUpdateModalFormModel.jobType"
+                     @keydown.enter.prevent readonly
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="12" label="任务名称" path="jobName" :label-style="{userSelect:'none'}">
+            <n-input v-model:value="jobUpdateModalFormModel.jobName"
+                     @keydown.enter.prevent
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="12" label="数据源" path="dbId">
+            <n-select
+                v-model:value="jobUpdateModalFormModel.dbId"
+                :options="datasourceOptions"
+                :size="'small'"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi :span="12" label="等待时间" path="timeout">
+            <n-input-number v-model:value="jobUpdateModalFormModel.timeout"
+                            :step="60"
+                            :min="0"
+                            :max="60*60"
+            >
+              <template #suffix>
+                秒
+              </template>
+            </n-input-number>
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-icon size="16" class="ml-2" style="line-height: 22px">
+                  <QuestionCircleTwotone/>
+                </n-icon>
+              </template>
+              SQL执行后，数据需要3-5分钟才会进入目标表中，可能影响业务流程
+            </n-tooltip>
+          </n-form-item-gi>
+
+          <n-form-item-gi :span="12" label="自定义SQL" path="sql" :label-style="{userSelect:'none'}">
+            <n-input type="textarea" v-model:value="jobUpdateModalFormModel.sql"
+                     @keydown.enter.prevent
+                     placeholder="只可用于执行 DML 、 DDL"
+            />
+          </n-form-item-gi>
+        </n-grid>
+
       </n-form>
     </n-scrollbar>
     <template #action>
@@ -273,8 +330,15 @@ import {DCJob, Task} from "@common/taskSchedulerTypes";
 import {SchedJobType, WorkflowType} from "@common/types";
 import {clipboard_write_text} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
-import {get_sched_job_by_id, get_sched_job_page, get_workflow, get_workflow_page} from "@render/api/datacenter.api";
 import {
+  get_all_datasource,
+  get_sched_job_by_id,
+  get_sched_job_page,
+  get_workflow,
+  get_workflow_page
+} from "@render/api/datacenter.api";
+import {
+  find_job_by_id,
   get_scheduler,
   get_task,
   save_task,
@@ -289,6 +353,7 @@ import {isCronExpressionValid} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {getSchedJob, showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import NodeItem from "@render/views/taskScheduler/nodeItem.vue";
+import {QuestionCircleTwotone} from "@vicons/antd";
 import {CheckmarkCircle24Regular, ChevronUp24Regular, DismissCircle24Regular} from "@vicons/fluent";
 import {Add, Refresh, Search} from "@vicons/ionicons5";
 import {VNode} from "@vue/runtime-core";
@@ -547,9 +612,10 @@ const taskConfigModalFormRules = ref({
   }
 })
 
-const taskConfigModalInit = (task: Task) => {
+const taskConfigModalInit = async (task: Task) => {
   if (task != undefined) {
     modalTitle.value = '任务配置'
+    //  task = await get_task(task.id)
     Object.assign(taskConfigModalFormModel.value, task)
     handleCronTimePredictionUpdate(task.cron)
   } else {
@@ -816,6 +882,7 @@ const nodeRegister = () => {
 }
 
 const loadGraphData = async () => {
+  const task = await get_task(taskConfigModalFormModel.value.id)
 
   const updateNodesJobStatus = async (nodes: SchedulerJobNodeConfig[]) => {
     for (let i = 0; i < nodes.length; i++) {
@@ -851,13 +918,15 @@ const loadGraphData = async () => {
         } else if (workflow.status == '5') {
           nodes[i].jobStatus = 5 //任务异常
         }
+      } else if (nodes[i].jobType == 'sparkSql' || nodes[i].jobType == 'mysql') {
+        const dcJob = await find_job_by_id(nodes[i].id, task.id);
+        nodes[i].sqlConfig = dcJob.sqlConfig
       }
     }
 
     return nodes
   }
 
-  const task = await get_task(taskConfigModalFormModel.value.id)
   if (task != null && task.graphSave != null) {
     const graphSave = JSON.parse(task.graphSave) as GraphData
 
@@ -951,18 +1020,6 @@ const graphEventRegister = () => {
 
 }
 
-const jobUpdateModelInit = (item: Item) => {
-  jobUpdateModalFormModel.value.item = item
-  const model = item.getModel() as SchedulerJobNodeConfig
-
-  jobUpdateModalFormModel.value.jobType = model.jobType == 'dataX' ? 'DataX任务' : '工作流任务'
-  jobUpdateModalFormModel.value.jobId = model.jobId
-
-  handleJobIdOptionsUpdate(model.jobName)
-
-  showJobUpdateModelRef.value = true
-}
-
 const jobIdOptionsLoading = ref(false)
 
 const handleJobIdOptionsUpdate = async (v: string) => {
@@ -1042,32 +1099,103 @@ const jobIdOptions = ref<Array<SelectOption | SelectGroupOption>>()
 
 const showJobUpdateModelRef = ref(false)
 const jobUpdateModalFormRef = ref<FormInst | null>(null);
-
+const datasourceOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const jobUpdateModalFormModel = ref({
   item: null as Item,
   jobType: '',
   jobId: null,
   jobName: '',
-  jobStatus: null
+  jobStatus: null,
+  sql: '',
+  dbType: '',
+  dbId: '',
+  timeout: 5 * 60
 })
-const jobUpdateModalFormRules = ref({})
+const jobUpdateModalFormRules = ref({
+  jobName: {
+    required: true,
+    trigger: ['input'],
+    message: '请输入任务名称'
+  },
+  sql: {
+    required: true,
+    trigger: ['input'],
+    message: '请输入SQL'
+  },
+  dbId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择数据源'
+  },
+  timeout: {
+    type: 'number',
+    required: true,
+    trigger: ['change'],
+    message: '请输入等待时间'
+  },
+})
+
+const jobUpdateModelInit = (item: Item) => {
+  jobUpdateModalFormModel.value.item = item
+  const model = item.getModel() as SchedulerJobNodeConfig
+
+  jobUpdateModalFormModel.value.jobType = model.title
+  jobUpdateModalFormModel.value.jobId = model.jobId
+  jobUpdateModalFormModel.value.jobStatus = model.jobStatus
+  jobUpdateModalFormModel.value.jobName = model.jobName
+
+  if (['sparkSql', 'mysql'].includes((model.jobType))) {
+    jobUpdateModalFormModel.value.sql = model?.sqlConfig?.sql || ''
+    jobUpdateModalFormModel.value.dbType = model.jobType == 'sparkSql' ? 'tbds-hive' : 'mysql'
+    jobUpdateModalFormModel.value.dbId = model?.sqlConfig?.dbId || ''
+    jobUpdateModalFormModel.value.timeout = model?.sqlConfig.timeout == undefined ? 300 : model?.sqlConfig.timeout
+
+    handleDatasourceOptionsUpdate(jobUpdateModalFormModel.value.dbType)
+  } else {
+    handleJobIdOptionsUpdate(model.jobName)
+  }
+
+  showJobUpdateModelRef.value = true
+}
+
+const handleDatasourceOptionsUpdate = async (dbType: string) => {
+  const datasource = await get_all_datasource(dbType)
+
+  datasourceOptions.value = datasource.map((db: { datasourceName: string; id: number; }) => ({
+    label: db.datasourceName,
+    value: db.id.toString()
+  }))
+}
 
 const isJobNodeUpdating = ref(false)
 const handleJobUpdate = () => {
   isJobNodeUpdating.value = true
 
-  jobUpdateModalFormModel.value.item.update({
-    ...jobUpdateModalFormModel.value.item.getModel(),
-    jobId: jobUpdateModalFormModel.value.jobId,
-    jobName: jobUpdateModalFormModel.value.jobName,
-    jobStatus: jobUpdateModalFormModel.value.jobStatus,
-  })
+  jobUpdateModalFormRef.value?.validate(errors => {
+    if (!errors) {
+      jobUpdateModalFormModel.value.item.update({
+        ...jobUpdateModalFormModel.value.item.getModel(),
+        jobId: jobUpdateModalFormModel.value.jobId,
+        jobName: jobUpdateModalFormModel.value.jobName,
+        jobStatus: jobUpdateModalFormModel.value.jobStatus,
+        sqlConfig: {
+          dbType: jobUpdateModalFormModel.value.dbType,
+          dbId: jobUpdateModalFormModel.value.dbId,
+          sql: jobUpdateModalFormModel.value.sql,
+          timeout: jobUpdateModalFormModel.value.timeout,
+          isRunning: false
+        }
+      })
 
-  jobUpdateModalFormModel.value.item.draw()
+      jobUpdateModalFormModel.value.item.draw()
+
+      showJobUpdateModelRef.value = false
+    }
+
+  })
 
   isJobNodeUpdating.value = false
 
-  showJobUpdateModelRef.value = false
 }
 
 const nodeItemList = [
@@ -1078,6 +1206,14 @@ const nodeItemList = [
   {
     label: "工作流任务",
     type: "workflow"
+  },
+  {
+    label: "SparkSQL任务",
+    type: "sparkSql"
+  },
+  {
+    label: "MySQL任务",
+    type: "mysql"
   }
 ]
 
@@ -1091,13 +1227,16 @@ const handleDragEnd = (e: {
   const renderPoints = graph.getPointByClient(e.x, e.y); //渲染
   const canvasPoints = graph.getCanvasByPoint(renderPoints.x, renderPoints.y) // 画布
   if (canvasPoints.x > 0 && canvasPoints.y > 0 && canvasPoints.x < graph.getWidth() && canvasPoints.y < graph.getHeight()) {
+    const id = `node-${uuid.v4()}`
     graph.addItem('node', {
       x: renderPoints.x - 200 / 2,
       y: renderPoints.y - 60 / 2,
-      id: `node-${uuid.v4()}`,
+      id: id,
+      title: item.label,
       jobType: item.type,
       jobName: null,
-      jobStatus: null
+      jobStatus: ['sparkSql', 'mysql'].includes(item.type) ? 2 : null,
+      jobId: ['sparkSql', 'mysql'].includes(item.type) ? id : null,
     });
   }
 }
@@ -1177,6 +1316,11 @@ const generateJobHierarchy = (headNodes: INode[]) => {
       name: model.jobName,
       dependentJobs: generateJobHierarchy(targetNodes)
     }
+
+    if (['sparkSql', 'mysql'].includes((model.jobType))) {
+      job.sqlConfig = model.sqlConfig
+    }
+
     jobs.push(job)
   }
 

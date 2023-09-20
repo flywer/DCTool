@@ -2,10 +2,10 @@
   <n-card
       hoverable
       draggable="true"
-      :content-style="{padding:'8px'}"
+      :content-style="{padding:'10px'}"
   >
-    <n-space align="center" style="width: 100px">
-      <n-icon :size="16" style="padding-top: 8px">
+    <n-space align="center" >
+      <n-icon :size="16" style="line-height: 34px">
         <Cube/>
       </n-icon>
       <div draggable="false">{{ label }}</div>

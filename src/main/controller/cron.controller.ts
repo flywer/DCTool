@@ -54,7 +54,7 @@ export class CronController {
                                 procName: jobName,
                                 size: 1,
                                 status: null
-                            }).then(res => {
+                            }).then(async res => {
                                 //任务不存在，或者任务已不在运行中则停止监听
                                 if (isEmpty(res.data.records) || (res.data.records[0].procName === jobName && res.data.records[0].status != '4')) {
                                     let jobRes = ''
@@ -74,7 +74,7 @@ export class CronController {
                                     }
 
                                     const filter = dcJobNames.filter((item) => item !== jobName);
-                                    jsonfileWrite(filePath, filter, {spaces: 2})
+                                    await jsonfileWrite(filePath, filter, {spaces: 2})
 
                                     let jobEndNotice = new Notification({
                                         title: `任务监听`,
@@ -101,7 +101,7 @@ export class CronController {
         }
 
         const filter = dcJobNames.filter((item) => !filterJobs.includes(item));
-        jsonfileWrite(filePath, filter, {spaces: 2})
+        await jsonfileWrite(filePath, filter, {spaces: 2})
     }
 
     @IpcHandle(channels.cron.createCronJob)
@@ -130,7 +130,7 @@ export class CronController {
 
             dcJobNames.push(jobName)
 
-            jsonfileWrite(filePath, dcJobNames, {spaces: 2})
+            await jsonfileWrite(filePath, dcJobNames, {spaces: 2})
 
             this.createDatacenterCronJob(jobName)
             res = {
@@ -190,7 +190,7 @@ export class CronController {
                         }
 
                         const filter = dcJobNames.filter((item) => item !== jobName);
-                        jsonfileWrite(filePath, filter, {spaces: 2})
+                        await jsonfileWrite(filePath, filter, {spaces: 2})
 
                         let jobEndNotice = new Notification({
                             title: `任务监听`,

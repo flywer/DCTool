@@ -215,7 +215,7 @@ export class LoginController {
             rememberMe: model.rememberMe
         }
 
-        jsonfileWrite(filePath, json, {spaces: 2})
+        await jsonfileWrite(filePath, json, {spaces: 2})
     }
 
     @IpcHandle(channels.login.readUserConfig)

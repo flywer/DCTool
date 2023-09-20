@@ -92,17 +92,34 @@ export class TaskSchedulerController {
     //  停止运行所有任务
     public async cronJobsStopAll() {
         let scheduler = await this.handleGetScheduler()
+
+        const setAllJobsIsRunningFalse = (jobList: DCJob[]) => {
+            for (const job of jobList) {
+                if (typeof job.sqlConfig != 'undefined') {
+                    job.sqlConfig.isRunning = false;
+                }
+
+                if (job.dependentJobs.length > 0) {
+                    setAllJobsIsRunningFalse(job.dependentJobs);
+                }
+            }
+        }
+
         for (let i = 0; i < scheduler.tasks.length; i++) {
             scheduler.tasks[i].isRunning = false
+            // 日志内运行中状态重置
             for (let j = 0; j < scheduler.tasks[i].execLog.length; j++) {
                 if (scheduler.tasks[i].execLog[j].status == 0 && scheduler.tasks[i].execLog[j].jobLog.length == 0) {
                     scheduler.tasks[i].execLog[j].status = 2
                     scheduler.tasks[i].execLog[j].msg = '任务中断'
                 }
             }
+
+            // sql任务运行中重置
+            setAllJobsIsRunningFalse(scheduler.tasks[i].jobList)
         }
 
-        jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
+        await jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
 
         this.schedulerTaskCronJobs.forEach(job => {
             if (job.cronJob != null) {
@@ -167,7 +184,7 @@ export class TaskSchedulerController {
         })
     }
 
-    private async runJob(job: DCJob): Promise<{
+    private async runJob(taskId: string, job: DCJob): Promise<{
         success: boolean,
         msg: string
     }> {
@@ -238,7 +255,7 @@ export class TaskSchedulerController {
                 }
             }
 
-        } else {
+        } else if (job.jobType == 'workflow') {
 
             const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
 
@@ -308,6 +325,58 @@ export class TaskSchedulerController {
                     msg: "任务不存在"
                 }
             }
+        } else if (job.jobType == 'sparkSql' || job.jobType == 'mysql') {
+            let paramModel = {
+                sourceId: job.sqlConfig.dbId,
+                dbType: job.sqlConfig.dbType,
+                sourceName: '',
+                dataTierCode: '',
+                dataTierName: '',
+                namedJson: '',
+                datamodelTableFieldsVoList: [],
+                lifeCycle: '1',
+                ddlSql: job.sqlConfig.sql,
+                tableName: 'execSql'
+            }
+
+            const scheduler = await this.handleGetScheduler()
+            const task = scheduler.tasks.find(task => task.id == taskId);
+
+            job.sqlConfig.isRunning = true
+            const newTask = this.handleUpdateDCJob(task, job)
+            if (newTask != null) {
+                await this.handleUpdateTask(newTask)
+            }
+
+            const res = await datacenter.handleExecSql(paramModel)
+
+            if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
+                // 执行成功
+                return new Promise((resolve) => {
+                    setTimeout(async () => {
+                        job.sqlConfig.isRunning = false
+                        let newTask = this.handleUpdateDCJob(task, job)
+                        if (newTask != null) {
+                            await this.handleUpdateTask(newTask)
+                        }
+                        resolve({
+                            success: true,
+                            msg: "任务执行成功"
+                        })
+                    }, (job.sqlConfig.timeout == undefined ? 5 * 60 : job.sqlConfig.timeout) * 1000)
+                })
+
+            } else {
+                job.sqlConfig.isRunning = false
+                const newTask = this.handleUpdateDCJob(task, job)
+                await this.handleUpdateTask(newTask)
+                // 执行失败
+                return {
+                    success: false,
+                    msg: `任务执行失败:${res.message.replace(/建表失败，/g, '')}`
+                }
+            }
+
         }
 
     }
@@ -319,25 +388,24 @@ export class TaskSchedulerController {
             try {
 
                 const jobLog: ExecLog = {
+                    jobName: job.name,
                     startTime: getCurrentDateTime(),
                     endTime: null,
                     status: 0
                 }
 
-                const jobResult = await this.runJob(job);
+                const jobResult = await this.runJob(task.id, job);
 
                 jobLog.endTime = getCurrentDateTime()
                 jobLog.status = jobResult.success ? 1 : 2
                 jobLog.msg = jobResult.msg
-                jobLog.jobName = job.name
 
                 task.execLog.at(-1).jobLog.push(jobLog)
-                // await this.handleUpdateTask(task)
+                await this.handleUpdateTask(task)
 
                 if (jobResult.success) {
                     // 若此时本地文件内的任务配置更新
                     const newTaskConfig = (await this.handleGetScheduler()).tasks.find(task1 => task1.id == task.id)
-
                     if (typeof newTaskConfig.isEnable != "undefined") {
                         await this.serialExecuteDependentJobs(task, job.dependentJobs);
                     } else {
@@ -361,24 +429,25 @@ export class TaskSchedulerController {
             try {
 
                 const jobLog: ExecLog = {
+                    jobName: job.name,
                     startTime: getCurrentDateTime(),
                     endTime: null,
                     status: 0
                 }
 
-                const jobResult = await this.runJob(job);
+                const jobResult = await this.runJob(task.id, job);
 
                 jobLog.endTime = getCurrentDateTime()
                 jobLog.status = jobResult.success ? 1 : 2
                 jobLog.msg = jobResult.msg
-                jobLog.jobName = job.name
 
                 task.execLog.at(-1).jobLog.push(jobLog)
+                await this.handleUpdateTask(task)
 
                 if (jobResult.success) {
                     const newTaskConfig = (await this.handleGetScheduler()).tasks.find((task1) => task1.id === task.id);
 
-                    if (typeof newTaskConfig.isEnable !== "undefined") {
+                    if (typeof newTaskConfig?.isEnable !== "undefined") {
                         await Promise.all(job.dependentJobs.map(async dependentJob => await this.parallelExecuteDependentJobs(task, [dependentJob])));
                     } else {
                         return failure('任务配置异常');
@@ -449,7 +518,7 @@ export class TaskSchedulerController {
             } else {
                 scheduler.tasks.push(task)
             }
-            jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
+            await jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
 
             this.handleSchedulerTaskCronJobUpdate(task)
 
@@ -469,7 +538,7 @@ export class TaskSchedulerController {
                 // 使用新的 job 对象替换该索引处的元素
                 scheduler.tasks.splice(index, 1, Object.assign(scheduler.tasks[index], task));
 
-                jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
+                await jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
 
             } else {
                 return failure(`任务不存在`)
@@ -478,6 +547,60 @@ export class TaskSchedulerController {
             log.error(e)
             return failure(`更新失败,${e}`)
         }
+    }
+
+    // 仅更新DCJob
+    public handleUpdateDCJob(task: TaskAlias, job: DCJob) {
+        try {
+            const newJobList = this.UpdateJobById(job, task.jobList)
+            if (typeof newJobList != 'undefined') {
+                task.jobList = newJobList
+                return task
+            } else {
+                log.error('中台任务不存在')
+                return null
+            }
+        } catch (e) {
+            log.error(`更新失败,${e}`)
+            return null
+        }
+    }
+
+    @IpcHandle(channels.taskScheduler.findJobById)
+    public async findJobById(jobId: string, taskId: string): Promise<DCJob | undefined> {
+        let scheduler = await this.handleGetScheduler()
+        const task = scheduler.tasks.find(task1 => task1.id == taskId);
+
+        function find(jobId: string, jobList: DCJob[]) {
+            for (const job of jobList) {
+                if (job.id === jobId) {
+                    return job;
+                }
+                const dependentJob = find(jobId, job.dependentJobs);
+                if (dependentJob) {
+                    return dependentJob;
+                }
+            }
+            return undefined;
+        }
+
+        return find(jobId, task.jobList)
+
+    }
+
+    public UpdateJobById(newJob: DCJob, jobList: DCJob[]): DCJob[] {
+        for (let job of jobList) {
+            if (job.id === newJob.id) {
+                job = Object.assign(job, newJob)
+                return jobList;
+            }
+            const dependentJobList = this.UpdateJobById(newJob, job.dependentJobs);
+            if (dependentJobList.length > 0) {
+                job.dependentJobs = dependentJobList;
+                return jobList;
+            }
+        }
+        return [];
     }
 
     // 任务更新或新增，调度任务实例数组也需更新
@@ -509,7 +632,7 @@ export class TaskSchedulerController {
         try {
             let scheduler = await this.handleGetScheduler()
             scheduler.tasks = scheduler.tasks.filter(task => task.id != id);
-            jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
+            await jsonfileWrite(this.SCHEDULER_FILE_PATH, scheduler, {spaces: 2})
             return success('删除成功')
         } catch (e) {
             log.error(e)
