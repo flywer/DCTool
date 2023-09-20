@@ -247,17 +247,17 @@ export class XlsxController {
         const cityData: DepartDataVolExcelDataType[] = data.filter((item) => !item.departName.startsWith('广东省'));
 
         const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
-        const columnWidths = [25, 20, 30, 30, 15, 15, 15];
+        const columnWidths = [25, 20, 20, 30, 30, 15, 15, 15];
         const createExcelData = (data: DepartDataVolExcelDataType[]): DepartDataVolExcelDataType[][] => {
             const excelData: any[][] = [];
 
-            // Add header row
-            excelData.push(['数源单位', '数据元分类号', '编目名称', '前置机表名', '前置机数据量', '数据湖数据量', '主题库数据量']);
+            excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '前置机数据量', '数据湖数据量', '主题库数据量']);
 
-            // Add data rows
             for (const item of data) {
+
                 excelData.push([
                     item.departName,
+                    getAuthorityTypeByTableType(item.tableType),
                     item.tableType,
                     item.tableComment,
                     item.feTableName,
@@ -268,6 +268,38 @@ export class XlsxController {
             }
 
             return excelData;
+        }
+
+        const getAuthorityTypeByTableType = (tableType: string) => {
+            if (tableType.startsWith('G')) {
+                return '法律法规'
+            } else if (tableType.startsWith('Z')) {
+                return '执法和监督部门'
+            } else if (tableType.startsWith('Y')) {
+                return '执法和监督人员'
+            } else if (tableType.startsWith('F')) {
+                return '事项清单'
+            } else if (tableType.startsWith('D')) {
+                return '执法对象'
+            } else if (tableType.startsWith('DATA_CHECK')) {
+                return '数据对账信息'
+            } else if (tableType.startsWith('C10')) {
+                return '行政许可'
+            } else if (tableType.startsWith('C20') || tableType == 'C2100') {
+                return '行政处罚'
+            } else if (tableType.startsWith('C30')) {
+                return '行政强制'
+            } else if (tableType == 'C4010') {
+                return '行政征收'
+            } else if (tableType == 'C4110') {
+                return '行政征用'
+            } else if (tableType.startsWith('C60')) {
+                return '行政检查'
+            } else if (tableType == 'C7090') {
+                return '行为救济'
+            } else {
+                return '未知职权'
+            }
         }
 
         const setColumnWidths = (worksheet: ExcelJS.Worksheet, columnWidths: number[]) => {
@@ -318,6 +350,11 @@ export class XlsxController {
                 vertical: 'middle',
                 horizontal: 'center'
             };
+
+            worksheet.getColumn(2).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            };
         }
 
         const setBolder = (worksheet: ExcelJS.Worksheet) => {
@@ -339,16 +376,16 @@ export class XlsxController {
             });
         }
 
-        const mergeCells = (worksheet: ExcelJS.Worksheet) => {
+        const mergeCells = (worksheet: ExcelJS.Worksheet, col: string) => {
             // 合并相同部门名称的单元格
             let currentDepartment = '';
             let mergeStartRowIndex = 2; // 从第二行开始合并，跳过标题行
             for (let i = 2; i <= worksheet.rowCount; i++) {
-                const departmentCell = worksheet.getCell(`A${i}`);
+                const departmentCell = worksheet.getCell(`${col}${i}`);
                 if (departmentCell.text !== currentDepartment) {
                     if (i > mergeStartRowIndex + 1) {
                         // 只在至少有两行时进行单元格合并
-                        worksheet.mergeCells(`A${mergeStartRowIndex}:A${i - 1}`);
+                        worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${i - 1}`);
                     }
                     currentDepartment = departmentCell.text;
                     mergeStartRowIndex = i;
@@ -356,18 +393,18 @@ export class XlsxController {
             }
             // 处理最后一组相同部门名称的单元格合并
             if (worksheet.rowCount > mergeStartRowIndex + 1) {
-                worksheet.mergeCells(`A${mergeStartRowIndex}:A${worksheet.rowCount}`);
+                worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${worksheet.rowCount}`);
             }
         }
 
         const setCountCol = (worksheet: ExcelJS.Worksheet) => {
-            worksheet.getColumn(5).alignment = {
-                horizontal: 'right'
-            };
             worksheet.getColumn(6).alignment = {
                 horizontal: 'right'
             };
             worksheet.getColumn(7).alignment = {
+                horizontal: 'right'
+            };
+            worksheet.getColumn(8).alignment = {
                 horizontal: 'right'
             };
         }
@@ -378,28 +415,28 @@ export class XlsxController {
             let dataLakeCountTotal = 0
             let themeBaseCountTotal = 0;
 
-            (worksheet.getColumn(5) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+            (worksheet.getColumn(6) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                 if (rowNumber > 1) {
                     feDataCountTotal += parseInt(cell.text)
                 }
 
             });
 
-            (worksheet.getColumn(6) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+            (worksheet.getColumn(7) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                 if (rowNumber > 1) {
                     dataLakeCountTotal += parseInt(cell.text)
                 }
 
             });
 
-            (worksheet.getColumn(7) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+            (worksheet.getColumn(8) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                 if (rowNumber > 1) {
                     themeBaseCountTotal += parseInt(cell.text)
                 }
 
             })
 
-            worksheet.addRow(['合计', '', '', '', feDataCountTotal.toString(), dataLakeCountTotal.toString(), themeBaseCountTotal.toString()])
+            worksheet.addRow(['合计', '', '', '', '', feDataCountTotal.toString(), dataLakeCountTotal.toString(), themeBaseCountTotal.toString()])
         }
 
         const provinceWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直部门');
@@ -408,7 +445,8 @@ export class XlsxController {
         setColumnWidths(provinceWorksheet, columnWidths);
         setFirstRow(provinceWorksheet)
         setFirstCol(provinceWorksheet)
-        mergeCells(provinceWorksheet)
+        mergeCells(provinceWorksheet, 'A')
+        mergeCells(provinceWorksheet, 'B')
         setCountCol(provinceWorksheet)
         setTotalRow(provinceWorksheet)
         setBolder(provinceWorksheet)
@@ -420,7 +458,8 @@ export class XlsxController {
         setColumnWidths(cityWorksheet, columnWidths);
         setFirstRow(cityWorksheet)
         setFirstCol(cityWorksheet)
-        mergeCells(cityWorksheet)
+        mergeCells(cityWorksheet, 'A')
+        mergeCells(cityWorksheet, 'B')
         setCountCol(cityWorksheet)
         setTotalRow(cityWorksheet)
         setBolder(cityWorksheet)
