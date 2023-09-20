@@ -46,7 +46,7 @@ import {
   TableAdd24Regular,
   Toolbox24Regular,
   Organization24Regular,
-TaskListLtr24Regular
+  TaskListLtr24Regular
 } from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
