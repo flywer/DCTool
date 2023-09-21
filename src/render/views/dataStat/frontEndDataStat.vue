@@ -61,7 +61,6 @@
 
 <script setup lang="ts">
 import {WorkflowType} from "@common/types";
-import {getCurrentDateTime} from "@main/utils/dateUtils";
 import {get_project_by_pro_abbr, get_project_info} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql, get_workflow_page} from "@render/api/datacenter.api";
@@ -167,7 +166,7 @@ const generateSql = async () => {
                    '${departName}',
                    '${tableName.split('_')[2].toUpperCase()}',
                    COUNT(DISTINCT t1.${pColName}),
-                   '${getCurrentDateTime()}'
+                   NOW()
             FROM ${tableName} t1
                    INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
                                FROM ${tableName}
@@ -197,7 +196,7 @@ const generateSubSql = async (item: TreeSelectOption) => {
            '${item.label.split('-')[0]}',
            '${item.label.split('-')[1]}',
            COUNT(DISTINCT t1.${pColName}),
-           '${getCurrentDateTime()}'
+           NOW()
     FROM ${item.key.toString().split(':')[1]} t1
            INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
                        FROM ${item.key.toString().split(':')[1]}
