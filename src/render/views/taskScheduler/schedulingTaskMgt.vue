@@ -1119,7 +1119,7 @@ const jobUpdateModalFormRules = ref({
   },
   sql: {
     required: true,
-    trigger: ['input'],
+    trigger: ['blur'],
     message: '请输入SQL'
   },
   dbId: {
