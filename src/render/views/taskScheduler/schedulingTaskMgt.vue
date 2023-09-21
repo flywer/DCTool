@@ -1148,7 +1148,7 @@ const jobUpdateModelInit = (item: Item) => {
     jobUpdateModalFormModel.value.sql = model?.sqlConfig?.sql || ''
     jobUpdateModalFormModel.value.dbType = model.jobType == 'sparkSql' ? 'tbds-hive' : 'mysql'
     jobUpdateModalFormModel.value.dbId = model?.sqlConfig?.dbId || ''
-    jobUpdateModalFormModel.value.timeout = model?.sqlConfig.timeout == undefined ? 300 : model?.sqlConfig.timeout
+    jobUpdateModalFormModel.value.timeout = model?.sqlConfig?.timeout == undefined ? 300 : model?.sqlConfig?.timeout
 
     handleDatasourceOptionsUpdate(jobUpdateModalFormModel.value.dbType)
   } else {
