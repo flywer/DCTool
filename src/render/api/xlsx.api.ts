@@ -11,7 +11,10 @@ export const generate_insert_statements = async (tableName: string) => {
     return data
 }
 
-export const create_depart_data_vol_excel = async (rows: DepartDataVolExcelDataType[]) => {
-    const {data} = (await ipcInstance.send<string>(channels.xlsx.createDepartDataVolExcel, rows))
+export const create_depart_data_vol_excel = async (excelData: {
+    basicData: DepartDataVolExcelDataType[],
+    actionData: DepartDataVolExcelDataType[],
+}) => {
+    const {data} = (await ipcInstance.send<string>(channels.xlsx.createDepartDataVolExcel, excelData))
     return data
 }

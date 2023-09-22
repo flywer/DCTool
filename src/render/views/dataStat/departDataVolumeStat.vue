@@ -2,8 +2,7 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
       统计各单位前置机（去重后）、数据湖、主题库数据量；<br>
-      因数据库与数据限制，目前只能全量统计，无法选择部门；<br>
-      未统计基础数据
+      因数据库与数据限制，目前只能全量统计，无法选择部门
     </n-alert>
 
     <n-space justify="center" align="center" class="mt-2">
@@ -30,31 +29,35 @@ const generateData = () => {
 
   isGenerating.value = true
   buttonText.value = '获取单位表名关联信息...'
+
+  const basicDataArr: DepartDataVolExcelDataType[] = []
+  const actionDataArr: DepartDataVolExcelDataType[] = []
   const excelDataArr: DepartDataVolExcelDataType[] = []
 
   // 获取单位表名关联数据
   get_all_FE_TableName().then(async departs => {
     for (const depart of departs) {
-      // 过滤基础数据
-      if (!basicTableNames.includes(depart.tableType.toLowerCase())) {
+      buttonText.value = `处理${depart.departName}数据...`
 
-        buttonText.value = `处理${depart.departName}数据...`
+      const dataRow: DepartDataVolExcelDataType = {
+        departName: depart.departName,
+        tableType: depart.tableType,
+        tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
+        feTableName: depart.tableName,
+        feDataCount: (await get_FE_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
+        dataLakeDataCount: (await get_data_lake_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
+        themeBaseDataCount: (await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
+      }
 
-        const dataRow: DepartDataVolExcelDataType = {
-          departName: depart.departName,
-          tableType: depart.tableType,
-          tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
-          feTableName: depart.tableName,
-          feDataCount: (await get_FE_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
-          dataLakeDataCount: (await get_data_lake_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
-          themeBaseDataCount: (await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
-        }
-
-        excelDataArr.push(dataRow)
+      // 基础数据
+      if (basicTableNames.includes(depart.tableType.toLowerCase())) {
+        basicDataArr.push(dataRow)
+      } else {
+        actionDataArr.push(dataRow)
       }
     }
 
-    excelDataArr.sort((a, b) => {
+    const customSort = (a: DepartDataVolExcelDataType, b: DepartDataVolExcelDataType) => {
       // 先按 departName 进行排序
       const departNameComparison = a.departName.localeCompare(b.departName);
       if (departNameComparison !== 0) {
@@ -63,12 +66,18 @@ const generateData = () => {
 
       // departName 相同时，按 tableType 进行排序
       return a.tableType.localeCompare(b.tableType);
-    })
+    }
+
+    basicDataArr.sort(customSort)
+    actionDataArr.sort(customSort)
 
     buttonText.value = `生成Excel中...`
 
     // 生成Excel
-    create_depart_data_vol_excel(excelDataArr).catch(() => {
+    create_depart_data_vol_excel({
+      basicData: basicDataArr,
+      actionData: actionDataArr
+    }).catch(() => {
       window.$message.error('生成Excel失败')
       isGenerating.value = false
       buttonText.value = `生成Excel`
