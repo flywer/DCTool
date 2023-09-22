@@ -32,7 +32,6 @@ const generateData = () => {
 
   const basicDataArr: DepartDataVolExcelDataType[] = []
   const actionDataArr: DepartDataVolExcelDataType[] = []
-  const excelDataArr: DepartDataVolExcelDataType[] = []
 
   // 获取单位表名关联数据
   get_all_FE_TableName().then(async departs => {
