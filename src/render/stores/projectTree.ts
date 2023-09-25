@@ -7,8 +7,8 @@ export const useProjectTreeStore = defineStore({
     id: 'projectTree',
     state: () => ({
         treeNodes: [] as TreeOption[],
-        defaultExpandedKeys: ['-1', '0', '0-6'] as string[],
-        defaultSelectedKeys: ['0-6-G1010'] as string[],
+        defaultExpandedKeys: ['-1', '0', '0-6', '0-6-G'],
+        defaultSelectedKeys: ['0-6-G1010'],
         isBasicData: true //此项目是否为基础数据项目，否则为行为数据项目
     }),
     actions: {
@@ -42,53 +42,74 @@ export const useProjectTreeStore = defineStore({
                                         },
                                         children: [
                                             {
-                                                label: 'G1010',
-                                                key: '0-6-G1010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'G1020',
-                                                key: '0-6-G1020',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Z2010',
-                                                key: '0-6-Z2010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Z2020',
-                                                key: '0-6-Z2020',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Z2030',
-                                                key: '0-6-Z2030',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Z2050',
-                                                key: '0-6-Z2050',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Z3010',
-                                                key: '0-6-Z3010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Y2010',
-                                                key: '0-6-Y2010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Y2020',
-                                                key: '0-6-Y2020',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Y2030',
-                                                key: '0-6-Y2030',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Y3010',
-                                                key: '0-6-Y3010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'Y4010',
-                                                key: '0-6-Y4010',
-                                                isLeaf: true
+                                                label: '法律法规',
+                                                key: '0-6-G',
+                                                children: [
+                                                    {
+                                                        label: 'G1010',
+                                                        key: '0-6-G1010',
+                                                        isLeaf: true
+                                                    },
+                                                    {
+                                                        label: 'G1020',
+                                                        key: '0-6-G1020',
+                                                        isLeaf: true
+                                                    },
+                                                ]
+                                            },
+                                            {
+                                                label: '执法和监督部门',
+                                                key: '0-6-Z',
+                                                children: [
+                                                    {
+                                                        label: 'Z2010',
+                                                        key: '0-6-Z2010',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Z2020',
+                                                        key: '0-6-Z2020',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Z2030',
+                                                        key: '0-6-Z2030',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Z2050',
+                                                        key: '0-6-Z2050',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Z3010',
+                                                        key: '0-6-Z3010',
+                                                        isLeaf: true
+                                                    },
+                                                ]
+                                            },
+                                            {
+                                                label: '执法和监督人员',
+                                                key: '0-6-Y',
+                                                children: [
+                                                    {
+                                                        label: 'Y2010',
+                                                        key: '0-6-Y2010',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Y2020',
+                                                        key: '0-6-Y2020',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Y2030',
+                                                        key: '0-6-Y2030',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Y3010',
+                                                        key: '0-6-Y3010',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'Y4010',
+                                                        key: '0-6-Y4010',
+                                                        isLeaf: true
+                                                    }
+                                                ]
                                             },
                                         ]
                                     },
@@ -105,31 +126,44 @@ export const useProjectTreeStore = defineStore({
                                         },
                                         children: [
                                             {
-                                                label: 'F1010',
-                                                key: '0-11-F1010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'F1011',
-                                                key: '0-11-F1011',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'F1012',
-                                                key: '0-11-F1012',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'F1016',
-                                                key: '0-11-F1016',
-                                                isLeaf: true
+                                                label: '行政职权类事项',
+                                                key: '0-11-F1',
+                                                children: [
+                                                    {
+                                                        label: 'F1010',
+                                                        key: '0-11-F1010',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'F1011',
+                                                        key: '0-11-F1011',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'F1012',
+                                                        key: '0-11-F1012',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'F1016',
+                                                        key: '0-11-F1016',
+                                                        isLeaf: true
+                                                    },
+                                                ]
                                             },
                                             {
-                                                label: 'F2010',
-                                                key: '0-11-F2010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'F2020',
-                                                key: '0-11-F2020',
-                                                isLeaf: true
-                                            },
+                                                label: '  “互联网+监管”事项',
+                                                key: '0-11-F2',
+                                                children: [
+                                                    {
+                                                        label: 'F2010',
+                                                        key: '0-11-F2010',
+                                                        isLeaf: true
+                                                    }, {
+                                                        label: 'F2020',
+                                                        key: '0-11-F2020',
+                                                        isLeaf: true
+                                                    },
+                                                ]
+                                            }
+
                                         ]
                                     },
                                     {
@@ -145,31 +179,48 @@ export const useProjectTreeStore = defineStore({
                                         },
                                         children: [
                                             {
-                                                label: 'F3010',
-                                                key: '0-5-F3010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'F3011',
-                                                key: '0-5-F3011',
-                                                isLeaf: true
+                                                label: '“双随机、一公开”事项',
+                                                key: '0-5-F3',
+                                                children: [
+                                                    {
+                                                        label: 'F3010',
+                                                        key: '0-5-F3010',
+                                                        isLeaf: true
+                                                    },
+                                                    {
+                                                        label: 'F3011',
+                                                        key: '0-5-F3011',
+                                                        isLeaf: true
+                                                    },
+                                                ]
                                             },
                                             {
-                                                label: 'D1010',
-                                                key: '0-5-D1010',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'D1020',
-                                                key: '0-5-D1020',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'D1030',
-                                                key: '0-5-D1030',
-                                                isLeaf: true
-                                            }, {
-                                                label: 'D1040',
-                                                key: '0-5-D1040',
-                                                isLeaf: true
-                                            }
+                                                label: '执法对象',
+                                                key: '0-5-D',
+                                                children: [
+                                                    {
+                                                        label: 'D1010',
+                                                        key: '0-5-D1010',
+                                                        isLeaf: true
+                                                    },
+                                                    {
+                                                        label: 'D1020',
+                                                        key: '0-5-D1020',
+                                                        isLeaf: true
+                                                    },
+                                                    {
+                                                        label: 'D1030',
+                                                        key: '0-5-D1030',
+                                                        isLeaf: true
+                                                    },
+                                                    {
+                                                        label: 'D1040',
+                                                        key: '0-5-D1040',
+                                                        isLeaf: true
+                                                    }
+                                                ]
+                                            },
+
                                         ]
                                     }
                                 ]
