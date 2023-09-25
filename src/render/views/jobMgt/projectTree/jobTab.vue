@@ -50,7 +50,7 @@
           :scroll-x="1200"
       >
         <template #empty>
-          <span style="color: rgba(194, 194, 194, 1)">未选择项目对应表</span>
+          <span style="color: rgba(194, 194, 194, 1)">未选择任务或未配置项目简称信息</span>
         </template>
       </n-data-table>
     </n-scrollbar>
@@ -859,7 +859,9 @@ const pageInit = async (defaultSelectedKeys: string[]) => {
     queryParam.value.tableAbbr = segments[segments.length - 1]
     projectRef.value = await find_by_project_id(queryParam.value.projectId)
     datacenterProjectRef.value = await get_job_project_by_id(queryParam.value.projectId)
-    isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
+    if (projectRef.value != null) {
+      isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
+    }
     await tableDataInit()
   }
 }
@@ -877,11 +879,15 @@ const setTitle = async (project: ProjectInfo) => {
     tableName: queryParam.value?.tableAbbr.toString().toUpperCase()
   }))[0]?.comment || '未知信息'
 
-  const projectName = project.projectName.replaceAll('行政行为', '')
+  if (project != null) {
+    const projectName = project.projectName.replaceAll('行政行为', '')
 
-  const index = projectName.indexOf('数据归集')
+    const index = projectName.indexOf('数据归集')
 
-  title.value = projectName.slice(0, index) + '-' + tableComment
+    title.value = projectName.slice(0, index) + '-' + tableComment
+  } else {
+    title.value = tableComment
+  }
 }
 
 const tableDataInit = async () => {
@@ -891,7 +897,7 @@ const tableDataInit = async () => {
 
   await setTitle(projectRef.value)
 
-  const projectAbbr = projectRef.value.projectAbbr || '';
+  const projectAbbr = projectRef.value?.projectAbbr || '';
   if (projectAbbr !== '') {
     // 采集任务
     let dataXJobs = (await get_cj_job_page({

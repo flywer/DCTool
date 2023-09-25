@@ -139,7 +139,6 @@ const createColumns = ({}: {
           value: row.projectAbbr,
           async onUpdateValue(v: string) {
             get_project_by_pro_abbr(v).then(res => {
-              console.log(res)
               if (isNull(res) || res.projectId == row.projectId) {
                 tableDataRef.value.find(item => item.projectId == row.projectId).projectAbbr = v
                 update_project_info(tableDataRef.value.find(item => item.projectId == row.projectId)).then(() => {
