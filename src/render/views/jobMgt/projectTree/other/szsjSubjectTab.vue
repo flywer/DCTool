@@ -92,7 +92,7 @@ import {
   showButton, showButtonPopover,
   showConfirmation, showTextButton,
 } from "@render/utils/datacenter/jobTabUtil";
-import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
+import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import {Refresh} from "@vicons/ionicons5";
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";

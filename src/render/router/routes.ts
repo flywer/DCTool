@@ -4,7 +4,7 @@ const App = () => import ('@render/App.vue')
 const Main = () => import ('@render/pages/main.vue')
 const Updater = () => import ('@render/pages/updater.vue')
 const jobCreate = () => import('@render/views/jobCreate/index.vue')
-const projectMgt = () => import('@render/views/projectMgt/index.vue')
+const jobMgt = () => import('@render/views/jobMgt/index.vue')
 const projectAbbr = () => import('@render/views/projectAbbr/index.vue')
 const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
@@ -37,7 +37,7 @@ export const routeName = {
     projectAbbr: 'projectAbbr',
     createTable: 'createTable',
     settings: 'settings',
-    projectMgt: 'projectMgt',
+    jobMgt: 'jobMgt',
     preDatabase: 'preDatabase',
     sztkDict: 'sztkDict',
     dataStat: 'dataStat',
@@ -59,9 +59,9 @@ export const routes: Array<RouteRecordRaw> = [
                 component: Main,
                 children: [
                     {
-                        name: routeName.projectMgt,
-                        path: 'projectMgt/index',
-                        component: projectMgt
+                        name: routeName.jobMgt,
+                        path: 'jobMgt/index',
+                        component: jobMgt
                     },
                     {
                         name: routeName.jobCreate,

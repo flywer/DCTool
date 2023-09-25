@@ -223,8 +223,8 @@ import {
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
 import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
-import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
-import JobInspectionTab from "@render/views/projectMgt/projectTree/jobInspectionTab.vue";
+import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.vue";
 import {Add, Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";

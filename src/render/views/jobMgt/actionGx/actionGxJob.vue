@@ -263,7 +263,7 @@ import {
   showButton, showButtonPopover,
   showTextButton
 } from "@render/utils/datacenter/jobTabUtil";
-import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
+import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";

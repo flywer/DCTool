@@ -18,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import ActionGxJob from "@render/views/projectMgt/actionGx/actionGxJob.vue";
-import ActionRkTab from "@render/views/projectMgt/actionRk/actionRkTab.vue";
-import DataLakeZjTab from "@render/views/projectMgt/dataLakeZj/dataLakeZjTab.vue";
-import TreeTab from "@render/views/projectMgt/projectTree/treeTab.vue";
+import ActionGxJob from "@render/views/jobMgt/actionGx/actionGxJob.vue";
+import ActionRkTab from "@render/views/jobMgt/actionRk/actionRkTab.vue";
+import DataLakeZjTab from "@render/views/jobMgt/dataLakeZj/dataLakeZjTab.vue";
+import TreeTab from "@render/views/jobMgt/projectTree/treeTab.vue";
 </script>
 
 <style scoped>

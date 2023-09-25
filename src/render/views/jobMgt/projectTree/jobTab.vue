@@ -798,7 +798,7 @@ import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob} from "@render/utils/datacenter/rhJob";
 import {createRkJob} from "@render/utils/datacenter/rkJob";
 import {createZjJob, updateZjJob} from "@render/utils/datacenter/zjJob";
-import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
+import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import {
   AddSquareMultiple16Regular,
   Options16Regular,

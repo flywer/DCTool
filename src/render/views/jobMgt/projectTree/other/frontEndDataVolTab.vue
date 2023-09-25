@@ -4,7 +4,7 @@
       <div class="w-auto h-8 mb-2">
         <div class="float-left leading-8 font-bold text-base" style="max-width: 40%">
           <n-skeleton v-if="isTableLoading" :width="300" size="small"/>
-          <n-ellipsis style="max-width: 100%" v-else>数据湖数据量数据同步</n-ellipsis>
+          <n-ellipsis style="max-width: 100%" v-else>前置机数据量数据同步</n-ellipsis>
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
 
@@ -82,7 +82,7 @@ import {
   showButton, showButtonPopover,
   showConfirmation, showTextButton
 } from "@render/utils/datacenter/jobTabUtil";
-import JobLogDrawer from "@render/views/projectMgt/components/jobLogDrawer.vue";
+import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import {Refresh} from "@vicons/ionicons5";
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
@@ -129,7 +129,7 @@ const tableDataInit = async () => {
   let dataXJobs = (await get_cj_job_page({
     current: 1,
     size: 1,
-    jobDesc: `sjtj_data_lake`,
+    jobDesc: `sjtj_front_end`,
     subsystemName: "采集"
   })).data.records
 

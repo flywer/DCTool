@@ -64,12 +64,12 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.projectMgt,
+                name: routeName.jobMgt,
               }
             },
             {default: () => '任务管理'}
         ),
-    key: routeName.projectMgt,
+    key: routeName.jobMgt,
     icon: renderIcon(AppsListDetail24Regular)
   },
   {
@@ -245,12 +245,12 @@ const menuOptions: MenuOption[] = [
 // 菜单实例
 const menuInstRef = ref<MenuInst | null>(null)
 // 默认选中的菜单
-const selectedKey = ref(routeName.projectMgt)
+const selectedKey = ref(routeName.jobMgt)
 // 菜单是否折叠
 const collapsed = ref(false)
 
 onMounted(() => {
-  router.push({name: routeName.projectMgt});
+  router.push({name: routeName.jobMgt});
 })
 
 const ipc = useIpc()

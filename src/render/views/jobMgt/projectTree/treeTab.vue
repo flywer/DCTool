@@ -98,12 +98,12 @@
 <script setup lang="ts">
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
-import JobInspectionTab from "@render/views/projectMgt/projectTree/jobInspectionTab.vue";
-import JobTab from "@render/views/projectMgt/projectTree/jobTab.vue";
-import DataLakeDataVolTab from "@render/views/projectMgt/projectTree/other/dataLakeDataVolTab.vue";
-import FrontEndDataVolTab from "@render/views/projectMgt/projectTree/other/frontEndDataVolTab.vue";
-import ProjectTablesTab from "@render/views/projectMgt/projectTree/projectTablesTab.vue";
-import SzsjSubjectTab from "@render/views/projectMgt/projectTree/other/szsjSubjectTab.vue";
+import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.vue";
+import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
+import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
+import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
+import ProjectTablesTab from "@render/views/jobMgt/projectTree/projectTablesTab.vue";
+import SzsjSubjectTab from "@render/views/jobMgt/projectTree/other/szsjSubjectTab.vue";
 import {onMounted, ref, h} from 'vue'
 import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'

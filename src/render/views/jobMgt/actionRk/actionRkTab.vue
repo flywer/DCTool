@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import ActionDmTable from "@render/views/projectMgt/actionRk/actionDmTable.vue";
-import ActionRkJob from "@render/views/projectMgt/actionRk/actionRkJob.vue";
-import DataLakeTable from "@render/views/projectMgt/actionRk/dataLakeTable.vue";
+import ActionDmTable from "@render/views/jobMgt/actionRk/actionDmTable.vue";
+import ActionRkJob from "@render/views/jobMgt/actionRk/actionRkJob.vue";
+import DataLakeTable from "@render/views/jobMgt/actionRk/dataLakeTable.vue";
 </script>
 
 <style scoped>
