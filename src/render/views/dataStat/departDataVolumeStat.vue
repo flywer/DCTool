@@ -1,7 +1,7 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      统计各单位前置机（去重后）、数据湖、主题库数据量；<br>
+      统计各单位备份表（去重后）、数据湖、主题库数据量；<br>
       因数据库与数据限制，目前只能全量统计，无法选择部门
     </n-alert>
 

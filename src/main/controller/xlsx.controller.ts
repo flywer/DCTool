@@ -253,7 +253,7 @@ export class XlsxController {
             const excelData: any[][] = [];
 
             if (isBasicData) {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '前置机数据量', '主题库数据量']);
+                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '主题库数据量']);
 
                 for (const item of data) {
 
@@ -268,7 +268,7 @@ export class XlsxController {
                     ]);
                 }
             } else {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '前置机数据量', '数据湖数据量', '主题库数据量']);
+                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '数据湖数据量', '主题库数据量']);
 
                 for (const item of data) {
 

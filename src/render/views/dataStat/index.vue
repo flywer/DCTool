@@ -4,7 +4,7 @@
       <n-tab-pane name="1" tab="质检情况统计">
         <quality-insp-stat/>
       </n-tab-pane>
-      <n-tab-pane name="2" tab="前置机数据量统计">
+      <n-tab-pane name="2" tab="累计报送数据量统计">
         <front-end-data-stat/>
       </n-tab-pane>
       <n-tab-pane name="3" tab="数据湖数据量统计">

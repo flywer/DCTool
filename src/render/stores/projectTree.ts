@@ -255,7 +255,7 @@ export const useProjectTreeStore = defineStore({
                                         key: '2-1',
                                         children: [
                                             {
-                                                label: '前置机数据量数据同步',
+                                                label: '累计报送数据量数据同步',
                                                 key: '2-1-0',
                                                 isLeaf: true
                                             },
