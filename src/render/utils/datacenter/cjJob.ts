@@ -137,7 +137,7 @@ const buildCjJobJson = async (formModel: CjFormModelType, sourceTableColumns: an
         // 有 NULL 则说明目标表有字段没有被对应上
         window.$notification.create({
             title: "字段对应失败",
-            content: `目标表有字段无法在来源表[${formModel.sourceTableName}]找到对应字段：${targetTableColumns.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join('，')}`,
+            content: `目标表有字段无法在来源表[${formModel.sourceTableName}]找到对应字段：${targetTableColumns.filter((_, index) => indexes.includes(index)).map(item => item.split(':')[1]).join(', ')}`,
             type: "error"
         })
 
