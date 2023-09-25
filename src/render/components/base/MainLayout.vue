@@ -42,7 +42,6 @@ import {LibraryAddOutlined} from '@vicons/material'
 import {
   AppsListDetail24Regular,
   BookSearch24Regular,
-  CalendarClock24Regular,
   TableAdd24Regular,
   Toolbox24Regular,
   Organization24Regular,
@@ -106,34 +105,6 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.createTable,
-              }
-            },
-            {default: () => '中台建表'}
-        ),
-    key: routeName.createTable,
-    icon: renderIcon(TableAdd24Regular)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.schedulingMgt,
-              }
-            },
-            {default: () => '调度管理'}
-        ),
-    key: routeName.schedulingMgt,
-    icon: renderIcon(CalendarClock24Regular)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
                 name: routeName.taskScheduler,
               }
             },
@@ -148,13 +119,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.sqlProcess,
+                name: routeName.projectMgt,
               }
             },
-            {default: () => 'SQL处理'}
+            {default: () => '项目管理'}
         ),
-    key: routeName.sqlProcess,
-    icon: renderIcon(Sql)
+    key: routeName.projectMgt,
+    icon: renderIcon(ProjectOutlined)
   },
   {
     label: () =>
@@ -162,13 +133,27 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.projectAbbr,
+                name: routeName.createTable,
               }
             },
-            {default: () => '项目简称'}
+            {default: () => '中台建表'}
         ),
-    key: routeName.projectAbbr,
-    icon: renderIcon(ProjectOutlined)
+    key: routeName.createTable,
+    icon: renderIcon(TableAdd24Regular)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.sqlProcess,
+              }
+            },
+            {default: () => 'SQL处理'}
+        ),
+    key: routeName.sqlProcess,
+    icon: renderIcon(Sql)
   },
   {
     label: () =>

@@ -62,7 +62,7 @@ import {
   get_project_by_pro_abbr, get_project_by_table_abbr,
   update_project_info
 } from "@render/api/auxiliaryDb/projectInfo.api";
-import showOrEdit from "@render/views/projectAbbr/showOrEdit.vue";
+import showOrEdit from "@render/views/projectMgt/projectAbbr/showOrEdit.vue";
 import {isNull} from "lodash-es";
 import type {DataTableColumns} from 'naive-ui'
 import {h, onMounted, ref, reactive} from 'vue'
