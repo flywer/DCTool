@@ -173,7 +173,7 @@ export const channels = reactive({
 
     },
     updater: {
-        msg: 'updater/msg'
+        checkUpdate: "updater/checkUpdate",
     },
     taskScheduler: {
         getScheduler: 'taskScheduler/getScheduler',

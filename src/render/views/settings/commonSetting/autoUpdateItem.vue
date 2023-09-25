@@ -4,7 +4,9 @@
       <n-gi>
         <div class="select-none leading-8">
           <span>自动更新</span>
-          <n-text depth="3" class="ml-3">启动时检查更新</n-text>
+          <n-text depth="3" class="ml-3">启动时检查更新
+            <n-button text type="primary" @click="checkUpdate">检查更新</n-button>
+          </n-text>
         </div>
       </n-gi>
       <n-gi>
@@ -23,6 +25,7 @@
 
 <script setup lang="ts">
 import {set_app_settings} from "@render/api/app.api"
+import {check_update} from "@render/api/updater.api";
 import {useAppSettingsStore} from "@render/stores/appSettings";
 import {ref} from 'vue'
 
@@ -46,6 +49,10 @@ const handleUpdateValue = (v: boolean) => {
         window.$message.error(res)
       })
       .finally(() => loading.value = false)
+}
+
+const checkUpdate = () => {
+  check_update()
 }
 
 </script>
