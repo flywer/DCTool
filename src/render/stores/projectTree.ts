@@ -200,7 +200,7 @@ export const useProjectTreeStore = defineStore({
                                         isLeaf: true
                                     },
                                     {
-                                        label: '全省数据统计任务',
+                                        label: '全省数据统计',
                                         key: '2-1',
                                         children: [
                                             {

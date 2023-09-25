@@ -2,6 +2,11 @@ import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo} from "@c
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
+export const get_user = async () => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getUser))
+    return data.data
+}
+
 // 获取项目列表
 export const get_job_project_list_all = async () => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.jobProjectListAll))

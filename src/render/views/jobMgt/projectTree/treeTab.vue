@@ -68,6 +68,7 @@
             :default-selected-keys="useProjectTreeStore().defaultSelectedKeys"
             @update:expandedKeys="handleExpandedKeys"
             @update:selectedKeys="handleSelectedKeys"
+            :render-suffix="renderSuffix"
         />
       </n-layout-sider>
       <n-layout-content content-style="padding: 12px;border-left: 1px solid rgb(237 237 237)">
@@ -96,7 +97,9 @@
 </template>
 
 <script setup lang="ts">
+import {get_job_project_list_all} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
+import {useUserStore} from "@render/stores/user";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
@@ -104,8 +107,9 @@ import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeD
 import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
 import ProjectTablesTab from "@render/views/jobMgt/projectTree/projectTablesTab.vue";
 import SzsjSubjectTab from "@render/views/jobMgt/projectTree/other/szsjSubjectTab.vue";
+import {Star24Filled} from "@vicons/fluent";
 import {onMounted, ref, h} from 'vue'
-import {NButton, NIcon, TreeOption, TreeInst, NTag} from 'naive-ui'
+import {NButton, NIcon, TreeOption, TreeInst, NTag, SelectOption} from 'naive-ui'
 import {Search, Refresh} from '@vicons/ionicons5'
 import {Filter, FilterOff, Focus2} from '@vicons/tabler'
 
@@ -115,9 +119,17 @@ const pattern = ref()
 
 const filterNode = ref(false)
 
-onMounted(() => {
+// 项目与用户关系
+const projectUserOptions = ref<Array<SelectOption>>()
+
+const user = useUserStore()
+
+onMounted(async () => {
+
+  await projectUserOptionsInit()
+
   useProjectTreeStore().projectTreeInit()
-  projectIdOptionsUpdate()
+  await projectIdOptionsUpdate()
 
   // 初始化滚动到选中的节点上
   tree.value.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})
@@ -334,6 +346,39 @@ const handleExpandedKeys = (keys: Array<string>) => {
 
 const handleSelectedKeys = (keys: Array<string>) => {
   useProjectTreeStore().defaultSelectedKeys = keys as string[]
+}
+
+const projectUserOptionsInit = async () => {
+  projectUserOptions.value = (await get_job_project_list_all())?.map(
+      ((v: {
+        userId: any; name: any; id: number
+      }) => ({
+        label: v.name.replace('广东', '').replace('数据归集', '').replace('行政行为', ''),
+        userId: v.userId,
+        value: v.id.toString()
+      }))
+  ) || []
+}
+
+function renderSuffix({option}: { option: TreeOption }) {
+  // 所属任务后缀
+  if ((option.key.toString() == '0-6') ||
+      (option.key.toString() == '0-11') ||
+      (option.key.toString() == '0-5') ||
+      (option.key.toString().startsWith('1-0') && option.key.toString().split('-').length == 3) ||
+      (option.key.toString().startsWith('1-1') && option.key.toString().split('-').length == 3) ||
+      (option.key.toString() == '2-0') ||
+      (option.key.toString() == '2-1')
+  ) {
+    const userProjects = projectUserOptions.value?.filter(opt => opt.userId == user.dcUserInfo.user.id) || []
+    if (userProjects.some(project => project.label == option.label)) {
+      return h(
+          NIcon,
+          {color: '#80e8b1'},
+          {default: () => h(Star24Filled)}
+      )
+    }
+  }
 }
 
 </script>

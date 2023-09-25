@@ -48,6 +48,13 @@ export class DatacenterController {
         return `数据中台访问令牌出错或不存在，请前往应用设置修改令牌`
     }
 
+    @IpcHandle(channels.datacenter.getUser)
+    public handleGetUser() {
+        return new Promise<any>((resolve) => {
+            resolve(this.commonGetRequest('/services/am-uaa/uaa/auth/user', null))
+        });
+    }
+
     @IpcHandle(channels.datacenter.jobProjectListAll)
     public async handleGetJobListAll() {
         return new Promise<any>(async (resolve) => {

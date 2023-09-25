@@ -13,6 +13,7 @@
 
 <script setup lang="ts">
 import {channels} from "@render/api/channels";
+import {get_user} from "@render/api/datacenter.api";
 import {useIpc} from '@render/plugins/ipc'
 import {useUserStore} from "@render/stores/user";
 import WindowBar from "@render/components/base/WindowBar.vue";
@@ -23,8 +24,9 @@ const user = useUserStore()
 
 const ipc = useIpc()
 
-ipc.on(channels.login.sendCanLogin, (msg: boolean) => {
+ipc.on(channels.login.sendCanLogin, async (msg: boolean) => {
   user.isLogin = msg
+  user.dcUserInfo = await get_user()
 })
 
 </script>
