@@ -132,7 +132,7 @@ onMounted(async () => {
   await projectIdOptionsUpdate()
 
   // 初始化滚动到选中的节点上
-  tree.value.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})
+  tree.value?.scrollTo({key: useProjectTreeStore().defaultSelectedKeys[0]})
 })
 
 const handleTreeNodeInit = () => {
