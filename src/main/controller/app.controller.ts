@@ -27,10 +27,7 @@ export class AppController {
         });
     }
 
-    /**
-     * 应用重启
-     * @constructor
-     */
+    // 应用重启
     @IpcHandle(channels.app.relaunch)
     public handleRelaunch() {
         app.relaunch()
