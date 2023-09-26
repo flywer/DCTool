@@ -38,7 +38,7 @@
               <QuestionCircleTwotone/>
             </n-icon>
           </template>
-          将数据插入到中台xzzf_sjtj_data_lake表中，执行后需等待3-5分钟数据才会存入此表
+          将数据插入到数据湖xzzf_sjtj_data_lake表中
         </n-tooltip>
       </n-button>
     </n-space>

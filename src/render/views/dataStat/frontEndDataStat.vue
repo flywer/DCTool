@@ -196,7 +196,7 @@ const generateSubSql = async (item: TreeSelectOption) => {
            '${item.label.split('-')[0]}',
            '${item.label.split('-')[1]}',
            COUNT(DISTINCT t1.${pColName}),
-           NOW()
+           CURRENT_TIMESTAMP()
     FROM ${item.key.toString().split(':')[1]} t1
            INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
                        FROM ${item.key.toString().split(':')[1]}
