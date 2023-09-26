@@ -162,7 +162,6 @@ const generateSql = async () => {
           const pColName = (await get_table_sql({
             tableName: tableName.split('_')[2]
           }))[0].pColName
-          console.log(tableName)
           const departName = (await get_project_by_table_abbr(tableName.split('_')[1]))
               .projectName.replaceAll('数据归集', '').replaceAll('行政行为', '')
           insertSql.value += `
