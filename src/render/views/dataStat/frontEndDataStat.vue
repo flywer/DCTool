@@ -61,7 +61,10 @@
 
 <script setup lang="ts">
 import {WorkflowType} from "@common/types";
-import {get_project_by_pro_abbr, get_project_info} from "@render/api/auxiliaryDb/projectInfo.api";
+import {
+  get_project_by_table_abbr,
+  get_project_info
+} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql, get_workflow_page} from "@render/api/datacenter.api";
 import {QuestionCircleTwotone} from "@vicons/antd";
@@ -159,7 +162,8 @@ const generateSql = async () => {
           const pColName = (await get_table_sql({
             tableName: tableName.split('_')[2]
           }))[0].pColName
-          const departName = (await get_project_by_pro_abbr(tableName.split('_')[1]))
+          console.log(tableName)
+          const departName = (await get_project_by_table_abbr(tableName.split('_')[1]))
               .projectName.replaceAll('数据归集', '').replaceAll('行政行为', '')
           insertSql.value += `
             SELECT '${uuid.v4()}',
