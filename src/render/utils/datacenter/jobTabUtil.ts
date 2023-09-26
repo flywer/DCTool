@@ -57,14 +57,14 @@ export const getDCTableIsValidConfig = async (tableAbbr: string, tableName: stri
 
     const validTableName = `di_${tableAbbr}_${tableName.toLowerCase()}_temp_ods`
 
-    const records = (await get_valid_config_page(validTableName)).data?.records||[]
+    const records = (await get_valid_config_page(validTableName)).data?.records || []
 
     return !(isEmpty(records) || records[0].tableName != validTableName);
 }
 
 // 查询自定义表的质检任务是否已配置
 export const getCustomTableValidConfig = async (tableName: string) => {
-    const records = (await get_valid_config_page(tableName)).data?.records||[]
+    const records = (await get_valid_config_page(tableName)).data?.records || []
 
     return !(isEmpty(records) || records[0].tableName != tableName);
 }
@@ -310,14 +310,19 @@ export const workflowActive = async (id: string, type: '01' | '02', onSuccess: (
  * @param onSuccess 成功时的触发函数
  **/
 export const workflowRun = async (job: Job, onSuccess: () => any) => {
+    // 正在运行工作流数量检查
     checkRunningNum().then(isPass1 => {
         if (isPass1) {
+            // 依赖任务执行时间检查
             checkWorkflowDependency(job).then(isPass2 => {
                 if (isPass2) {
+                    // 质检任务特殊检查:机构配置
                     checkZjJobInpsConfig(job).then(isPass3 => {
                         if (isPass3) {
-                            checkZjJobRulesUpdateTime(job).then(isPass4 => {
+                            // 检查任务模板是否存在新版本
+                            checkJobRulesUpdateTime(job).then(isPass4 => {
                                 if (isPass4) {
+                                    // 多表融合任务是否有多个正在运行
                                     checkRh2Job(job).then(isPass5 => {
                                         if (isPass5) {
                                             workflowStart(job, () => onSuccess())
@@ -546,7 +551,8 @@ const checkZjJobInpsConfig = async (job: Job): Promise<boolean> => {
     }
 }
 
-const checkZjJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
+// 检查任务模板是否存在新版本
+const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
     if (job.type === '数据质检任务') {
 
         const tableName = job.jobName.split('_').pop()
