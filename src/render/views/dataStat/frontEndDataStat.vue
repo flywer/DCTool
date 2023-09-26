@@ -166,7 +166,7 @@ const generateSql = async () => {
                    '${departName}',
                    '${tableName.split('_')[2].toUpperCase()}',
                    COUNT(DISTINCT t1.${pColName}),
-                   NOW()
+                   CURRENT_TIMESTAMP()
             FROM ${tableName} t1
                    INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
                                FROM ${tableName}
