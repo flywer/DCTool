@@ -1,7 +1,7 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {DataXJobLogType, DataXJobPageType, ProjectInfo, SchedJobType} from "@common/types";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
-import {get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
@@ -572,6 +572,27 @@ const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
                 window.$dialog.warning({
                     title: '警告',
                     content: `检测到质检规则已更新，是否继续以旧规则执行质检？`,
+                    positiveText: '确定',
+                    negativeText: '取消',
+                    onPositiveClick: () => {
+                        resolve(true);
+                    },
+                    onNegativeClick: () => {
+                        resolve(false);
+                    }
+                });
+            });
+        }
+    } else if (job.type == '数据融合任务' || job.type == '单表融合任务') {
+        const rulesUpdateTime = formatDate((await get_rh_json(job.jobName.split('_').pop()))[0].rh1UpdateTime)
+        console.log(rulesUpdateTime)
+        if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
+            return true
+        } else {
+            return new Promise<boolean>((resolve) => {
+                window.$dialog.warning({
+                    title: '警告',
+                    content: `检测到融合任务模板已更新，是否继续以旧任务模板执行任务？`,
                     positiveText: '确定',
                     negativeText: '取消',
                     onPositiveClick: () => {
