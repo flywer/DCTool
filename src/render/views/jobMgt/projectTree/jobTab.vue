@@ -2138,7 +2138,7 @@ const showUpdateRhJobDialog = (job: Job) => {
     positiveText: '确定',
     negativeText: '取消',
     onPositiveClick: () => {
-      updateRhJob(job.id, job.jobName.split('_').pop())
+      updateRhJob(job.id, job.jobName.split('_').pop()).then(() => tableDataInit())
     }
   })
 }
