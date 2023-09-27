@@ -108,6 +108,8 @@ const generateSql = async () => {
   if (!isEmpty(formModel.value.tableSelect)) {
     isGenerating.value = true
 
+    insertSql.value = ''
+
     for (const tables of formModel.value.tableSelect) {
       if (tables == '0') {
         for (const table of basicTableNames) {
@@ -153,7 +155,11 @@ const execSql = () => {
     if (res.success) {
       window.$message.success(res.message)
     } else {
-      window.$message.error(res.message)
+      window.$dialog.error({
+        title: '执行出错',
+        content: res.message,
+        positiveText: '确定',
+      })
     }
   }).finally(() => isExecuting.value = false)
 }

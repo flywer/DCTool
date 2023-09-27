@@ -11,7 +11,7 @@ export class ShareController {
     }
 
     @IpcHandle(channels.share.getDataVolume)
-    public async handleGetDataVolume(sql: string) {
+    public handleGetDataVolume(sql: string) {
         return new Promise<any>(resolve => {
             ShareSource.manager.query(sql).then(res => {
                 const frontController = new FrontController()
@@ -19,11 +19,11 @@ export class ShareController {
                     resolve(success('同步成功'))
                 }).catch((reason) => {
                     log.error(reason)
-                    resolve(failure(reason))
+                    resolve(failure(reason.message))
                 })
             }).catch((reason) => {
                 log.error(reason)
-                resolve(failure(reason))
+                resolve(failure(reason.message))
             })
         })
 
