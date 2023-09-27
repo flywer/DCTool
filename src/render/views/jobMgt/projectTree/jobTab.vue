@@ -795,7 +795,7 @@ import {
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
 import {createQcJob} from "@render/utils/datacenter/qcJob";
-import {createRhJob} from "@render/utils/datacenter/rhJob";
+import {createRhJob, updateRhJob} from "@render/utils/datacenter/rhJob";
 import {createRkJob} from "@render/utils/datacenter/rkJob";
 import {createZjJob, updateZjJob} from "@render/utils/datacenter/zjJob";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
@@ -1183,6 +1183,10 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   if (row.type === '数据采集任务' && row.status != -1) {
     moreBtnChildren.push(showTextButton('源表预览', () => tablePreview(row)))
   }
+
+  if ((row.type === '数据融合任务' || row.type === '单表融合任务') && ![-1, 2, 3].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('更新任务配置', () => showUpdateRhJobDialog(row)))
+  }
 }
 
 // children直接添加更多中的组件
@@ -1205,6 +1209,10 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
 
   if (row.type === '数据采集任务' && row.status != -1) {
     children.push(showButton('源表预览', () => tablePreview(row)))
+  }
+
+  if ((row.type === '数据融合任务' || row.type === '单表融合任务') && ![-1, 2, 3].includes(row.status)) {
+    children.push(showButton('更新任务配置', () => showUpdateRhJobDialog(row)))
   }
 }
 
@@ -2120,6 +2128,21 @@ const onUpdateZjJob = () => {
       .finally(() => isUpdateZjJob.value = false)
 }
 //endregion
+
+// region
+const showUpdateRhJobDialog = (job: Job) => {
+  window.$dialog.success({
+    showIcon: false,
+    title: '更新任务配置',
+    content: `是否更新[${job.jobName}]任务配置为最新状态？`,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: () => {
+      updateRhJob(job.id, job.jobName.split('_').pop())
+    }
+  })
+}
+// endregion
 
 //region 预览
 const showPreviewModalRef = ref(false)

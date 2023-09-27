@@ -1,8 +1,10 @@
+import {WorkflowType} from "@common/types";
 import {get_rh_json, get_rh_json_by_id} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {add_work_flow} from "@render/api/datacenter.api";
+import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {cloneDeep} from "lodash-es";
@@ -171,4 +173,55 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
     }
 }
 
+export const updateRhJob = async (jobId: string, tableName: string) => {
+    const jobInfo: WorkflowType = (await get_workflow(jobId)).data
 
+    let paramsJson = {
+        name: jobInfo.procName,
+        email: jobInfo.email,
+        description: jobInfo.description,
+        personId: jobInfo.personId,
+        personName: jobInfo.personName,
+        projectId: jobInfo.projectId,
+        projectName: jobInfo.projectName,
+        dependencyProjectId: jobInfo.dependencyProjectId,
+        dependencyProjectName: jobInfo.dependencyProjectName,
+        dependencyWorkflowId: jobInfo.dependencyWorkflowId,
+        dependencyWorkflowName: jobInfo.dependencyWorkflowName,
+        schedulingMode: jobInfo.schedulingMode,
+        crontab: jobInfo.crontab,
+        type: "流程",
+        code: '',
+        modelXml: '',
+        modelJson: '',
+        dataDevBizVo: undefined
+    }
+
+    const jobTemplate = JSON.parse((await get_rh_json(tableName))[0]?.rh1Json)
+
+    if (jobTemplate != undefined) {
+        // 项目表名简称
+        const {tableAbbr} = await getAbbrByProId(paramsJson.projectId);
+
+        paramsJson.code = jobTemplate.code
+        paramsJson.modelXml = jobTemplate.modelXml.replaceAll('depart', tableAbbr)
+        paramsJson.modelXml = jobTemplate.modelXml.replaceAll('depart', tableAbbr)
+        paramsJson.modelJson = jobTemplate.modelJson.replaceAll('depart', tableAbbr)
+
+        paramsJson.dataDevBizVo = JSON.parse(JSON.stringify(jobTemplate.dataDevBizVo).replaceAll('depart', tableAbbr))
+
+        paramsJson = JSON.parse(updateSjkUUID(paramsJson))
+
+        await update_workflow(jobInfo.id, paramsJson).then((res) => {
+            if (res.success) {
+                window.$message.success(res.message)
+            } else {
+                window.$message.error(res.message)
+            }
+        })
+
+    } else {
+        window.$message.error('融合任务模板不存在')
+    }
+
+}
