@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import ActionDataProblemQuery from "@render/views/preDatabase/actionDataProblemQuery.vue";
-import ActionDataSumStat from "@render/views/preDatabase/actionDataSumStat.vue";
-import TableNameAssociation from "@render/views/preDatabase/tableNameAssociation.vue";
+import ActionDataProblemQuery from "@render/views/tableMgt/frontEnd/actionDataProblemQuery.vue";
+import ActionDataSumStat from "@render/views/tableMgt/frontEnd/actionDataSumStat.vue";
+import TableNameAssociation from "@render/views/tableMgt/frontEnd/tableNameAssociation.vue";
 </script>
 
 <style scoped>

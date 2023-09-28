@@ -45,7 +45,8 @@ import {
   TableAdd24Regular,
   Toolbox24Regular,
   Organization24Regular,
-  TaskListLtr24Regular
+  TaskListLtr24Regular,
+  TableFreezeRow24Regular
 } from '@vicons/fluent'
 import {SettingsOutline, StatsChartOutline} from '@vicons/ionicons5'
 import {ProjectOutlined} from '@vicons/antd'
@@ -133,13 +134,13 @@ const menuOptions: MenuOption[] = [
             RouterLink,
             {
               to: {
-                name: routeName.createTable,
+                name: routeName.tableMgt,
               }
             },
-            {default: () => '中台建表'}
+            {default: () => '库表管理'}
         ),
-    key: routeName.createTable,
-    icon: renderIcon(TableAdd24Regular)
+    key: routeName.tableMgt,
+    icon: renderIcon(TableFreezeRow24Regular)
   },
   {
     label: () =>
@@ -154,20 +155,6 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.sqlProcess,
     icon: renderIcon(Sql)
-  },
-  {
-    label: () =>
-        h(
-            RouterLink,
-            {
-              to: {
-                name: routeName.preDatabase,
-              }
-            },
-            {default: () => '前置机'}
-        ),
-    key: routeName.preDatabase,
-    icon: renderIcon(DataBase)
   },
   {
     label: () =>

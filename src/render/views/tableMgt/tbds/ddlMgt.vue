@@ -1,50 +1,52 @@
 <template>
-  <n-alert type="default" :show-icon="false">
-    此处为<b>融合前</b>的原始数据表结构
-  </n-alert>
-  <n-space justify="end" class="mt-2">
-    <n-input
-        placeholder="搜索"
-        v-model:value="searchValue"
-        @update:value="tableDataInit"
-        @keydown.enter="tableDataInit"
-        clearable
-    >
-      <template #prefix>
-        <n-icon>
-          <Search/>
-        </n-icon>
-      </template>
-    </n-input>
-    <n-button secondary strong @click="add">
-      新增
-      <template #icon>
-        <n-icon>
-          <Add/>
-        </n-icon>
-      </template>
-    </n-button>
-    <n-button secondary strong @click="tableDataInit">
-      刷新
-      <template #icon>
-        <n-icon>
-          <Refresh/>
-        </n-icon>
-      </template>
-    </n-button>
-  </n-space>
-  <n-data-table
-      ref="tableRef"
-      :key="(row) => row.id"
-      class="mt-2"
-      :columns="columnsRef"
-      :data="tableDataRef"
-      :pagination="paginationReactive"
-      :bordered="true"
-      :size="'small'"
-      :loading="isLoading"
-      :striped="true"
-  />
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
+    <n-alert type="default" :show-icon="false">
+      此处为<b>融合前</b>的原始数据表结构
+    </n-alert>
+    <n-space justify="end" class="mt-2">
+      <n-input
+          placeholder="搜索"
+          v-model:value="searchValue"
+          @update:value="tableDataInit"
+          @keydown.enter="tableDataInit"
+          clearable
+      >
+        <template #prefix>
+          <n-icon>
+            <Search/>
+          </n-icon>
+        </template>
+      </n-input>
+      <n-button secondary strong @click="add">
+        新增
+        <template #icon>
+          <n-icon>
+            <Add/>
+          </n-icon>
+        </template>
+      </n-button>
+      <n-button secondary strong @click="tableDataInit">
+        刷新
+        <template #icon>
+          <n-icon>
+            <Refresh/>
+          </n-icon>
+        </template>
+      </n-button>
+    </n-space>
+    <n-data-table
+        ref="tableRef"
+        :key="(row) => row.id"
+        class="mt-2"
+        :columns="columnsRef"
+        :data="tableDataRef"
+        :pagination="paginationReactive"
+        :bordered="true"
+        :size="'small'"
+        :loading="isLoading"
+        :striped="true"
+    />
+  </n-scrollbar>
 
   <n-modal
       v-model:show="showModalRef"
@@ -91,6 +93,7 @@
       <n-button :size="'small'" @click=" showModalRef = false">返回</n-button>
     </template>
   </n-modal>
+
 </template>
 
 <script setup lang="ts">

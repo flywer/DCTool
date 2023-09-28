@@ -1,203 +1,206 @@
 <template>
-  <n-card class="mt-2" :content-style="{paddingBottom:0}">
-    <n-form ref="formRef"
-            inline
-            :size="'small'"
-            :model="formModel"
-            :rules="rules"
-            label-placement="left"
-    >
-      <n-grid :cols="3" :x-gap="12">
-        <n-form-item-gi label="表名" path="tableSqlId">
-          <n-select
-              v-model:value="formModel.tableSqlId"
-              placeholder="选择表名"
-              :options="tableNameOptions"
-              :consistent-menu-width="false"
-              filterable
-          />
-        </n-form-item-gi>
-        <n-form-item-gi label="项目" path="projectId">
-          <n-select
-              v-model:value="formModel.projectId"
-              placeholder="选择项目"
-              :options="projectIdOptions"
-              :consistent-menu-width="false"
-              filterable
-          />
-        </n-form-item-gi>
-        <n-form-item-gi>
-          <n-checkbox v-model:checked="formModel.hasOptCol">
-            是否需要OPT字段
-          </n-checkbox>
-        </n-form-item-gi>
-        <n-form-item-gi
-            :span="12"
-            path="tableGroupValue"
-        >
-          <n-checkbox-group
-              v-model:value="formModel.tableGroupValue"
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
+
+    <n-card class="mt-2" :content-style="{paddingBottom:0}">
+      <n-form ref="formRef"
+              inline
+              :size="'small'"
+              :model="formModel"
+              :rules="rules"
+              label-placement="left"
+      >
+        <n-grid :cols="3" :x-gap="12">
+          <n-form-item-gi label="表名" path="tableSqlId">
+            <n-select
+                v-model:value="formModel.tableSqlId"
+                placeholder="选择表名"
+                :options="tableNameOptions"
+                :consistent-menu-width="false"
+                filterable
+            />
+          </n-form-item-gi>
+          <n-form-item-gi label="项目" path="projectId">
+            <n-select
+                v-model:value="formModel.projectId"
+                placeholder="选择项目"
+                :options="projectIdOptions"
+                :consistent-menu-width="false"
+                filterable
+            />
+          </n-form-item-gi>
+          <n-form-item-gi>
+            <n-checkbox v-model:checked="formModel.hasOptCol">
+              是否需要OPT字段
+            </n-checkbox>
+          </n-form-item-gi>
+          <n-form-item-gi
+              :span="12"
+              path="tableGroupValue"
           >
-            <n-space>
-              <n-checkbox value="temp_ods">
-                ODS层临时表
-              </n-checkbox>
-              <n-checkbox value="ods">
-                ODS层备份表
-              </n-checkbox>
-              <n-checkbox value="right_dwd">
-                DWD层合格表
-              </n-checkbox>
-              <n-checkbox value="error_dwd">
-                DWD层不合格表
-              </n-checkbox>
-              <n-checkbox value="dwb">
-                DWB层融合表
-              </n-checkbox>
-              <n-checkbox value="temp_dwb" disabled>
-                DWB层融合临时表
-              </n-checkbox>
-            </n-space>
-          </n-checkbox-group>
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-  </n-card>
-
-  <n-space justify="center" align="center" class="mt-2">
-    <n-button type="primary" class="w-28" @click="createTables">创建表</n-button>
-  </n-space>
-
-  <n-card class="mt-2">
-    <n-list>
-      <template #header>
-        执行状态
-      </template>
-
-      <n-list-item v-if="createStatus.tempOds.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.tempOds.isCreating"/>
-          <div>{{ createStatus.tempOds.tableName }}</div>
-          <n-space v-if="!createStatus.tempOds.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempOds.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.tempOds.msg }}
-            <n-button text type="info"
-                      v-if="!createStatus.tempOds.isSuccess"
-                      @click="deleteTableRebuild(createStatus.tempOds.tableName,'temp_ods')"
-            >删除重建
-            </n-button>
-          </n-space>
-        </n-space>
-      </n-list-item>
-
-      <n-list-item v-if="createStatus.ods.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.ods.isCreating"/>
-          <div>{{ createStatus.ods.tableName }}</div>
-          <n-space v-if="!createStatus.ods.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.ods.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.ods.msg }}
-            <n-button text type="info"
-                      v-if="!createStatus.ods.isSuccess"
-                      @click="deleteTableRebuild(createStatus.ods.tableName,'ods')"
-            >删除重建
-            </n-button>
-          </n-space>
-        </n-space>
-      </n-list-item>
-
-      <n-list-item v-if="createStatus.rightDwd.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.rightDwd.isCreating"/>
-          <div>{{ createStatus.rightDwd.tableName }}</div>
-          <n-space v-if="!createStatus.rightDwd.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.rightDwd.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.rightDwd.msg }}
-            <n-button text type="info"
-                      v-if="!createStatus.rightDwd.isSuccess"
-                      @click="deleteTableRebuild(createStatus.rightDwd.tableName,'right_dwd')"
+            <n-checkbox-group
+                v-model:value="formModel.tableGroupValue"
             >
-              删除重建
-            </n-button>
-          </n-space>
-        </n-space>
-      </n-list-item>
-
-      <n-list-item v-if="createStatus.errorDwd.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.errorDwd.isCreating"/>
-          <div>{{ createStatus.errorDwd.tableName }}</div>
-          <n-space v-if="!createStatus.errorDwd.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.errorDwd.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.errorDwd.msg }}
-            <n-button text type="info"
-                      v-if="!createStatus.errorDwd.isSuccess"
-                      @click="deleteTableRebuild(createStatus.errorDwd.tableName,'error_dwd')"
-            >
-              删除重建
-            </n-button>
-          </n-space>
-        </n-space>
-      </n-list-item>
-
-      <n-list-item v-if="createStatus.dwb.tableName !==''">
-        <n-space class="pl-2">
-          <n-spin :size="14" v-if="createStatus.dwb.isCreating"/>
-          <div>{{ createStatus.dwb.tableName }}</div>
-          <n-space v-if="!createStatus.dwb.isCreating">
-            <n-icon :size="20" color="#0e7a0d" v-if="createStatus.dwb.isSuccess">
-              <CheckmarkSharp/>
-            </n-icon>
-            <n-icon :size="20" color="rgb(205 19 19)" v-else>
-              <CloseSharp/>
-            </n-icon>
-            {{ createStatus.dwb.msg }}
-            <n-button text type="info"
-                      v-if="!createStatus.dwb.isSuccess"
-                      @click="deleteTableRebuild(createStatus.dwb.tableName,'dwb')"
-            >删除重建
-            </n-button>
-          </n-space>
-        </n-space>
-      </n-list-item>
-
-      <!--      <n-list-item v-if="createStatus.tempDwb.tableName !==''">
-              <n-space class="pl-2">
-                <n-spin :size="14" v-if="createStatus.tempDwb.isCreating"/>
-                <div>{{ createStatus.tempDwb.tableName }}</div>
-                <n-space v-if="!createStatus.tempDwb.isCreating">
-                  <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempDwb.isSuccess">
-                    <CheckmarkSharp/>
-                  </n-icon>
-                  <n-icon :size="20" color="rgb(205 19 19)" v-else>
-                    <CloseSharp/>
-                  </n-icon>
-                  {{ createStatus.tempDwb.msg }}
-                </n-space>
+              <n-space>
+                <n-checkbox value="temp_ods">
+                  ODS层临时表
+                </n-checkbox>
+                <n-checkbox value="ods">
+                  ODS层备份表
+                </n-checkbox>
+                <n-checkbox value="right_dwd">
+                  DWD层合格表
+                </n-checkbox>
+                <n-checkbox value="error_dwd">
+                  DWD层不合格表
+                </n-checkbox>
+                <n-checkbox value="dwb">
+                  DWB层融合表
+                </n-checkbox>
+                <n-checkbox value="temp_dwb" disabled>
+                  DWB层融合临时表
+                </n-checkbox>
               </n-space>
-            </n-list-item>-->
-    </n-list>
-  </n-card>
+            </n-checkbox-group>
+          </n-form-item-gi>
+        </n-grid>
+      </n-form>
+    </n-card>
+
+    <n-space justify="center" align="center" class="mt-2">
+      <n-button type="primary" class="w-28" @click="createTables">创建表</n-button>
+    </n-space>
+
+    <n-card class="mt-2">
+      <n-list>
+        <template #header>
+          执行状态
+        </template>
+
+        <n-list-item v-if="createStatus.tempOds.tableName !==''">
+          <n-space class="pl-2">
+            <n-spin :size="14" v-if="createStatus.tempOds.isCreating"/>
+            <div>{{ createStatus.tempOds.tableName }}</div>
+            <n-space v-if="!createStatus.tempOds.isCreating">
+              <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempOds.isSuccess">
+                <CheckmarkSharp/>
+              </n-icon>
+              <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                <CloseSharp/>
+              </n-icon>
+              {{ createStatus.tempOds.msg }}
+              <n-button text type="info"
+                        v-if="!createStatus.tempOds.isSuccess"
+                        @click="deleteTableRebuild(createStatus.tempOds.tableName,'temp_ods')"
+              >删除重建
+              </n-button>
+            </n-space>
+          </n-space>
+        </n-list-item>
+
+        <n-list-item v-if="createStatus.ods.tableName !==''">
+          <n-space class="pl-2">
+            <n-spin :size="14" v-if="createStatus.ods.isCreating"/>
+            <div>{{ createStatus.ods.tableName }}</div>
+            <n-space v-if="!createStatus.ods.isCreating">
+              <n-icon :size="20" color="#0e7a0d" v-if="createStatus.ods.isSuccess">
+                <CheckmarkSharp/>
+              </n-icon>
+              <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                <CloseSharp/>
+              </n-icon>
+              {{ createStatus.ods.msg }}
+              <n-button text type="info"
+                        v-if="!createStatus.ods.isSuccess"
+                        @click="deleteTableRebuild(createStatus.ods.tableName,'ods')"
+              >删除重建
+              </n-button>
+            </n-space>
+          </n-space>
+        </n-list-item>
+
+        <n-list-item v-if="createStatus.rightDwd.tableName !==''">
+          <n-space class="pl-2">
+            <n-spin :size="14" v-if="createStatus.rightDwd.isCreating"/>
+            <div>{{ createStatus.rightDwd.tableName }}</div>
+            <n-space v-if="!createStatus.rightDwd.isCreating">
+              <n-icon :size="20" color="#0e7a0d" v-if="createStatus.rightDwd.isSuccess">
+                <CheckmarkSharp/>
+              </n-icon>
+              <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                <CloseSharp/>
+              </n-icon>
+              {{ createStatus.rightDwd.msg }}
+              <n-button text type="info"
+                        v-if="!createStatus.rightDwd.isSuccess"
+                        @click="deleteTableRebuild(createStatus.rightDwd.tableName,'right_dwd')"
+              >
+                删除重建
+              </n-button>
+            </n-space>
+          </n-space>
+        </n-list-item>
+
+        <n-list-item v-if="createStatus.errorDwd.tableName !==''">
+          <n-space class="pl-2">
+            <n-spin :size="14" v-if="createStatus.errorDwd.isCreating"/>
+            <div>{{ createStatus.errorDwd.tableName }}</div>
+            <n-space v-if="!createStatus.errorDwd.isCreating">
+              <n-icon :size="20" color="#0e7a0d" v-if="createStatus.errorDwd.isSuccess">
+                <CheckmarkSharp/>
+              </n-icon>
+              <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                <CloseSharp/>
+              </n-icon>
+              {{ createStatus.errorDwd.msg }}
+              <n-button text type="info"
+                        v-if="!createStatus.errorDwd.isSuccess"
+                        @click="deleteTableRebuild(createStatus.errorDwd.tableName,'error_dwd')"
+              >
+                删除重建
+              </n-button>
+            </n-space>
+          </n-space>
+        </n-list-item>
+
+        <n-list-item v-if="createStatus.dwb.tableName !==''">
+          <n-space class="pl-2">
+            <n-spin :size="14" v-if="createStatus.dwb.isCreating"/>
+            <div>{{ createStatus.dwb.tableName }}</div>
+            <n-space v-if="!createStatus.dwb.isCreating">
+              <n-icon :size="20" color="#0e7a0d" v-if="createStatus.dwb.isSuccess">
+                <CheckmarkSharp/>
+              </n-icon>
+              <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                <CloseSharp/>
+              </n-icon>
+              {{ createStatus.dwb.msg }}
+              <n-button text type="info"
+                        v-if="!createStatus.dwb.isSuccess"
+                        @click="deleteTableRebuild(createStatus.dwb.tableName,'dwb')"
+              >删除重建
+              </n-button>
+            </n-space>
+          </n-space>
+        </n-list-item>
+
+        <!--      <n-list-item v-if="createStatus.tempDwb.tableName !==''">
+                <n-space class="pl-2">
+                  <n-spin :size="14" v-if="createStatus.tempDwb.isCreating"/>
+                  <div>{{ createStatus.tempDwb.tableName }}</div>
+                  <n-space v-if="!createStatus.tempDwb.isCreating">
+                    <n-icon :size="20" color="#0e7a0d" v-if="createStatus.tempDwb.isSuccess">
+                      <CheckmarkSharp/>
+                    </n-icon>
+                    <n-icon :size="20" color="rgb(205 19 19)" v-else>
+                      <CloseSharp/>
+                    </n-icon>
+                    {{ createStatus.tempDwb.msg }}
+                  </n-space>
+                </n-space>
+              </n-list-item>-->
+      </n-list>
+    </n-card>
+  </n-scrollbar>
 </template>
 
 <script setup lang="ts">

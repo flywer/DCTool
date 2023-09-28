@@ -7,14 +7,15 @@ const jobCreate = () => import('@render/views/jobCreate/index.vue')
 const jobMgt = () => import('@render/views/jobMgt/index.vue')
 const sqlProcess = () => import('@render/views/sqlProcess/index.vue')
 const settings = () => import('@render/views/settings/index.vue')
-const createTable = () => import('@render/views/createTable/index.vue')
-const preDatabase = () => import('@render/views/preDatabase/index.vue')
+const createTable = () => import('@render/views/tableMgt/tbds/tbdsTab.vue')
+const preDatabase = () => import('@render/views/tableMgt/frontEnd/frontEndTab.vue')
 const sztkDict = () => import('@render/views/sztkDict/index.vue')
 const dataStat = () => import('@render/views/dataStat/index.vue')
 const projectMgt = () => import('@render/views/projectMgt/index.vue')
 const toolbox = () => import('@render/views/toolbox/index.vue')
 const jobDependency = () => import('@render/views/jobDependency/index.vue')
 const taskScheduler = () => import('@render/views/taskScheduler/index.vue')
+const tableMgt = () => import('@render/views/tableMgt/index.vue')
 
 export const routeName = {
     app: 'app',
@@ -42,7 +43,8 @@ export const routeName = {
     projectMgt: 'projectMgt',
     toolbox: 'toolbox',
     jobDependency: 'jobDependency',
-    taskScheduler: 'taskScheduler'
+    taskScheduler: 'taskScheduler',
+    tableMgt: 'tableMgt',
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -110,10 +112,16 @@ export const routes: Array<RouteRecordRaw> = [
                         name: routeName.jobDependency,
                         path: '/jobDependency/index',
                         component: jobDependency
-                    }, {
+                    },
+                    {
                         name: routeName.taskScheduler,
                         path: '/taskScheduler/index',
                         component: taskScheduler
+                    },
+                    {
+                        name: routeName.tableMgt,
+                        path: '/tableMgt/index',
+                        component: tableMgt
                     },
                 ]
             },
