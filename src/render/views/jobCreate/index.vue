@@ -27,13 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import CjJob from "@render/views/cjJob/index.vue";
-import ZjJob from "@render/views/zjJob/index.vue";
-import BfJob from "@render/views/bfJob/index.vue";
-import RhJob from "@render/views/rhJob/index.vue";
-import QcJob from "@render/views/qcJob/index.vue";
-import RkJob from "@render/views/rkJob/index.vue";
-import GxJob from "@render/views/gxJob/index.vue";
+import CjJob from "@render/views/jobCreate/cjJob/index.vue";
+import ZjJob from "@render/views/jobCreate/zjJob/index.vue";
+import BfJob from "@render/views/jobCreate/bfJob/index.vue";
+import RhJob from "@render/views/jobCreate/rhJob/index.vue";
+import QcJob from "@render/views/jobCreate/qcJob/index.vue";
+import RkJob from "@render/views/jobCreate/rkJob/index.vue";
+import GxJob from "@render/views/jobCreate/gxJob/index.vue";
 </script>
 
 <style scoped>

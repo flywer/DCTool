@@ -99,7 +99,7 @@
 <script setup lang="ts">
 import {CommonJsonDataType} from "@common/types";
 import {copyText} from "@render/utils/common/clipboard";
-import ZjRulesTable from "@render/views/zjJob/components/zjRulesTable.vue";
+import ZjRulesTable from "@render/views/jobCreate/zjJob/components/zjRulesTable.vue";
 import {Refresh, Search} from '@vicons/ionicons5'
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, reactive, ref} from "vue";

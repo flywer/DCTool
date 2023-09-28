@@ -10,10 +10,10 @@
 
 <script setup lang="ts">
 import {CommonJsonDataType} from "@common/types";
-import {get_zj_json, update_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_simp_zj_json, update_simp_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {convertZjJson} from "@render/utils/datacenter/zjJob";
-import JsonDataTable from "@render/views/zjJob/components/jsonDataTable.vue";
+import JsonDataTable from "@render/views/jobCreate/zjJob/components/jsonDataTable.vue";
 import {onMounted, ref} from "vue";
 
 const tableDataRef = ref<CommonJsonDataType[]>([])
@@ -26,13 +26,13 @@ onMounted(() => {
 
 const tableDataInit = (v?: string) => {
   isLoading.value = true
-  get_zj_json(v || '').then((res) => {
-    tableDataRef.value = res.map(
+  get_simp_zj_json(v || '').then((res) => {
+    tableDataRef.value = res.filter((table: { tableName: string; }) => table.tableName.startsWith('C')).map(
         (v => ({
           id: v.id,
           tableName: v.tableName,
-          json: v.zjJson,
-          updateTime: v.zjUpdateTime == null ? '--' : formatDate(v.zjUpdateTime)
+          json: v.simpZjJson,
+          updateTime: v.simpZjUpdateTime == null ? '--' : formatDate(v.simpZjUpdateTime)
         })))
   }).finally(() => isLoading.value = false)
 }
@@ -46,13 +46,13 @@ const handleSave = (model: CommonJsonDataType, searchValue: string) => {
   const {
     id,
     tableName,
-    json: zjJson
+    json: simpZjJson
   } = model
 
-  update_zj_json({
+  update_simp_zj_json({
     id,
     tableName,
-    zjJson
+    simpZjJson
   }).then(() => {
     window.$message.success('保存成功')
     tableDataInit(searchValue)

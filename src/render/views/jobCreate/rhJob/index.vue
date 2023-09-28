@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import CreateActionDataRhJobTab from "@render/views/rhJob/createActionDataRhJobTab.vue";
-import CreateBasicDataRhJobTab from "@render/views/rhJob/createBasicDataRhJobTab.vue";
-import RhJsonTab from "@render/views/rhJob/rhJsonTab.vue";
+import CreateActionDataRhJobTab from "@render/views/jobCreate/rhJob/createActionDataRhJobTab.vue";
+import CreateBasicDataRhJobTab from "@render/views/jobCreate/rhJob/createBasicDataRhJobTab.vue";
+import RhJsonTab from "@render/views/jobCreate/rhJob/rhJsonTab.vue";
 </script>
 
 <style scoped>

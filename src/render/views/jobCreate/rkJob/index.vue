@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import CreateRkJobTab from "@render/views/rkJob/createRkJobTab.vue";
+import CreateRkJobTab from "@render/views/jobCreate/rkJob/createRkJobTab.vue";
 </script>
 
 <style scoped>

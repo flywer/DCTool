@@ -18,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import CreateZjJobTab from "@render/views/zjJob/createZjJobTab.vue";
-import SimpZjJsonTab from "@render/views/zjJob/simpZjJsonTab.vue";
-import ZjJsonTab from "@render/views/zjJob/zjJsonTab.vue";
-import ZjJsonTransTab from "@render/views/zjJob/zjJsonTransTab.vue";
+import CreateZjJobTab from "@render/views/jobCreate/zjJob/createZjJobTab.vue";
+import SimpZjJsonTab from "@render/views/jobCreate/zjJob/simpZjJsonTab.vue";
+import ZjJsonTab from "@render/views/jobCreate/zjJob/zjJsonTab.vue";
+import ZjJsonTransTab from "@render/views/jobCreate/zjJob/zjJsonTransTab.vue";
 </script>
 
 <style scoped>
