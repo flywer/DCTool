@@ -37,12 +37,11 @@ import {NIcon, useNotification, NButton} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
-import {Sql, DataBase} from '@vicons/carbon'
+import {Sql} from '@vicons/carbon'
 import {LibraryAddOutlined} from '@vicons/material'
 import {
   AppsListDetail24Regular,
   BookSearch24Regular,
-  TableAdd24Regular,
   Toolbox24Regular,
   Organization24Regular,
   TaskListLtr24Regular,
