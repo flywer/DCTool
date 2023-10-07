@@ -155,7 +155,7 @@ export class JobJsonController {
                 .values([{
                     simpZjJson: obj.simpZjJson,
                     tableName: obj.tableName,
-                    simpZjUpdateTime: obj.simpZjUpdateTime
+                    simpZjUpdateTime: new Date()
                 }])
                 .execute()
         } else {
@@ -164,7 +164,7 @@ export class JobJsonController {
                 .set({
                     simpZjJson: obj.simpZjJson,
                     tableName: obj.tableName,
-                    simpZjUpdateTime: obj.simpZjUpdateTime
+                    simpZjUpdateTime: new Date()
                 })
                 .where("id = :id", {id: obj.id})
                 .execute()
