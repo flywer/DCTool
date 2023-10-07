@@ -70,7 +70,7 @@
   >
     <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
       <n-alert type="warning" :show-icon="false" v-if="formSelect.addSchedJob && showCronUnConfigAlert">
-        此项目未进行调度配置，可能会与其他项目执行时间产生冲突，前往<b>调度管理</b>进行配置
+        此项目未进行调度配置，可能会与其他项目执行时间产生冲突，前往<b>项目管理/项目调度管理</b>进行配置
       </n-alert>
 
       <n-form
