@@ -90,6 +90,10 @@ export const channels = reactive({
         runDataxJobByJobContent: 'datacenter/runDataxJobByJobContent',
         getSchedJobById: 'datacenter/getSchedJobById',
         getAllDataSource: 'datacenter/getAllDataSource',
+        getTableInfoById: 'datacenter/getTableInfoById',
+        getTableStoreFormat: 'datacenter/getTableStoreFormat',
+        getTableFieldType: 'datacenter/getTableFieldType',
+        updateTable: 'datacenter/updateTable',
     },
     auxiliaryDb: {
         projectInfo: {

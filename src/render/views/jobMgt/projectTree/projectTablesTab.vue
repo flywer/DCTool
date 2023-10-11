@@ -56,7 +56,6 @@
 
   </n-modal>
 
-
   <n-modal
       v-model:show="showUpdateModalRef"
       :mask-closable="true"
@@ -98,7 +97,7 @@
 </template>
 
 <script setup lang="ts">
-import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter.api";
+import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
@@ -155,7 +154,7 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    const records = (await get_tables_info({
+    const records = (await get_tables_info_page({
       size: 10000,
       page: 1,
       sourceId: 6,

@@ -1,3 +1,11 @@
+import {
+    DCCommonResult,
+    DCPageResult,
+    DictItemType,
+    FieldType,
+    PageTableType,
+    TableInfoType
+} from "@common/datacenter.types";
 import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
@@ -206,8 +214,13 @@ export type GetTablesInfoApiType = {
     likeValue: string
 }
 
-export const get_tables_info = async (obj: GetTablesInfoApiType) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTablesInfo, JSON.stringify(obj)))
+export const get_tables_info_page = async (obj: GetTablesInfoApiType): Promise<DCPageResult<PageTableType>> => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTablesInfo, obj))
+    return data
+}
+
+export const get_table_info_by_id = async (tableId: string): Promise<DCCommonResult<TableInfoType>> => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.getTableInfoById, tableId))
     return data
 }
 
@@ -336,5 +349,20 @@ export const update_is_processed = async (id: string, isProcessed: number) => {
 
 export const get_sched_job_by_id = async (id: string | number) => {
     const {data} = (await ipcInstance.send(channels.datacenter.getSchedJobById, id))
+    return data
+}
+
+export const get_table_store_format = async (): Promise<DCCommonResult<DictItemType[]>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getTableStoreFormat))
+    return data
+}
+
+export const get_table_field_type = async (type: 'tbds-hive' | 'mysql'): Promise<DCCommonResult<FieldType[]>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getTableFieldType, type))
+    return data
+}
+
+export const update_table = async (params: string): Promise<DCCommonResult<any>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.updateTable, params))
     return data
 }

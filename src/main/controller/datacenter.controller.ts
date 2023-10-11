@@ -317,10 +317,21 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getTablesInfo)
-    public async handleGetTablesInfo(params: any) {
-        params = JSON.parse(params)
+    public async handleGetTablesInfo(params: {
+        size: number,
+        page: number,
+        sourceId: number,
+        likeValue: string
+    }) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest(`/datawork/datamodelTables/page`, params))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getTableInfoById)
+    public handleGetTableInfoById(id: string) {
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonGetRequest(`/datawork/datamodelTables/get/${id}`, ``))
         });
     }
 
@@ -518,6 +529,30 @@ export class DatacenterController {
 
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest(`/workflow/proc/findList`, params))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getTableStoreFormat)
+    public handleGetTableStoreFormat() {
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonPostRequest(`/services/am-usrc/usrc/dictDetail/treeList`, {
+                dictName: "datawork_datamodel_storeformat"
+            }))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getTableFieldType)
+    public handleGetTableFieldType(type: string) {
+        const query: string = `type=${type}`;
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonGetRequest(`/datawork/datamodelTables/fieldTypes`, query))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.updateTable)
+    public handleUpdateTable(params: string) {
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonPostRequest(`/datawork/datamodelTables/update`, JSON.parse(params)))
         });
     }
 

@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import {exec_sql, get_tables_info, table_delete, table_preview} from "@render/api/datacenter.api";
+import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
@@ -149,7 +149,7 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    tableDataRef.value = (await get_tables_info({
+    tableDataRef.value = (await get_tables_info_page({
       size: 100,
       page: 1,
       sourceId: 12,

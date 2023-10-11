@@ -88,7 +88,6 @@
       :size="'small'"
       style="width: 340px"
   >
-
     <n-scrollbar class="pr-2" style="max-height: calc(100vh - 300px);" trigger="hover">
       <n-form
           class="mt-4"
@@ -138,7 +137,7 @@ import {
 } from "@render/api/auxiliaryDb/preDatabase.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {actionTableNames, basicTableNames} from "@render/utils/datacenter/constants";
-import {showButton} from "@render/utils/datacenter/jobTabUtil";
+import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh, Search} from "@vicons/ionicons5";
 import {ArrowDownload20Regular, ArrowUpload20Regular, Add24Regular} from '@vicons/fluent'
 import {clone} from "lodash-es";
@@ -191,7 +190,7 @@ const createColumns = (): DataTableColumns<FEDepartTableName> => {
           showButton('编辑', () => {
             updateModalInit(2, row)
           }),
-          showButton('删除', () => {
+          showConfirmation('删除', () => {
             handleDelete(row)
           }),
         ])

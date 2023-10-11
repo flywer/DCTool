@@ -205,7 +205,7 @@
 
 <script setup lang="ts">
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {create_table, get_tables_info, table_delete} from "@render/api/datacenter.api";
+import {create_table, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {projectIdOptions} from "@render/typings/datacenterOptions";
 import {CheckmarkSharp, CloseSharp} from '@vicons/ionicons5'
@@ -715,7 +715,7 @@ const addFieldsToSql = (sql: string): string => {
 }
 
 const deleteTableRebuild = async (tableName: string, tableSuffix: string) => {
-  const table = (await get_tables_info({
+  const table = (await get_tables_info_page({
     size: 1,
     page: 1,
     sourceId: 6,
