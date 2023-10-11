@@ -63,7 +63,7 @@
             :show-irrelevant-nodes="!filterNode"
             virtual-scroll
             @load="handleLoad"
-            style="height: calc(100vh - 150px);"
+            style="height: calc(100vh - 150px);user-select: none"
             :default-expanded-keys="useProjectTreeStore().defaultExpandedKeys"
             :default-selected-keys="useProjectTreeStore().defaultSelectedKeys"
             @update:expandedKeys="handleExpandedKeys"
