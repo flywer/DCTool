@@ -585,7 +585,6 @@ const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
         }
     } else if (job.type == '数据融合任务' || job.type == '单表融合任务') {
         const rulesUpdateTime = formatDate((await get_rh_json(job.jobName.split('_').pop()))[0].rh1UpdateTime)
-        console.log(rulesUpdateTime)
         if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
             return true
         } else {
