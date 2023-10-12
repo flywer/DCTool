@@ -194,39 +194,44 @@ export class XlsxController {
                                 const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
                                 await (workbook.xlsx as ExcelJS.Xlsx).readFile(result.filePaths[0]);
 
-                                workbook.eachSheet(function (worksheet: ExcelJS.Worksheet) {
+                                workbook.eachSheet((worksheet: ExcelJS.Worksheet) => {
 
-                                    const columns = (worksheet.getRow(1).values as any[]).slice(1).map(value => {
-                                        if (typeof value === 'string' || typeof value === 'number') {
-                                            return value;
-                                        } else {
-                                            return value.richText[0].text
-                                        }
-                                    });
+                                    // 字段名数组
+                                    const columns: string[] = [];
 
+                                    (worksheet.getRow(1) as ExcelJS.Row).eachCell((cell: ExcelJS.Cell) => {
+                                        columns.push(cell.text)
+                                    })
+
+                                    // 待出入值
                                     let insertStatements = '';
 
-                                    worksheet.eachRow((row, rowNumber) => {
+                                    worksheet.eachRow((row: ExcelJS.Row, rowNumber) => {
                                         if (rowNumber > 1) {
-                                            const values = (row.values as any[]).slice(1)
-                                            for (let index = 0; index < values.length; index++) {
-                                                if (typeof values[index] === 'undefined') {
-                                                    values[index] = null;
-                                                }
-                                            }
-                                            const insertValues = values.map((value) => {
-                                                if (typeof value === 'string') {
-                                                    return `'${value}'`;
-                                                } else if (value instanceof Date) {
-                                                    return `'${formatDate(value)}'`;
-                                                } else if (value == undefined) {
-                                                    return `null`;
-                                                } else {
-                                                    return `${value.toString()}`;
-                                                }
-                                            }).join(', ');
 
-                                            const insertQuery = `INSERT INTO ${tableName || 'table'} (${(columns as []).join(', ')}) VALUES (${insertValues});\n`;
+                                            const rowValues: any[] = []
+
+                                            row.eachCell({includeEmpty: true}, (cell: ExcelJS.Cell) => {
+                                                switch (cell.type) {
+                                                    case 0:
+                                                        rowValues.push('null')
+                                                        break
+                                                    case 2:
+                                                        if (cell.numFmt != undefined) {
+                                                            rowValues.push(`'${cell.value.toString().padStart(cell.numFmt.length, '0')}'`)
+                                                        } else {
+                                                            rowValues.push(`'${cell.value}'`)
+                                                        }
+                                                        break
+                                                    case 4:
+                                                        rowValues.push(`'${formatDate(cell.value as Date)}'`)
+                                                        break
+                                                    default:
+                                                        rowValues.push(`'${cell.text}'`)
+                                                }
+                                            })
+
+                                            const insertQuery = `INSERT INTO ${tableName || 'table'} (${(columns as []).join(', ')}) VALUES (${rowValues.join(', ')});\n`;
                                             insertStatements += insertQuery;
                                         }
                                     });

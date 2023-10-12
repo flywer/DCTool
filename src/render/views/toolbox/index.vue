@@ -10,7 +10,7 @@
       <n-tab-pane name="3" tab="JSON类型提取">
         <get-type-from-json-tab/>
       </n-tab-pane>
-      <n-tab-pane name="4" tab="Execel提取">
+      <n-tab-pane name="4" tab="Excel提取">
         <convert-excel-data-tab/>
       </n-tab-pane>
     </n-tabs>
