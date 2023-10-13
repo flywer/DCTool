@@ -45,6 +45,7 @@
           将数据插入到中台xzzf_sjtj_front_end表中，执行后需等待3-5分钟数据才会存入此表
         </n-tooltip>
       </n-button>
+      <div v-if="execEndTime != null">执行结束时间：{{ execEndTime }}</div>
     </n-space>
 
     <n-input
@@ -67,6 +68,7 @@ import {
 } from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql, get_workflow_page} from "@render/api/datacenter.api";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {QuestionCircleTwotone} from "@vicons/antd";
 import {isEmpty} from "lodash-es";
 import {FormInst, TreeSelectOption} from "naive-ui";
@@ -138,6 +140,7 @@ const orgSelectOptionsInit = async () => {
 const generateSql = async () => {
   if (!isEmpty(formModel.value.tableSelect)) {
     isGenerating.value = true
+    execEndTime.value = null
 
     insertSql.value = `INSERT INTO xzzf_sjtj_front_end
     (id, depart_name, table_type, data_count, update_time)`
@@ -208,6 +211,8 @@ const generateSubSql = async (item: TreeSelectOption) => {
     UNION ALL`
 }
 
+const execEndTime = ref(null)
+
 const execSql = async () => {
   isExecuting.value = true
 
@@ -227,6 +232,7 @@ const execSql = async () => {
   await exec_sql(paramModel).then((res) => {
     if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
       window.$message.success('执行成功')
+      execEndTime.value = formatDate(new Date)
     } else {
       window.$dialog.error({
         title: '执行失败',
