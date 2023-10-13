@@ -6,7 +6,7 @@ import {
     PageTableType,
     TableInfoType
 } from "@common/datacenter.types";
-import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo} from "@common/types";
+import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo, WorkflowType} from "@common/types";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
@@ -337,7 +337,7 @@ export const get_dataXJob = async (jobId: string): Promise<{
  * @param projectId 项目ID
  * @param procName 任务名称
  **/
-export const get_workflow_list_by_project_id = async (projectId: string, procName?: string) => {
+export const get_workflow_list_by_project_id = async (projectId: string, procName?: string): Promise<DCCommonResult<WorkflowType[]>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowListByProjectId, projectId, procName))
     return data
 }

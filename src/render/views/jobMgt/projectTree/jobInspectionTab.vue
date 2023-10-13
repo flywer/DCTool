@@ -69,7 +69,7 @@ const queryParam = ref('')
 const projectTree = useProjectTreeStore()
 
 // 创建计算属性来获取 Pinia 存储中的值
-const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+const defaultSelectedKeys = computed(() => projectTree.selectedKeys)
 
 watch(defaultSelectedKeys, async (newValue) => {
   if (newValue[0] != null) {
@@ -88,7 +88,7 @@ watch(defaultSelectedKeys, async (newValue) => {
 
 onMounted(async () => {
   if (props.inpsTableName == undefined) {
-    const segments = useProjectTreeStore().defaultSelectedKeys[0].split('-');
+    const segments = useProjectTreeStore().selectedKeys[0].split('-');
     const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
     if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
       const projectId = segments[segments.length - 2]

@@ -102,7 +102,7 @@ import {computed, h, onMounted, ref, watch} from "vue";
 const projectTree = useProjectTreeStore()
 
 // 创建计算属性来获取 Pinia 存储中的值
-const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+const defaultSelectedKeys = computed(() => projectTree.selectedKeys)
 
 const projectId = '52'
 
@@ -115,7 +115,7 @@ const datacenterProjectRef = ref(null)
 watch(defaultSelectedKeys, (newValue, oldValue) => {
   if (newValue.length == 0) {
     newValue = oldValue
-    projectTree.defaultSelectedKeys = newValue
+    projectTree.selectedKeys = newValue
   }
   if (newValue[0] != null) {
     pageInit()

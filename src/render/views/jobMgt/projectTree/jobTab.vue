@@ -820,7 +820,7 @@ import {computed, h, onMounted, ref, watch} from "vue";
 const projectTree = useProjectTreeStore()
 
 // 创建计算属性来获取 Pinia 存储中的值
-const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+const selectedKeys = computed(() => projectTree.selectedKeys)
 
 // 当前项目示例，辅助库信息
 const projectRef = ref<ProjectInfo>(null)
@@ -836,10 +836,10 @@ const queryParam = ref({
   tableAbbr: null as string //此为表名的最简化，比如di_ssft_z2010_temp_ods 则为z2010
 })
 
-watch(defaultSelectedKeys, (newValue, oldValue) => {
+watch(selectedKeys, (newValue, oldValue) => {
   if (newValue.length == 0) {
     newValue = oldValue
-    projectTree.defaultSelectedKeys = newValue
+    projectTree.selectedKeys = newValue
   }
   if (newValue[0] != null) {
     pageInit(newValue)
@@ -847,11 +847,11 @@ watch(defaultSelectedKeys, (newValue, oldValue) => {
 })
 
 onMounted(() => {
-  pageInit(useProjectTreeStore().defaultSelectedKeys)
+  pageInit(useProjectTreeStore().selectedKeys)
 })
 
-const pageInit = async (defaultSelectedKeys: string[]) => {
-  const segments = defaultSelectedKeys[0].split('-');
+const pageInit = async (selectedKeys: string[]) => {
+  const segments = selectedKeys[0].split('-');
   projectTree.isBasicData = segments[0] === '0'
   const pattern: RegExp = /[a-zA-Z]/; // 包含字母的正则表达式
   if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {

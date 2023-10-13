@@ -266,7 +266,7 @@ const tableDataInit = async () => {
       jobName: v.procName,
       type: '数据质检任务',
       status: getWorkflowJobStatus(v),
-      schedMode: v.schedulingMode,
+      schedMode: parseInt(v.schedulingMode),
       cron: v.crontab == '' ? null : v.crontab,
       lastExecTime: await workflowJobGetLastExecTime(v),
       nextExecTime: workflowJobGetNextExecTime(v),
