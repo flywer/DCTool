@@ -143,7 +143,7 @@ export const get_workflow_page = async (obj: {
     size: number,
     status?: number | string,
     procName?: string
-}) => {
+}):Promise<DCPageResult<WorkflowType>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowPage, obj))
     return data
 }
@@ -312,7 +312,7 @@ export const get_inps_record_page = async (obj: GetInspRecordPageType) => {
     return data
 }
 
-export const get_workflow = async (jobId: string) => {
+export const get_workflow = async (jobId: string): Promise<DCCommonResult<WorkflowType>> => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getWorkflow, jobId))
     return data
 }

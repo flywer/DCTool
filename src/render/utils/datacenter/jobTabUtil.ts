@@ -354,7 +354,7 @@ const checkRunningNum = async (): Promise<boolean> => {
         procName: ``
     })).data.records
 
-    if (runningJobs.length >= maxRunningNum) {
+    if (runningJobs.length >= parseInt(maxRunningNum)) {
         return new Promise<boolean>((resolve) => {
             window.$dialog.warning({
                 title: '警告',

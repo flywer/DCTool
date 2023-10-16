@@ -9,7 +9,6 @@
           </n-ellipsis>
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
-
           <n-button secondary type="info" @click="quickCreateModalInit">
             快捷创建
             <template #icon>
@@ -753,6 +752,14 @@
       <n-button :size="'small'" @click="showDataXJobSetupModalRef=!showDataXJobSetupModalRef">返回</n-button>
     </template>
   </n-modal>
+
+  <workflow-config-modal
+      v-model:show="workflowModalConfig.show"
+      :job-id="workflowModalConfig.workflowId"
+      :editable="workflowModalConfig.editable"
+      @onAfterLeave="tableDataInit"
+  />
+
 </template>
 
 <script setup lang="ts">
@@ -769,6 +776,7 @@ import {
 } from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
 import {find_by_project_id, get_project_by_pro_abbr} from "@render/api/auxiliaryDb/projectInfo.api";
+import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {convertCronExpression} from "@render/utils/common/cronUtils";
@@ -1174,6 +1182,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
+    moreBtnChildren.push(showTextButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
@@ -2389,6 +2398,20 @@ const handleDataXJobSetupSave = async () => {
   })
 
   isDataXJobSetupSaving.value = false
+}
+// endregion
+
+// region 工作流任务配置
+const workflowModalConfig = ref({
+  show: false,
+  workflowId: null,
+  editable: true
+})
+
+const showWorkflowConfigModal = (row: Job) => {
+  workflowModalConfig.value.show = true
+  workflowModalConfig.value.workflowId = row.id
+  workflowModalConfig.value.editable = row.status != 3;
 }
 // endregion
 </script>

@@ -1,7 +1,7 @@
 // 更新其中sjk开头的uuid
 import {uuid} from "vue3-uuid";
 
-export const updateSjkUUID = (json) => {
+export const updateSjkUUID = (json: any) => {
     let xmlIds: string[] = []
     json.modelXml.match(/id="sjk[^"]*"/g).forEach(idStr => {
         xmlIds.push(idStr.replace(/id="|"/g, ''));
