@@ -45,7 +45,7 @@ export  type Job = {
     comment?: string
     createTime: string
     updateTime: string
-    jobRerunType: 1|2
+    jobRerunType: 1 | 2
     project: ProjectInfo
 }
 
