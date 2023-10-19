@@ -45,6 +45,7 @@ export  type Job = {
     comment?: string
     createTime: string
     updateTime: string
+    jobRerunType: 1|2
     project: ProjectInfo
 }
 
@@ -674,7 +675,7 @@ export const workflowStart = (v: Job, onSuccess: {
 export const workflowReRun = (v: Job, onSuccess: () => void) => {
     checkRunningNum().then(isPass => {
         if (isPass) {
-            workflow_rerun(v.id, 1).then(res => {
+            workflow_rerun(v.id, v.jobRerunType).then(res => {
                 if (res.code == 200) {
                     window.$message.success(res.message)
                     onSuccess()

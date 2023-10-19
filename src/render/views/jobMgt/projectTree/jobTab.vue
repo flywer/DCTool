@@ -932,6 +932,7 @@ const tableDataInit = async () => {
         createBy: null,
         createTime: schedJob?.addTime || '--',
         updateTime: schedJob?.updateTime || '--',
+        jobRerunType: null,
         project: projectRef.value
       }
 
@@ -997,6 +998,7 @@ const tableDataInit = async () => {
         code: v.procCode,
         createTime: v.createTime,
         updateTime: v.updateTime,
+        jobRerunType: v.editModel == 1 ? 2 : 1,
         project: projectRef.value
       }
 
@@ -1210,6 +1212,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
+    children.push(showButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {

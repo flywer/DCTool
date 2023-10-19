@@ -150,6 +150,7 @@ const tableDataInit = async () => {
       createBy: null,
       createTime: schedJob?.addTime || '--',
       updateTime: schedJob?.updateTime || '--',
+      jobRerunType: v.editModel == 1 ? 2 : 1,
       project: projectRef.value
     }
 

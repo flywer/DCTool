@@ -103,6 +103,7 @@ const tableDataInit = async () => {
       comment: await getTableComment(v.procName),
       createTime: v.createTime,
       updateTime: v.updateTime,
+      jobRerunType: v.editModel == 1 ? 2 : 1,
       project: await find_by_project_id(projectId)
     }
 
