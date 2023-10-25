@@ -135,7 +135,12 @@ const generateSql = async () => {
 const generateSubSql = async (tableName: string) => {
   const tableSql = await get_table_sql({tableName: tableName})
 
-  const departColName = tableSql[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+  let departColName = tableSql[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+
+  // 执法对象特殊处理
+  if (['d1010', 'd1020', 'd1030', 'd1040'].includes(tableName)) {
+    departColName = `IF(LOCATE('(', ${departColName}) > 0, SUBSTRING(${departColName}, 1, LOCATE('(', ${departColName}) - 1), ${departColName})`
+  }
 
   return `
     SELECT UUID()                       AS id,
