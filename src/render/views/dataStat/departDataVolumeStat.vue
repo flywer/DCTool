@@ -5,6 +5,16 @@
       因数据库与数据限制，目前只能全量统计，无法选择部门
     </n-alert>
 
+    <n-card class="mt-2">
+      <n-checkbox-group v-model:value="filterData" :disabled="isGenerating">
+        <n-space item-style="display: flex;">
+          <n-checkbox value="fe" label="过滤累计报送数据量为空的数据"/>
+          <n-checkbox value="dataLake" label="过滤数据湖数据量为空的数据"/>
+          <n-checkbox value="themeBase" label="过滤主题库数据量为空的数据"/>
+        </n-space>
+      </n-checkbox-group>
+    </n-card>
+
     <n-space justify="center" align="center" class="mt-2">
       <n-button type="primary" @click="generateData" :loading="isGenerating">{{ buttonText }}</n-button>
     </n-space>
@@ -20,9 +30,14 @@ import {
   get_FE_data_vol_by_depart_name_and_table_type, get_theme_base_data_vol_by_depart_name_and_table_type
 } from "@render/api/front.api";
 import {create_depart_data_vol_excel} from "@render/api/xlsx.api";
-import {formatDate, formatDate2Day} from "@render/utils/common/dateUtils";
+import {formatDate2Day} from "@render/utils/common/dateUtils";
+import {isBasicTable} from "@render/utils/common/isBasicTable";
 import {basicTableNames} from "@render/utils/datacenter/constants";
+import {isNull} from "lodash-es";
 import {ref} from "vue";
+
+// 数据过滤
+const filterData = ref([])
 
 const isGenerating = ref(false)
 const buttonText = ref('生成Excel')
@@ -43,6 +58,12 @@ const generateData = () => {
       const feDataRecord = await get_FE_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
       const dataLakeDataRecord = await get_data_lake_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
       const themeBaseDataRecord = await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
+      console.log(depart.tableType)
+      if ((filterData.value.includes('fe') && isNull(feDataRecord)) ||
+          (filterData.value.includes('dataLake') && !isBasicTable(depart.tableType) && isNull(dataLakeDataRecord)) ||
+          (filterData.value.includes('themeBase') && isNull(themeBaseDataRecord))) {
+        continue
+      }
 
       const dataRow: DepartDataVolExcelModel = {
         departName: depart.departName,
