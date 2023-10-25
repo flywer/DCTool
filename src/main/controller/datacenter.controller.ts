@@ -1,4 +1,3 @@
-import {CommonQueryParam, DataXJobQueryParams} from "@common/types";
 import {AppDataSource} from "@main/dataSource/data-source";
 import {User} from "@main/entity/User";
 import {getAppDataPath} from "@main/utils/appPath";
@@ -10,9 +9,6 @@ import {dialog, net} from "electron";
 import log from 'electron-log'
 import {isEmpty} from "lodash";
 import {join} from "path";
-
-type CommonQueryParamAlias = CommonQueryParam
-type DataXJobQueryParamsAlias = DataXJobQueryParams
 
 @Controller()
 export class DatacenterController {
@@ -217,14 +213,14 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getCjJobPage)
-    public async handleGetCjJobPage(params: DataXJobQueryParamsAlias) {
+    public async handleGetCjJobPage(params: any) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest('/gather/api/jobTemplate/findPage', params))
         });
     }
 
     @IpcHandle(channels.datacenter.getSchedJobPage)
-    public async handleGetSchedJobPage(params: DataXJobQueryParamsAlias) {
+    public async handleGetSchedJobPage(params: any) {
         let paramStr = '';
         if (params.current !== undefined) {
             paramStr += `current=${params.current}&`;
@@ -336,7 +332,7 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.getDataxJobLog)
-    public async handleGetDataXJobLog(params: CommonQueryParamAlias) {
+    public async handleGetDataXJobLog(params: any) {
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonPostRequest(`/gather/api/log/pageList`, params))
         });

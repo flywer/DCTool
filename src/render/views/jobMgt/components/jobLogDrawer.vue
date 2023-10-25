@@ -54,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import {DataXJobLogType, WorkflowLogType} from "@common/types";
+import {DataXJobLog} from "@common/types/datacenter/dataCollection";
+import {WorkflowLog} from "@common/types/datacenter/workflow";
 import {get_datax_job_log, get_workflow_log} from "@render/api/datacenter.api";
 import {Job} from "@render/utils/datacenter/jobTabUtil";
 import {CheckmarkCircle24Regular, DismissCircle24Regular, ChevronUp24Regular} from "@vicons/fluent";
@@ -105,7 +106,7 @@ watch(() => showDrawerRef.value, (newValue: boolean) => {
 })
 
 const showDataXJobLog = async (v: Job) => {
-  const logs: DataXJobLogType[] = (await get_datax_job_log({
+  const logs: DataXJobLog[] = (await get_datax_job_log({
     current: 1,
     size: 100,
     jobContent: v.jobName
@@ -187,7 +188,7 @@ const getDataXJobLogInfo = (logString: string) => {
 }
 
 const showWorkflowLog = async (v: Job) => {
-  const logs: WorkflowLogType[] = (await get_workflow_log(v.id, 100, 1)).data.records
+  const logs: WorkflowLog[] = (await get_workflow_log(v.id, 100, 1)).data.records
 
   showTipRef.value = logs.length >= 100;
 

@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import {DepartDataVolExcelDataType} from "@common/types";
+import {DepartDataVolExcelModel} from "@common/types/dataStat";
 import {get_all_FE_TableName} from "@render/api/auxiliaryDb/preDatabase.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
@@ -30,15 +30,15 @@ const generateData = () => {
   isGenerating.value = true
   buttonText.value = '获取单位表名关联信息...'
 
-  const basicDataArr: DepartDataVolExcelDataType[] = []
-  const actionDataArr: DepartDataVolExcelDataType[] = []
+  const basicDataArr: DepartDataVolExcelModel[] = []
+  const actionDataArr: DepartDataVolExcelModel[] = []
 
   // 获取单位表名关联数据
   get_all_FE_TableName().then(async departs => {
     for (const depart of departs) {
       buttonText.value = `处理${depart.departName}数据...`
 
-      const dataRow: DepartDataVolExcelDataType = {
+      const dataRow: DepartDataVolExcelModel = {
         departName: depart.departName,
         tableType: depart.tableType,
         tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
@@ -56,7 +56,7 @@ const generateData = () => {
       }
     }
 
-    const customSort = (a: DepartDataVolExcelDataType, b: DepartDataVolExcelDataType) => {
+    const customSort = (a: DepartDataVolExcelModel, b: DepartDataVolExcelModel) => {
       // 先按 departName 进行排序
       const departNameComparison = a.departName.localeCompare(b.departName);
       if (departNameComparison !== 0) {

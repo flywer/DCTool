@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import {PageTableType} from "@common/datacenter.types";
+import {PageTableType} from "@common/types/datacenter/visualTable";
 import {get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import TableEditModal from "@render/views/tableMgt/tbds/components/tableEditModal.vue";

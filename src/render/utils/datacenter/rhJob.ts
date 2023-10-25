@@ -1,4 +1,4 @@
-import {WorkflowType} from "@common/types";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {get_rh_json, get_rh_json_by_id} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
@@ -174,7 +174,7 @@ export const createRhJob = async (formModel: RhFormModelType, isBasicData: boole
 }
 
 export const updateRhJob = async (jobId: string, tableName: string) => {
-    const jobInfo: WorkflowType = (await get_workflow(jobId)).data
+    const jobInfo: Workflow = (await get_workflow(jobId)).data
 
     let paramsJson = {
         name: jobInfo.procName,

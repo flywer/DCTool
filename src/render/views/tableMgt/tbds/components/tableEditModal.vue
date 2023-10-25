@@ -177,7 +177,7 @@
 </template>
 
 <script setup lang="ts">
-import {TableFieldType} from "@common/datacenter.types";
+import {TableFieldType} from "@common/types/datacenter/visualTable";
 import {
   get_table_field_type,
   get_table_info_by_id,

@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import {InspectionRecord} from "@common/types";
+import {InspectionRecord} from "@common/types/datacenter/qaportal";
 import {open_default_browser} from "@render/api/app.api";
 import {get_inps_record_page, update_is_processed} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";

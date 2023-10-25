@@ -1,5 +1,6 @@
 import {DCJob, ExecLog, Scheduler, Task} from "@common/taskSchedulerTypes";
-import {DataXJobLogType, WorkflowType} from "@common/types";
+import {DataXJobLog} from "@common/types/datacenter/dataCollection";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {getAppDataPath} from "@main/utils/appPath";
 import {getCurrentDateTime} from "@main/utils/dateUtils";
@@ -207,7 +208,7 @@ export class TaskSchedulerController {
                 return new Promise((resolve) => {
 
                     const interval = setInterval(async () => {
-                        const log: DataXJobLogType = (await datacenter.handleGetDataXJobLog({
+                        const log: DataXJobLog = (await datacenter.handleGetDataXJobLog({
                             current: 1,
                             size: 1,
                             jobContent: job.name
@@ -257,7 +258,7 @@ export class TaskSchedulerController {
 
         } else if (job.jobType == 'workflow') {
 
-            const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
+            const workflow: Workflow = (await datacenter.handleGetWorkflow(job.id)).data
 
             //任务需存在，且需处于启动状态
             if (workflow != null) {
@@ -294,7 +295,7 @@ export class TaskSchedulerController {
                 return new Promise((resolve) => {
                     const interval = setInterval(async () => {
 
-                        const workflow: WorkflowType = (await datacenter.handleGetWorkflow(job.id)).data
+                        const workflow: Workflow = (await datacenter.handleGetWorkflow(job.id)).data
 
                         if (workflow.status == '4') { //运行中
                             console.log(`任务[${job.name}]运行中...`)

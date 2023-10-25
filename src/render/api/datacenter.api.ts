@@ -1,12 +1,8 @@
-import {
-    DCCommonResult,
-    DCPageResult,
-    DictItemType,
-    FieldType,
-    PageTableType,
-    TableInfoType
-} from "@common/datacenter.types";
-import {CommonQueryParam, DataXJobQueryParams, JobTemplateType, PageVo, WorkflowType} from "@common/types";
+import {PageVo} from "@common/types";
+import {DCCommonResult, DCPageResult, DC_DictItem} from "@common/types/datacenter/common";
+import {DataXJobQueryParams, DataXJobTemplate} from "@common/types/datacenter/dataCollection";
+import {FieldType, PageTableType, TableInfoType} from "@common/types/datacenter/visualTable";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
@@ -104,7 +100,7 @@ export const add_datax_job = async (obj: object) => {
     return data
 }
 
-export const update_datax_job = async (obj: JobTemplateType) => {
+export const update_datax_job = async (obj: DataXJobTemplate) => {
     const {data} = (await ipcInstance.send(channels.datacenter.updateDataXJob, obj))
     return data
 }
@@ -143,7 +139,7 @@ export const get_workflow_page = async (obj: {
     size: number,
     status?: number | string,
     procName?: string
-}):Promise<DCPageResult<WorkflowType>> => {
+}): Promise<DCPageResult<Workflow>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowPage, obj))
     return data
 }
@@ -234,7 +230,7 @@ export const table_delete = async (id: string) => {
     return data
 }
 
-export const get_datax_job_log = async (obj: CommonQueryParam) => {
+export const get_datax_job_log = async (obj: DataXJobQueryParams) => {
     const {data} = (await ipcInstance.send(channels.datacenter.getDataxJobLog, obj))
     return data
 }
@@ -312,7 +308,7 @@ export const get_inps_record_page = async (obj: GetInspRecordPageType) => {
     return data
 }
 
-export const get_workflow = async (jobId: string): Promise<DCCommonResult<WorkflowType>> => {
+export const get_workflow = async (jobId: string): Promise<DCCommonResult<Workflow>> => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getWorkflow, jobId))
     return data
 }
@@ -325,7 +321,7 @@ export const update_workflow = async (jobId: string, params: any) => {
 export const get_dataXJob = async (jobId: string): Promise<{
     code: number,
     data: {
-        jobTemplate: JobTemplateType
+        jobTemplate: DataXJobTemplate
     },
     msg: string
 }> => {
@@ -337,7 +333,7 @@ export const get_dataXJob = async (jobId: string): Promise<{
  * @param projectId 项目ID
  * @param procName 任务名称
  **/
-export const get_workflow_list_by_project_id = async (projectId: string, procName?: string): Promise<DCCommonResult<WorkflowType[]>> => {
+export const get_workflow_list_by_project_id = async (projectId: string, procName?: string): Promise<DCCommonResult<Workflow[]>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getWorkflowListByProjectId, projectId, procName))
     return data
 }
@@ -352,7 +348,7 @@ export const get_sched_job_by_id = async (id: string | number) => {
     return data
 }
 
-export const get_table_store_format = async (): Promise<DCCommonResult<DictItemType[]>> => {
+export const get_table_store_format = async (): Promise<DCCommonResult<DC_DictItem[]>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getTableStoreFormat))
     return data
 }

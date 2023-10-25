@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import {WorkflowType} from "@common/types";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_workflow_list_by_project_id} from "@render/api/datacenter.api";
@@ -82,9 +82,9 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   // 工作流任务
-  const allActionRkJobs: WorkflowType[] = (await get_workflow_list_by_project_id(projectId)).data
+  const allActionRkJobs: Workflow[] = (await get_workflow_list_by_project_id(projectId)).data
 
-  const actionRkJobs: WorkflowType[] = allActionRkJobs.filter(job => job.procName.includes(queryParam.value))
+  const actionRkJobs: Workflow[] = allActionRkJobs.filter(job => job.procName.includes(queryParam.value))
 
   let newJobs = []
 

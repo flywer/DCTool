@@ -184,7 +184,7 @@
 </template>
 
 <script setup lang="ts">
-import {WorkflowType} from "@common/types";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {get_workflow, get_workflow_page, update_workflow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {convertCronExpression, generateCronExpression, isDCCronExpressionValid} from "@render/utils/common/cronUtils";
@@ -235,7 +235,7 @@ const modalReset = () => {
 }
 
 // region 表单
-let workflow: WorkflowType
+let workflow: Workflow
 const configFormRef = ref<FormInst | null>(null);
 const configModelRef = ref({
   procName: null,
@@ -349,7 +349,7 @@ const workflowOptionsInit = async () => {
   workflowOptions.value = []
 
   // 工作流任务
-  const workflowJobs: WorkflowType[] = (await get_workflow_page({
+  const workflowJobs: Workflow[] = (await get_workflow_page({
     page: 1,
     size: 10,
     status: null,
@@ -381,7 +381,7 @@ const handleWorkflowSelectScroll = async (e: Event) => {
       currentTarget.scrollHeight
   ) {
     // 工作流任务
-    const workflowJobs: WorkflowType[] = (await get_workflow_page({
+    const workflowJobs: Workflow[] = (await get_workflow_page({
       page: (workflowOptions.value.length / 10) + 1,
       size: 10,
       status: null,
@@ -402,7 +402,7 @@ const handleWorkflowSelectSearch = async (query: string) => {
   workflowOptions.value = []
 
   // 工作流任务
-  const workflowJobs: WorkflowType[] = (await get_workflow_page({
+  const workflowJobs: Workflow[] = (await get_workflow_page({
     page: 1,
     size: 10,
     status: null,
@@ -473,7 +473,7 @@ const schedulingTimeValid = () => {
 
 const updateWorkflow = async () => {
 
-  const newJson: WorkflowType = JSON.parse(updateSjkUUID(workflow))
+  const newJson: Workflow = JSON.parse(updateSjkUUID(workflow))
 
   let paramsJson = {
     name: configModelRef.value.procName,

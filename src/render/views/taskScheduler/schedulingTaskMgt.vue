@@ -327,7 +327,8 @@ import G6, {Graph, Algorithm} from "@antv/g6";
 import {INode} from "@antv/g6-core/lib/interface/item";
 import {GraphData, Item} from "@antv/g6-core/lib/types";
 import {DCJob, Task} from "@common/taskSchedulerTypes";
-import {SchedJobType, WorkflowType} from "@common/types";
+import {SchedJob} from "@common/types/datacenter/dataCollection";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {clipboard_write_text} from "@render/api/app.api";
 import {channels} from "@render/api/channels";
 import {
@@ -887,7 +888,7 @@ const loadGraphData = async () => {
   const updateNodesJobStatus = async (nodes: SchedulerJobNodeConfig[]) => {
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].jobType == 'dataX') {
-        let schedJob: SchedJobType = (await get_sched_job_by_id(nodes[i].jobId)).data
+        let schedJob: SchedJob = (await get_sched_job_by_id(nodes[i].jobId)).data
         schedJob = await getSchedJob(schedJob.jobContent)
 
         nodes[i].jobName = schedJob.jobContent
@@ -903,7 +904,7 @@ const loadGraphData = async () => {
         }
 
       } else if (nodes[i].jobType == 'workflow') {
-        const workflow: WorkflowType = (await get_workflow(nodes[i].jobId)).data
+        const workflow: Workflow = (await get_workflow(nodes[i].jobId)).data
 
         nodes[i].jobName = workflow.procName
 
@@ -1025,7 +1026,7 @@ const jobIdOptionsLoading = ref(false)
 const handleJobIdOptionsUpdate = async (v: string) => {
   jobIdOptionsLoading.value = true
   if (jobUpdateModalFormModel.value.jobType == 'DataX任务') {
-    const records: SchedJobType[] = (await get_sched_job_page({
+    const records: SchedJob[] = (await get_sched_job_page({
       current: 1,
       size: 100,
       jobContent: v || ''
@@ -1036,7 +1037,7 @@ const handleJobIdOptionsUpdate = async (v: string) => {
       value: v.id.toString()
     }))
   } else if (jobUpdateModalFormModel.value.jobType == '工作流任务') {
-    const records: WorkflowType[] = (await get_workflow_page({
+    const records: Workflow[] = (await get_workflow_page({
       page: 1,
       size: 100,
       procName: v || ''
@@ -1054,7 +1055,7 @@ const handleJobIdOptionsUpdate = async (v: string) => {
 const handleJobIdUpdate = async (id: string) => {
   if (id != null) {
     if (jobUpdateModalFormModel.value.jobType == 'DataX任务') {
-      let schedJob: SchedJobType = (await get_sched_job_by_id(id)).data
+      let schedJob: SchedJob = (await get_sched_job_by_id(id)).data
       schedJob = await getSchedJob(schedJob.jobContent)
 
       jobUpdateModalFormModel.value.jobName = schedJob.jobContent
@@ -1070,7 +1071,7 @@ const handleJobIdUpdate = async (id: string) => {
       }
 
     } else if (jobUpdateModalFormModel.value.jobType == '工作流任务') {
-      const workflow: WorkflowType = (await get_workflow(id)).data
+      const workflow: Workflow = (await get_workflow(id)).data
 
       jobUpdateModalFormModel.value.jobName = workflow.procName
 

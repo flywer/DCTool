@@ -1,4 +1,4 @@
-import {JobTemplateType} from "@common/types";
+import {DataXJobTemplate} from "@common/types/datacenter/dataCollection";
 import {add_datax_job, add_sched_task, build_datax_json, update_datax_job} from "@render/api/datacenter.api";
 import {findCommonElementsByArr2} from "@render/utils/datacenter/findCommonElements";
 import {cloneDeep} from "lodash-es";
@@ -227,7 +227,7 @@ export const createCjJob = async (formModel: CjFormModelType, sourceTableColumns
     }
 }
 
-export const updateDataXJob = async (formModel: JobTemplateType) => {
+export const updateDataXJob = async (formModel: DataXJobTemplate) => {
     await update_datax_job(formModel).then(async (res) => {
         if (res.code == 0) {
             window.$message.success('采集任务更新成功')

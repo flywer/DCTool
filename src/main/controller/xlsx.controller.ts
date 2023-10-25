@@ -1,4 +1,4 @@
-import {DepartDataVolExcelDataType, InspectionDataStatType} from "@common/types";
+import {DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
 import {FilePathType} from "@main/enum/filePathEnum";
 import {getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
@@ -14,8 +14,8 @@ export class XlsxController {
     }
 
     @IpcHandle(channels.xlsx.createDataInpsStat)
-    public async handleCreateDataInpsStat(data: InspectionDataStatType[]) {
-        const createExcelData = (data: InspectionDataStatType[]): InspectionDataStatType[][] => {
+    public async handleCreateDataInpsStat(data: InspectionDataExcelModel[]) {
+        const createExcelData = (data: InspectionDataExcelModel[]): InspectionDataExcelModel[][] => {
             const excelData: any[][] = [];
 
             // Add header row
@@ -136,8 +136,8 @@ export class XlsxController {
         const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
         const columnWidths = [20, 30, 30, 20, 20, 20, 20];
 
-        const provinceData: InspectionDataStatType[] = data.filter((item) => item.orgName.startsWith('广东省'));
-        const cityData: InspectionDataStatType[] = data.filter((item) => !item.orgName.startsWith('广东省'));
+        const provinceData: InspectionDataExcelModel[] = data.filter((item) => item.orgName.startsWith('广东省'));
+        const cityData: InspectionDataExcelModel[] = data.filter((item) => !item.orgName.startsWith('广东省'));
 
         const provinceWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直部门');
 
@@ -247,14 +247,14 @@ export class XlsxController {
 
     @IpcHandle(channels.xlsx.createDepartDataVolExcel)
     public async handleCreateDepartDataVolExcel(excelData: {
-        basicData: DepartDataVolExcelDataType[],
-        actionData: DepartDataVolExcelDataType[],
+        basicData: DepartDataVolExcelModel[],
+        actionData: DepartDataVolExcelModel[],
     }) {
 
         const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
 
         // region 辅助方法
-        const createExcelData = (data: DepartDataVolExcelDataType[], isBasicData: boolean): DepartDataVolExcelDataType[][] => {
+        const createExcelData = (data: DepartDataVolExcelModel[], isBasicData: boolean): DepartDataVolExcelModel[][] => {
             const excelData: any[][] = [];
 
             if (isBasicData) {
@@ -523,8 +523,8 @@ export class XlsxController {
         // endregion
 
         // region 省直部门行为数据
-        const provinceData: DepartDataVolExcelDataType[] = excelData.actionData.filter((item) => item.departName.startsWith('广东省'));
-        const cityData: DepartDataVolExcelDataType[] = excelData.actionData.filter((item) => !item.departName.startsWith('广东省'));
+        const provinceData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => item.departName.startsWith('广东省'));
+        const cityData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => !item.departName.startsWith('广东省'));
 
         const columnWidths = [25, 20, 20, 30, 30, 15, 15, 15];
 

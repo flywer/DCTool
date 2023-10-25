@@ -1,5 +1,6 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {DataXJobLogType, DataXJobPageType, ProjectInfo, SchedJobType} from "@common/types";
+import {ProjectInfo} from "@common/types";
+import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
@@ -385,7 +386,7 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
     // 行为数据入湖、数据湖质检无依赖检查
     if (!['xzxw', 'lake'].includes(job.jobName.split('_')[1])) {
         if (job.type === '数据质检任务' || job.type === '数据备份任务') {
-            const cjJob: DataXJobPageType = (await get_cj_job_page({
+            const cjJob: DataXJob_Page = (await get_cj_job_page({
                 current: 1,
                 size: 1,
                 jobDesc: `cj${job.jobName.substring(job.jobName.indexOf('_'))}`,
@@ -877,7 +878,7 @@ export const getDataXJobStatus = async (v: {
     if (v.configuration == 0) {
         return 0 //未配置
     } else {
-        const log: DataXJobLogType = (await get_datax_job_log({
+        const log: DataXJobLog = (await get_datax_job_log({
             current: 1,
             size: 1,
             jobContent: v.jobDesc
@@ -933,7 +934,7 @@ export const dataXJobGetNextExecTime = (schedJob: any) => {
 
 //endregion
 
-export const getSchedJob = async (jobName: string): Promise<SchedJobType> => {
+export const getSchedJob = async (jobName: string): Promise<SchedJob> => {
     return (await get_sched_job_page({
         current: 1,
         size: 10000,

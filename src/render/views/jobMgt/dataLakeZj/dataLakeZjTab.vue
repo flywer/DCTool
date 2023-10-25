@@ -201,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import {DataDevBizVoType, WorkflowType} from "@common/types";
+import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
 import {get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
@@ -773,9 +773,9 @@ const inpsTableName = ref('')
 const inpsTableDbId = ref('')
 
 const showJobInpsModal = async (row: Job) => {
-  const workflow: WorkflowType = (await get_workflow(row.id)).data
+  const workflow: Workflow = (await get_workflow(row.id)).data
 
-  const dataDevBizVo: DataDevBizVoType = JSON.parse(workflow.businessParamsJson)
+  const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
 
   inpsTableName.value = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
   inpsTableDbId.value = '12'

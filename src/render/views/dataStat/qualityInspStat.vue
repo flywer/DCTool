@@ -86,7 +86,8 @@
 </template>
 
 <script setup lang="ts">
-import {InspectionDataStatType, InspectionRecord} from "@common/types";
+import {InspectionRecord} from "@common/types/datacenter/qaportal";
+import {InspectionDataExcelModel} from "@common/types/dataStat";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_inps_record_page, insp_home_list} from "@render/api/datacenter.api";
 import {create_data_inps_stat} from "@render/api/xlsx.api";
@@ -201,7 +202,7 @@ const createExcel = async () => {
         tableNames.push(...actionTableNames)
       }
 
-      let dataSata: InspectionDataStatType[] = []
+      let dataSata: InspectionDataExcelModel[] = []
 
       // 遍历各个部门
       for (let i = 0; i < formModel.value.orgIds.length; i++) {
@@ -234,7 +235,7 @@ const createExcel = async () => {
             const processedData = processInspectionRecords(records)
 
             // 将 processedData 转换并添加到 dataSata 中
-            const convertedDataArray: InspectionDataStatType[] = processedData.map(record => {
+            const convertedDataArray: InspectionDataExcelModel[] = processedData.map(record => {
               return {
                 orgName: record.orgName,
                 tableComment: comment,
@@ -303,14 +304,14 @@ const processInspectionRecords = (records: InspectionRecord[]): InspectionRecord
   return processedArray2;
 }
 
-const summaryCompute = (records: InspectionDataStatType[]) => {
+const summaryCompute = (records: InspectionDataExcelModel[]) => {
 
   summaryItem.value.provinceNums = countUniqueDeparts(records.filter((item) => item.orgName.startsWith('广东省')));
   summaryItem.value.cityNums = countUniqueDeparts(records.filter((item) => !item.orgName.startsWith('广东省')));
 
   summaryItem.value.tableNums = countUniqueTables(records)
 
-  const basicData: InspectionDataStatType[] = records.filter((item) => isBasicTable(item.tableName));
+  const basicData: InspectionDataExcelModel[] = records.filter((item) => isBasicTable(item.tableName));
 
   summaryItem.value.basicDataNums = calculateTotalRecordSum(basicData)
   summaryItem.value.basicAimDataSums = calculateAimRecordSum(basicData)
@@ -321,7 +322,7 @@ const summaryCompute = (records: InspectionDataStatType[]) => {
     summaryItem.value.basicDataPassRate = '0%'
   }
 
-  const actionData: InspectionDataStatType[] = records.filter((item) => !isBasicTable(item.tableName));
+  const actionData: InspectionDataExcelModel[] = records.filter((item) => !isBasicTable(item.tableName));
 
   summaryItem.value.actionDataNums = calculateTotalRecordSum(actionData)
   summaryItem.value.actionAimDataSums = calculateAimRecordSum(actionData)
@@ -332,7 +333,7 @@ const summaryCompute = (records: InspectionDataStatType[]) => {
   }
 }
 
-const countUniqueDeparts = (records: InspectionDataStatType[]): number => {
+const countUniqueDeparts = (records: InspectionDataExcelModel[]): number => {
   const uniqueTables: Set<string> = new Set();
 
   for (const record of records) {
@@ -342,7 +343,7 @@ const countUniqueDeparts = (records: InspectionDataStatType[]): number => {
   return uniqueTables.size;
 }
 
-const countUniqueTables = (records: InspectionDataStatType[]): number => {
+const countUniqueTables = (records: InspectionDataExcelModel[]): number => {
   const uniqueTables: Set<string> = new Set();
 
   for (const record of records) {
@@ -352,7 +353,7 @@ const countUniqueTables = (records: InspectionDataStatType[]): number => {
   return uniqueTables.size;
 }
 
-const calculateTotalRecordSum = (records: InspectionDataStatType[]): number => {
+const calculateTotalRecordSum = (records: InspectionDataExcelModel[]): number => {
   let totalSum = 0;
 
   for (const record of records) {
@@ -362,7 +363,7 @@ const calculateTotalRecordSum = (records: InspectionDataStatType[]): number => {
   return totalSum;
 }
 
-const calculateAimRecordSum = (records: InspectionDataStatType[]): number => {
+const calculateAimRecordSum = (records: InspectionDataExcelModel[]): number => {
   let totalSum = 0;
 
   for (const record of records) {

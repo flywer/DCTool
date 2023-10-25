@@ -763,7 +763,9 @@
 </template>
 
 <script setup lang="ts">
-import {JobTemplateType, ProjectInfo, WorkflowType} from "@common/types";
+import {ProjectInfo} from "@common/types";
+import {DataXJobTemplate} from "@common/types/datacenter/dataCollection";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
   create_valid_config,
@@ -975,7 +977,7 @@ const tableDataInit = async () => {
     }
 
     //工作流任务
-    const workflowJobs: WorkflowType[] = (await get_workflow_page({
+    const workflowJobs: Workflow[] = (await get_workflow_page({
       page: 1,
       size: 10000,
       status: null,
@@ -2250,7 +2252,7 @@ const dataXJobSetupModelRef = ref({
   readerTable: '',
   incStartTime: null,
   lastExecTime: new Date(),
-  jonInfo: {} as JobTemplateType,
+  jonInfo: {} as DataXJobTemplate,
   schedJob: {
     retry: '0',
     executorFailRetryCount: 0,
@@ -2325,7 +2327,7 @@ const incStartTimeShorCuts = ref({
 const showDataXJobSetupModal = async (row: Job) => {
   sourceTableOptions.value = await getTablesOptions(cjJobModalFormModel.value.sourceDataSourceId)
 
-  dataXJobSetupModelRef.value.jonInfo = (await get_dataXJob(row.id)).data.jobTemplate as JobTemplateType
+  dataXJobSetupModelRef.value.jonInfo = (await get_dataXJob(row.id)).data.jobTemplate as DataXJobTemplate
 
   if (!dataXJobSetupModelRef.value.jonInfo.replaceParam) {
     dataXJobSetupModelRef.value.jonInfo.replaceParam = "-DlastTime='%s' -DcurrentTime='%s'"
@@ -2374,7 +2376,7 @@ const handleDataXJobSetupSave = async () => {
         dataXJobSetupModelRef.value.jonInfo.jobJson.job.content[0].reader.parameter.where = 'cd_time >= ${lastTime} and cd_time < ${currentTime}'
       }
 
-      updateDataXJob(dataXJobSetupModelRef.value.jonInfo as JobTemplateType).then(async () => {
+      updateDataXJob(dataXJobSetupModelRef.value.jonInfo as DataXJobTemplate).then(async () => {
 
         // 更新采集任务后重新获取调度任务信息
         const schedJob = await getSchedJob(dataXJobSetupModelRef.value.jonInfo.jobDesc)

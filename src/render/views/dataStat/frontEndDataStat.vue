@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import {WorkflowType} from "@common/types";
+import {Workflow} from "@common/types/datacenter/workflow";
 import {
   get_project_by_table_abbr,
   get_project_info
@@ -105,7 +105,7 @@ const orgSelectOptionsInit = async () => {
 
   for (const project of uniqueProjects) {
     //查询所有带bf_的任务，即备份任务，确保该单位存在
-    const bfJobs: WorkflowType[] = (await get_workflow_page({
+    const bfJobs: Workflow[] = (await get_workflow_page({
       page: 1,
       size: 1000,
       status: null,
