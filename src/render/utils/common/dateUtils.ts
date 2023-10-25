@@ -16,6 +16,29 @@ export const formatDate = (date: Date): string => {
 
 }
 
+/**
+ * 提取日期中的年月日
+ * @param date 带提取日期
+ * @param isCN 展示为"yyyy年mm月dd日",还是"yyyy-mm-dd"
+ **/
+export const formatDate2Day = (date: Date, isCN?: boolean): string => {
+    if (!isNull(date)) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        if (isCN) {
+            return `${year}年${month}月${day}日`
+        } else {
+            return `${year}-${month}-${day}`;
+        }
+    } else {
+        return null
+    }
+}
+
+
+
 export const isValidDateString = (dateString: string): boolean => {
     const timestamp = Date.parse(dateString);
     return !isNaN(timestamp);

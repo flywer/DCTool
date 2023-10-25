@@ -22,3 +22,14 @@ export const getCurrentDateTime = () => {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
+
+/**
+ * 获取当前时分秒的时间戳值
+ **/
+export const getCurrentTimeInSeconds = (): number => {
+    const date = new Date();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    return (hours * 3600) + (minutes * 60) + seconds;
+}

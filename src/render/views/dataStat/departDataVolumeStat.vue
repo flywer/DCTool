@@ -20,11 +20,13 @@ import {
   get_FE_data_vol_by_depart_name_and_table_type, get_theme_base_data_vol_by_depart_name_and_table_type
 } from "@render/api/front.api";
 import {create_depart_data_vol_excel} from "@render/api/xlsx.api";
+import {formatDate, formatDate2Day} from "@render/utils/common/dateUtils";
 import {basicTableNames} from "@render/utils/datacenter/constants";
 import {ref} from "vue";
 
 const isGenerating = ref(false)
 const buttonText = ref('生成Excel')
+
 const generateData = () => {
 
   isGenerating.value = true
@@ -38,14 +40,21 @@ const generateData = () => {
     for (const depart of departs) {
       buttonText.value = `处理${depart.departName}数据...`
 
+      const feDataRecord = await get_FE_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
+      const dataLakeDataRecord = await get_data_lake_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
+      const themeBaseDataRecord = await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
+
       const dataRow: DepartDataVolExcelModel = {
         departName: depart.departName,
         tableType: depart.tableType,
         tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
         feTableName: depart.tableName,
-        feDataCount: (await get_FE_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
-        dataLakeDataCount: (await get_data_lake_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
-        themeBaseDataCount: (await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType))?.dataCount || '0',
+        feDataCount: feDataRecord?.dataCount || '0',
+        feDataStatTime: feDataRecord?.updateTime ? formatDate2Day(feDataRecord?.updateTime, true) : '-',
+        dataLakeDataCount: dataLakeDataRecord?.dataCount || '0',
+        dataLakeDataStatTime: dataLakeDataRecord?.updateTime ? formatDate2Day(dataLakeDataRecord?.updateTime, true) : '-',
+        themeBaseDataCount: themeBaseDataRecord?.dataCount || '0',
+        themeBaseDataStatTime: themeBaseDataRecord?.updateTime ? formatDate2Day(themeBaseDataRecord?.updateTime, true) : '-',
       }
 
       // 基础数据

@@ -1,6 +1,6 @@
 import {DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
 import {FilePathType} from "@main/enum/filePathEnum";
-import {getDayString} from "@main/utils/dateUtils";
+import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
 import {formatDate} from "@render/utils/common/dateUtils";
@@ -258,7 +258,7 @@ export class XlsxController {
             const excelData: any[][] = [];
 
             if (isBasicData) {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '主题库数据量']);
+                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
 
                 for (const item of data) {
 
@@ -269,11 +269,13 @@ export class XlsxController {
                         item.tableComment,
                         item.feTableName,
                         item.feDataCount,
-                        item.themeBaseDataCount
+                        item.feDataStatTime,
+                        item.themeBaseDataCount,
+                        item.themeBaseDataStatTime
                     ]);
                 }
             } else {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '数据湖数据量', '主题库数据量']);
+                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '数据湖数据量', '数据湖数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
 
                 for (const item of data) {
 
@@ -284,8 +286,11 @@ export class XlsxController {
                         item.tableComment,
                         item.feTableName,
                         item.feDataCount,
+                        item.feDataStatTime,
                         item.dataLakeDataCount,
-                        item.themeBaseDataCount
+                        item.dataLakeDataStatTime,
+                        item.themeBaseDataCount,
+                        item.themeBaseDataStatTime
                     ]);
                 }
             }
@@ -346,35 +351,6 @@ export class XlsxController {
                 vertical: 'middle',
                 horizontal: 'center'
             };
-            /*
-                        worksheet.getCell('A1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('B1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('C1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('D1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('E1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('F1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        };
-                        worksheet.getCell('G1').alignment = {
-                            vertical: 'middle',
-                            horizontal: 'center'
-                        }; */
         }
 
         const setFirstCol = (worksheet: ExcelJS.Worksheet) => {
@@ -438,17 +414,32 @@ export class XlsxController {
                     horizontal: 'right'
                 };
                 worksheet.getColumn(7).alignment = {
+                    horizontal: 'center'
+                };
+                worksheet.getColumn(8).alignment = {
                     horizontal: 'right'
+                };
+                worksheet.getColumn(9).alignment = {
+                    horizontal: 'center'
                 };
             } else {
                 worksheet.getColumn(6).alignment = {
                     horizontal: 'right'
                 };
                 worksheet.getColumn(7).alignment = {
-                    horizontal: 'right'
+                    horizontal: 'center'
                 };
                 worksheet.getColumn(8).alignment = {
                     horizontal: 'right'
+                };
+                worksheet.getColumn(9).alignment = {
+                    horizontal: 'center'
+                };
+                worksheet.getColumn(10).alignment = {
+                    horizontal: 'right'
+                };
+                worksheet.getColumn(11).alignment = {
+                    horizontal: 'center'
                 };
             }
 
@@ -468,14 +459,14 @@ export class XlsxController {
 
                 });
 
-                (worksheet.getColumn(7) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+                (worksheet.getColumn(8) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                     if (rowNumber > 1) {
                         themeBaseCountTotal += parseInt(cell.text)
                     }
 
                 })
 
-                worksheet.addRow(['合计', '', '', '', '', feDataCountTotal.toString(), themeBaseCountTotal.toString()])
+                worksheet.addRow(['合计', '', '', '', '', feDataCountTotal.toString(), '', themeBaseCountTotal.toString(), ''])
 
             } else {
                 (worksheet.getColumn(6) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
@@ -485,21 +476,21 @@ export class XlsxController {
 
                 });
 
-                (worksheet.getColumn(7) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+                (worksheet.getColumn(8) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                     if (rowNumber > 1) {
                         dataLakeCountTotal += parseInt(cell.text)
                     }
 
                 });
 
-                (worksheet.getColumn(8) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
+                (worksheet.getColumn(10) as ExcelJS.Column).eachCell((cell: ExcelJS.Cell, rowNumber: number) => {
                     if (rowNumber > 1) {
                         themeBaseCountTotal += parseInt(cell.text)
                     }
 
                 })
 
-                worksheet.addRow(['合计', '', '', '', '', feDataCountTotal.toString(), dataLakeCountTotal.toString(), themeBaseCountTotal.toString()])
+                worksheet.addRow(['合计', '', '', '', '', feDataCountTotal.toString(), '', dataLakeCountTotal.toString(), '', themeBaseCountTotal.toString(), ''])
 
             }
 
@@ -511,7 +502,7 @@ export class XlsxController {
         const basicDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('基础数据');
         basicDataWorksheet.addRows(createExcelData(excelData.basicData, true));
 
-        setColumnWidths(basicDataWorksheet, [25, 23, 20, 30, 35, 15, 15]);
+        setColumnWidths(basicDataWorksheet, [25, 23, 20, 30, 35, 15, 26, 15, 26]);
         setFirstRow(basicDataWorksheet)
         setFirstCol(basicDataWorksheet)
         mergeCells(basicDataWorksheet, 'A')
@@ -526,7 +517,7 @@ export class XlsxController {
         const provinceData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => item.departName.startsWith('广东省'));
         const cityData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => !item.departName.startsWith('广东省'));
 
-        const columnWidths = [25, 20, 20, 30, 30, 15, 15, 15];
+        const columnWidths = [25, 20, 20, 30, 30, 15, 26, 15, 26, 15, 26];
 
         const provinceWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直部门行为数据');
         provinceWorksheet.addRows(createExcelData(provinceData, false));
@@ -561,7 +552,7 @@ export class XlsxController {
                 name: 'xlsx',
                 extensions: ['xlsx']
             }],
-            defaultPath: '全省单位数据量统计-' + getDayString()
+            defaultPath: '全省单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
         }).then(res => {
             if (!res.canceled) {
                 // 导出 Excel 文件
