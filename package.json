@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@antv/g6": "^4.8.21",
+    "@node-rs/jieba": "^1.7.2",
     "@types/node": "^20.2.5",
     "cron": "^2.4.0",
     "cron-parser": "^4.9.0",

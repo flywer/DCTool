@@ -17,6 +17,7 @@ import {ShareController} from "@main/controller/share.controller";
 import {SvgController} from "@main/controller/svg.controller";
 import {SysController} from "@main/controller/sys.controller";
 import {TaskSchedulerController} from "@main/controller/taskScheduler.controller";
+import {ExtractLawsController} from "@main/controller/toolbox/extractLaws.controller";
 import {UpdaterController} from "@main/controller/updater.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
@@ -120,7 +121,8 @@ async function bootstrap() {
                         DictController,
                         TaskSchedulerController,
                         FEDepartTableNameController,
-                        ShareController
+                        ShareController,
+                        ExtractLawsController
                     ],
                 injects: [{
                     name: 'IS_DEV',

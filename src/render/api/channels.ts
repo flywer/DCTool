@@ -194,5 +194,8 @@ export const channels = reactive({
     },
     share: {
         getDataVolume: 'share/getDataVolume'
+    },
+    extractLaws:{
+        extract: 'extractLaws/extract'
     }
 })

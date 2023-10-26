@@ -13,6 +13,9 @@
       <n-tab-pane name="4" tab="Excel提取">
         <convert-excel-data-tab/>
       </n-tab-pane>
+      <n-tab-pane name="5" tab="法规提取（测）">
+        <extract-laws-tab/>
+      </n-tab-pane>
     </n-tabs>
 
   </n-layout>
@@ -20,6 +23,7 @@
 
 <script setup lang="ts">
 import ConvertExcelDataTab from "@render/views/toolbox/convertExcelDataTab.vue";
+import ExtractLawsTab from "@render/views/toolbox/extractLawsTab.vue";
 import FlattenTextTab from "@render/views/toolbox/flattenTextTab.vue";
 import GetTypeFromJsonTab from "@render/views/toolbox/getTypeFromJsonTab.vue";
 import LdDecryptTab from "@render/views/toolbox/ldDecryptTab.vue";
