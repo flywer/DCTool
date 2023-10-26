@@ -1,3 +1,4 @@
+import {app} from "electron";
 import os from "os";
 import path from "path";
 
@@ -16,7 +17,7 @@ export const getAppTempDataPath = () => {
 }
 
 export const getResourcePath = () => {
-    return !process.env.NODE_ENV || process.env.NODE_ENV === "production"
+    return app.isPackaged
         ? process.resourcesPath // Live Mode
         : process.cwd(); // Dev Mode
 }
