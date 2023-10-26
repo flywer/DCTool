@@ -36,7 +36,7 @@ const resultValue = ref()
 
 const trans = () => {
   //resultValue.value = extractLaws(inputValue.value)
-  resultValue.value = extractLaws(inputValue.value)
+  resultValue.value = extractLaws(inputValue.value).join('\n')
 }
 
 // const regex = /(《(.*?)》|(.*?)(?=第))((第.*?章)(.*?)(?=第))?(第.*?条)?(第.*?款)?(第.*?项)?/g;
@@ -55,32 +55,22 @@ const extractLaws = (text: string): any => {
       }
     }) */
 
-// 定义一个正则表达式，用于匹配法规引用
-  /*     const regex = /((?:《([^》]+)》|[\u4e00-\u9fa5]+)(?:第([^条]+)条)?(?:第([^款]+)款)?(?:第([^项]+)项)?)/g;
+  const regex = /(《(.*?)》|(\S+?)\/)(第(.*?)章)?\/?(第(.*?)条)?\/?(第(.*?)款)?\/?(第(.*?)项)?/g;
+  let match;
+  let results = [];
 
-      const result = [];
-      let match;
-      while ((match = regex.exec(text)) !== null) {
-          const law = match[2] || match[1]; // 法规名称
-          const clause = match[3]; // 条
-          const paragraph = match[4]; // 款
-          const item = match[5]; // 项
-          let lawRef = law;
-          if (clause) lawRef += '/' + clause + '条';
-          if (paragraph) lawRef += '/' + paragraph + '款';
-          if (item) lawRef += '/' + item + '项';
-          result.push(lawRef);
-      }
-
-      return result; */
-
-   const regex = /(.*?)(\/第.*章)?(\/第.*条)?(\/第.*款)?/;
-
-  const match = regex.exec(text)
-  if (match) {
-    return match[0];
+  while ((match = regex.exec(text)) !== null) {
+    let result = {
+      law: match[2] || match[3],
+      chapter: match[5],
+      clause: match[7],
+      item: match[9],
+      subItem: match[11]
+    };
+    results.push(result);
   }
-  return '';
+
+   return results.map((v) => `${v.law}/${v.chapter}/${v.clause}/${v.item}/${v.subItem}`)
 }
 
 </script>
