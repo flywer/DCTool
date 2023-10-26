@@ -27,7 +27,7 @@ export class WindowController {
 
     @IpcHandle(channels.window.close)
     public async windowClose() {
-        const setup = await getAppSettings()
+        const setup = getAppSettings()
         if (setup != null && setup.closeAsHidden) {
             this.mainWindow.hide()
         } else {

@@ -6,9 +6,9 @@ import {join} from "path";
 
 export const APP_CONFIG_PATH = join(getAppDataPath(), 'config', 'app.json')
 
-export const getAppSettings = async () => {
+export const getAppSettings = () => {
     let setting: SetupModelType
-    const buffer = await readFsSync(APP_CONFIG_PATH)
+    const buffer = readFsSync(APP_CONFIG_PATH)
     if (buffer == null || isEmpty(buffer.toString())) {
         setting = null
     } else {

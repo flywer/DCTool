@@ -57,7 +57,7 @@ export class AppController {
     @IpcHandle(channels.app.updateSettings)
     public async handleUpdateSettings(setupModel: SetupModelTypeAlias) {
         try {
-            const newSettings = Object.assign({}, await getAppSettings(), setupModel);
+            const newSettings = Object.assign({}, getAppSettings(), setupModel);
 
             await jsonfileWrite(APP_CONFIG_PATH, newSettings, {spaces: 2})
 

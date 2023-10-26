@@ -60,7 +60,7 @@ async function electronAppInit() {
 
     ///应用启动后的操作
     app.whenReady().then(async () => {
-        const setup = await getAppSettings()
+        const setup = getAppSettings()
         if (setup != null && setup.enableSysTray) {
             trayInit()
         }
