@@ -1,4 +1,5 @@
-import {FilePathType} from "@main/enum/filePathEnum";
+
+import {FilePathType} from "@common/enum/filePath";
 import log from 'electron-log'
 import fs from "fs";
 import jsonfile from 'jsonfile'

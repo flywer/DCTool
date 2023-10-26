@@ -1,4 +1,4 @@
-import {FilePathType} from "@main/enum/filePathEnum";
+import {FilePathType} from "@common/enum/filePath";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";

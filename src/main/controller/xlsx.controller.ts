@@ -1,5 +1,5 @@
+import {FilePathType} from "@common/enum/filePath";
 import {DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
-import {FilePathType} from "@main/enum/filePathEnum";
 import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
