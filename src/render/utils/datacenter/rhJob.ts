@@ -212,7 +212,11 @@ export const updateRhJob = async (jobId: string, tableName: string) => {
         paramsJson.modelXml = jobTemplate.modelXml.replaceAll('depart', tableAbbr)
         paramsJson.modelJson = jobTemplate.modelJson.replaceAll('depart', tableAbbr)
 
-        paramsJson.dataDevBizVo = JSON.parse(JSON.stringify(jobTemplate.dataDevBizVo).replaceAll('depart', tableAbbr))
+        paramsJson.dataDevBizVo = JSON.parse(
+            JSON.stringify(jobTemplate.dataDevBizVo)
+                .replaceAll('depart', tableAbbr)
+                .replaceAll('{PROJECT_ID}', jobInfo.projectId)
+        )
 
         paramsJson = JSON.parse(updateSjkUUID(paramsJson))
 
