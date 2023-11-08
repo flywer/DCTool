@@ -101,6 +101,7 @@
 </template>
 
 <script setup lang="ts">
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
@@ -473,17 +474,27 @@ const toolOptions = [
   }
 ]
 
-const handleToolSelect = (key: string) => {
+const handleToolSelect = async (key: string) => {
   if (key === 'ODS') {
     const tempOdsTable = tableDataRef.value.find(row => row.tableName.includes('_temp_ods'))
     const odsTable = tableDataRef.value.find(row => row.tableName.includes('_ods') && !row.tableName.includes('_temp_'))
 
     if (tempOdsTable && odsTable) {
-      paramModel.ddlSql = `insert into ${tempOdsTable.tableName} select * from ${odsTable.tableName}`
+      const pColName = (await get_table_sql({
+        tableName: tempOdsTable.tableName.split('_')[2]
+      }))[0].pColName
 
+      paramModel.ddlSql = `insert into ${tempOdsTable.tableName}
+      select t1.* from ${odsTable.tableName} t1
+      INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
+                               FROM ${odsTable.tableName}
+                               GROUP BY ${pColName}) t2
+                              ON t1.${pColName} = t2.${pColName} AND t1.cd_time = t2.max_cd_time`
+
+      window.$message.info('执行需要时间...')
       exec_sql(paramModel).then((res) => {
         if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          window.$message.success('执行成功')
+          window.$message.success('执行[ODS数据回流至临时表]成功')
         } else {
           window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
         }
