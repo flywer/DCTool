@@ -963,6 +963,7 @@ const handleTableFieldTreeNodeAdd = () => {
     label: `Field_${tableFieldTreeNodes.value[0].children.length + 1}`,
     key: key,
     isLeaf: true,
+    ruleType: 1,
     suffix: () => h(NIcon, {color: '#23bf19'}, h(CircleSmall24Filled))
   })
 
