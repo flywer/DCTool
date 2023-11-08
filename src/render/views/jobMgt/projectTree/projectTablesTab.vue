@@ -3,6 +3,11 @@
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto h-8 mb-2">
         <n-space inline class="float-right">
+          <n-dropdown :options="toolOptions" trigger="click" @select="handleToolSelect">
+            <n-button secondary strong type="info">
+              实用方法
+            </n-button>
+          </n-dropdown>
           <n-button secondary strong @click="tableDataInit">
             刷新
             <template #icon>
@@ -93,15 +98,16 @@
     </template>
   </n-modal>
 
-
 </template>
 
 <script setup lang="ts">
 import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
+import {renderIcon} from "@render/utils/common/renderIcon";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
+import {ArrowBackUp} from '@vicons/tabler'
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, ref, watch, computed} from "vue";
@@ -148,7 +154,7 @@ onMounted(async () => {
 
 const isTableLoading = ref(false)
 
-const tableDataRef = ref([])
+const tableDataRef = ref<Table[]>([])
 
 const tableDataInit = async () => {
   isTableLoading.value = true
@@ -171,7 +177,7 @@ const tableDataInit = async () => {
   isTableLoading.value = false
 }
 
-const customSort = (arr: any[]): string[] => {
+const customSort = (arr: any[]): any[] => {
   const map = new Map<string, number>();
 
   [
@@ -459,6 +465,36 @@ const tableTruncate = async (row: Table) => {
 }
 
 //endregion
+const toolOptions = [
+  {
+    label: 'ODS数据回流至临时表',
+    key: 'ODS',
+    icon: renderIcon(ArrowBackUp)
+  }
+]
+
+const handleToolSelect = (key: string) => {
+  if (key === 'ODS') {
+    const tempOdsTable = tableDataRef.value.find(row => row.tableName.includes('_temp_ods'))
+    const odsTable = tableDataRef.value.find(row => row.tableName.includes('_ods') && !row.tableName.includes('_temp_'))
+
+    if (tempOdsTable && odsTable) {
+      paramModel.ddlSql = `insert into ${tempOdsTable.tableName} select * from ${odsTable.tableName}`
+
+      exec_sql(paramModel).then((res) => {
+        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
+          window.$message.success('执行成功')
+        } else {
+          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
+        }
+      })
+    } else {
+      window.$message.error(`表不存在，无法执行`)
+    }
+
+  }
+}
+
 </script>
 
 <style scoped>
