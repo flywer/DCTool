@@ -273,6 +273,8 @@ const onPositiveClick = () => {
         const splitArray = jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable.split('_')
         splitArray[1] = 'depart'
         jobJson.dataDevBizVo.sparkSqlDtoList[0].targetTable = splitArray.join('_');
+
+        jobJson.dataDevBizVo.sparkSqlDtoList[0].sql = updateOptSubjectId(jobJson.dataDevBizVo.sparkSqlDtoList[0].sql, '{PROJECT_ID}')
       }
 
       modalFormModel.value.rh1Json = JSON.stringify(jobJson, null, 2)
@@ -292,6 +294,11 @@ const onPositiveClick = () => {
     isSaving.value = false
   })
 
+}
+
+function updateOptSubjectId(query: string, newValue: string): string {
+  const regex = /'.*?'(\s+AS\s+)?OPT_SUBJECT_ID/;
+  return query.replace(regex, `'${newValue}' AS OPT_SUBJECT_ID`);
 }
 
 const search = (v: string) => {

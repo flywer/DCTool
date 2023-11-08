@@ -41,7 +41,11 @@ export const buildRhJson = async (formModel: RhFormModelType, templateJson: any,
         templateJson.personId = formModel.personId
         templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label as string
 
-        templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', project.tableAbbr))
+        templateJson = JSON.parse(
+            JSON.stringify(templateJson)
+                .replaceAll('depart', project.tableAbbr)
+                .replaceAll('{PROJECT_ID}', project.projectId)
+        )
         templateJson = JSON.parse(updateSjkUUID(removeIds(templateJson)))
     }
 
