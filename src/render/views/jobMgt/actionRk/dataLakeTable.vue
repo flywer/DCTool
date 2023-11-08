@@ -112,7 +112,7 @@ const queryParam = ref('')
 const projectTree = useProjectTreeStore()
 
 // 创建计算属性来获取 Pinia 存储中的值
-const defaultSelectedKeys = computed(() => projectTree.defaultSelectedKeys)
+const defaultSelectedKeys = computed(() => projectTree.selectedKeys)
 
 watch(defaultSelectedKeys, async (newValue) => {
   if (newValue[0] != null) {

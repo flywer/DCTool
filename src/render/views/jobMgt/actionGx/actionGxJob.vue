@@ -317,7 +317,8 @@ const tableDataInit = async () => {
       comment: await getTableComment(v.jobDesc),
       createTime: schedJob?.addTime || '--',
       updateTime: schedJob?.updateTime || '--',
-      project: project
+      project: project,
+      jobRerunType: v.editModel == 1 ? 2 : 1,
     }
 
     newJobs.push(job)
