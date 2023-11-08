@@ -37,7 +37,7 @@ import {NIcon, useNotification, NButton} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
-import {Sql} from '@vicons/carbon'
+import {Sql,Template} from '@vicons/carbon'
 import {LibraryAddOutlined} from '@vicons/material'
 import {
   AppsListDetail24Regular,
@@ -84,6 +84,20 @@ const menuOptions: MenuOption[] = [
         ),
     key: routeName.jobCreate,
     icon: renderIcon(LibraryAddOutlined)
+  },
+  {
+    label: () =>
+        h(
+            RouterLink,
+            {
+              to: {
+                name: routeName.jobTemplate,
+              }
+            },
+            {default: () => '任务模板'}
+        ),
+    key: routeName.jobTemplate,
+    icon: renderIcon(Template)
   },
   {
     label: () =>

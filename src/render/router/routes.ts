@@ -16,6 +16,7 @@ const toolbox = () => import('@render/views/toolbox/index.vue')
 const jobDependency = () => import('@render/views/jobDependency/index.vue')
 const taskScheduler = () => import('@render/views/taskScheduler/index.vue')
 const tableMgt = () => import('@render/views/tableMgt/index.vue')
+const jobTemplate = () => import('@render/views/jobTemplate/index.vue')
 
 export const routeName = {
     app: 'app',
@@ -45,6 +46,7 @@ export const routeName = {
     jobDependency: 'jobDependency',
     taskScheduler: 'taskScheduler',
     tableMgt: 'tableMgt',
+    jobTemplate: 'jobTemplate',
 }
 
 export const routes: Array<RouteRecordRaw> = [
@@ -122,6 +124,11 @@ export const routes: Array<RouteRecordRaw> = [
                         name: routeName.tableMgt,
                         path: '/tableMgt/index',
                         component: tableMgt
+                    },
+                    {
+                        name: routeName.jobTemplate,
+                        path: '/jobTemplate/index',
+                        component: jobTemplate,
                     },
                 ]
             },

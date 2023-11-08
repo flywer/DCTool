@@ -9,24 +9,21 @@
               label-placement="left"
       >
         <n-grid :cols="2" :x-gap="12">
-          <n-form-item-gi label="质检类型">
-            <n-radio-group v-model:value="zjType">
-              <n-radio-button
-                  :key="1"
-                  :value="'1'"
-                  label="完整版"
-              />
-              <n-radio-button
-                  :key="2"
-                  :value="'2'"
-                  label="简化版"
-              />
-            </n-radio-group>
-          </n-form-item-gi>
-          <n-form-item-gi label="表名" path="jobJsonId">
+          <n-form-item-gi label="质检模板">
             <n-select
-                v-model:value="formModel.jobJsonId"
-                placeholder="选择表名"
+                v-model:value="selectedTemplateId"
+                placeholder="选择质检模板"
+                :options="jobTemplateOptions"
+                :consistent-menu-width="false"
+                filterable
+                @update:value="handleTemplateUpdate"
+            />
+          </n-form-item-gi>
+          <n-form-item-gi label="结构表" path="structTableId">
+            <n-select
+                :disabled="!selectedTemplateId"
+                v-model:value="formModel.structTableId"
+                placeholder="选择结构表"
                 :options="tableNameOptions"
                 :consistent-menu-width="false"
                 filterable
@@ -56,11 +53,11 @@
 
     <n-space justify="center" align="center" class="mt-2">
       <n-button type="primary" class="w-28" @click="generate" :loading="isGenerating">生成</n-button>
-      <n-button :disabled="jonJsonRef === ''" class="w-28" @click="copyText(jonJsonRef)">
+      <n-button :disabled="!saveModel" class="w-28" @click="copyText(JSON.stringify(saveModel))">
         复制结果
       </n-button>
       <n-divider :vertical="true"/>
-      <n-button type="primary" :disabled="jonJsonRef === ''" class="w-28" @click="addWorkFlow"
+      <n-button type="primary" :disabled="!saveModel" class="w-28" @click="addWorkFlow"
                 :loading="isAdding"
       >
         执行
@@ -75,52 +72,83 @@
       </n-tooltip>
     </n-space>
 
-    <n-input
-        class="mt-2"
-        v-model:value="jonJsonRef"
-        type="textarea"
-        placeholder=""
-        :autosize="{
-        minRows: 6,
-        maxRows: 20
+    <JsonEditorVue
+        class="mt-4"
+        v-model="saveModel"
+        v-bind="{
+        mode:'text',
+        mainMenuBar:true,
+        statusBar:false,
+        navigationBar:false,
+        askToFormat:false,
+        escapeControlCharacters:false,
+        escapeUnicodeCharacters:false,
+        flattenColumns:false,
       }"
+        style="height: calc(100vh - 350px)"
     />
   </n-scrollbar>
 </template>
 
 <script setup lang="ts">
-import {get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
-import {add_work_flow} from "@render/api/datacenter.api";
+import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
+import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {copyText} from "@render/utils/common/clipboard";
-import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
-import {removeIds} from "@render/utils/datacenter/removeIds";
-import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
-import {FormInst, SelectGroupOption, SelectOption} from "naive-ui";
-import {onMounted, ref, watch} from "vue";
+import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
+import JsonEditorVue from "json-editor-vue";
+import {FormInst, SelectOption} from "naive-ui";
+import {onMounted, ref} from "vue";
 import {QuestionCircleTwotone} from '@vicons/antd'
 
-const tableNameOptions = ref<Array<SelectOption | SelectGroupOption>>()
+onMounted(async () => {
+  await jobTemplateOptionsInit()
+})
 
-const jonJsonRef = ref('')
+const jobTemplateOptions = ref<Array<SelectOption>>()
+const selectedTemplateId = ref()
+
+const jobTemplateOptionsInit = async () => {
+  jobTemplateOptions.value = (await find_job_template({templateType: 1})).map(v => ({
+    label: v.templateName,
+    value: v.id.toString()
+  }))
+}
+
+const tableSelectLoading = ref(false)
+const handleTemplateUpdate = async (templateId: string) => {
+  formModel.value.structTableId = null
+  tableNameOptions.value = []
+
+  tableSelectLoading.value = true
+
+  const tables = await find_template_struct_table({
+    templateId: parseInt(templateId)
+  })
+
+  tableNameOptions.value = tables.map(v => ({
+    label: v.tableName,
+    value: v.id.toString()
+  }))
+
+  tableSelectLoading.value = false
+}
+
+const tableNameOptions = ref<Array<SelectOption>>()
 
 const formRef = ref<FormInst | null>(null);
-
-const zjType = ref('1')
-
 const formModel = ref({
-  jobJsonId: '',
+  structTableId: '',
   personId: '',
   projectId: '',
 })
-
 const rules = {
-  jobJsonId: {
+  structTableId: {
     required: true,
     trigger: ['change'],
-    message: '请选择表名'
+    message: '请选择结构表'
   },
   projectId: {
     required: true,
@@ -134,136 +162,52 @@ const rules = {
   }
 }
 
-const tableSelectLoading = ref(false)
-
-onMounted(() => {
-  tableSelectLoading.value = true
-  get_zj_json()
-      .then((res) => {
-        tableNameOptions.value = res?.filter((item: {
-          zjJson: any;
-        }) => item.zjJson != null).map(
-            ((v: {
-              tableName: any;
-              id: {
-                toString: () => any;
-              };
-              zjJson: any;
-            }) => ({
-              label: `${v.tableName}`,
-              value: v.id.toString(),
-              json: v.zjJson,
-            }))
-        ) || []
-      }).finally(() => tableSelectLoading.value = false)
-})
-
-watch(zjType, (value) => {
-  tableSelectLoading.value = true
-  if (value == '1') {
-    get_zj_json().then((res) => {
-      tableNameOptions.value = res?.filter((item: {
-        zjJson: any;
-      }) => item.zjJson != null).map(
-          ((v: {
-            tableName: any;
-            id: {
-              toString: () => any;
-            };
-            zjJson: any;
-          }) => ({
-            label: `${v.tableName}`,
-            value: v.id.toString(),
-            json: v.zjJson,
-          }))
-      ) || []
-    }).finally(() => tableSelectLoading.value = false)
-  } else {
-    get_simp_zj_json().then((res) => {
-      tableNameOptions.value = res?.filter((item: {
-        simpZjJson: any;
-      }) => item.simpZjJson != null).map(
-          ((v: {
-            tableName: any;
-            id: {
-              toString: () => any;
-            };
-            simpZjJson: any;
-          }) => ({
-            label: `${v.tableName}`,
-            value: v.id.toString(),
-            json: v.simpZjJson,
-          }))
-      ) || []
-    }).finally(() => tableSelectLoading.value = false)
-  }
-})
+const saveModel = ref<ZjJobSaveModel>()
 
 const isGenerating = ref(false)
-
 const generate = () => {
-  isGenerating.value = true
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      let paramJson = JSON.parse(tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).json as string)
-      let tableName = (tableNameOptions.value.find(item => item.value === formModel.value.jobJsonId).label as string).toLowerCase()
+      isGenerating.value = true
 
-      const projectAbbr = (await find_by_project_id(formModel.value.projectId))?.projectAbbr || ''
+      // 结构表名
+      const tableName = (tableNameOptions.value.find(item => item.value === formModel.value.structTableId).label as string).toLowerCase()
 
-      if (zjType.value == '1') {
-        paramJson.name = `zj_${projectAbbr}_${tableName}`;
-      } else {
-        paramJson.name = `zj_${projectAbbr}_${tableName}_simp`;
-      }
+      const {projectAbbr, tableAbbr} = (await find_by_project_id(formModel.value.projectId))
 
-      paramJson.projectId = formModel.value.projectId
-      paramJson.projectName = projectIdOptions.find(option => option.value === formModel.value.projectId).label
-      paramJson.personId = formModel.value.personId
-      paramJson.personName = personIdOptions.find(option => option.value === formModel.value.personId).label
+      saveModel.value = new ZjJobSaveModel(`zj_${projectAbbr}_${tableName}`, '', '')
+      await saveModel.value.setTableFieldRules(parseInt(formModel.value.structTableId))
+      saveModel.value.setPerson(formModel.value.personId)
+      saveModel.value.setProject(formModel.value.projectId)
+      saveModel.value.setGlobalVariable({project: tableAbbr, tableName: tableName})
 
-      const {tableAbbr} = await getAbbrByProId(paramJson.projectId);
-
-      paramJson = JSON.parse(JSON.stringify(paramJson).replaceAll('depart', tableAbbr))
-      paramJson = JSON.parse(updateSjkUUID(removeIds(paramJson)))
-
-      jonJsonRef.value = JSON.stringify(paramJson, null, 2)
-    } else {
-      console.error(errors)
+      isGenerating.value = false
     }
-  }).finally(() => isGenerating.value = false)
+  })
 }
 
 const isAdding = ref(false)
 
 const addWorkFlow = async () => {
   isAdding.value = true
-  const paramsModel = JSON.parse(jonJsonRef.value)
-  if (await workflowJobNameExist(paramsModel.name)) {
+  if (await workflowJobNameExist(saveModel.value.name)) {
     window.$dialog.warning({
       title: '警告',
-      content: `检测到[${paramsModel.name}]任务名已存在，是否继续创建？`,
+      content: `检测到[${saveModel.value.name}]任务名已存在，是否继续创建？`,
       positiveText: '确定',
       negativeText: '取消',
-      onPositiveClick: () => {
-        addWorkflow2(paramsModel)
+      onPositiveClick: async () => {
+        await saveModel.value.createZjJob()
+        isAdding.value = false
       },
       onAfterLeave: () => {
         isAdding.value = false
       }
     })
   } else {
-    addWorkflow2(paramsModel)
+    await saveModel.value.createZjJob()
+    isAdding.value = false
   }
-}
-
-const addWorkflow2 = (paramsModel: any) => {
-  add_work_flow(paramsModel).then((res) => {
-    if (res.code == 200) {
-      window.$message.success('质检任务创建成功')
-    } else {
-      window.$message.error(res.message)
-    }
-  }).finally(() => isAdding.value = false)
 }
 
 </script>

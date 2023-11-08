@@ -3,6 +3,7 @@ import naive from "naive-ui";
 import App from './App.vue'
 import {router} from "@render/router";
 import {createPinia} from 'pinia';
+import 'animate.css'
 
 // 全局自定义样式
 import '@render/styles/css/global.css'

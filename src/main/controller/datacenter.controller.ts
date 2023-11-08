@@ -552,6 +552,28 @@ export class DatacenterController {
         });
     }
 
+    @IpcHandle(channels.datacenter.getNorm)
+    public handleGetNorm() {
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonPostRequest(`/datawork/norm/findList`, {}))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getNormCodeSet)
+    public handleGetNormCodeSet(normId: string) {
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonPostRequest(`/datawork/normCodeSet/findList`, {normId: normId}))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getColumnsInfo)
+    public handleGetColumnsInfo(datasourceId: number | string, tableName: string) {
+        const query: string = `datasourceId=${datasourceId}&tableName=${tableName}`;
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonGetRequest(`/gather/api/metadata/getColumnsInfo`, query))
+        });
+    }
+
     public async getAccountByConfig() {
         const filePath = join(getAppDataPath(), 'config', 'user.json')
         const buffer = readFsSync(filePath)

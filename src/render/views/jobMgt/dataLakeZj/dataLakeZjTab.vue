@@ -198,6 +198,12 @@
   >
     <job-inspection-tab :inps-table-name="inpsTableName" :inps-table-db-id="inpsTableDbId"/>
   </n-modal>
+
+  <zj-job-update-modal
+      v-model:show="zjJobUpdateModalConfig.show"
+      :table-abbr="zjJobUpdateModalConfig.tableAbbr"
+      :job-id="zjJobUpdateModalConfig.jobId"
+  />
 </template>
 
 <script setup lang="ts">
@@ -218,12 +224,13 @@ import {
   Job, renderWorkflowActionButton,
   setJobStatus,
   showButton, showButtonPopover,
-  showConfirmation, showTextButton, showTextConfirmation,
+  showTextButton,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
-import {dataLakeZjJobJsonConvert, updateZjJob} from "@render/utils/datacenter/zjJob";
+import {dataLakeZjJobJsonConvert} from "@render/utils/datacenter/zjJob";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.vue";
 import {Add, Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
@@ -256,7 +263,9 @@ const tableDataInit = async () => {
   // 工作流任务
   const allJobs = (await get_workflow_list_by_project_id(projectId)).data
 
-  const filterJobs = allJobs.filter((job: { procName: string; }) => job.procName.includes(queryParam.value))
+  const filterJobs = allJobs.filter((job: {
+    procName: string;
+  }) => job.procName.includes(queryParam.value))
 
   let newJobs = []
 
@@ -275,7 +284,8 @@ const tableDataInit = async () => {
       comment: await getTableCommentByProName(v.procName),
       createTime: v.createTime,
       updateTime: v.updateTime,
-      project: await find_by_project_id(projectId)
+      project: await find_by_project_id(projectId),
+      jobRerunType: v.editModel == 1 ? 2 : 1,
     }
 
     newJobs.push(job)
@@ -376,7 +386,7 @@ const createColumns = (): DataTableColumns<Job> => {
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
-    moreBtnChildren.push(showTextConfirmation('更新规则', () => onUpdateZjJob(row)))
+    moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
@@ -389,7 +399,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
-    children.push(showConfirmation('更新规则', () => onUpdateZjJob(row)))
+    children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
   if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
@@ -453,8 +463,16 @@ const showCreateJobModal = () => {
 
   get_zj_json()
       .then((res) => {
-        tableNameOptions.value = res?.filter((item: { zjJson: any; }) => item.zjJson != null).map(
-            ((v: { tableName: any; id: { toString: () => any; }; zjJson: any; }) => ({
+        tableNameOptions.value = res?.filter((item: {
+          zjJson: any;
+        }) => item.zjJson != null).map(
+            ((v: {
+              tableName: any;
+              id: {
+                toString: () => any;
+              };
+              zjJson: any;
+            }) => ({
               label: v.tableName,
               value: v.id.toString(),
               json: v.zjJson,
@@ -693,7 +711,10 @@ const showValidConfigModal = async (v: Job) => {
     validConfigModalFormModel.value.cdBatchName = 'cd_batch'
   }
 
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: { name: any; id: any; }) => ({
+  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: {
+    name: any;
+    id: any;
+  }) => ({
     label: `${v.name}`,
     value: v.id
   })))
@@ -753,17 +774,16 @@ const handlemechanismIdUpdate = () => {
 //endregion
 
 // region 质检规则更新
-const updateZjJobFormRef = ref({
-  tableName: '',
-  type: '1',
-  jobId: ''
+const zjJobUpdateModalConfig = ref({
+  show: false,
+  jobId: null,
+  tableAbbr: null
 })
 
-const onUpdateZjJob = (v: Job) => {
-  updateZjJobFormRef.value.jobId = v.id
-  updateZjJobFormRef.value.tableName = v.jobName.split('_')[2].toUpperCase()
-
-  updateZjJob(updateZjJobFormRef.value, true).then(() => tableDataInit())
+const showZjJobUpdateModal = (v: Job) => {
+  zjJobUpdateModalConfig.value.show = true
+  zjJobUpdateModalConfig.value.jobId = v.id
+  zjJobUpdateModalConfig.value.tableAbbr = v.jobName.split('_')[2].toUpperCase()
 }
 //endregion
 

@@ -1,9 +1,12 @@
 import {DictController} from "@main/controller/auxiliaryDb/dict.controller";
 import {FEDepartTableNameController} from "@main/controller/auxiliaryDb/fEDepartTableName.controller";
 import {JobJsonController} from "@main/controller/auxiliaryDb/jobJson.controller";
+import {FieldInspectionRuleController} from "@main/controller/auxiliaryDb/jobTemplate/fieldInspectionRule.controller";
+import {JobTemplateController} from "@main/controller/auxiliaryDb/jobTemplate/jobTemplate.controller";
 import {PreDatabaseController} from "@main/controller/auxiliaryDb/preDatabase.controller";
 import {SztkDictController} from "@main/controller/auxiliaryDb/sztkDict.controller";
 import {TableSqlController} from "@main/controller/auxiliaryDb/tableSql.controller";
+import {TemplateStructTableController} from "@main/controller/auxiliaryDb/jobTemplate/templateStructTable.controller";
 import {UserController} from "@main/controller/auxiliaryDb/user.controller";
 import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
@@ -122,7 +125,10 @@ async function bootstrap() {
                         TaskSchedulerController,
                         FEDepartTableNameController,
                         ShareController,
-                        ExtractLawsController
+                        ExtractLawsController,
+                        JobTemplateController,
+                        TemplateStructTableController,
+                        FieldInspectionRuleController
                     ],
                 injects: [{
                     name: 'IS_DEV',

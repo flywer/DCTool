@@ -213,19 +213,14 @@
                 readonly
             />
           </n-form-item-gi>
-          <n-form-item-gi :span="4" label="任务类型" path="jobType">
-            <n-radio-group v-model:value="zjJobModalFormModel.jobType">
-              <n-radio-button
-                  :key="1"
-                  :value="'1'"
-                  label="完整版质检"
-              />
-              <n-radio-button
-                  :key="2"
-                  :value="'2'"
-                  label="简化版质检"
-              />
-            </n-radio-group>
+          <n-form-item-gi :span="4" label="质检模板" path="structTableId">
+            <n-select
+                v-model:value="zjJobModalFormModel.structTableId"
+                placeholder="选择质检模板"
+                :options="jobTemplateOptions"
+                :consistent-menu-width="false"
+                filterable
+            />
           </n-form-item-gi>
           <n-form-item-gi :span="4" label="责任人" path="personId">
             <n-select
@@ -434,20 +429,15 @@
             </n-divider>
           </n-gi>
           <n-form-item-gi v-if="quickCreateModalFormModel.jobSelect.includes('zj')" :span="4" label="任务类型"
-                          path="zjJobType"
+                          path="zjStructTableId"
           >
-            <n-radio-group v-model:value="quickCreateModalFormModel.zjJobType">
-              <n-radio-button
-                  :key="1"
-                  :value="'1'"
-                  label="完整版质检"
-              />
-              <n-radio-button
-                  :key="2"
-                  :value="'2'"
-                  label="简化版质检"
-              />
-            </n-radio-group>
+            <n-select
+                v-model:value="quickCreateModalFormModel.zjStructTableId"
+                placeholder="选择质检模板"
+                :options="jobTemplateOptions"
+                :consistent-menu-width="false"
+                filterable
+            />
           </n-form-item-gi>
 
           <n-gi v-if="quickCreateModalFormModel.jobSelect.includes('zj')" :span="4">
@@ -525,51 +515,6 @@
   </n-modal>
 
   <job-log-drawer v-model:show="showDrawerRef" :job="drawerJobRef"/>
-
-  <n-modal
-      v-model:show="showUpdateZjJobModalRef"
-      :mask-closable="false"
-      :closable="true"
-      preset="dialog"
-      role="dialog"
-      :show-icon="false"
-      :title="'更新质检规则'"
-      :size="'small'"
-      style="width: 370px"
-  >
-    <n-form
-        class="mt-4"
-        :model="updateZjJobFormRef"
-        :size="'small'"
-    >
-      <n-grid :cols="1">
-        <n-form-item-gi :span="1" label="表名" path="tableName">
-          <n-input
-              v-model:value="updateZjJobFormRef.tableName"
-              readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi :span="1" label="规则类型">
-          <n-radio-group v-model:value="updateZjJobFormRef.type" :size="'small'">
-            <n-radio-button
-                :key="1"
-                :value="'1'"
-                label="完整版规则"
-            />
-            <n-radio-button
-                :key="2"
-                :value="'2'"
-                label="简化版规则"
-            />
-          </n-radio-group>
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-    <template #action>
-      <n-button type="primary" :size="'small'" @click="onUpdateZjJob" :loading="isUpdateZjJob">更新</n-button>
-      <n-button :size="'small'" @click="showUpdateZjJobModalRef=!showUpdateZjJobModalRef">返回</n-button>
-    </template>
-  </n-modal>
 
   <n-modal
       v-model:show="showPreviewModalRef"
@@ -760,13 +705,21 @@
       @onAfterLeave="tableDataInit"
   />
 
+  <zj-job-update-modal
+      v-model:show="zjJobUpdateModalConfig.show"
+      :table-abbr="queryParam.tableAbbr"
+      :job-id="zjJobUpdateModalConfig.jobId"
+  />
+
 </template>
 
 <script setup lang="ts">
 import {ProjectInfo} from "@common/types";
 import {DataXJobTemplate} from "@common/types/datacenter/dataCollection";
 import {Workflow} from "@common/types/datacenter/workflow";
+import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
+import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {
   create_valid_config,
   get_cj_job_page,
@@ -807,8 +760,9 @@ import {
 import {createQcJob} from "@render/utils/datacenter/qcJob";
 import {createRhJob, updateRhJob} from "@render/utils/datacenter/rhJob";
 import {createRkJob} from "@render/utils/datacenter/rkJob";
-import {createZjJob, updateZjJob} from "@render/utils/datacenter/zjJob";
+import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import {
   AddSquareMultiple16Regular,
   Options16Regular,
@@ -1190,7 +1144,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   }
 
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
-    moreBtnChildren.push(showTextButton('更新规则', () => showUpdateZjJobModal(row)))
+    moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
   if (row.type === '数据采集任务' && row.status != -1) {
@@ -1218,7 +1172,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   }
 
   if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
-    children.push(showButton('更新规则', () => showUpdateZjJobModal(row)))
+    children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
   if (row.type === '数据采集任务' && row.status != -1) {
@@ -1324,11 +1278,12 @@ const onPositiveClick = async () => {
   if (formSelect.value.createZjJob) {
     zjJobModalFormRef.value?.validate(async (errors) => {
       if (!errors) {
-        await createZjJob({
-          projectId: zjJobModalFormModel.value.projectId,
-          personId: zjJobModalFormModel.value.personId,
-          tableName: zjJobModalFormModel.value.tableName
-        }, zjJobModalFormModel.value.jobType).then(() => {
+        const model = new ZjJobSaveModel()
+        model.quickCreate(
+            zjJobModalFormModel.value.projectId,
+            zjJobModalFormModel.value.personId,
+            zjJobModalFormModel.value.structTableId,
+        ).then(() => {
           tableDataInit()
         }).finally(() => {
           isSaving.value = false
@@ -1483,11 +1438,12 @@ const quickCreate = async () => {
   }
 
   if (quickCreateModalFormModel.value.jobSelect.includes('zj')) {
-    await createZjJob({
-      projectId: quickCreateModalFormModel.value.projectId,
-      personId: quickCreateModalFormModel.value.personId,
-      tableName: quickCreateModalFormModel.value.tableName
-    }, quickCreateModalFormModel.value.zjJobType)
+    const model = new ZjJobSaveModel()
+    await model.quickCreate(
+        quickCreateModalFormModel.value.projectId,
+        quickCreateModalFormModel.value.personId,
+        quickCreateModalFormModel.value.zjStructTableId,
+    )
   }
 
   if (quickCreateModalFormModel.value.jobSelect.includes('bf')) {
@@ -1718,21 +1674,49 @@ const zjJobModalFormModel = ref({
   projectId: '',
   projectName: '',
   personId: '',
-  jobType: '2'
+  structTableId: null,
 })
 const zjJobModalFormRules = {
   personId: {
     required: true,
     trigger: ['change'],
     message: '请选择责任人'
+  },
+  structTableId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择质检模板'
+  },
+}
+
+const jobTemplateOptions = ref<Array<SelectOption>>()
+
+const jobTemplateOptionsInit = async (tableName: string) => {
+
+  jobTemplateOptions.value = []
+
+  const tables = await find_template_struct_table({
+    tableName: tableName
+  })
+
+  for (const table of tables) {
+    const template = (await find_job_template({id: table.templateId}))[0]
+    jobTemplateOptions.value.push({
+      label: `${template.templateName}-${tableName}`,
+      value: table.id.toString()
+    })
   }
 }
 
-const createZjJobModalInit = (project: ProjectInfo) => {
+const createZjJobModalInit = async (project: ProjectInfo) => {
+
   zjJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   zjJobModalFormModel.value.projectId = queryParam.value.projectId
   zjJobModalFormModel.value.projectName = project.projectName
   zjJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
+  zjJobModalFormModel.value.structTableId = null
+
+  await jobTemplateOptionsInit(zjJobModalFormModel.value.tableName)
 
   showModalRef.value = true
   modalTitle = '创建质检任务'
@@ -1868,7 +1852,7 @@ const quickCreateModalFormModel = ref({
   projectId: '',
   projectName: '',
   personId: '',
-  zjJobType: '2'
+  zjStructTableId: null
 })
 
 const quickCreateModalFormRules = {
@@ -1881,6 +1865,11 @@ const quickCreateModalFormRules = {
     required: true,
     trigger: ['change'],
     message: '选择来源表'
+  },
+  zjStructTableId: {
+    required: true,
+    trigger: ['change'],
+    message: '选择质检模板'
   },
 }
 
@@ -1953,6 +1942,9 @@ const quickCreateModalInit = async () => {
   quickCreateModalFormModel.value.projectId = queryParam.value.projectId
   quickCreateModalFormModel.value.projectName = project.projectName
   quickCreateModalFormModel.value.personId = datacenterProjectRef.value?.userId
+
+  quickCreateModalFormModel.value.zjStructTableId = null
+  await jobTemplateOptionsInit(quickCreateModalFormModel.value.tableName.toUpperCase())
 
   handleJobTreeOptionsUpdate()
 
@@ -2115,31 +2107,14 @@ const showJobLogDrawer = (v: Job) => {
 //endregion
 
 // region 质检规则更新
-const showUpdateZjJobModalRef = ref(false)
-const updateZjJobFormRef = ref({
-  tableName: '',
-  type: '1',
-  jobId: ''
+const zjJobUpdateModalConfig = ref({
+  show: false,
+  jobId: null
 })
 
-const showUpdateZjJobModal = (v: Job) => {
-  updateZjJobFormRef.value.jobId = v.id
-  updateZjJobFormRef.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
-
-  showUpdateZjJobModalRef.value = true
-}
-
-const isUpdateZjJob = ref(false)
-
-const onUpdateZjJob = () => {
-  isUpdateZjJob.value = true
-
-  updateZjJob(updateZjJobFormRef.value, false)
-      .then(() => {
-        tableDataInit()
-        showUpdateZjJobModalRef.value = false
-      })
-      .finally(() => isUpdateZjJob.value = false)
+const showZjJobUpdateModal = (v: Job) => {
+  zjJobUpdateModalConfig.value.show = true
+  zjJobUpdateModalConfig.value.jobId = v.id
 }
 //endregion
 

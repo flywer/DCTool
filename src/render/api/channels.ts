@@ -94,6 +94,9 @@ export const channels = reactive({
         getTableStoreFormat: 'datacenter/getTableStoreFormat',
         getTableFieldType: 'datacenter/getTableFieldType',
         updateTable: 'datacenter/updateTable',
+        getNorm: 'datacenter/getNorm',
+        getNormCodeSet: 'datacenter/getNormCodeSet',
+        getColumnsInfo: 'datacenter/getColumnsInfo',
     },
     auxiliaryDb: {
         projectInfo: {
@@ -157,6 +160,22 @@ export const channels = reactive({
         },
         projectJobDependency: {
             findAll: 'auxiliaryDb/jobDetail/projectJobDependency',
+        },
+        jobTemplate: {
+            findTemplate: 'auxiliaryDb/jobTemplate/findTemplate',
+            templateSave: 'auxiliaryDb/jobTemplate/templateSave',
+            templateDelete: 'auxiliaryDb/jobTemplate/templateDelete',
+        },
+        templateStructTable: {
+            findTemplateStructTable: 'auxiliaryDb/templateStructTable/findTemplateStructTable',
+            save: 'auxiliaryDb/templateStructTable/save',
+            delete: 'auxiliaryDb/templateStructTable/delete',
+            saveTableJobRel: 'auxiliaryDb/templateStructTable/saveTableJobRel',
+        },
+        fieldInspectionRule: {
+            findFieldInspectionRule: 'auxiliaryDb/fieldInspectionRule/findFieldInspectionRule',
+            save: 'auxiliaryDb/fieldInspectionRule/save',
+            delete: 'auxiliaryDb/fieldInspectionRule/delete',
         }
     },
     cron: {
@@ -195,7 +214,7 @@ export const channels = reactive({
     share: {
         getDataVolume: 'share/getDataVolume'
     },
-    extractLaws:{
+    extractLaws: {
         extract: 'extractLaws/extract'
     }
 })

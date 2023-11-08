@@ -1,6 +1,8 @@
 import {PageVo} from "@common/types";
 import {DCCommonResult, DCPageResult, DC_DictItem} from "@common/types/datacenter/common";
 import {DataXJobQueryParams, DataXJobTemplate} from "@common/types/datacenter/dataCollection";
+import {Norm, NormCodeSet} from "@common/types/datacenter/datawork";
+import {ColumnInfo} from "@common/types/datacenter/metaData";
 import {FieldType, PageTableType, TableInfoType} from "@common/types/datacenter/visualTable";
 import {Workflow} from "@common/types/datacenter/workflow";
 import {channels} from "@render/api/channels";
@@ -360,5 +362,26 @@ export const get_table_field_type = async (type: 'tbds-hive' | 'mysql'): Promise
 
 export const update_table = async (params: string): Promise<DCCommonResult<any>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.updateTable, params))
+    return data
+}
+
+/**
+ * 获取标准规范列表
+ **/
+export const get_norm = async (): Promise<DCCommonResult<Norm[]>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getNorm))
+    return data
+}
+
+/**
+ * 获取标准代码集
+ **/
+export const get_norm_code_set = async (normId: string): Promise<DCCommonResult<NormCodeSet[]>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getNormCodeSet, normId))
+    return data
+}
+
+export const get_columns_info = async (datasourceId: number | string, tableName: string): Promise<DCCommonResult<ColumnInfo[]>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getColumnsInfo, datasourceId, tableName))
     return data
 }

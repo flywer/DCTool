@@ -1,14 +1,5 @@
-import {
-    get_simp_zj_json,
-    get_simp_zj_json_by_id,
-    get_zj_json,
-    get_zj_json_by_id
-} from "@render/api/auxiliaryDb/jobJson.api";
-import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
-import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {isBasicTable} from "@render/utils/common/isBasicTable";
-import {getAbbrByProId} from "@render/utils/datacenter/getAbbrByProId";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 
@@ -17,74 +8,6 @@ export type ZjFormModelType = {
     personId: string,
     projectId: string,
     tableName?: string
-}
-const buildZjJobJson = async (formModel: ZjFormModelType, templateJson: any) => {
-    if (templateJson != null) {
-
-        const project = await find_by_project_id(formModel.projectId)
-
-        const projectAbbr = project?.projectAbbr || ''
-
-        templateJson.name = `zj_${projectAbbr}_${formModel.tableName.toLowerCase()}`;
-        templateJson.projectId = formModel.projectId
-        templateJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label
-        templateJson.personId = formModel.personId
-        templateJson.personName = personIdOptions.find(option => option.value === formModel.personId).label
-
-        templateJson = JSON.parse(JSON.stringify(templateJson).replaceAll('depart', project.tableAbbr))
-        templateJson = JSON.parse(updateSjkUUID(removeIds(templateJson)))
-    }
-    return templateJson
-
-}
-/**
- * @param formModel
- * @param jobType 1：完整版；2：简化版
- **/
-export const createZjJob = async (formModel: ZjFormModelType, jobType: string) => {
-    let templateJsonStr: string
-
-    if (jobType == '1') {
-        if (formModel.jobJsonId != undefined) {
-            const json = await get_zj_json_by_id(Number(formModel.jobJsonId));
-            templateJsonStr = json?.zjJson || null;
-        } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
-            const jsonArr = await get_zj_json(formModel.tableName)
-            if (jsonArr.length > 0) {
-                // 若不知道jsonId则使用tableName获取json
-                templateJsonStr = jsonArr[0]?.zjJson || null;
-            } else {
-                templateJsonStr = null;
-            }
-        }
-    } else if (jobType == '2') {
-        if (formModel.jobJsonId != undefined) {
-            const json = await get_simp_zj_json_by_id(Number(formModel.jobJsonId));
-            templateJsonStr = json?.simpZjJson || null;
-        } else if (formModel.jobJsonId == undefined && formModel.tableName != null) {
-            const jsonArr = await get_simp_zj_json(formModel.tableName)
-            if (jsonArr.length > 0) {
-                // 若不知道jsonId则使用tableName获取json
-                templateJsonStr = jsonArr[0]?.simpZjJson || null;
-            } else {
-                templateJsonStr = null;
-            }
-        }
-    }
-
-    const paramsJson = await buildZjJobJson(formModel, JSON.parse(templateJsonStr));
-
-    if (paramsJson != null) {
-        await add_work_flow(paramsJson).then((res) => {
-            if (res.code == 200) {
-                window.$message.success('质检任务创建成功')
-            } else {
-                window.$message.error(res.message)
-            }
-        })
-    } else {
-        window.$message.error('质检模板JSON不存在')
-    }
 }
 
 export const convertZjJson = (jsonStr: string, tableName: string): string => {
@@ -300,88 +223,5 @@ const removeRulesByCustomSql = (list: any, str: string) => {
             return true
         }
     })
-}
-
-export type UpdateZjJobFormType = {
-    jobId: string
-    tableName: string
-    type: string
-}
-
-/**
- * @jobId 任务ID
- **/
-export const updateZjJob = async (form: UpdateZjJobFormType, isDataLake: boolean) => {
-
-    const jobInfo = (await get_workflow(form.jobId)).data
-
-    let paramsJson = {
-        name: jobInfo.procName,
-        email: jobInfo.email,
-        description: jobInfo.description,
-        personId: jobInfo.personId,
-        personName: jobInfo.personName,
-        projectId: jobInfo.projectId,
-        projectName: jobInfo.projectName,
-        dependencyProjectId: jobInfo.dependencyProjectId,
-        dependencyProjectName: jobInfo.dependencyProjectName,
-        dependencyWorkflowId: jobInfo.dependencyWorkflowId,
-        dependencyWorkflowName: jobInfo.dependencyWorkflowName,
-        schedulingMode: jobInfo.schedulingMode,
-        crontab: jobInfo.crontab,
-        type: "流程",
-        code: jobInfo.procCode,
-        modelXml: jobInfo.modelXml,
-        modelJson: jobInfo.modelJson,
-        dataDevBizVo: ''
-    }
-
-    const dataDevBizVo = JSON.parse(jobInfo.businessParamsJson)
-
-    let newRules = []
-    if (form.type == '1') {
-        const jsonArr = await get_zj_json(form.tableName)
-        if (jsonArr.length > 0) {
-            const zjJson = jsonArr[0]?.zjJson || null;
-            if (zjJson != null) {
-                newRules = JSON.parse(zjJson).dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList
-            }
-        }
-    } else {
-        const jsonArr = await get_simp_zj_json(form.tableName)
-        if (jsonArr.length > 0) {
-            const zjJson = jsonArr[0]?.simpZjJson || null;
-            if (zjJson != null) {
-                newRules = JSON.parse(zjJson).dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList
-            }
-        }
-    }
-
-    if (newRules.length > 0) {
-
-        const {tableAbbr} = await getAbbrByProId(paramsJson.projectId);
-
-        newRules = JSON.parse(JSON.stringify(newRules).replaceAll('depart', tableAbbr))
-
-        if (isDataLake) {
-            dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = dataLakeQualityInspectionFieldListConvert(newRules)
-        } else {
-            dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = newRules
-        }
-
-        paramsJson.dataDevBizVo = dataDevBizVo
-
-        await update_workflow(jobInfo.id, paramsJson).then((res) => {
-            if (res.success) {
-                window.$message.success(res.message)
-            } else {
-                window.$message.error(res.message)
-            }
-        })
-
-    } else {
-        window.$message.error('质检模板JSON不存在')
-    }
-
 }
 
