@@ -76,7 +76,7 @@ const templateJson = {
                 sparkConfig: {
                     saveMode: "overwrite"
                 },
-                sql: "INSERT INTO\n  sztk_TABLENAME_dm\nSELECT\n  *\nFROM\n  df_DEPART_TABLENAME_dwb\nUNION ALL\nSELECT\n  t1.*\nFROM\n  sztk_TABLENAME_dm t1\n  LEFT JOIN (\n    SELECT\n      CONCAT(primId, OPT_SUBJECT_ID,OPT_DEPT_ID) AS uniqId\n    FROM\n      df_DEPART_TABLENAME_dwb\n  ) t2 ON CONCAT(t1.primId, t1.OPT_SUBJECT_ID,t1.OPT_DEPT_ID) = t2.uniqId\nWHERE\n  t2.uniqId IS NULL",
+                sql: "INSERT INTO\n  sztk_TABLENAME_dm\nSELECT\n  *\nFROM\n  df_DEPART_TABLENAME_dwb\nUNION ALL\nSELECT\n  t1.*\nFROM\n  sztk_TABLENAME_dm t1\n  LEFT JOIN (\n    SELECT\n      CONCAT(primId, OPT_SUBJECT_ID) AS uniqId\n    FROM\n      df_DEPART_TABLENAME_dwb\n  ) t2 ON CONCAT(t1.primId, t1.OPT_SUBJECT_ID) = t2.uniqId\nWHERE\n  t2.uniqId IS NULL",
                 id: "sjk584f23e6fbcb42528847a59c962bca83",
                 sourceDBId: [
                     6,
