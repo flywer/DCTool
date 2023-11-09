@@ -32,6 +32,8 @@
                 @onSelectedKeysUpdate="handleStructTableTreeKeyUpdate"
 
                 @reload-tree="structTableTreeNodesInit"
+
+                :render-label="structTableTreeRenderLabel"
             />
           </n-gi>
           <n-gi :span="1">
@@ -525,6 +527,7 @@ import {
   find_field_insp_rule
 } from "@render/api/auxiliaryDb/fieldInspectionRule.api";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
   find_template_struct_table,
   struct_table_delete,
@@ -650,6 +653,8 @@ onMounted(async () => {
     id: props.templateId
   }, {templateNameLike: false}))[0]
 
+  await tableCommentsInit()
+
   tableFieldCommentMapInit()
 
   inspRuleOptionsInit()
@@ -662,10 +667,7 @@ const structTableTreeNodes = ref<TreeOption[]>([])
 const selectedStructTableId = ref(null)
 const structTableTreeSelectedKeys = ref<(string | number)[]>(['root'])
 const tableFieldCommentMap = new Map<StructTableFieldType, string>()
-
-// region 按钮栏
-
-// endregion
+const tableComments = new Map<string, string>()
 
 // 结构表tree初始化
 const structTableTreeNodesInit = async () => {
@@ -830,6 +832,37 @@ const handleStructTableTreeNodeRemove = () => {
       })
     }
   })
+}
+
+const tableCommentsInit = async () => {
+  const tableData = await get_table_sql()
+
+  tableData.forEach(data => {
+    tableComments.set(data.tableName, data.comment)
+  })
+}
+
+const structTableTreeRenderLabel = (info: {
+  option: TreeOption,
+  checked: boolean,
+  selected: boolean
+}) => {
+  if (info.option.isLeaf && info.option.label.startsWith('C')) {
+    return h('div', {}, [
+      h('span', {class: 'pr-2'}, info.option.label),
+      h('span', {
+            style: {
+              color: useThemeVars().value.textColor3,
+              fontSize: '12px',
+              float: 'right',
+              lineHeight: '22px'
+            }
+          }, tableComments.get(info.option.label).slice(4)
+      )
+    ])
+  } else {
+    return info.option.label
+  }
 }
 
 // endregion
