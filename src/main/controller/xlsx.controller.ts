@@ -505,8 +505,8 @@ export class XlsxController {
         setColumnWidths(basicDataWorksheet, [25, 23, 20, 30, 35, 15, 26, 15, 26]);
         setFirstRow(basicDataWorksheet)
         setFirstCol(basicDataWorksheet)
-        mergeCells(basicDataWorksheet, 'A')
-        mergeCells(basicDataWorksheet, 'B')
+        // mergeCells(basicDataWorksheet, 'A')
+        // mergeCells(basicDataWorksheet, 'B')
         setCountCol(basicDataWorksheet, true)
         setTotalRow(basicDataWorksheet, true)
         setBolder(basicDataWorksheet)
@@ -525,8 +525,8 @@ export class XlsxController {
         setColumnWidths(provinceWorksheet, columnWidths);
         setFirstRow(provinceWorksheet)
         setFirstCol(provinceWorksheet)
-        mergeCells(provinceWorksheet, 'A')
-        mergeCells(provinceWorksheet, 'B')
+        // mergeCells(provinceWorksheet, 'A')
+        // mergeCells(provinceWorksheet, 'B')
         setCountCol(provinceWorksheet, false)
         setTotalRow(provinceWorksheet, false)
         setBolder(provinceWorksheet)
@@ -540,8 +540,8 @@ export class XlsxController {
         setColumnWidths(cityWorksheet, columnWidths);
         setFirstRow(cityWorksheet)
         setFirstCol(cityWorksheet)
-        mergeCells(cityWorksheet, 'A')
-        mergeCells(cityWorksheet, 'B')
+        // mergeCells(cityWorksheet, 'A')
+        // mergeCells(cityWorksheet, 'B')
         setCountCol(cityWorksheet, false)
         setTotalRow(cityWorksheet, false)
         setBolder(cityWorksheet)
