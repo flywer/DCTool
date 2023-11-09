@@ -682,16 +682,20 @@ const structTableTreeNodesInit = async () => {
     templateId: props.templateId
   })
 
-  const groupedArrays = tables.reduce((groups, item) => {
-    const {fieldType} = item;
-    const comment = tableFieldCommentMap.get(fieldType)
-    if (!groups[comment]) {
-      groups[comment] = [item];
-    } else {
-      groups[comment].push(item);
-    }
-    return groups;
-  }, {});
+  const groupedArrays = tables
+      .sort((a, b) => {
+        return a.tableName.localeCompare(b.tableName)
+      })
+      .reduce((groups, item) => {
+        const {fieldType} = item;
+        const comment = tableFieldCommentMap.get(fieldType)
+        if (!groups[comment]) {
+          groups[comment] = [item];
+        } else {
+          groups[comment].push(item);
+        }
+        return groups;
+      }, {});
 
   structTableTreeNodes.value[0].children = Object.keys(groupedArrays).map(key => ({
     label: key,
