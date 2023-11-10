@@ -29,6 +29,7 @@ export class CronController {
             } catch (e) {
                 log.error(e)
                 dcJobNames = []
+                await jsonfileWrite(filePath, dcJobNames, {spaces: 2})
             }
 
         }
@@ -125,7 +126,13 @@ export class CronController {
             if (buffer == null || isEmpty(buffer.toString())) {
                 dcJobNames = []
             } else {
-                dcJobNames = JSON.parse(buffer.toString())
+                try {
+                    dcJobNames = JSON.parse(buffer.toString())
+                } catch (e) {
+                    log.error(e)
+                    dcJobNames = []
+                    await jsonfileWrite(filePath, dcJobNames, {spaces: 2})
+                }
             }
 
             dcJobNames.push(jobName)
@@ -186,7 +193,13 @@ export class CronController {
                         if (buffer == null || isEmpty(buffer.toString())) {
                             dcJobNames = []
                         } else {
-                            dcJobNames = JSON.parse(buffer.toString())
+                            try {
+                                dcJobNames = JSON.parse(buffer.toString())
+                            } catch (e) {
+                                log.error(e)
+                                dcJobNames = []
+                                await jsonfileWrite(filePath, dcJobNames, {spaces: 2})
+                            }
                         }
 
                         const filter = dcJobNames.filter((item) => item !== jobName);
