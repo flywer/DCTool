@@ -109,6 +109,7 @@ import {renderIcon} from "@render/utils/common/renderIcon";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import {Refresh} from '@vicons/ionicons5'
 import {ArrowBackUp} from '@vicons/tabler'
+import {Clean} from '@vicons/carbon'
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, ref, watch, computed} from "vue";
@@ -471,6 +472,11 @@ const toolOptions = [
     label: 'ODS数据回流至临时表',
     key: 'ODS',
     icon: renderIcon(ArrowBackUp)
+  },
+  {
+    label: '清空所有相关表',
+    key: 'ALL_CLEAR',
+    icon: renderIcon(Clean)
   }
 ]
 
@@ -503,6 +509,18 @@ const handleToolSelect = async (key: string) => {
       window.$message.error(`表不存在，无法执行`)
     }
 
+  } else if (key === 'ALL_CLEAR') {
+    tableDataRef.value.forEach(table => {
+      paramModel.ddlSql = `TRUNCATE TABLE ${table.tableName}`
+
+      exec_sql(paramModel).then((res) => {
+        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
+          window.$message.success(`已清空${table.tableName}`)
+        } else {
+          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
+        }
+      })
+    })
   }
 }
 
