@@ -1,3 +1,4 @@
+import {DepartCatalogHookRecordController} from "@main/controller/auxiliaryDb/departCatalogHookRecord.controller";
 import {DictController} from "@main/controller/auxiliaryDb/dict.controller";
 import {FEDepartTableNameController} from "@main/controller/auxiliaryDb/fEDepartTableName.controller";
 import {JobJsonController} from "@main/controller/auxiliaryDb/jobJson.controller";
@@ -128,7 +129,8 @@ async function bootstrap() {
                         ExtractLawsController,
                         JobTemplateController,
                         TemplateStructTableController,
-                        FieldInspectionRuleController
+                        FieldInspectionRuleController,
+                        DepartCatalogHookRecordController
                     ],
                 injects: [{
                     name: 'IS_DEV',

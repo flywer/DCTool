@@ -80,4 +80,33 @@ export class DepartCatalogHookRecord {
         comment: '行政强制'
     })
     AF: number
+
+    @Column({
+        name: 'update_time',
+        type: 'datetime',
+        comment: '更新时间'
+    })
+    updateTime: Date
+}
+
+/**
+ * 编目挂接类型
+ **/
+export enum CatalogHookType {
+    // 无职权
+    noAuthority,
+    // 未编目
+    noCatalog,
+    // 已编目无数据
+    catalogedNoData,
+    // 已编目已挂接
+    hooked,
+    // 使用国垂系统
+    nationalVertical,
+    // 使用省垂系统
+    provincialVertical,
+    // 粤执法
+    yzf,
+    // 未确定
+    undefined
 }

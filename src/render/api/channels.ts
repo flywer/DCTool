@@ -176,6 +176,12 @@ export const channels = reactive({
             findFieldInspectionRule: 'auxiliaryDb/fieldInspectionRule/findFieldInspectionRule',
             save: 'auxiliaryDb/fieldInspectionRule/save',
             delete: 'auxiliaryDb/fieldInspectionRule/delete',
+        },
+        departCatalogHookRecord: {
+            updateByExcel: 'auxiliaryDb/departCatalogHookRecord/updateByExcel',
+            downloadImportTemplate: 'auxiliaryDb/departCatalogHookRecord/downloadImportTemplate',
+            getCatalogHookInfoByDepartName: 'auxiliaryDb/departCatalogHookRecord/getCatalogHookInfoByDepartName',
+            deleteCatalogHookRecord: 'auxiliaryDb/departCatalogHookRecord/deleteCatalogHookRecord',
         }
     },
     cron: {

@@ -1,5 +1,6 @@
 import "reflect-metadata"
 import {ActivationKey} from "@main/entity/ActivationKey";
+import {DepartCatalogHookRecord} from "@main/entity/DepartCatalogHookRecord";
 import {Dict} from "@main/entity/Dict";
 import {FEDepartTableName} from "@main/entity/FEDepartTableName";
 import {FieldInspectionRule} from "@main/entity/jobTemplate/FieldInspectionRule";
@@ -40,7 +41,8 @@ export const AppDataSource = new DataSource({
         JobTemplate,
         TemplateStructTable,
         FieldInspectionRule,
-        TemplateTableJobRel
+        TemplateTableJobRel,
+        DepartCatalogHookRecord
     ],
     migrations: [],
     subscribers: [],
