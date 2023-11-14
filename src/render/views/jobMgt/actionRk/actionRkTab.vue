@@ -2,12 +2,12 @@
   <n-layout class="ml-2 mr-2">
     <n-tabs type="line" animated>
       <n-tab-pane name="1" tab="任务列表">
-        <action-rk-job/>
+        <action-data2-data-lake-job/>
       </n-tab-pane>
-      <n-tab-pane name="2" tab="行为数据集市表">
-        <action-dm-table/>
+      <n-tab-pane name="2" tab="行为数据表">
+        <action-dwb-table/>
       </n-tab-pane>
-      <n-tab-pane name="3" tab="数据湖行为表">
+      <n-tab-pane name="3" tab="数据湖表">
         <data-lake-table/>
       </n-tab-pane>
     </n-tabs>
@@ -15,8 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import ActionDmTable from "@render/views/jobMgt/actionRk/actionDmTable.vue";
-import ActionRkJob from "@render/views/jobMgt/actionRk/actionRkJob.vue";
+import ActionDwbTable from "@render/views/jobMgt/actionRk/actionDwbTable.vue";
+import ActionData2DataLakeJob from "@render/views/jobMgt/actionRk/actionData2DataLakeJob.vue";
 import DataLakeTable from "@render/views/jobMgt/actionRk/dataLakeTable.vue";
 </script>
 

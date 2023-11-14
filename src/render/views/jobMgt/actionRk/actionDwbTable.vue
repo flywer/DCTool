@@ -137,7 +137,7 @@ type Table = {
 }
 
 onMounted(async () => {
-  queryParam.value = `sztk_`
+  queryParam.value = `df_lake_`
   await tableDataInit()
 })
 
@@ -149,12 +149,14 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    tableDataRef.value = (await get_tables_info_page({
+    const data = (await get_tables_info_page({
       size: 100,
       page: 1,
       sourceId: 6,
       likeValue: queryParam.value
     })).data?.records || []
+
+    tableDataRef.value = data.filter(table => !table.tableName.includes('_error_'))
   }
 
   isTableLoading.value = false
@@ -278,10 +280,12 @@ const tablePreview = (row: { id?: string; tableName: any; tableComment?: string;
             )
         )
 
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | { [s: string]: unknown; }) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
+        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | {
+              [s: string]: unknown;
+            }) =>
+                Object.values(item).map(
+                    (value) => (value === null ? 'null' : value.toString())
+                )
         ));
       }
     } else {
