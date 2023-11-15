@@ -1479,15 +1479,20 @@ const customSqlValid = () => {
   })
 }
 
-const handleInspRuleUpdate = async () => {
+const handleInspRuleUpdate = async (v: string) => {
   normOptionsInit()
   if (customFormModel.value.standardSpecificationId) {
     normCodeSetOptionsInit(customFormModel.value.standardSpecificationId)
   }
 
-  customFormModel.value.customSqlKey = 'id'
-  const structTableName = (await find_template_struct_table({id: selectedStructTableId.value}))[0].tableName
-  customSqlPrefix.value = `SELECT a.* FROM di_{PROJECT}_${structTableName.toLowerCase()}_temp_ods a`
+  if (v == '17') {
+    customFormModel.value.customSqlKey = 'id'
+    const structTableName = (await find_template_struct_table({id: selectedStructTableId.value}))[0].tableName
+    customSqlPrefix.value = `SELECT a.* FROM di_{PROJECT}_${structTableName.toLowerCase()}_temp_ods a`
+  } else {
+    customFormModel.value.customSqlKey = undefined
+  }
+
 }
 
 const fieldInspRuleSaving = ref(false)
