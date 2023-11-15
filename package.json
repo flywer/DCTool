@@ -18,6 +18,7 @@
     "@node-rs/jieba": "^1.7.2",
     "@types/node": "^20.2.5",
     "animate.css": "^4.1.1",
+    "caniuse-lite": "^1.0.30001562",
     "cron": "^2.4.0",
     "cron-parser": "^4.9.0",
     "crypto-ts": "^1.0.2",
