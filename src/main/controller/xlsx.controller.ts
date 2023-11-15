@@ -1,5 +1,5 @@
 import {FilePathType} from "@common/enum/filePath";
-import {DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
+import {DepartCaseVolumeExcelModel, DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
 import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
@@ -80,25 +80,6 @@ export class XlsxController {
             };
         }
 
-        const setBolder = (worksheet: ExcelJS.Worksheet) => {
-            // 遍历每个单元格，并为其添加边框
-            worksheet.eachRow({includeEmpty: true}, (row) => {
-                row.eachCell({includeEmpty: true}, (cell) => {
-                    // 获取当前单元格的边框
-                    const border = cell.border || {};
-
-                    // 设置边框样式
-                    border.top = {style: 'thin'};
-                    border.left = {style: 'thin'};
-                    border.bottom = {style: 'thin'};
-                    border.right = {style: 'thin'};
-
-                    // 更新单元格的边框
-                    cell.border = border;
-                });
-            });
-        }
-
         const setStripeStyle = (worksheet: ExcelJS.Worksheet) => {
 
             let preOrgName = null
@@ -145,7 +126,7 @@ export class XlsxController {
 
         setColumnWidths(provinceWorksheet, columnWidths);
         setFirstRow(provinceWorksheet)
-        setBolder(provinceWorksheet)
+        this.setCellBolder(provinceWorksheet)
         setStripeStyle(provinceWorksheet)
 
         const cityWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市');
@@ -154,7 +135,7 @@ export class XlsxController {
 
         setColumnWidths(cityWorksheet, columnWidths);
         setFirstRow(cityWorksheet)
-        setBolder(cityWorksheet)
+        this.setCellBolder(cityWorksheet)
         setStripeStyle(cityWorksheet)
 
         await dialog.showSaveDialog({
@@ -248,7 +229,7 @@ export class XlsxController {
     @IpcHandle(channels.xlsx.createDepartDataVolExcel)
     public async handleCreateDepartDataVolExcel(excelData: {
         basicData: DepartDataVolExcelModel[],
-        actionData: DepartDataVolExcelModel[],
+        actionData: DepartDataVolExcelModel[]
     }) {
 
         const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
@@ -363,25 +344,6 @@ export class XlsxController {
                 vertical: 'middle',
                 horizontal: 'center'
             };
-        }
-
-        const setBolder = (worksheet: ExcelJS.Worksheet) => {
-            // 遍历每个单元格，并为其添加边框
-            worksheet.eachRow({includeEmpty: true}, (row: ExcelJS.Row) => {
-                row.eachCell({includeEmpty: true}, (cell: ExcelJS.Cell) => {
-                    // 获取当前单元格的边框
-                    const border = cell.border || {};
-
-                    // 设置边框样式
-                    border.top = {style: 'thin'};
-                    border.left = {style: 'thin'};
-                    border.bottom = {style: 'thin'};
-                    border.right = {style: 'thin'};
-
-                    // 更新单元格的边框
-                    cell.border = border;
-                });
-            });
         }
 
         const mergeCells = (worksheet: ExcelJS.Worksheet, col: string) => {
@@ -509,7 +471,7 @@ export class XlsxController {
         // mergeCells(basicDataWorksheet, 'B')
         setCountCol(basicDataWorksheet, true)
         setTotalRow(basicDataWorksheet, true)
-        setBolder(basicDataWorksheet)
+        this.setCellBolder(basicDataWorksheet)
 
         // endregion
 
@@ -529,7 +491,7 @@ export class XlsxController {
         // mergeCells(provinceWorksheet, 'B')
         setCountCol(provinceWorksheet, false)
         setTotalRow(provinceWorksheet, false)
-        setBolder(provinceWorksheet)
+        this.setCellBolder(provinceWorksheet)
         // endregion
 
         // region 地市单位行为数据
@@ -544,7 +506,7 @@ export class XlsxController {
         // mergeCells(cityWorksheet, 'B')
         setCountCol(cityWorksheet, false)
         setTotalRow(cityWorksheet, false)
-        setBolder(cityWorksheet)
+        this.setCellBolder(cityWorksheet)
         // endregion
         await dialog.showSaveDialog({
             title: '选择文件保存位置',
@@ -560,5 +522,125 @@ export class XlsxController {
             }
         })
 
+    }
+
+    @IpcHandle(channels.xlsx.createDepartCaseVolumeExcel)
+    public async handleCreateDepartCaseVolumeExcel(excelData: {
+        provincialData: DepartCaseVolumeExcelModel[],
+        cityData: DepartCaseVolumeExcelModel[]
+    }) {
+
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+
+        const createExcelData = (model: DepartCaseVolumeExcelModel[], isProvincial: boolean) => {
+            const excelData: any[][] = []
+            if (isProvincial) {
+                excelData.push(['省直单位名称', '非“粤执法”推送案件量', '', '', '', '“粤执法”推送案件量', '总量']);
+                excelData.push(['', '国垂系统', '省垂系统', '自建系统', '合计', '', '']);
+            } else {
+                excelData.push(['地市名称', '非“粤执法”推送案件量', '', '', '', '“粤执法”推送案件量', '总量']);
+                excelData.push(['', '国垂系统', '省垂系统', '自建系统', '合计', '', '']);
+            }
+
+            model.forEach(depart => {
+
+                excelData.push([
+                    depart.cityName,
+                    depart.nv,
+                    depart.pv,
+                    depart.other,
+                    depart.nv + depart.pv + depart.other,
+                    depart.yzf,
+                    depart.nv + depart.pv + depart.other + depart.yzf
+                ])
+            })
+
+            return excelData
+        }
+
+        const headerCellsMerge = (worksheet: ExcelJS.Worksheet) => {
+            // 按开始行，开始列，结束行，结束列合并
+            worksheet.mergeCells(1, 1, 2, 1)
+            worksheet.mergeCells(1, 2, 1, 5)
+            worksheet.mergeCells(1, 6, 2, 6)
+            worksheet.mergeCells(1, 7, 2, 7)
+        }
+        const setColumnWidths = (worksheet: ExcelJS.Worksheet, columnWidths: number[]) => {
+            for (let i = 0; i < columnWidths.length; i++) {
+                worksheet.getColumn(i + 1).width = columnWidths[i];
+            }
+        }
+        const setHeaderCenter = (worksheet: ExcelJS.Worksheet) => {
+            worksheet.getRow(1).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            };
+            worksheet.getRow(2).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            };
+        }
+
+        //省直单位
+        const provincialDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直单位推送案件量');
+        provincialDataWorksheet.addRows(createExcelData(excelData.provincialData, true));
+
+        headerCellsMerge(provincialDataWorksheet)
+        setColumnWidths(provincialDataWorksheet, [20, 12, 12, 12, 12, 24, 12])
+        setHeaderCenter(provincialDataWorksheet)
+        this.setCellBolder(provincialDataWorksheet)
+
+        provincialDataWorksheet.getColumn(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        };
+
+        // 地市数据
+        const cityDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市单位推送案件量');
+        cityDataWorksheet.addRows(createExcelData(excelData.cityData, false));
+
+        headerCellsMerge(cityDataWorksheet)
+        setColumnWidths(cityDataWorksheet, [12, 12, 12, 12, 12, 24, 12])
+        setHeaderCenter(cityDataWorksheet)
+        this.setCellBolder(cityDataWorksheet)
+
+        cityDataWorksheet.getColumn(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        };
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '全省单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
+
+    }
+
+    public setCellBolder(worksheet: ExcelJS.Worksheet) {
+        // 遍历每个单元格，并为其添加边框
+        worksheet.eachRow({includeEmpty: true}, (row: ExcelJS.Row) => {
+            row.eachCell({includeEmpty: true}, (cell: ExcelJS.Cell) => {
+                // 获取当前单元格的边框
+                const border = cell.border || {};
+
+                // 设置边框样式
+                border.top = {style: 'thin'};
+                border.left = {style: 'thin'};
+                border.bottom = {style: 'thin'};
+                border.right = {style: 'thin'};
+
+                // 更新单元格的边框
+                cell.border = border;
+            });
+        });
     }
 }

@@ -1,4 +1,5 @@
 import {PageResult, PageVo} from "@common/types";
+import {CatalogHookData} from "@common/types/dataStat";
 import {AppDataSource} from "@main/dataSource/data-source";
 import {CatalogHookType, DepartCatalogHookRecord} from "@main/entity/DepartCatalogHookRecord";
 import {getResourcePath} from "@main/utils/appPath";
@@ -25,30 +26,29 @@ export class DepartCatalogHookRecordController {
     public async handleGetMaxRunningWorkFlowJobNum() {
 
         const templateCheck = (worksheet: ExcelJS.Worksheet) => {
-            return new Promise((resolve, reject) => {
-                if (worksheet.getCell('B1').text != '地市' ||
-                    worksheet.getCell('C1').text != '区县' ||
-                    worksheet.getCell('D1').text != '镇街' ||
-                    worksheet.getCell('E1').text != '部门/区划名称' ||
-                    worksheet.getCell('F1').text != '行政许可' ||
-                    worksheet.getCell('G1').text != '行政征收' ||
-                    worksheet.getCell('H1').text != '行政检查' ||
-                    worksheet.getCell('I1').text != '行政处罚' ||
-                    worksheet.getCell('J1').text != '行政强制'
-                ) {
-                    reject(failure('模板错误：表头错误'))
-                }
+            if (worksheet.getCell('B1').text != '地市' ||
+                worksheet.getCell('C1').text != '区县' ||
+                worksheet.getCell('D1').text != '镇街' ||
+                worksheet.getCell('E1').text != '部门/区划名称' ||
+                worksheet.getCell('F1').text != '行政许可' ||
+                worksheet.getCell('G1').text != '行政征收' ||
+                worksheet.getCell('H1').text != '行政检查' ||
+                worksheet.getCell('I1').text != '行政处罚' ||
+                worksheet.getCell('J1').text != '行政强制'
+            ) {
+                return `【${worksheet.name}】：模板错误-表头错误`
+            }
 
-                (worksheet.getColumn(5) as ExcelJS.Column).eachCell((cell, rowNumber) => {
-                    if (rowNumber > 1) {
-                        if (cell.text == null || cell.text === '') {
-                            reject(failure(`数据错误：部门/区划名称不可为空`))
-                        }
+            (worksheet.getColumn(5) as ExcelJS.Column).eachCell((cell, rowNumber) => {
+                if (rowNumber > 1) {
+                    if (cell.text == null || cell.text === '') {
+                        return `【${worksheet.name}】：数据错误-部门/区划名称不可为空`
                     }
-                })
-
-                resolve(success())
+                }
             })
+
+            return null
+
         }
 
         return new Promise<any>(async (resolve) => {
@@ -64,57 +64,72 @@ export class DepartCatalogHookRecordController {
                 ]
             })
                 .then(async result => {
+
                     if (!result.canceled) {
                         try {
                             const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
                             await (workbook.xlsx as ExcelJS.Xlsx).readFile(result.filePaths[0]);
 
-                            workbook.eachSheet((worksheet: ExcelJS.Worksheet) => {
-                                templateCheck(worksheet).then(() => {
-                                    worksheet.eachRow(async (row: ExcelJS.Row, rowNumber) => {
-                                        if (rowNumber > 1) {
-                                            const updateArr: DepartCatalogHookRecord[] = []
-                                            const updateTime = new Date()
+                            const error = await new Promise<string[]>((resolve, reject) => {
+                                let errorInfo: string[] = []
+                                workbook.eachSheet((worksheet: ExcelJS.Worksheet) => {
+                                    const error = templateCheck(worksheet)
+                                    if (error == null) {
+                                        worksheet.eachRow(async (row: ExcelJS.Row, rowNumber) => {
+                                            if (rowNumber > 1) {
+                                                const updateArr: DepartCatalogHookRecord[] = []
+                                                const updateTime = new Date()
 
-                                            const departInfo = await this.handleGetInfoByDepartName(row.getCell(5).text)
-                                            if (departInfo != null) {
-                                                departInfo.cityName = row.getCell(2).text
-                                                departInfo.districtName = row.getCell(3).text
-                                                departInfo.townName = row.getCell(4).text
-                                                departInfo.AL = this.getCatalogHookType(row.getCell(6).text)
-                                                departInfo.AE = this.getCatalogHookType(row.getCell(7).text)
-                                                departInfo.AC = this.getCatalogHookType(row.getCell(8).text)
-                                                departInfo.AP = this.getCatalogHookType(row.getCell(9).text)
-                                                departInfo.AF = this.getCatalogHookType(row.getCell(10).text)
-                                                departInfo.updateTime = updateTime
-                                                updateArr.push(departInfo)
-                                            } else {
-                                                const newDepart = new DepartCatalogHookRecord()
-                                                newDepart.cityName = row.getCell(2).text
-                                                newDepart.districtName = row.getCell(3).text
-                                                newDepart.townName = row.getCell(4).text
-                                                newDepart.departName = row.getCell(5).text
-                                                newDepart.AL = this.getCatalogHookType(row.getCell(6).text)
-                                                newDepart.AE = this.getCatalogHookType(row.getCell(7).text)
-                                                newDepart.AC = this.getCatalogHookType(row.getCell(8).text)
-                                                newDepart.AP = this.getCatalogHookType(row.getCell(9).text)
-                                                newDepart.AF = this.getCatalogHookType(row.getCell(10).text)
-                                                newDepart.updateTime = updateTime
-                                                updateArr.push(newDepart)
+                                                const departName = row.getCell(5).text.trim()
+                                                const cityName = row.getCell(2).text.trim()
+
+                                                if (departName != '部门/区划名称' && departName != null && departName != '' && cityName != '') {
+                                                    const departInfo = await this.handleGetInfoByDepartName(row.getCell(5).text.trim())
+                                                    if (departInfo != null) {
+                                                        departInfo.cityName = row.getCell(2).text.trim()
+                                                        departInfo.districtName = row.getCell(3).text.trim()
+                                                        departInfo.townName = row.getCell(4).text.trim()
+                                                        departInfo.AL = this.getCatalogHookType(row.getCell(6).text.trim())
+                                                        departInfo.AE = this.getCatalogHookType(row.getCell(7).text.trim())
+                                                        departInfo.AC = this.getCatalogHookType(row.getCell(8).text.trim())
+                                                        departInfo.AP = this.getCatalogHookType(row.getCell(9).text.trim())
+                                                        departInfo.AF = this.getCatalogHookType(row.getCell(10).text.trim())
+                                                        departInfo.updateTime = updateTime
+                                                        updateArr.push(departInfo)
+                                                    } else {
+                                                        const newDepart = new DepartCatalogHookRecord()
+                                                        newDepart.cityName = row.getCell(2).text.trim()
+                                                        newDepart.districtName = row.getCell(3).text.trim()
+                                                        newDepart.townName = row.getCell(4).text.trim()
+                                                        newDepart.departName = row.getCell(5).text.trim()
+                                                        newDepart.AL = this.getCatalogHookType(row.getCell(6).text.trim())
+                                                        newDepart.AE = this.getCatalogHookType(row.getCell(7).text.trim())
+                                                        newDepart.AC = this.getCatalogHookType(row.getCell(8).text.trim())
+                                                        newDepart.AP = this.getCatalogHookType(row.getCell(9).text.trim())
+                                                        newDepart.AF = this.getCatalogHookType(row.getCell(10).text.trim())
+                                                        newDepart.updateTime = updateTime
+                                                        updateArr.push(newDepart)
+                                                    }
+
+                                                    await AppDataSource.getRepository(DepartCatalogHookRecord).save(updateArr)
+                                                }
                                             }
-
-                                            resolve(new Promise<any>((resolve) => {
-                                                AppDataSource.getRepository(DepartCatalogHookRecord).save(updateArr).then(() => {
-                                                    resolve(success('更新成功'))
-                                                })
-                                            }))
-
-                                        }
-                                    })
-                                }).catch(error => {
-                                    resolve(error)
+                                        })
+                                    } else {
+                                        errorInfo.push(error)
+                                    }
                                 })
+                                resolve(errorInfo)
                             })
+                            if (error.length > 0) {
+                                if (error.length == workbook.worksheets.length) {
+                                    resolve(failure('全部文件导入失败\n' + error.join('\n')))
+                                } else {
+                                    resolve(failure('部分文件导入失败\n' + error.join('\n')))
+                                }
+                            } else {
+                                resolve(success('全部导入成功'))
+                            }
 
                         } catch (e) {
                             log.error(e)
@@ -219,6 +234,114 @@ export class DepartCatalogHookRecordController {
             log.error(e)
             return failure('删除失败')
         }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.departCatalogHookRecord.exportCatalogHookData)
+    public async handleExportCatalogHookData() {
+
+        type DepartStr = {
+            departs: string
+        }
+
+        try {
+            const resultData: CatalogHookData[] = []
+
+            const cityNames: {
+                cityName: string
+            }[] = await AppDataSource.getRepository(DepartCatalogHookRecord).createQueryBuilder()
+                .select('city_name', 'cityName')
+                .groupBy('city_name')
+                .execute()
+
+            for (const cityName of cityNames) {
+                // 许可
+                const al: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
+                    .query(`
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al NOT IN (4,5,6)
+                `);
+
+                // 征收
+                const ae: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
+                    .query(`
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae NOT IN (4,5,6)
+                `);
+
+                // 行政检查
+                const ac: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
+                    .query(`
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC NOT IN (4,5,6)
+                `);
+
+                // 行政处罚
+                const ap: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
+                    .query(`
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP NOT IN (4,5,6)
+                `);
+
+                // 行政处罚
+                const af: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
+                    .query(`
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF NOT IN (4,5,6)
+                `);
+
+                resultData.push({
+                    cityName: cityName.cityName,
+                    AL: {
+                        nationalVertical: al[0].departs?.split(',') || [],
+                        provincialVertical: al[1].departs?.split(',') || [],
+                        yzf: al[2].departs?.split(',') || [],
+                        other: al[3].departs?.split(',') || []
+                    },
+                    AE: {
+                        nationalVertical: ae[0].departs?.split(',') || [],
+                        provincialVertical: ae[1].departs?.split(',') || [],
+                        yzf: ae[2].departs?.split(',') || [],
+                        other: ae[3].departs?.split(',') || []
+                    },
+                    AC: {
+                        nationalVertical: ac[0].departs?.split(',') || [],
+                        provincialVertical: ac[1].departs?.split(',') || [],
+                        yzf: ac[2].departs?.split(',') || [],
+                        other: ac[3].departs?.split(',') || []
+                    },
+                    AP: {
+                        nationalVertical: ap[0].departs?.split(',') || [],
+                        provincialVertical: ap[1].departs?.split(',') || [],
+                        yzf: ap[2].departs?.split(',') || [],
+                        other: ap[3].departs?.split(',') || []
+                    },
+                    AF: {
+                        nationalVertical: af[0].departs?.split(',') || [],
+                        provincialVertical: af[1].departs?.split(',') || [],
+                        yzf: af[2].departs?.split(',') || [],
+                        other: af[3].departs?.split(',') || []
+                    }
+                })
+            }
+
+            const result = success()
+            result.data = resultData
+            return result
+        } catch (e) {
+            log.error(e)
+            return failure('获取编目挂接信息失败')
+        }
+
     }
 
 }

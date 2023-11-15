@@ -14,12 +14,17 @@ export const download_catalog_hook_info_import_template = async () => {
     return data
 }
 
-export const get_depart_catalog_hook_info_by_page = async (page: PageVo):Promise<PageResult<DepartCatalogHookRecord>> => {
-    const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.getCatalogHookInfoByDepartName,page)
+export const get_depart_catalog_hook_info_by_page = async (page: PageVo): Promise<PageResult<DepartCatalogHookRecord>> => {
+    const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.getCatalogHookInfoByDepartName, page)
     return data
 }
 
-export const delete_catalog_hook_record = async (id:number):Promise<Result>  => {
-   const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.deleteCatalogHookRecord,id)
+export const delete_catalog_hook_record = async (id: number): Promise<Result> => {
+    const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.deleteCatalogHookRecord, id)
+    return data
+}
+
+export const export_catalog_hook_data = async (): Promise<Result> => {
+    const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.exportCatalogHookData)
     return data
 }

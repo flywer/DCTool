@@ -28,4 +28,16 @@ export class ShareController {
         })
 
     }
+
+    @IpcHandle(channels.share.executeSql)
+    public handleExecuteSql(sql: string) {
+        return new Promise<any>(resolve => {
+            ShareSource.manager.query(sql).then(res => {
+                resolve(res)
+            }).catch((reason) => {
+                log.error(reason)
+                resolve(failure(reason.message))
+            })
+        })
+    }
 }

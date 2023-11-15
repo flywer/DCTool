@@ -22,3 +22,29 @@ export type InspectionDataExcelModel = {
     wrongRecordSum: number,
     inspectionTime: string
 }
+
+//【主题库案件数量统计】
+// 编目挂接信息数据
+export type CatalogHookData = {
+    cityName: string,
+    AL: FieldDepart,
+    AE: FieldDepart,
+    AC: FieldDepart,
+    AP: FieldDepart,
+    AF: FieldDepart
+}
+
+export type FieldDepart = {
+    nationalVertical: string[],
+    provincialVertical: string[],
+    yzf: string[],
+    other: string[]
+}
+
+export type DepartCaseVolumeExcelModel = {
+    cityName: string, // 地市名称
+    nv: number, // 国垂
+    pv: number, // 省垂
+    yzf: number, // 粤执法
+    other: number // 其他
+}

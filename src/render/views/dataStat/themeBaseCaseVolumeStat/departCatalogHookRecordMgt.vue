@@ -20,10 +20,10 @@
             搜索
           </n-button>
         </n-input-group>
-        <n-button secondary type="info" @click="updateByExcel">
+        <n-button secondary type="info" @click="updateByExcel" :loading="isImporting">
           导入
           <template #icon>
-            <n-icon>
+            <n-icon v-if="!isImporting">
               <ArrowUpload20Regular/>
             </n-icon>
           </template>
@@ -36,7 +36,7 @@
             </n-icon>
           </template>
         </n-button>
-        <n-button secondary strong @click="">
+        <n-button secondary strong @click="tableDataInit">
           刷新
           <template #icon>
             <n-icon>
@@ -247,20 +247,25 @@ const paginationReactive = reactive({
   }
 })
 
+const isImporting = ref(false)
+
 // region 导入
 const updateByExcel = () => {
-  update_depart_catalog_hook_info_by_excel().then(res => {
-    if (res.success) {
-      window.$message.success(res.message)
-      tableDataInit()
-    } else {
-      window.$notification.create({
-        title: "文件导入失败",
-        content: res.message,
-        type: "error"
+  isImporting.value = true
+  update_depart_catalog_hook_info_by_excel()
+      .then(res => {
+        if (res.success) {
+          window.$message.success(res.message)
+          tableDataInit()
+        } else {
+          window.$notification.create({
+            title: "文件导入失败",
+            content: res.message,
+            type: "error"
+          })
+        }
       })
-    }
-  })
+      .finally(() => isImporting.value = false)
 }
 
 const downloadTemplate = () => {

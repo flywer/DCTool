@@ -182,6 +182,7 @@ export const channels = reactive({
             downloadImportTemplate: 'auxiliaryDb/departCatalogHookRecord/downloadImportTemplate',
             getCatalogHookInfoByDepartName: 'auxiliaryDb/departCatalogHookRecord/getCatalogHookInfoByDepartName',
             deleteCatalogHookRecord: 'auxiliaryDb/departCatalogHookRecord/deleteCatalogHookRecord',
+            exportCatalogHookData: 'auxiliaryDb/departCatalogHookRecord/exportCatalogHookData',
         }
     },
     cron: {
@@ -192,6 +193,7 @@ export const channels = reactive({
         createDataInpsStat: 'xlsx/createDataInpsStat',
         generateInsertStatements: 'xlsx/generateInsertStatements',
         createDepartDataVolExcel: 'xlsx/createDepartDataVolExcel',
+        createDepartCaseVolumeExcel: 'xlsx/createDepartCaseVolumeExcel',
     },
     front: {
         getTableData: 'front/getTableData',
@@ -199,7 +201,6 @@ export const channels = reactive({
         getFrontEndDataVolByDepartNameAndTableType: 'front/getFrontEndDataVolByDepartNameAndTableType',
         getDataLakeDataVolByDepartNameAndTableType: 'front/getDataLakeDataVolByDepartNameAndTableType',
         getThemeBaseDataVolByDepartNameAndTableType: 'front/getThemeBaseDataVolByDepartNameAndTableType',
-
     },
     updater: {
         checkUpdate: "updater/checkUpdate",
@@ -218,7 +219,9 @@ export const channels = reactive({
         findJobById: 'taskScheduler/findJobById'
     },
     share: {
-        getDataVolume: 'share/getDataVolume'
+        getDataVolume: 'share/getDataVolume',
+        executeSql: 'share/executeSql',
+
     },
     extractLaws: {
         extract: 'extractLaws/extract'
