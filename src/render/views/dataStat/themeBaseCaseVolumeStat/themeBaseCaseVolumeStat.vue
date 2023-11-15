@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import {CatalogHookData, DepartCaseVolumeExcelModel, FieldDepart} from "@common/types/dataStat";
+import {CatalogHookData, DepartCaseVolumeExcelModel} from "@common/types/dataStat";
 import {export_catalog_hook_data} from "@render/api/auxiliaryDb/departCatalogHookRecord.api";
 import {execute_sql} from "@render/api/shareBase.api";
 import {create_depart_case_volume_excel} from "@render/api/xlsx.api";

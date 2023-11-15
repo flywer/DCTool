@@ -70,7 +70,7 @@ export class DepartCatalogHookRecordController {
                             const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
                             await (workbook.xlsx as ExcelJS.Xlsx).readFile(result.filePaths[0]);
 
-                            const error = await new Promise<string[]>((resolve, reject) => {
+                            const error = await new Promise<string[]>((resolve) => {
                                 let errorInfo: string[] = []
                                 workbook.eachSheet((worksheet: ExcelJS.Worksheet) => {
                                     const error = templateCheck(worksheet)
