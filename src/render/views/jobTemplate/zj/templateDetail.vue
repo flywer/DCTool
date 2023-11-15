@@ -142,7 +142,11 @@
                           <template v-else-if="customFormModel.inspRuleId === '2'">
                             <n-grid :cols="12" :x-gap="12">
                               <n-form-item-gi :span="12" label="从表数据源" path="fromTableDataSourceId">
-                                <n-input v-model:value="customFormModel.fromTableDataSourceId"/>
+                                <n-select
+                                    v-model:value="customFormModel.fromTableDataSourceId"
+                                    :options="datasourceOptions"
+                                    :size="'small'"
+                                />
                               </n-form-item-gi>
                               <n-form-item-gi :span="6" label="从表数据表" path="fromTableDataTable">
                                 <n-input v-model:value="customFormModel.fromTableDataTable"/>
@@ -534,6 +538,7 @@ import {
   struct_table_save
 } from "@render/api/auxiliaryDb/templateStructTable.api";
 import {get_norm, get_norm_code_set, sql_valid} from "@render/api/datacenter.api";
+import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {nativeCopyText} from "@render/utils/common/clipboard";
 import {actionTableNames, basicTableNames} from "@render/utils/datacenter/constants";
 import {zjRulesList} from "@render/utils/datacenter/zjRulesList";
@@ -1258,6 +1263,11 @@ const customFormRules = ref({
     required: true,
     trigger: ['change'],
     message: '请选择比较时间'
+  },
+  fromTableDataSourceId: {
+    required: true,
+    trigger: ['change'],
+    message: '请选择数据源'
   },
   fromTableDataTable: {
     required: true,
