@@ -138,9 +138,9 @@
             <n-tab-pane name="2" tab="中台相关表">
               <project-tables-tab/>
             </n-tab-pane>
-            <n-tab-pane name="3" tab="质检情况">
+<!--            <n-tab-pane name="3" tab="质检情况">
               <job-inspection-tab/>
-            </n-tab-pane>
+            </n-tab-pane>-->
           </n-tabs>
         </template>
         <!--省政数局主体信息采集-->

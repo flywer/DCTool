@@ -32,7 +32,7 @@
           <span style="color: rgba(194, 194, 194, 1)">暂无质检记录</span>
         </template>
       </n-data-table>
-      <n-space justify="end">
+      <n-space justify="end" class="absolute bottom-1.5 right-2">
         <n-pagination
             v-model:page="paginationReactive.page"
             v-model:page-size="paginationReactive.pageSize"

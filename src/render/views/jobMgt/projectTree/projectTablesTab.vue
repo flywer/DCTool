@@ -187,7 +187,9 @@ const customSort = (arr: any[]): any[] => {
     'ods',
     'right_dwd',
     'error_dwd',
-    'dwb'
+    'dwb',
+    'right_dwb',
+    'error_dwb',
   ].forEach((item, index) => {
     map.set(item, index);
   });
@@ -203,6 +205,10 @@ const customSort = (arr: any[]): any[] => {
       return 'error_dwd'
     } else if (tableName.endsWith('dwb')) {
       return 'dwb'
+    } else if (tableName.endsWith('right_dwb')) {
+      return 'right_dwb'
+    } else if (tableName.endsWith('error_dwb')) {
+      return 'error_dwb'
     } else {
       return ''
     }
@@ -227,17 +233,17 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '表描述',
       key: 'tableComment',
-      width: '23%'
+      width: '22%'
     },
     {
       title: '创建时间',
       key: 'createTime',
-      width: '15%',
+      width: '17%',
     },
     {
       title: '操作',
       key: 'actions',
-      width: '22%',
+      width: '21%',
       align: 'center',
       render(row) {
         return h(NSpace, {

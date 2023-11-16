@@ -1,6 +1,7 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {ProjectInfo} from "@common/types";
 import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
+import {DataDevBizVo} from "@common/types/datacenter/workflow";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
@@ -12,7 +13,7 @@ import {
     datax_job_stop, get_cj_job_page,
     get_datax_job_log,
     get_sched_job_page,
-    get_valid_config_page,
+    get_valid_config_page, get_workflow,
     get_workflow_log,
     get_workflow_page,
     sched_job_delete,
@@ -32,7 +33,7 @@ import {uuid} from "vue3-uuid";
 
 export  type Job = {
     id: string
-    type: '数据采集任务' | '数据质检任务' | '数据备份任务' | '数据清除任务' | '数据融合任务' | '单表融合任务' | '多表融合任务' | '数据入库任务' | '数据共享任务' | '未知任务'
+    type: '数据采集任务' | '数据质检任务' | '初步质检任务' | '数据备份任务' | '数据清除任务' | '数据融合任务' | '单表融合任务' | '完整质检任务' | '多表融合任务' | '数据入库任务' | '数据共享任务' | '未知任务'
     jobName: string
     // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
     status: number
@@ -82,7 +83,7 @@ export const jobNameCompare = (a: {
 }, b: {
     jobName: string;
 }) => {
-    const order = ["cj", "zj", "bf", "qc", "rh", "rh1", "rh2", "rk", "gx"];
+    const order = ["cj", "zj", "zj1", "bf", "qc", "rh", "rh1", "zj2", "rh2", "rk", "gx"];
     const aIndex = order.indexOf(a.jobName.split("_")[0]);
     const bIndex = order.indexOf(b.jobName.split("_")[0]);
 
@@ -203,9 +204,7 @@ export const renderWorkflowActionButton = (job: Job, tableDataInit: () => any): 
             children = [
                 showButton('启用', () => workflowActive(job.id, '01', () => tableDataInit())),
                 showConfirmation('执行', async () => {
-                    await workflowActive(job.id, '01', async () => {
-                        await workflowRun(job, () => tableDataInit())
-                    })
+                    await workflowRun(job, () => tableDataInit())
                 }),
                 showConfirmation('删除', async () => workflowDelete(job.id, () => tableDataInit())),
             ]
@@ -289,7 +288,7 @@ export const renderDataXJobActionButton = (job: Job, showCreateSchedJobModal: ()
 
 /**
  * @param id
- * @param type
+ * @param type 01:启用 02：停用
  * @param onSuccess 任务启用成功的回调函数
  **/
 export const workflowActive = async (id: string, type: '01' | '02', onSuccess: () => any) => {
@@ -319,7 +318,7 @@ export const workflowRun = async (job: Job, onSuccess: () => any) => {
             checkWorkflowDependency(job).then(isPass2 => {
                 if (isPass2) {
                     // 质检任务特殊检查:机构配置
-                    checkZjJobInpsConfig(job).then(isPass3 => {
+                    checkZjJobInspConfig(job).then(isPass3 => {
                         if (isPass3) {
                             // 检查任务模板是否存在新版本
                             checkJobRulesUpdateTime(job).then(isPass4 => {
@@ -517,20 +516,17 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
 /**
  * 质检任务特殊检查:机构配置
  **/
-const checkZjJobInpsConfig = async (job: Job): Promise<boolean> => {
-    if (job.type === '数据质检任务') {
-        let isValidConfigRef: boolean
-        let validTableName: string = ''
-        if (!job.jobName.startsWith('zj_lake_')) {
-            validTableName = `di_${job.project.tableAbbr}_${job.jobName.split('_')[2].toLowerCase()}_temp_ods`
-            isValidConfigRef = await getCustomTableValidConfig(validTableName)
-        } else {
-            // 数据湖质检
-            validTableName = `sztk_${job.jobName.split('_')[2]}`
-            isValidConfigRef = await getCustomTableValidConfig(validTableName)
-        }
+const checkZjJobInspConfig = async (job: Job): Promise<boolean> => {
+    if (job.type.includes('质检') || job.type.includes('zj')) {
 
-        if (!isValidConfigRef) {
+        const workflow = (await get_workflow(job.id)).data
+
+        const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
+        const validTableName = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+
+        const isValidConfig = await getCustomTableValidConfig(validTableName)
+
+        if (!isValidConfig) {
             return new Promise<boolean>((resolve) => {
                 window.$dialog.warning({
                     title: '警告',
@@ -645,7 +641,7 @@ const checkRh2Job = async (job: Job): Promise<boolean> => {
     }
 }
 
-export const workflowStart = (v: Job, onSuccess: {
+export const workflowStart = async (job: Job, onSuccess: {
     (): any;
     (): any;
     (): any;
@@ -655,9 +651,15 @@ export const workflowStart = (v: Job, onSuccess: {
 }) => {
     const param = {
         businessKey: uuid.v4(),
-        code: v.code,
-        createBy: v.createBy,
-        creator: v.createBy
+        code: job.code,
+        createBy: job.createBy,
+        creator: job.createBy
+    }
+
+    // 若停用先启用
+    if (job.status == 1) {
+        await workflowActive(job.id, '01', () => {
+        })
     }
     workflow_run(param).then(async res => {
         if (res.code == 200) {
@@ -667,7 +669,7 @@ export const workflowStart = (v: Job, onSuccess: {
             window.$message.error(res.message)
         }
     }).then(() => {
-        create_cron_job(v.jobName).catch(error => {
+        create_cron_job(job.jobName).catch(error => {
             window.$message.error(error)
         })
     })
@@ -735,6 +737,10 @@ export const getWorkflowJobType = (v: {
     switch (v.procName.split('_')[0]) {
         case 'zj':
             return '数据质检任务'
+        case 'zj1':
+            return '初步质检任务'
+        case 'zj2':
+            return '完整质检任务'
         case 'bf':
             return '数据备份任务'
         case 'qc':
@@ -949,20 +955,6 @@ export const convertToSixFields = (cron: string): string => {
 
 export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: string, isBasicData: boolean) => {
 
-    if (!newJobs.some(job => job.type === '数据质检任务')) {
-        newJobs.push({
-            id: null,
-            jobName: `zj_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
-            status: -1,
-            type: '数据质检任务',
-            schedMode: 0,
-            cron: null,
-            lastExecTime: '--',
-            nextExecTime: '未配置调度任务',
-            createBy: null
-        })
-    }
-
     if (!newJobs.some(job => job.type === '数据备份任务')) {
         newJobs.push({
             id: null,
@@ -992,6 +984,20 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
     }
 
     if (isBasicData) {
+        if (!newJobs.some(job => job.type === '数据质检任务')) {
+            newJobs.push({
+                id: null,
+                jobName: `zj_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
+                status: -1,
+                type: '数据质检任务',
+                schedMode: 0,
+                cron: null,
+                lastExecTime: '--',
+                nextExecTime: '未配置调度任务',
+                createBy: null
+            })
+        }
+
         if (!newJobs.some(job => job.type === '数据融合任务')) {
             newJobs.push({
                 id: null,
@@ -1006,12 +1012,40 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
     } else {
+        if (!newJobs.some(job => job.type === '初步质检任务')) {
+            newJobs.push({
+                id: null,
+                jobName: `zj1_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
+                status: -1,
+                type: '初步质检任务',
+                schedMode: 0,
+                cron: null,
+                lastExecTime: '--',
+                nextExecTime: '未配置调度任务',
+                createBy: null
+            })
+        }
+
         if (!newJobs.some(job => job.type === '单表融合任务')) {
             newJobs.push({
                 id: null,
                 jobName: `rh1_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
                 type: '单表融合任务',
+                schedMode: 0,
+                cron: null,
+                lastExecTime: '--',
+                nextExecTime: '未配置调度任务',
+                createBy: null
+            })
+        }
+
+        if (!newJobs.some(job => job.type === '完整质检任务')) {
+            newJobs.push({
+                id: null,
+                jobName: `zj2_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
+                status: -1,
+                type: '完整质检任务',
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',

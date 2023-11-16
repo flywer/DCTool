@@ -9,23 +9,14 @@
           </n-ellipsis>
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
-          <n-button secondary type="info" @click="quickCreateModalInit">
-            快捷创建
-            <template #icon>
-              <n-icon>
-                <AddSquareMultiple16Regular/>
-              </n-icon>
-            </template>
-          </n-button>
-
-          <n-button secondary color="#8a2be2" @click="validConfigModalInit">
-            配置管理{{ isValidConfigRef ? '（已配置）' : '（未配置）' }}
-            <template #icon>
-              <n-icon>
-                <Options16Regular/>
-              </n-icon>
-            </template>
-          </n-button>
+          <!--          <n-button secondary type="info" @click="quickCreateModalInit">
+                      快捷创建
+                      <template #icon>
+                        <n-icon>
+                          <AddSquareMultiple16Regular/>
+                        </n-icon>
+                      </template>
+                    </n-button>-->
 
           <n-button secondary strong @click="tableDataInit">
             刷新
@@ -456,53 +447,6 @@
         </n-grid>
       </n-form>
 
-      <n-alert v-if="formSelect.validConfig && isValidConfigRef" class="mt-4" type="default" :show-icon="false">
-        一旦创建无法修改，只可删除
-      </n-alert>
-
-      <n-form
-          v-if="formSelect.validConfig"
-          class="mt-4"
-          ref="validConfigModalFormRef"
-          :model="validConfigModalFormModel"
-          :rules="validConfigModalFormRules"
-          :size="'small'"
-      >
-        <n-grid :cols="4" :x-gap="4">
-          <n-form-item-gi :span="4" label="表名" path="tableName">
-            <n-input
-                v-model:value="validConfigModalFormModel.tableName"
-                readonly
-            />
-          </n-form-item-gi>
-
-          <n-form-item-gi :span="2" label="主键字段" path="pkeyName">
-            <n-input
-                v-model:value="validConfigModalFormModel.pkeyName"
-                :readonly="isValidConfigRef"
-            />
-          </n-form-item-gi>
-
-          <n-form-item-gi :span="2" label="批次号字段" path="cdBatchName">
-            <n-input
-                v-model:value="validConfigModalFormModel.cdBatchName"
-                :readonly="isValidConfigRef"
-            />
-          </n-form-item-gi>
-
-          <n-form-item-gi :span="4" label="组织机构" path="mechanismId">
-            <n-select
-                v-model:value="validConfigModalFormModel.mechanismId"
-                placeholder="选择组织机构"
-                :options="mechanismOptions"
-                :consistent-menu-width="false"
-                filterable
-                :disabled="isValidConfigRef"
-                @update:value="handlemechanismIdUpdate"
-            />
-          </n-form-item-gi>
-        </n-grid>
-      </n-form>
     </n-scrollbar>
     <template #action>
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">{{
@@ -711,27 +655,39 @@
       :job-id="zjJobUpdateModalConfig.jobId"
   />
 
+  <zj-job-insp-config-modal
+      v-model:show="showZjJobInspConfigModal"
+      :table-name="zjJobInspConfigModalConfig.tableName"
+  />
+
+  <zj-job-insp-situation-modal
+      v-model:show="zjJobInspSituationModalConfig.show"
+      :insp-table-db-id="zjJobInspSituationModalConfig.inspTableDbId"
+      :insp-table-name="zjJobInspSituationModalConfig.inspTableName"
+  />
+
 </template>
 
 <script setup lang="ts">
 import {ProjectInfo} from "@common/types";
 import {DataXJobTemplate} from "@common/types/datacenter/dataCollection";
-import {Workflow} from "@common/types/datacenter/workflow";
+import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {
-  create_valid_config,
   get_cj_job_page,
   get_columns,
   get_dataXJob, get_job_project_by_id,
-  get_valid_config_page,
+  get_workflow,
   get_workflow_page,
-  gte_usrc_org_tree, update_sched_job
+  update_sched_job
 } from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
 import {find_by_project_id, get_project_by_pro_abbr} from "@render/api/auxiliaryDb/projectInfo.api";
 import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
+import ZjJobInspConfigModal from "@render/components/datacenter/zjJobInspConfigModal.vue";
+import ZjJobInspSituationModal from "@render/components/datacenter/zjJobInspSituationModal.vue";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {convertCronExpression} from "@render/utils/common/cronUtils";
@@ -764,8 +720,7 @@ import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import {
-  AddSquareMultiple16Regular,
-  Options16Regular,
+  AddSquareMultiple16Regular
 } from '@vicons/fluent'
 import {Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
@@ -863,7 +818,7 @@ const tableDataInit = async () => {
 
   const projectAbbr = projectRef.value?.projectAbbr || '';
   if (projectAbbr !== '') {
-    // 采集任务
+    // region 采集任务
     let dataXJobs = (await get_cj_job_page({
       current: 1,
       size: 10000,
@@ -930,7 +885,9 @@ const tableDataInit = async () => {
       newDataXJobs = newDataXJobs.filter(job => job.type !== '数据共享任务')
     }
 
-    //工作流任务
+    // endregion
+
+    // region 工作流任务
     const workflowJobs: Workflow[] = (await get_workflow_page({
       page: 1,
       size: 10000,
@@ -967,7 +924,10 @@ const tableDataInit = async () => {
     // 行为数据的入库任务不显示
     if (!projectTree.isBasicData) {
       newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据入库任务')
+      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据质检任务')
     }
+
+    // endregion
 
     jobs.push(...newDataXJobs, ...newWorkflowJobs)
   } else {
@@ -1044,7 +1004,13 @@ const createColumns = (): DataTableColumns<Job> => {
                   await createCjJobModalInit(project, row)
                   break
                 case '数据质检任务':
-                  createZjJobModalInit(project)
+                  await createZjJobModalInit(project, false)
+                  break
+                case '初步质检任务':
+                  await createZjJobModalInit(project, false)
+                  break
+                case '完整质检任务':
+                  await createZjJobModalInit(project, true)
                   break
                 case '数据融合任务':
                   createRhJobModalInit(project)
@@ -1143,8 +1109,13 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
     moreBtnChildren.push(showTextButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+  if (row.type.includes('质检') && ![-1, 2, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
+  }
+
+  if (row.type.includes('质检') && ![-1].includes(row.status)) {
+    moreBtnChildren.push(showTextButton('质检配置', () => zjJobInspConfigModalInit(row)))
+    moreBtnChildren.push(showTextButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
   if (row.type === '数据采集任务' && row.status != -1) {
@@ -1171,8 +1142,13 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
     children.push(showButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+  if (row.type.includes('质检') && ![-1, 2, 3].includes(row.status)) {
     children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
+  }
+
+  if (row.type.includes('质检') && ![-1].includes(row.status)) {
+    children.push(showButton('质检配置', () => zjJobInspConfigModalInit(row)))
+    children.push(showButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
   if (row.type === '数据采集任务' && row.status != -1) {
@@ -1202,7 +1178,6 @@ const formSelect = ref({
   createRh2Job: false,
   createQcJob: false,
   quickCreate: false,
-  validConfig: false,
 })
 
 const onModelAfterLeave = () => {
@@ -1215,7 +1190,6 @@ const onModelAfterLeave = () => {
     createRh2Job: false,
     createQcJob: false,
     quickCreate: false,
-    validConfig: false,
   }
 }
 
@@ -1279,6 +1253,13 @@ const onPositiveClick = async () => {
     zjJobModalFormRef.value?.validate(async (errors) => {
       if (!errors) {
         const model = new ZjJobSaveModel()
+        if (zjJobModalFormModel.value.isActionCompleteInsp) {
+          const {projectAbbr} = await find_by_project_id(zjJobModalFormModel.value.projectId)
+          const table = (await find_template_struct_table({id: zjJobModalFormModel.value.structTableId}))[0]
+
+          model.name = `zj2_${projectAbbr}_${table.tableName.toLowerCase()}`
+          model.customTableName(`df_{PROJECT}_{TABLE_NAME}_dwb`, `df_{PROJECT}_{TABLE_NAME}_right_dwb`, `df_{PROJECT}_{TABLE_NAME}_error_dwb`)
+        }
         model.quickCreate(
             zjJobModalFormModel.value.projectId,
             zjJobModalFormModel.value.personId,
@@ -1391,30 +1372,6 @@ const onPositiveClick = async () => {
     } else {
       window.$message.warning("未选择任务")
     }
-  }
-
-  if (formSelect.value.validConfig) {
-    validConfigModalFormRef.value?.validate(async (errors) => {
-      if (!errors) {
-        if (!isValidConfigRef.value) {
-          create_valid_config(validConfigModalFormModel.value).then(async res => {
-            if (res.code == 200) {
-              window.$message.success('配置成功')
-              isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
-            } else {
-              window.$message.error(res.message)
-            }
-          }).finally(() => {
-            isSaving.value = false
-            showModalRef.value = false
-            formSelect.value.validConfig = false
-          })
-        }
-
-      } else {
-        console.error(errors)
-      }
-    })
   }
 }
 // endregion
@@ -1675,6 +1632,7 @@ const zjJobModalFormModel = ref({
   projectName: '',
   personId: '',
   structTableId: null,
+  isActionCompleteInsp: false // 是否是行为数据完整质检
 })
 const zjJobModalFormRules = {
   personId: {
@@ -1701,20 +1659,23 @@ const jobTemplateOptionsInit = async (tableName: string) => {
 
   for (const table of tables) {
     const template = (await find_job_template({id: table.templateId}))[0]
-    jobTemplateOptions.value.push({
-      label: `${template.templateName}-${tableName}`,
-      value: table.id.toString()
-    })
+    if (template) {
+      jobTemplateOptions.value.push({
+        label: `${template.templateName}-${tableName}`,
+        value: table.id.toString()
+      })
+    }
   }
 }
 
-const createZjJobModalInit = async (project: ProjectInfo) => {
+const createZjJobModalInit = async (project: ProjectInfo, isActionCompleteInsp: boolean) => {
 
   zjJobModalFormModel.value.tableName = queryParam.value.tableAbbr.toString().toUpperCase()
   zjJobModalFormModel.value.projectId = queryParam.value.projectId
   zjJobModalFormModel.value.projectName = project.projectName
   zjJobModalFormModel.value.personId = datacenterProjectRef.value?.userId
   zjJobModalFormModel.value.structTableId = null
+  zjJobModalFormModel.value.isActionCompleteInsp = isActionCompleteInsp
 
   await jobTemplateOptionsInit(zjJobModalFormModel.value.tableName)
 
@@ -1999,99 +1960,18 @@ const handleJobTreeUpdateValue = async (v: string[]) => {
 //endregion
 
 //region 质检配置管理
-
-// 组织机构下拉值
-const mechanismOptions = ref<Array<SelectOption | SelectGroupOption>>()
-
-const validConfigModalFormRef = ref<FormInst | null>(null);
-
-const validConfigModalFormModel = ref({
-  dbId: '6',
-  dbName: "数据中台（TBDS）",
-  mechanismId: '',
-  mechanismName: '',
-  pkeyName: '',
-  cdBatchName: 'cd_batch',
-  tableName: ''
+const showZjJobInspConfigModal = ref(false)
+const zjJobInspConfigModalConfig = ref({
+  tableName: null
 })
 
-const validConfigModalFormRules = {
-  mechanismId: {
-    required: true,
-    trigger: ['change'],
-    message: '请选择组织机构'
-  },
-  pkeyName: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入主键字段'
-  },
-  cdBatchName: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入批次号字段'
-  }
-}
+const zjJobInspConfigModalInit = async (job: Job) => {
+  const workflow = (await get_workflow(job.id)).data
 
-const validConfigModalInit = async () => {
+  const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
 
-  const validTableName = `di_${projectRef.value.tableAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}_temp_ods`
-
-  if (isValidConfigRef.value) {
-    // 若已配置
-    get_valid_config_page(validTableName).then(res => {
-      const data = res.data.records[0]
-      validConfigModalFormModel.value.dbId = data.dbId
-      validConfigModalFormModel.value.dbName = data.dbName
-      validConfigModalFormModel.value.mechanismId = data.mechanismId
-      validConfigModalFormModel.value.mechanismName = data.mechanismName
-      validConfigModalFormModel.value.pkeyName = data.pkeyName
-      validConfigModalFormModel.value.cdBatchName = data.cdBatchName
-      validConfigModalFormModel.value.tableName = data.tableName
-    })
-
-    confirmBtnText = '确定'
-  } else {
-    validConfigModalFormModel.value.tableName = validTableName
-    validConfigModalFormModel.value.mechanismId = ''
-    validConfigModalFormModel.value.mechanismName = ''
-    validConfigModalFormModel.value.pkeyName = (await get_table_sql({tableName: queryParam.value.tableAbbr.toString()}))[0].pColName.toLowerCase()
-    validConfigModalFormModel.value.cdBatchName = 'cd_batch'
-
-    confirmBtnText = '保存'
-  }
-
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: {
-    name: string;
-    id: string;
-  }) => ({
-    label: `${v.name}`,
-    value: v.id
-  })))
-
-  modalTitle = '质检配置管理'
-
-  formSelect.value.validConfig = true
-  showModalRef.value = true
-}
-
-const customSort = (a: any, b: any) => {
-  // Check if both strings start with '广东省'
-  const startsWithGuangDongA = a.name.startsWith('广东省');
-  const startsWithGuangDongB = b.name.startsWith('广东省');
-
-  if (startsWithGuangDongA && !startsWithGuangDongB) {
-    return -1; // Move `a` before `b`
-  } else if (!startsWithGuangDongA && startsWithGuangDongB) {
-    return 1; // Move `b` before `a`
-  } else {
-    // Both start with '广东省' or don't start with it
-    return a.name.localeCompare(b.name);
-  }
-};
-
-const handlemechanismIdUpdate = () => {
-  validConfigModalFormModel.value.mechanismName = mechanismOptions.value.filter(item => item.value == validConfigModalFormModel.value.mechanismId)[0].label as string
+  zjJobInspConfigModalConfig.value.tableName = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+  showZjJobInspConfigModal.value = true
 }
 
 //endregion
@@ -2392,6 +2272,25 @@ const showWorkflowConfigModal = (row: Job) => {
   workflowModalConfig.value.show = true
   workflowModalConfig.value.workflowId = row.id
   workflowModalConfig.value.editable = row.status != 3;
+}
+// endregion
+
+// region 质检情况
+const zjJobInspSituationModalConfig = ref({
+  show: false,
+  inspTableName: null,
+  inspTableDbId: null
+})
+
+const zjJobInspSituationModalInt = async (job: Job) => {
+  const workflow: Workflow = (await get_workflow(job.id)).data
+
+  const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
+
+  zjJobInspSituationModalConfig.value.inspTableName = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+  zjJobInspSituationModalConfig.value.inspTableDbId = '6'
+
+  zjJobInspSituationModalConfig.value.show = true
 }
 // endregion
 </script>

@@ -3,6 +3,7 @@ import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {find_template_struct_table, save_struct_table_job_rel} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {basicTableNames} from "@render/utils/datacenter/constants";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 
 /**
@@ -101,11 +102,21 @@ export class ZjJobSaveModel {
     }
 
     public updateSjk() {
-        const sjkTemplate = JSON.parse(updateSjkUUID({
-            code: "sjk8e20a50e61e54b2c804d049c04f69028",
-            modelXml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:flowable=\"http://flowable.org/bpmn\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\" typeLanguage=\"http://www.w3.org/2001/XMLSchema\" expressionLanguage=\"http://www.w3.org/1999/XPath\" targetNamespace=\"http://www.flowable.org/processdef\" exporter=\"Flowable Open Source Modeler\" exporterVersion=\"6.7.2\">\n    <process id=\"sjk8e20a50e61e54b2c804d049c04f69028\" name=\"sjk8e20a50e61e54b2c804d049c04f69028\" isExecutable=\"true\">\n        <startEvent id=\"sjkd5a871b435bb48c4a0ee041d033cbfef\" name=\"开始\" flowable:formFieldValidation=\"true\"/>\n        <userTask id=\"sjkaa2a4c71ea61443282a0ee228ae92659\" name=\"数据质检\" flowable:formFieldValidation=\"true\">\n            <extensionElements>\n                <flowable:taskListener event=\"create\" delegateExpression=\"${dataQuInTaskListener}\"/>\n            </extensionElements>\n        </userTask>\n        <endEvent id=\"sjkd0eecad201414233bfad63dfb8e19ffc\" name=\"结束\"/>\n        <sequenceFlow id=\"sjkb7d88964ac63447bb1778a95dd395bf3\" name=\"TDBS-Hive\" sourceRef=\"sjkd5a871b435bb48c4a0ee041d033cbfef\" targetRef=\"sjkaa2a4c71ea61443282a0ee228ae92659\"/>\n        <sequenceFlow id=\"sjk5d3a9d4ea6a84f34b97493d381eb4019\" name=\"TDBS-Hive\" sourceRef=\"sjkaa2a4c71ea61443282a0ee228ae92659\" targetRef=\"sjkd0eecad201414233bfad63dfb8e19ffc\"/>\n    </process>\n</definitions>",
-            modelJson: "{\"nodeList\":[{\"id\":\"sjkd5a871b435bb48c4a0ee041d033cbfef\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/ea223490b8676e353d40480c6b4d6de4.svg\",\"size\":\"20\",\"type\":\"startProcess\",\"name\":\"开始\"},{\"id\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_temp_ods\"},{\"id\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/10b677b7f9ea1e0d12abb1cc1d0a508a.svg\",\"size\":\"20\",\"delegateExpression\":\"dataQuInTaskListener\",\"type\":\"component\",\"name\":\"数据质检\"},{\"id\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_right_dwd\"},{\"id\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_error_dwd\"},{\"id\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/fc24a27468b1b125d7cf415739058b41.svg\",\"size\":\"20\",\"type\":\"endProcess\",\"name\":\"结束\"}],\"edgesList\":[{\"from\":\"sjkd5a871b435bb48c4a0ee041d033cbfef\",\"to\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"id\":\"sjk2f507bde4ad3406d99feaed7bb70c423\"},{\"from\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"to\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"id\":\"sjkb7d88964ac63447bb1778a95dd395bf3\"},{\"from\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"to\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"id\":\"sjk955ef6e614fb468887df93c984c6a4c5\"},{\"from\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"to\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"id\":\"sjke0429660901746c9a5dc163f1d4b0254\"},{\"from\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"to\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"id\":\"sjk21ced6465033432cb34498e9aaf8eded\"},{\"from\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"to\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"id\":\"sjk5d3a9d4ea6a84f34b97493d381eb4019\"}]}"
-        }))
+        let sjkTemplate: any
+        if (this.code && this.modelXml && this.modelJson) {
+            sjkTemplate = JSON.parse(updateSjkUUID({
+                code: this.code,
+                modelXml: this.modelXml,
+                modelJson: this.modelJson
+            }))
+        } else {
+            sjkTemplate = JSON.parse(updateSjkUUID({
+                code: "sjk8e20a50e61e54b2c804d049c04f69028",
+                modelXml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:flowable=\"http://flowable.org/bpmn\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\" typeLanguage=\"http://www.w3.org/2001/XMLSchema\" expressionLanguage=\"http://www.w3.org/1999/XPath\" targetNamespace=\"http://www.flowable.org/processdef\" exporter=\"Flowable Open Source Modeler\" exporterVersion=\"6.7.2\">\n    <process id=\"sjk8e20a50e61e54b2c804d049c04f69028\" name=\"sjk8e20a50e61e54b2c804d049c04f69028\" isExecutable=\"true\">\n        <startEvent id=\"sjkd5a871b435bb48c4a0ee041d033cbfef\" name=\"开始\" flowable:formFieldValidation=\"true\"/>\n        <userTask id=\"sjkaa2a4c71ea61443282a0ee228ae92659\" name=\"数据质检\" flowable:formFieldValidation=\"true\">\n            <extensionElements>\n                <flowable:taskListener event=\"create\" delegateExpression=\"${dataQuInTaskListener}\"/>\n            </extensionElements>\n        </userTask>\n        <endEvent id=\"sjkd0eecad201414233bfad63dfb8e19ffc\" name=\"结束\"/>\n        <sequenceFlow id=\"sjkb7d88964ac63447bb1778a95dd395bf3\" name=\"TDBS-Hive\" sourceRef=\"sjkd5a871b435bb48c4a0ee041d033cbfef\" targetRef=\"sjkaa2a4c71ea61443282a0ee228ae92659\"/>\n        <sequenceFlow id=\"sjk5d3a9d4ea6a84f34b97493d381eb4019\" name=\"TDBS-Hive\" sourceRef=\"sjkaa2a4c71ea61443282a0ee228ae92659\" targetRef=\"sjkd0eecad201414233bfad63dfb8e19ffc\"/>\n    </process>\n</definitions>",
+                modelJson: "{\"nodeList\":[{\"id\":\"sjkd5a871b435bb48c4a0ee041d033cbfef\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/ea223490b8676e353d40480c6b4d6de4.svg\",\"size\":\"20\",\"type\":\"startProcess\",\"name\":\"开始\"},{\"id\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_temp_ods\"},{\"id\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/10b677b7f9ea1e0d12abb1cc1d0a508a.svg\",\"size\":\"20\",\"delegateExpression\":\"dataQuInTaskListener\",\"type\":\"component\",\"name\":\"数据质检\"},{\"id\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_right_dwd\"},{\"id\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"di_{PROJECT}_{TABLE_NAME}_error_dwd\"},{\"id\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/fc24a27468b1b125d7cf415739058b41.svg\",\"size\":\"20\",\"type\":\"endProcess\",\"name\":\"结束\"}],\"edgesList\":[{\"from\":\"sjkd5a871b435bb48c4a0ee041d033cbfef\",\"to\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"id\":\"sjk2f507bde4ad3406d99feaed7bb70c423\"},{\"from\":\"sjk5bb36ef44fc24116b73b2f11220774dc\",\"to\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"id\":\"sjkb7d88964ac63447bb1778a95dd395bf3\"},{\"from\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"to\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"id\":\"sjk955ef6e614fb468887df93c984c6a4c5\"},{\"from\":\"sjkaa2a4c71ea61443282a0ee228ae92659\",\"to\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"id\":\"sjke0429660901746c9a5dc163f1d4b0254\"},{\"from\":\"sjk53f0c64776bd4ae3b1315e168dbdc15c\",\"to\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"id\":\"sjk21ced6465033432cb34498e9aaf8eded\"},{\"from\":\"sjkf15efcf3fa484e38a1198fd86476ff47\",\"to\":\"sjkd0eecad201414233bfad63dfb8e19ffc\",\"id\":\"sjk5d3a9d4ea6a84f34b97493d381eb4019\"}]}"
+            }))
+
+        }
         this.code = sjkTemplate.code
         this.modelXml = sjkTemplate.modelXml
         this.modelJson = sjkTemplate.modelJson
@@ -155,10 +166,7 @@ export class ZjJobSaveModel {
     }
 
     // 设置模型内所有全局变量
-    public setGlobalVariable(variable: {
-        project?: string,
-        tableName?: string
-    }) {
+    public setGlobalVariable(variable: { project?: string, tableName?: string }) {
         this.name = this.name
             .replaceAll('{PROJECT}', variable.project ? variable.project : 'ssft')
             .replaceAll('{TABLE_NAME}', variable.tableName ? variable.tableName : 'c1010')
@@ -198,7 +206,7 @@ export class ZjJobSaveModel {
             this.setPerson('1649250175324086274')
         }
 
-        // 替换所有变量
+        // 默认替换所有变量
         const templateJson = JSON.parse(JSON.stringify(this)
             .replaceAll('{PROJECT}', 'ssft')
             .replaceAll('{TABLE_NAME}', 'c1010'))
@@ -214,7 +222,7 @@ export class ZjJobSaveModel {
     }
 
     /**
-     * 快速创建任务
+     * 快速创建任务,适用于行为数据初步质检、基础数据质检
      **/
     public async quickCreate(projectId: string, personId: string, structTableId: number) {
         const {
@@ -223,7 +231,13 @@ export class ZjJobSaveModel {
         } = await find_by_project_id(projectId)
         const table = (await find_template_struct_table({id: structTableId}))[0]
 
-        this.name = `zj_${projectAbbr}_${table.tableName.toLowerCase()}`
+        if (this.name == '' || this.name == null) {
+            if (basicTableNames.includes(table.tableName.toLowerCase())) {
+                this.name = `zj_${projectAbbr}_${table.tableName.toLowerCase()}`
+            } else {
+                this.name = `zj1_${projectAbbr}_${table.tableName.toLowerCase()}`
+            }
+        }
 
         await this.setTableFieldRules(structTableId)
         this.setPerson(personId)
@@ -281,6 +295,21 @@ export class ZjJobSaveModel {
             }
         })
 
+    }
+
+    public customTableName(sourceTable: string, aimTableName: string, wrongTableName: string) {
+        const oldSourceTable = this.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+        const oldAimTableName = this.dataDevBizVo.qualityInspectionDtoList[0].aimTableName
+        const oldWrongTableName = this.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName
+
+        this.modelJson = this.modelJson
+            .replaceAll(oldSourceTable, sourceTable)
+            .replaceAll(oldAimTableName, aimTableName)
+            .replaceAll(oldWrongTableName, wrongTableName)
+
+        this.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = sourceTable
+        this.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = aimTableName
+        this.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName = wrongTableName
     }
 
 }

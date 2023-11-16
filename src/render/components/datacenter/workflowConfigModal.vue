@@ -448,7 +448,6 @@ const handleSave = () => {
             _show.value = false
             emit('onAfterLeave')
           } else {
-            console.log(res)
             window.$message.error(res.message)
           }
         }).finally(() => isSaving.value = false)
