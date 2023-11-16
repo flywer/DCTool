@@ -924,7 +924,7 @@ const tableDataInit = async () => {
     // 行为数据的入库任务不显示
     if (!projectTree.isBasicData) {
       newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据入库任务')
-      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据质检任务')
+     // newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据质检任务')
     }
 
     // endregion
