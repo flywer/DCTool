@@ -4,7 +4,7 @@
       <n-tab-pane name="1" tab="任务列表">
         <action-data2-data-lake-job/>
       </n-tab-pane>
-      <n-tab-pane name="2" tab="行为数据表">
+      <n-tab-pane name="2" tab="TBDS-Hive表">
         <action-dwb-table/>
       </n-tab-pane>
       <n-tab-pane name="3" tab="数据湖表">

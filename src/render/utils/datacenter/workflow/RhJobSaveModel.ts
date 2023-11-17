@@ -9,6 +9,7 @@ import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Workflow} from "@render/utils/datacenter/workflow/Workflow";
 import {isEmpty} from "lodash-es";
 import {format} from "sql-formatter";
+import {uuid} from "vue3-uuid";
 
 export class RhJobSaveModel extends Workflow {
 
@@ -141,7 +142,7 @@ export class RhJobSaveModel extends Workflow {
 
             await this.createJob(rh1Json, '单表融合任务创建成功')
         } else {
-            window.$message.error('来源表不存在')
+            window.$message.error(`来源表[${sourceTable}]不存在`)
         }
 
     }
@@ -216,9 +217,135 @@ export class RhJobSaveModel extends Workflow {
      * 创建行为数据-数据入库-多表融合任务 rh3
      **/
     public static async createActionData2ThemeRh3Job(model: RhFormModel) {
-       // TODO
-        console.log(model)
-        window.$message.info('开发中~')
+        const project = await find_by_project_id(model.projectId)
+        const projectTableAbbr = project.tableAbbr
+
+        const sourceTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase()}_right_dwb`
+        const sourceTableColumns = await get_columns('6', sourceTable, true)
+
+        if (!isEmpty(sourceTableColumns)) {
+            const sourceTablePrimColName = (await get_table_sql({tableName: model.tableName}))[0].pColName as string
+
+            const aimTable = `df_sztk_${model.tableName.toLowerCase()}_dm`
+
+            const sourceTableColumnsAlias = sourceTableColumns.filter(col => !col.toLowerCase().startsWith('opt_')).map(col => 't1.' + col)
+
+            // 不需要主表关联的表
+            const noJoinTable = ['c1010', 'c2010', 'c3010', 'c4010', 'c4110', 'c6010', 'c6030']
+            let joinSql: string
+
+            // 使用到的来源表
+            let sourceTableNames: string[] = [sourceTable, aimTable]
+
+            if (noJoinTable.includes(model.tableName.toLowerCase())) {
+                sourceTableNames.push(...['df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
+
+                joinSql = `
+                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t1.Z202000
+                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
+            } else {
+                // 将要关联的主表名称
+                let joinMainTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase().slice(0, 2)}010_right_dwb`
+                const joinMainTablePrimColName = (await get_table_sql({tableName: `${model.tableName.toLowerCase().slice(0, 2)}010`}))[0].pColName as string
+
+                sourceTableNames.push(...[joinMainTable, 'df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
+
+                joinSql = `
+                     INNER JOIN ${joinMainTable} mainTable ON t1.${joinMainTablePrimColName} = mainTable.${joinMainTablePrimColName}
+                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = mainTable.Z202000
+                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
+            }
+
+            const sql = `
+            INSERT INTO ${aimTable}
+            SELECT ${sourceTableColumnsAlias.join(',')},
+                   z2010.Z201013 AS OPT_AREA_CODE,
+                   z2010.Z201012 AS OPT_FIELD_CODE,
+                   z2020.Z202000 AS OPT_SUBJECT_ID,
+                   z2020.Z202001 AS OPT_SUBJECT_NAME,
+                   z2010.Z201000 AS OPT_DEPT_ID,
+                   z2010.Z201001 AS OPT_DEPT_NAME
+            FROM ${sourceTable} t1
+                     ${joinSql}
+            UNION ALL
+            SELECT t1.*
+            FROM ${aimTable} t1
+                     LEFT JOIN (SELECT ${sourceTablePrimColName}
+                                FROM ${sourceTable}
+                                GROUP BY ${sourceTablePrimColName}) t2 ON t1.${sourceTablePrimColName} = t2.${sourceTablePrimColName}
+            WHERE t2.${sourceTablePrimColName} IS NULL`
+
+            const {modelXml, modelJson} = createModalByTables({
+                    tableName: sourceTableNames,
+                    dBId: 6
+                },
+                {
+                    tableName: aimTable,
+                    dBId: 6
+                }
+            )
+
+            const rh3Json = {
+                name: `rh3_${project.projectAbbr}_${model.tableName.toLowerCase()}`,
+                email: '',
+                description: '',
+                personId: model.personId,
+                personName: personIdOptions.find(option => option.value === model.personId).label as string,
+                projectId: model.projectId,
+                projectName: projectIdOptions.find(option => option.value === model.projectId).label as string,
+                crontab: '',
+                type: "流程",
+                code: this.getCodeByModelXml(modelXml),
+                modelXml: modelXml,
+                modelJson: modelJson,
+                dataDevBizVo: {
+                    sparkSqlDtoList: [
+                        {
+                            taskType: "TDBS-HIVE2TDBS-HIVE",
+                            sourceDBId: sourceTableNames.map(() => 6),
+                            sourceTable: sourceTableNames,
+                            targetDBId: 6,
+                            sql: format(sql),
+                            sparkConfig: {
+                                saveMode: "overwrite"
+                            },
+                            targetTable: aimTable,
+                            taskInfoDto: {
+                                taskDefKey: this.getTaskDefKeyByModelXml(modelXml)
+                            },
+                        }
+                    ],
+                    dataSyncDtoList: [],
+                    qualityInspectionDtoList: [],
+                    mySqlDtoList: [],
+                    postgreSqlDtoList: [],
+                    trinoSqlDtoList: [],
+                    conversionDtoList: []
+                }
+            }
+
+            await this.createJob(rh3Json, '入库融合任务创建成功')
+
+        } else {
+            window.$message.error(`来源表[${sourceTable}]不存在`)
+        }
+
+    }
+
+    public static getTaskDefKeyByModelXml(modelXml: string) {
+        const userTaskIdMatch = modelXml.match(/<userTask id="([^"]+)"/);
+        if (userTaskIdMatch && userTaskIdMatch.length > 1) {
+            return userTaskIdMatch[1];
+        }
+        return undefined;
+    }
+
+    public static getCodeByModelXml(modelXml: string) {
+        const userTaskIdMatch = modelXml.match(/<process id="([^"]+)"/);
+        if (userTaskIdMatch && userTaskIdMatch.length > 1) {
+            return userTaskIdMatch[1];
+        }
+        return undefined;
     }
 
     public static async createJob(json: any, successMsg: string) {
@@ -241,3 +368,151 @@ export type RhFormModel = {
     personId: string,
     tableName: string
 }
+
+type ModelJson = {
+    nodeList: {
+        id: string,
+        shape: string,
+        image: string,
+        size: string,
+        type: string,
+        name: string,
+        delegateExpression?: string
+        taskType?: string
+        database?: string
+        databaseName?: number
+        tableName?: string
+    }[],
+    edgesList: {
+        from: string,
+        to: string,
+        id: string
+    }[]
+}
+
+/**
+ * 通过来源表与目标表创建modelXml与modelJson
+ **/
+const createModalByTables = (sourceTable: {
+    tableName: string[],
+    dBId: number
+}, targetTable: {
+    tableName: string,
+    dBId: number
+}) => {
+    let modelJson: ModelJson = {
+        nodeList: [
+            {
+                id: "sjkccd4823a46b64b6ab8e27ca2d7d790ab",
+                shape: "image",
+                image: "/szrzyt/data_center/tdbs-dev/65accb422a8d3f181bbbc1c537006cc0.svg",
+                size: "20",
+                type: "startProcess",
+                name: "开始"
+            },
+            {
+                id: "sjk4885a18eddad4215a7c8d05645dc09a9",
+                shape: "image",
+                image: "/szrzyt/data_center/tdbs-dev/fea7e3bc7f3297c8652a8aa51c964606.svg",
+                size: "20",
+                delegateExpression: "dataDevSpTaskListener",
+                type: "component",
+                name: "数据开发(Spark SQL)",
+                taskType: "TDBS-Hive"
+            },
+            {
+                id: "sjk100325c69a3c4af9981f99cb8ac16dc2",
+                shape: "image",
+                image: "/szrzyt/data_center/tdbs-dev/198b2349289796a4476408838a50f944.svg",
+                size: "20",
+                type: "endProcess",
+                name: "结束"
+            }
+        ],
+        edgesList: []
+    }
+    const startProcessId = "sjkccd4823a46b64b6ab8e27ca2d7d790ab"
+    const sparkSqlId = "sjk4885a18eddad4215a7c8d05645dc09a9"
+    const endProcessId = "sjk100325c69a3c4af9981f99cb8ac16dc2"
+
+    sourceTable.tableName.forEach((tableName) => {
+
+        const nodeId = 'sjk' + uuid.v4().replace(/-/g, '')
+
+        modelJson.nodeList.push({
+            id: nodeId,
+            shape: "image",
+            image: "/szrzyt/data_center/tdbs-dev/32a601d50ea448553386f286a6911239.svg",
+            size: "20",
+            type: "database",
+            database: sourceTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
+            name: sourceTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
+            databaseName: sourceTable.dBId,
+            tableName: tableName
+        })
+
+        // 开始节点与来源表节点相连
+        modelJson.edgesList.push({
+            from: startProcessId,
+            to: nodeId,
+            id: 'sjk' + uuid.v4().replace(/-/g, '')
+        })
+
+        // 来源表节点相连与SparkSql节点相连
+        modelJson.edgesList.push({
+            from: nodeId,
+            to: sparkSqlId,
+            id: 'sjk' + uuid.v4().replace(/-/g, '')
+        })
+
+    })
+
+    const targetNodeId = 'sjk' + uuid.v4().replace(/-/g, '')
+
+    modelJson.nodeList.push({
+        id: targetNodeId,
+        shape: "image",
+        image: "/szrzyt/data_center/tdbs-dev/32a601d50ea448553386f286a6911239.svg",
+        size: "20",
+        type: "database",
+        database: targetTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
+        name: targetTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
+        databaseName: targetTable.dBId,
+        tableName: targetTable.tableName
+    })
+
+    // SparkSql节点与目标表相连
+    modelJson.edgesList.push({
+        from: sparkSqlId,
+        to: targetNodeId,
+        id: 'sjk' + uuid.v4().replace(/-/g, '')
+    })
+
+    // 目标表与结束节点相连
+    modelJson.edgesList.push({
+        from: targetNodeId,
+        to: endProcessId,
+        id: 'sjk' + uuid.v4().replace(/-/g, '')
+    })
+
+    const modelXml: string = `<?xml version="1.0" encoding="UTF-8"?>
+        <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef" exporter="Flowable Open Source Modeler" exporterVersion="6.7.2">
+            <process id="sjk78ae83918154400aae62f5351dbd5194" name="sjk78ae83918154400aae62f5351dbd5194" isExecutable="true">
+                <startEvent id="sjkccd4823a46b64b6ab8e27ca2d7d790ab" name="开始" flowable:formFieldValidation="true"/>
+                <userTask id="sjk4885a18eddad4215a7c8d05645dc09a9" name="数据开发(Spark SQL)" flowable:formFieldValidation="true">
+                    <extensionElements>
+                        <flowable:taskListener event="create" delegateExpression="\${dataDevSpTaskListener}"/>
+                    </extensionElements>
+                </userTask>
+                <endEvent id="sjk100325c69a3c4af9981f99cb8ac16dc2" name="结束"/>
+                  </process>
+        </definitions>`
+
+    const json = JSON.parse(updateSjkUUID({modelXml: modelXml, modelJson: JSON.stringify(modelJson)}))
+
+    return {
+        modelXml: json.modelXml,
+        modelJson: json.modelJson
+    }
+}
+
