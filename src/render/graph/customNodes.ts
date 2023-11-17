@@ -1,7 +1,6 @@
 import {ShapeDefine, ShapeOptions} from "@antv/g6-core/lib/interface/shape";
 import {NodeConfig} from "@antv/g6-core/lib/types";
 import {SqlConfig} from "@common/taskSchedulerTypes";
-import {JobType} from "@common/types/jobMgt";
 import cube from "@render/assets/graph/cube.svg"
 
 // 自定义节点注册类型

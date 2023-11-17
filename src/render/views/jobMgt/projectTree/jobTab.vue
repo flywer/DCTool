@@ -719,7 +719,7 @@ import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import {Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
-import {cloneDeep, isEmpty} from "lodash-es";
+import {isEmpty} from "lodash-es";
 import {
   DataTableColumns,
   FormInst,
