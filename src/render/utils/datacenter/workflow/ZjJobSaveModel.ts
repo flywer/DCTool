@@ -1,10 +1,11 @@
 import {find_field_insp_rule} from "@render/api/auxiliaryDb/fieldInspectionRule.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {find_template_struct_table, save_struct_table_job_rel} from "@render/api/auxiliaryDb/templateStructTable.api";
-import {add_work_flow, get_workflow, update_workflow} from "@render/api/datacenter.api";
+import {add_work_flow, get_columns, get_workflow, update_workflow} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {basicTableNames} from "@render/utils/datacenter/constants";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
+import {isEmpty} from "lodash-es";
 
 /**
  * 质检任务保存模型类
@@ -211,14 +212,16 @@ export class ZjJobSaveModel {
             .replaceAll('{PROJECT}', 'ssft')
             .replaceAll('{TABLE_NAME}', 'c1010'))
 
-        await add_work_flow(templateJson).then((res) => {
-            if (res.code == 200) {
-                window.$message.success(`质检任务[${this.name}]创建成功`)
-                save_struct_table_job_rel(this.structTableId, res.data.id)
-            } else {
-                window.$message.error(res.message)
-            }
-        })
+        if (await this.checkTableExist()) {
+            await add_work_flow(templateJson).then((res) => {
+                if (res.code == 200) {
+                    window.$message.success(`质检任务[${this.name}]创建成功`)
+                    save_struct_table_job_rel(this.structTableId, res.data.id)
+                } else {
+                    window.$message.error(res.message)
+                }
+            })
+        }
     }
 
     /**
@@ -310,6 +313,50 @@ export class ZjJobSaveModel {
         this.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName = sourceTable
         this.dataDevBizVo.qualityInspectionDtoList[0].aimTableName = aimTableName
         this.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName = wrongTableName
+    }
+
+    public getSourceDBId() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].sourceDbId
+    }
+
+    public getSourceTableName() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+    }
+
+    public getAimDbId() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].aimDbId
+    }
+
+    public getAimTableName() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].aimTableName
+    }
+
+    public getWrongDbId() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].wrongDbId
+    }
+
+    public getWrongTableName() {
+        return this.dataDevBizVo.qualityInspectionDtoList[0].wrongTableName
+    }
+
+    public async checkTableExist() {
+
+        if (isEmpty(await get_columns(this.getSourceDBId(), this.getSourceTableName(), true))) {
+            window.$message.error(`来源表[${this.getSourceTableName()}]不存在`)
+            return false
+        }
+
+        if (isEmpty(await get_columns(this.getAimDbId(), this.getAimTableName(), true))) {
+            window.$message.error(`合格表[${this.getSourceTableName()}]不存在`)
+            return false
+        }
+
+        if (isEmpty(await get_columns(this.getWrongDbId(), this.getWrongTableName(), true))) {
+            window.$message.error(`不合格表[${this.getSourceTableName()}]不存在`)
+            return false
+        }
+
+        return true
     }
 
 }

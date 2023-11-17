@@ -178,7 +178,7 @@
     <template #action>
       <n-button type="primary" :size="'small'" @click="handleSave" :loading="isSaving" :disabled="!editable">保存
       </n-button>
-      <n-button :size="'small'" @click="_show=!_show">返回</n-button>
+      <n-button :size="'small'" @click="_show=false">返回</n-button>
     </template>
   </n-modal>
 </template>

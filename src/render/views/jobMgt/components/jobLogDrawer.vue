@@ -56,9 +56,9 @@
 <script setup lang="ts">
 import {DataXJobLog} from "@common/types/datacenter/dataCollection";
 import {WorkflowLog} from "@common/types/datacenter/workflow";
+import {Job, JobType} from "@common/types/jobMgt";
 import {get_datax_job_log, get_workflow_log} from "@render/api/datacenter.api";
-import {Job} from "@render/utils/datacenter/jobTabUtil";
-import {CheckmarkCircle24Regular, DismissCircle24Regular, ChevronUp24Regular} from "@vicons/fluent";
+import {CheckmarkCircle24Regular, ChevronUp24Regular, DismissCircle24Regular} from "@vicons/fluent";
 import {isEmpty} from "lodash-es";
 import {NSpace} from "naive-ui";
 import {ref, watch} from "vue";
@@ -86,7 +86,7 @@ watch(() => props.job, (newValue: Job) => {
     logItemsRef.value = []
 
     showDrawerRef.value = props.show
-    if (newValue.type === '数据采集任务' || newValue.type === '数据共享任务') {
+    if (newValue.type === JobType.cj || newValue.type === JobType.gx) {
       showDataXJobLog(newValue)
     } else {
       showWorkflowLog(newValue)

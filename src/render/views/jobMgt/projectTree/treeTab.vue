@@ -75,7 +75,7 @@
                   quaternary
                   size="small"
                   @click="handleTreeOnlyShowUserJob"
-                  :title="useProjectTreeStore().onlyShowUserJob?'显示全部任务':'仅显示当前用户任务'"
+                  :title="useProjectTreeStore().onlyShowUserJob?'切换到:显示全部任务':'切换到:仅显示当前用户任务'"
               >
                 <n-icon>
                   <Bookmark24Regular v-if="useProjectTreeStore().onlyShowUserJob"/>
@@ -87,7 +87,7 @@
                   quaternary
                   size="small"
                   @click="handleHideEmptyNodes"
-                  :title="useProjectTreeStore().hideEmptyNodes?'显示无任务空节点':'隐藏无任务空节点'"
+                  :title="useProjectTreeStore().hideEmptyNodes?'切换到:显示无任务空节点':'切换到:隐藏无任务空节点'"
               >
                 <n-icon>
                   <CircleOff20Regular v-if="useProjectTreeStore().hideEmptyNodes"/>
@@ -138,9 +138,9 @@
             <n-tab-pane name="2" tab="中台相关表">
               <project-tables-tab/>
             </n-tab-pane>
-<!--            <n-tab-pane name="3" tab="质检情况">
-              <job-inspection-tab/>
-            </n-tab-pane>-->
+            <!--            <n-tab-pane name="3" tab="质检情况">
+                          <job-inspection-tab/>
+                        </n-tab-pane>-->
           </n-tabs>
         </template>
         <!--省政数局主体信息采集-->
@@ -160,7 +160,6 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {useUserStore} from "@render/stores/user";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
-import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
 import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
 import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
@@ -287,7 +286,7 @@ const handleLoad = (node: TreeOption) => {
         isLeaf: false
       }))
 
-      if (useProjectTreeStore().onlyShowUserJob) {
+      if (useProjectTreeStore().onlyShowUserJob && userProjectIds) {
         nodes = nodes.filter(node => userProjectIds.includes(node.key.toString().split('-')[2]))
       }
 

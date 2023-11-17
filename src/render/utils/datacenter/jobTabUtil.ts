@@ -1,7 +1,7 @@
 // 这里存放jobTab.vue中使用的一些工具方法
-import {ProjectInfo} from "@common/types";
 import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
 import {DataDevBizVo} from "@common/types/datacenter/workflow";
+import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
@@ -10,10 +10,12 @@ import {
     datax_job_delete,
     datax_job_run,
     datax_job_start,
-    datax_job_stop, get_cj_job_page,
+    datax_job_stop,
+    get_cj_job_page,
     get_datax_job_log,
     get_sched_job_page,
-    get_valid_config_page, get_workflow,
+    get_valid_config_page,
+    get_workflow,
     get_workflow_log,
     get_workflow_page,
     sched_job_delete,
@@ -27,29 +29,9 @@ import {actionTableNames} from "@render/utils/datacenter/constants";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {NButton, NPopconfirm, NPopover, NTag, NList, NListItem} from "naive-ui";
+import {NButton, NList, NListItem, NPopconfirm, NPopover, NTag} from "naive-ui";
 import {h} from "vue";
 import {uuid} from "vue3-uuid";
-
-export  type Job = {
-    id: string
-    type: '数据采集任务' | '数据质检任务' | '初步质检任务' | '数据备份任务' | '数据清除任务' | '数据融合任务' | '单表融合任务' | '完整质检任务' | '多表融合任务' | '数据入库任务' | '数据共享任务' | '未知任务'
-    jobName: string
-    // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
-    status: number
-    // 1:依赖调度；2:定时调度
-    schedMode: number
-    cron: string
-    lastExecTime: string
-    nextExecTime: string
-    createBy: string
-    code?: string
-    comment?: string
-    createTime: string
-    updateTime: string
-    jobRerunType: 1 | 2
-    project: ProjectInfo
-}
 
 // 查询中台表的质检任务是否已配置
 /**
@@ -83,9 +65,12 @@ export const jobNameCompare = (a: {
 }, b: {
     jobName: string;
 }) => {
-    const order = ["cj", "zj", "zj1", "bf", "qc", "rh", "rh1", "zj2", "rh2", "rk", "gx"];
-    const aIndex = order.indexOf(a.jobName.split("_")[0]);
-    const bIndex = order.indexOf(b.jobName.split("_")[0]);
+    const order = [
+        JobType.cj, JobType.zj, JobType.zj1, JobType.bf, JobType.qc,
+        JobType.rh, JobType.rh1, JobType.rh2,
+        JobType.zj2, JobType.rh3, JobType.rk, JobType.gx];
+    const aIndex = order.indexOf(getJobType(a.jobName));
+    const bIndex = order.indexOf(getJobType(b.jobName));
 
     if (aIndex === -1 && bIndex === -1) {
         return a.jobName.localeCompare(b.jobName);
@@ -382,9 +367,9 @@ const checkRunningNum = async (): Promise<boolean> => {
 const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
     let isPass = false
 
-    // 行为数据入湖、数据湖质检无依赖检查
-    if (!['xzxw', 'lake'].includes(job.jobName.split('_')[1])) {
-        if (job.type === '数据质检任务' || job.type === '数据备份任务') {
+    // 行为数据入湖无依赖检查
+    if (!['lake'].includes(job.jobName.split('_')[1])) {
+        if (job.type === JobType.zj || job.type === JobType.zj1 || job.type === JobType.bf) {
             const cjJob: DataXJob_Page = (await get_cj_job_page({
                 current: 1,
                 size: 1,
@@ -410,7 +395,8 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
                     });
                 });
             }
-        } else if (job.type === '数据清除任务') {
+        }
+        /* else if (job.type === JobType.qc) {
 
             const zjJob = (await get_workflow_page({
                 page: 1,
@@ -452,59 +438,8 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
                     });
                 });
             }
-        } else if (job.type === '单表融合任务') {
-            const zjJob = (await get_workflow_page({
-                page: 1,
-                size: 1,
-                status: null,
-                procName: `zj${job.jobName.substring(job.jobName.indexOf('_'))}`
-            })).data?.records[0] || null
-
-            if (zjJob != null && compareTimeStrings(await workflowJobGetLastExecTime(zjJob), job.lastExecTime) > 0) {
-                isPass = true
-            } else {
-                return new Promise<boolean>(async (resolve) => {
-                    window.$dialog.warning({
-                        title: '警告',
-                        content: `质检任务「zj${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`,
-                        positiveText: '确定',
-                        negativeText: '取消',
-                        onPositiveClick: () => {
-                            resolve(true);
-                        },
-                        onNegativeClick: () => {
-                            resolve(false);
-                        }
-                    });
-                });
-            }
-        } else if (job.type === '多表融合任务') {
-            const rh1Job = (await get_workflow_page({
-                page: 1,
-                size: 1,
-                status: null,
-                procName: `rh1${job.jobName.substring(job.jobName.indexOf('_'))}`
-            })).data?.records[0] || null
-
-            if (rh1Job != null && compareTimeStrings(await workflowJobGetLastExecTime(rh1Job), job.lastExecTime) > 0) {
-                isPass = true
-            } else {
-                return new Promise<boolean>(async (resolve) => {
-                    window.$dialog.warning({
-                        title: '警告',
-                        content: `单表融合任务「rh1${job.jobName.substring(job.jobName.indexOf('_'))}」未执行，是否直接执行此任务？`,
-                        positiveText: '确定',
-                        negativeText: '取消',
-                        onPositiveClick: () => {
-                            resolve(true);
-                        },
-                        onNegativeClick: () => {
-                            resolve(false);
-                        }
-                    });
-                });
-            }
-        } else {
+        }  */
+        else {
             isPass = true
         }
     } else {
@@ -517,7 +452,7 @@ const checkWorkflowDependency = async (job: Job): Promise<boolean> => {
  * 质检任务特殊检查:机构配置
  **/
 const checkZjJobInspConfig = async (job: Job): Promise<boolean> => {
-    if (job.type.includes('质检') || job.type.includes('zj')) {
+    if (job.type == JobType.zj || job.type == JobType.zj1 || job.type == JobType.zj2) {
 
         const workflow = (await get_workflow(job.id)).data
 
@@ -551,7 +486,8 @@ const checkZjJobInspConfig = async (job: Job): Promise<boolean> => {
 
 // 检查任务模板是否存在新版本
 const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
-    if (job.type === '数据质检任务') {
+    // TODO 暂时无法检测新质检模板
+    if (job.type === JobType.zj) {
 
         const tableName = job.jobName.split('_').pop()
 
@@ -581,7 +517,7 @@ const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
                 });
             });
         }
-    } else if (job.type == '数据融合任务' || job.type == '单表融合任务') {
+    } else if (job.type == JobType.rh) {
         const rulesUpdateTime = formatDate((await get_rh_json(job.jobName.split('_').pop()))[0].rh1UpdateTime)
         if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
             return true
@@ -607,13 +543,13 @@ const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
 }
 
 const checkRh2Job = async (job: Job): Promise<boolean> => {
-    if (job.type === '多表融合任务') {
+    if (job.type === JobType.rh2 || job.type == JobType.rh3) {
         // 所有正在运行的多表融合的任务
         const runningRh2JobsByPrefix = (await get_workflow_page({
             page: 1,
             size: 10000,
             status: '4',
-            procName: `rh2_`
+            procName: `${job.type}_`
         })).data.records
 
         if (!isEmpty(runningRh2JobsByPrefix) && runningRh2JobsByPrefix.some((job1: {
@@ -622,7 +558,7 @@ const checkRh2Job = async (job: Job): Promise<boolean> => {
             return new Promise<boolean>((resolve) => {
                 window.$dialog.warning({
                     title: '警告',
-                    content: `目前已有${job.jobName.split('_')[2].toUpperCase()}的多表融合任务正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
+                    content: `目前已有${job.jobName.split('_')[2].toUpperCase()}的${getJobTypeComment(job.type)}正在运行，多个任务同时运行可能导致数据不平，是否继续执行此任务？`,
                     positiveText: '确定',
                     negativeText: '取消',
                     onPositiveClick: () => {
@@ -641,14 +577,7 @@ const checkRh2Job = async (job: Job): Promise<boolean> => {
     }
 }
 
-export const workflowStart = async (job: Job, onSuccess: {
-    (): any;
-    (): any;
-    (): any;
-    (): any;
-    (): any;
-    (): any;
-}) => {
+export const workflowStart = async (job: Job, onSuccess: () => void) => {
     const param = {
         businessKey: uuid.v4(),
         code: job.code,
@@ -705,9 +634,7 @@ export const workflowDelete = (id: string, onSuccess: () => void) => {
     })
 }
 
-export const workflowJobGetLastExecTime = async (v: {
-    id: string;
-}) => {
+export const workflowJobGetLastExecTime = async (v: { id: string }) => {
     const res = await get_workflow_log(v.id, 1, 1);
     if (!isEmpty(res.data.records)) {
         return res.data.records[0].startTime;
@@ -731,55 +658,24 @@ export const workflowJobGetNextExecTime = (v: {
     }
 }
 
-export const getWorkflowJobType = (v: {
-    procName: string;
-}) => {
-    switch (v.procName.split('_')[0]) {
-        case 'zj':
-            return '数据质检任务'
-        case 'zj1':
-            return '初步质检任务'
-        case 'zj2':
-            return '完整质检任务'
-        case 'bf':
-            return '数据备份任务'
-        case 'qc':
-            return '数据清除任务'
-        case 'rh':
-            return '数据融合任务'
-        case 'rh1':
-            return '单表融合任务'
-        case 'rh2':
-            return '多表融合任务'
-        case 'rk':
-            return '数据入库任务'
-        default :
-            return '未知任务'
-    }
-}
-
 export const getJobType = (jobName: string) => {
-    switch (jobName.split('_')[0]) {
-        case 'cj':
-            return '数据采集任务'
-        case 'gx':
-            return '数据共享任务'
-        case 'zj':
-            return '数据质检任务'
-        case 'bf':
-            return '数据备份任务'
-        case 'qc':
-            return '数据清除任务'
-        case 'rh':
-            return '数据融合任务'
-        case 'rh1':
-            return '单表融合任务'
-        case 'rh2':
-            return '多表融合任务'
-        case 'rk':
-            return '数据入库任务'
-        default :
-            return '未知任务'
+    const jobPrefix = jobName.split('_')[0]
+    switch (jobPrefix) {
+        case JobType.cj:
+        case JobType.zj:
+        case JobType.zj1:
+        case JobType.zj2:
+        case JobType.bf:
+        case JobType.qc:
+        case JobType.rh:
+        case JobType.rh1:
+        case JobType.rh2:
+        case JobType.rh3:
+        case JobType.rk:
+        case JobType.gx:
+            return jobPrefix;
+        default:
+            return JobType.unknown;
     }
 }
 
@@ -915,19 +811,6 @@ export const getDataXJobStatus = async (v: {
     }
 }
 
-export const getDataXJobType = (v: {
-    jobDesc: string;
-}) => {
-    switch (v.jobDesc.split('_')[0]) {
-        case 'cj':
-            return '数据采集任务'
-        case 'gx':
-            return '数据共享任务'
-        default :
-            return '未知任务'
-    }
-}
-
 export const dataXJobGetNextExecTime = (schedJob: any) => {
     const jobCron = schedJob?.jobCron || null
     if (jobCron != null) {
@@ -955,12 +838,12 @@ export const convertToSixFields = (cron: string): string => {
 
 export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: string, isBasicData: boolean) => {
 
-    if (!newJobs.some(job => job.type === '数据备份任务')) {
+    if (!newJobs.some(job => job.type === JobType.bf)) {
         newJobs.push({
             id: null,
             jobName: `bf_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
             status: -1,
-            type: '数据备份任务',
+            type: JobType.bf,
             schedMode: 0,
             cron: null,
             lastExecTime: '--',
@@ -969,12 +852,26 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
         })
     }
 
-    if (!newJobs.some(job => job.type === '数据清除任务')) {
+    if (!newJobs.some(job => job.type === JobType.qc)) {
         newJobs.push({
             id: null,
             jobName: `qc_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
             status: -1,
-            type: '数据清除任务',
+            type: JobType.qc,
+            schedMode: 0,
+            cron: null,
+            lastExecTime: '--',
+            nextExecTime: '未配置调度任务',
+            createBy: null
+        })
+    }
+
+    if (!newJobs.some(job => job.type === JobType.rk)) {
+        newJobs.push({
+            id: null,
+            jobName: `rk_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
+            status: -1,
+            type: JobType.rk,
             schedMode: 0,
             cron: null,
             lastExecTime: '--',
@@ -984,12 +881,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
     }
 
     if (isBasicData) {
-        if (!newJobs.some(job => job.type === '数据质检任务')) {
+        if (!newJobs.some(job => job.type === JobType.zj)) {
             newJobs.push({
                 id: null,
                 jobName: `zj_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '数据质检任务',
+                type: JobType.zj,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -998,12 +895,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
 
-        if (!newJobs.some(job => job.type === '数据融合任务')) {
+        if (!newJobs.some(job => job.type === JobType.rh)) {
             newJobs.push({
                 id: null,
                 jobName: `rh_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '数据融合任务',
+                type: JobType.rh,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -1012,12 +909,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
     } else {
-        if (!newJobs.some(job => job.type === '初步质检任务')) {
+        if (!newJobs.some(job => job.type === JobType.zj1)) {
             newJobs.push({
                 id: null,
                 jobName: `zj1_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '初步质检任务',
+                type: JobType.zj1,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -1026,12 +923,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
 
-        if (!newJobs.some(job => job.type === '单表融合任务')) {
+        if (!newJobs.some(job => job.type === JobType.rh1)) {
             newJobs.push({
                 id: null,
                 jobName: `rh1_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '单表融合任务',
+                type: JobType.rh1,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -1040,12 +937,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
 
-        if (!newJobs.some(job => job.type === '完整质检任务')) {
+        if (!newJobs.some(job => job.type === JobType.zj2)) {
             newJobs.push({
                 id: null,
                 jobName: `zj2_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '完整质检任务',
+                type: JobType.zj2,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -1054,12 +951,12 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
             })
         }
 
-        if (!newJobs.some(job => job.type === '多表融合任务')) {
+        if (!newJobs.some(job => job.type === JobType.rh2)) {
             newJobs.push({
                 id: null,
                 jobName: `rh2_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
                 status: -1,
-                type: '多表融合任务',
+                type: JobType.rh2,
                 schedMode: 0,
                 cron: null,
                 lastExecTime: '--',
@@ -1067,20 +964,20 @@ export const pushUnExistJobs = (newJobs: any[], projectAbbr: string, tableAbbr: 
                 createBy: null
             })
         }
-    }
 
-    if (!newJobs.some(job => job.type === '数据入库任务')) {
-        newJobs.push({
-            id: null,
-            jobName: `rk_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
-            status: -1,
-            type: '数据入库任务',
-            schedMode: 0,
-            cron: null,
-            lastExecTime: '--',
-            nextExecTime: '未配置调度任务',
-            createBy: null
-        })
+        if (!newJobs.some(job => job.type === JobType.rh3)) {
+            newJobs.push({
+                id: null,
+                jobName: `rh3_${projectAbbr}_${tableAbbr.toString().toLowerCase()}`,
+                status: -1,
+                type: JobType.rh3,
+                schedMode: 0,
+                cron: null,
+                lastExecTime: '--',
+                nextExecTime: '未配置调度任务',
+                createBy: null
+            })
+        }
     }
 
     return newJobs

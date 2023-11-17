@@ -247,18 +247,17 @@
 </template>
 
 <script setup lang="ts">
+import {Job, JobType} from "@common/types/jobMgt";
 import {find_by_project_id, get_project_by_pro_abbr} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {
-  get_cj_job_page, update_sched_job,
-} from "@render/api/datacenter.api";
+import {get_cj_job_page, update_sched_job} from "@render/api/datacenter.api";
 import {convertCronExpression} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {createSchedJob} from "@render/utils/datacenter/cjJob";
 import {
   getDataXJobStatus,
   getSchedJob,
-  Job, renderDataXJobActionButton,
+  renderDataXJobActionButton,
   setJobStatus,
   showButton, showButtonPopover,
   showTextButton
@@ -307,7 +306,7 @@ const tableDataInit = async () => {
     const job: Job = {
       id: v.id,
       jobName: v.jobDesc,
-      type: '数据共享任务',
+      type: JobType.gx,
       status: await getDataXJobStatus(v, schedJob),
       schedMode: 2,
       cron: schedJob?.jobCron || null,
@@ -438,7 +437,7 @@ const createColumns = (): DataTableColumns<Job> => {
 }
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
-  if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
+  if (![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
     moreBtnChildren.push(showTextButton('调度配置', () => showDataXJobSetupModal(row)))
   }
@@ -446,7 +445,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
-  if (row.type === '数据共享任务' && ![0, -1].includes(row.status)) {
+  if (![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('调度配置', () => showDataXJobSetupModal(row)))
   }

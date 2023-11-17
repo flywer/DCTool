@@ -63,6 +63,12 @@
                     DWB层不合格表
                   </n-checkbox>
                 </n-space>
+                <n-space>
+                  <n-checkbox value="df_{PROJECT}_{TABLE_NAME}_dm">
+                    DM层全量表
+                  </n-checkbox>
+                </n-space>
+
               </n-space>
             </n-checkbox-group>
           </n-form-item-gi>

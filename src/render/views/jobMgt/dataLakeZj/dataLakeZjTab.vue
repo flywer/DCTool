@@ -209,22 +209,29 @@
 
 <script setup lang="ts">
 import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
+import {Job, JobType} from "@common/types/jobMgt";
 import {get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {
-  add_work_flow, create_table,
-  create_valid_config, get_tables,
-  get_valid_config_page, get_workflow, get_workflow_list_by_project_id,
+  add_work_flow,
+  create_table,
+  create_valid_config,
+  get_tables,
+  get_valid_config_page,
+  get_workflow,
+  get_workflow_list_by_project_id,
   gte_usrc_org_tree
 } from "@render/api/datacenter.api";
-import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {
-  getCustomTableValidConfig, getTableCommentByProName,
+  getCustomTableValidConfig,
+  getTableCommentByProName,
   getWorkflowJobStatus,
-  Job, renderWorkflowActionButton,
+  renderWorkflowActionButton,
   setJobStatus,
-  showButton, showButtonPopover,
+  showButton,
+  showButtonPopover,
   showTextButton,
   workflowJobGetLastExecTime,
   workflowJobGetNextExecTime,
@@ -236,14 +243,7 @@ import JobInspectionTab from "@render/views/jobMgt/projectTree/jobInspectionTab.
 import {Add, Refresh, Search} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
-import {
-  DataTableColumns,
-  FormInst,
-  NButton,
-  NSpace,
-  SelectGroupOption,
-  SelectOption
-} from "naive-ui";
+import {DataTableColumns, FormInst, NButton, NSpace, SelectGroupOption, SelectOption} from "naive-ui";
 import {format} from "sql-formatter";
 import {h, onMounted, reactive, ref} from "vue";
 
@@ -274,9 +274,9 @@ const tableDataInit = async () => {
     const job: Job = {
       id: v.id,
       jobName: v.procName,
-      type: '数据质检任务',
+      type: JobType.zj,
       status: getWorkflowJobStatus(v),
-      schedMode: parseInt(v.schedulingMode),
+      schedMode: parseInt(v.schedulingMode) == 1 ? 1 : 2,
       cron: v.crontab == '' ? null : v.crontab,
       lastExecTime: await workflowJobGetLastExecTime(v),
       nextExecTime: workflowJobGetNextExecTime(v),
@@ -386,11 +386,11 @@ const createColumns = (): DataTableColumns<Job> => {
 }
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
-  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+  if (![-1, 2, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
-  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if (![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
     moreBtnChildren.push(showTextButton('质检情况', () => showJobInpsModal(row)))
     moreBtnChildren.push(showTextButton('质检配置', () => showValidConfigModal(row)))
@@ -399,11 +399,11 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
 
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
-  if (row.type === '数据质检任务' && ![-1, 2, 3].includes(row.status)) {
+  if (![-1, 2, 3].includes(row.status)) {
     children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
-  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if (![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('质检情况', () => showJobInpsModal(row)))
     children.push(showButton('质检配置', () => showValidConfigModal(row)))

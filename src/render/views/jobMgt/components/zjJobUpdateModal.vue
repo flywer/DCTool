@@ -37,7 +37,7 @@
     </n-form>
     <template #action>
       <n-button type="primary" :size="'small'" @click="onUpdateZjJob" :loading="isSaving">更新</n-button>
-      <n-button :size="'small'" @click="_show=!_show">返回</n-button>
+      <n-button :size="'small'" @click="_show=false">返回</n-button>
     </template>
   </n-modal>
 </template>

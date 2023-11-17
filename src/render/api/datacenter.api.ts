@@ -65,7 +65,7 @@ export const get_tables = async (datasourceId: string, tableSchema: string) => {
 }
 
 // 获取表字段数组，onlyCol:是否去除hive表中的序号与类型 0:id:int --> id
-export const get_columns = async (datasourceId: string, tableName: string, onlyCol?: boolean) => {
+export const get_columns = async (datasourceId: string, tableName: string, onlyCol?: boolean):Promise<string[]> => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getColumns, datasourceId, tableName))
     // 遍历原数组中的每个元素，使用split()方法将其按照:分割成一个数组。
     // 取这个新数组中第二个元素（索引为1），也就是两个冒号之间的值。

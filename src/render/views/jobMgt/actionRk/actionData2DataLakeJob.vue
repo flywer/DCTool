@@ -76,7 +76,7 @@
     </n-form>
     <template #action>
       <n-button type="primary" :size="'small'" @click="handleModalFormSave" :loading="isSaving">保存</n-button>
-      <n-button :size="'small'" @click="showSaveModalRef!=showSaveModalRef">返回</n-button>
+      <n-button :size="'small'" @click="showSaveModalRef=false">返回</n-button>
     </template>
   </n-modal>
 
@@ -90,6 +90,7 @@
 
 <script setup lang="ts">
 import {Workflow} from "@common/types/datacenter/workflow";
+import {Job, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_job_project_by_id, get_workflow_list_by_project_id} from "@render/api/datacenter.api";
@@ -99,7 +100,7 @@ import {actionTableNames} from "@render/utils/datacenter/constants";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {
   getWorkflowJobStatus,
-  Job, renderWorkflowActionButton,
+  renderWorkflowActionButton,
   setJobStatus,
   showButton,
   workflowJobGetLastExecTime,
@@ -143,9 +144,9 @@ const tableDataInit = async () => {
     const job: Job = {
       id: v.id,
       jobName: v.procName,
-      type: '数据入库任务',
+      type: JobType.rk,
       status: getWorkflowJobStatus(v),
-      schedMode: parseInt(v.schedulingMode),
+      schedMode: parseInt(v.schedulingMode) == 1 ? 1 : 2,
       cron: v.crontab == '' ? null : v.crontab,
       lastExecTime: await workflowJobGetLastExecTime(v),
       nextExecTime: workflowJobGetNextExecTime(v),
@@ -319,7 +320,7 @@ const handleModalFormSave = () => {
         projectId: projectId,
         personId: saveModalFormModel.value.personId,
         sourceDataSourceId: '6',
-        sourceTableName: `df_lake_${saveModalFormModel.value.tableName}_dwb`,
+        sourceTableName: `df_lake_${saveModalFormModel.value.tableName}_dm`,
         targetDataSourceId: '12',
         targetTableName: `sztk_${saveModalFormModel.value.tableName}`,
       })

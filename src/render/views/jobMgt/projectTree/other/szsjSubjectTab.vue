@@ -69,13 +69,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  get_cj_job_page,
-  get_dataXJob,
-  get_job_project_by_id,
-} from "@render/api/datacenter.api";
-import {get_table_data} from "@render/api/front.api";
+import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
+import {get_cj_job_page, get_dataXJob, get_job_project_by_id} from "@render/api/datacenter.api";
+import {get_table_data} from "@render/api/front.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {
@@ -84,13 +81,14 @@ import {
   dataXJobStart,
   dataXJobStop,
   getDataXJobStatus,
-  getDataXJobType,
+  getJobType,
   getSchedJob,
-  Job,
   jobNameCompare,
   setJobStatus,
-  showButton, showButtonPopover,
-  showConfirmation, showTextButton,
+  showButton,
+  showButtonPopover,
+  showConfirmation,
+  showTextButton,
 } from "@render/utils/datacenter/jobTabUtil";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import {Refresh} from "@vicons/ionicons5";
@@ -158,7 +156,7 @@ const tableDataInit = async () => {
       id: v.id,
       jobName: v.jobDesc,
       status: await getDataXJobStatus(v, schedJob),
-      type: getDataXJobType(v),
+      type: getJobType(v.jobDesc),
       schedMode: 2,
       cron: schedJob?.jobCron || null,
       lastExecTime: v.triggerLastTime || '--',
@@ -188,7 +186,10 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务类型',
       key: 'type',
-      width: '6%'
+      width: '6%',
+      render(row) {
+        return getJobTypeComment(row.type)
+      }
     },
     {
       title: '状态',
@@ -299,22 +300,22 @@ const createColumns = (): DataTableColumns<Job> => {
 }
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if ((row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
   }
 
-  if (row.type === '数据采集任务' && row.status != -1) {
+  if (row.type === JobType.cj && row.status != -1) {
     moreBtnChildren.push(showTextButton('源表预览', () => tablePreview(row)))
   }
 }
 
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if ((row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
   }
 
-  if (row.type === '数据采集任务' && row.status != -1) {
+  if (row.type === JobType.cj && row.status != -1) {
     children.push(showButton('源表预览', () => tablePreview(row)))
   }
 }

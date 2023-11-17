@@ -171,7 +171,7 @@
     <template #action>
       <n-button type="primary" :size="'small'" @click="handleSave" :loading="isSaving">保存
       </n-button>
-      <n-button :size="'small'" @click="_show=!_show">返回</n-button>
+      <n-button :size="'small'" @click="_show=false">返回</n-button>
     </template>
   </n-modal>
 </template>
@@ -361,7 +361,11 @@ const treeInit = async () => {
 const renderSwitcherIcon = () => {
   return h(NIcon, null, {default: () => h(ChevronRight24Regular)})
 }
-const renderLabel = (info: { option: TreeOption, checked: boolean, selected: boolean }) => {
+const renderLabel = (info: {
+  option: TreeOption,
+  checked: boolean,
+  selected: boolean
+}) => {
   if (info.option.key === 'root') {
     return formModel.value.tableName
   } else if (info.option.key === 'fields') {

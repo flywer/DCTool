@@ -84,7 +84,6 @@
 
   </n-modal>
 
-
 </template>
 
 <script setup lang="ts">
@@ -225,7 +224,12 @@ const tableRows = ref([])
 const previewTableDataRef = ref([])
 
 const isPreviewTableLoading = ref(false)
-const tablePreview = (row: { id?: string; tableName: any; tableComment?: string; createTime?: string; }) => {
+const tablePreview = (row: {
+  id?: string;
+  tableName: any;
+  tableComment?: string;
+  createTime?: string;
+}) => {
   previewColsRef.value = []
   previewTableDataRef.value = []
 
@@ -251,10 +255,12 @@ const tablePreview = (row: { id?: string; tableName: any; tableComment?: string;
         }));
 
         // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item: { [s: string]: unknown; } | ArrayLike<unknown>) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
+        previewTableDataRef.value = res.data.slice(1).map((item: {
+              [s: string]: unknown;
+            } | ArrayLike<unknown>) =>
+                Object.values(item).map(
+                    (value) => (value === null ? 'null' : value.toString())
+                )
         )
 
         previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | {

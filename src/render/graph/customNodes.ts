@@ -1,6 +1,7 @@
 import {ShapeDefine, ShapeOptions} from "@antv/g6-core/lib/interface/shape";
 import {NodeConfig} from "@antv/g6-core/lib/types";
 import {SqlConfig} from "@common/taskSchedulerTypes";
+import {JobType} from "@common/types/jobMgt";
 import cube from "@render/assets/graph/cube.svg"
 
 // 自定义节点注册类型
@@ -19,7 +20,7 @@ export const customNode = {
 export interface JobNodeConfig extends NodeConfig {
     jobName: string,
     // 任务类型
-    jobType: '数据采集任务' | '数据质检任务' | '数据备份任务' | '数据清除任务' | '数据融合任务' | '单表融合任务' | '多表融合任务' | '数据入库任务' | '数据共享任务' | '未知任务',
+    jobType: string,
     // -1:未创建； 0:采集任务未配置； 1:任务停用； 2:任务启用； 3:任务运行中； 4:任务异常； 5:任务未反馈
     jobStatus?: -1 | 0 | 1 | 2 | 3 | 4 | 5,
     // 上次执行时间

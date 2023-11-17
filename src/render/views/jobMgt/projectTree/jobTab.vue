@@ -321,7 +321,7 @@
       </n-form>
 
       <n-form
-          v-if="formSelect.createRh2Job"
+          v-if="formSelect.createRh2Job || formSelect.createRh3Job"
           class="mt-4"
           ref="rh2JobModalFormRef"
           :model="rh2JobModalFormModel"
@@ -672,6 +672,7 @@
 import {ProjectInfo} from "@common/types";
 import {DataXJobTemplate} from "@common/types/datacenter/dataCollection";
 import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
+import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
@@ -699,12 +700,9 @@ import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
   dataXJobGetNextExecTime,
   getDataXJobStatus,
-  getDataXJobType,
-  getDCTableIsValidConfig,
+  getDCTableIsValidConfig, getJobType,
   getSchedJob,
   getWorkflowJobStatus,
-  getWorkflowJobType,
-  Job,
   jobNameCompare,
   pushUnExistJobs, renderDataXJobActionButton, renderWorkflowActionButton,
   setJobStatus,
@@ -714,14 +712,11 @@ import {
   workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
 import {createQcJob} from "@render/utils/datacenter/qcJob";
-import {createRhJob, updateRhJob} from "@render/utils/datacenter/rhJob";
-import {createRkJob} from "@render/utils/datacenter/rkJob";
+import {updateRhJob} from "@render/utils/datacenter/rhJob";
+import {RhJobSaveModel} from "@render/utils/datacenter/workflow/RhJobSaveModel";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
-import {
-  AddSquareMultiple16Regular
-} from '@vicons/fluent'
 import {Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {cloneDeep, isEmpty} from "lodash-es";
@@ -835,7 +830,7 @@ const tableDataInit = async () => {
         id: v.id,
         jobName: v.jobDesc,
         status: await getDataXJobStatus(v, schedJob),
-        type: getDataXJobType(v),
+        type: getJobType(v.jobDesc),
         schedMode: 2,
         cron: schedJob?.jobCron || null,
         lastExecTime: v.triggerLastTime || '--',
@@ -851,12 +846,12 @@ const tableDataInit = async () => {
     }
 
     // 若不存在采集任务
-    if (!newDataXJobs.some(job => job.type === '数据采集任务')) {
+    if (!newDataXJobs.some(job => job.type === JobType.cj)) {
       newDataXJobs.push({
         id: null,
         jobName: `cj_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
         status: -1,
-        type: '数据采集任务',
+        type: JobType.cj,
         schedMode: 2,
         cron: null,
         lastExecTime: '--',
@@ -866,12 +861,12 @@ const tableDataInit = async () => {
     }
 
     // 若不存在共享任务
-    if (!newDataXJobs.some(job => job.type === '数据共享任务')) {
+    if (!newDataXJobs.some(job => job.type === JobType.gx)) {
       newDataXJobs.push({
         id: null,
         jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
         status: -1,
-        type: '数据共享任务',
+        type: JobType.gx,
         schedMode: 2,
         cron: null,
         lastExecTime: '--',
@@ -882,7 +877,7 @@ const tableDataInit = async () => {
 
     // 行为数据的共享任务不显示
     if (!projectTree.isBasicData) {
-      newDataXJobs = newDataXJobs.filter(job => job.type !== '数据共享任务')
+      newDataXJobs = newDataXJobs.filter(job => job.type !== JobType.gx)
     }
 
     // endregion
@@ -901,9 +896,9 @@ const tableDataInit = async () => {
       const job: Job = {
         id: v.id,
         jobName: v.procName,
-        type: getWorkflowJobType(v),
+        type: getJobType(v.procName),
         status: getWorkflowJobStatus(v),
-        schedMode: parseInt(v.schedulingMode),
+        schedMode: parseInt(v.schedulingMode) == 1 ? 1 : 2,
         cron: v.crontab == '' ? null : v.crontab,
         lastExecTime: await workflowJobGetLastExecTime(v),
         nextExecTime: workflowJobGetNextExecTime(v),
@@ -923,8 +918,7 @@ const tableDataInit = async () => {
 
     // 行为数据的入库任务不显示
     if (!projectTree.isBasicData) {
-      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据入库任务')
-     // newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== '数据质检任务')
+      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== JobType.rk)
     }
 
     // endregion
@@ -949,7 +943,10 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务类型',
       key: 'type',
-      width: '6%'
+      width: '6%',
+      render(row) {
+        return getJobTypeComment(row.type)
+      }
     },
     {
       title: '状态',
@@ -996,50 +993,54 @@ const createColumns = (): DataTableColumns<Job> => {
 
         // 未创建的任务
         if (row.status == -1) {
-          if (row.type != '数据共享任务') {
+          if (row.type != JobType.gx) {
             children = [showButton('创建', async () => {
               const project = (await find_by_project_id(queryParam.value.projectId))
               switch (row.type) {
-                case '数据采集任务':
+                case 'cj':
                   await createCjJobModalInit(project, row)
                   break
-                case '数据质检任务':
+                case JobType.zj:
+                case JobType.zj1:
                   await createZjJobModalInit(project, false)
                   break
-                case '初步质检任务':
-                  await createZjJobModalInit(project, false)
-                  break
-                case '完整质检任务':
+                case JobType.zj2:
                   await createZjJobModalInit(project, true)
                   break
-                case '数据融合任务':
+                case JobType.rh:
                   createRhJobModalInit(project)
                   showModalRef.value = true
                   modalTitle = '创建融合任务'
                   formSelect.value.createRhJob = true
                   break
-                case '单表融合任务':
+                case JobType.rh1:
                   createRhJobModalInit(project)
                   showModalRef.value = true
                   modalTitle = '创建单表融合任务'
                   formSelect.value.createRhJob = true
                   break
-                case '多表融合任务':
+                case JobType.rh2:
                   createRh2JobModalInit(project)
                   showModalRef.value = true
-                  modalTitle = '创建多表融合任务'
+                  modalTitle = '创建入湖融合任务'
                   formSelect.value.createRh2Job = true
                   break
-                case '数据备份任务':
+                case JobType.rh3:
+                  createRh2JobModalInit(project)
+                  showModalRef.value = true
+                  modalTitle = '创建入库融合任务'
+                  formSelect.value.createRh3Job = true
+                  break
+                case JobType.bf:
                   createBfJobModalInit(project)
                   break
-                case '数据清除任务':
+                case JobType.qc:
                   createQcJobModalInit(project)
                   showModalRef.value = true
                   modalTitle = '创建清除任务'
                   formSelect.value.createQcJob = true
                   break
-                case '数据入库任务':
+                case JobType.rk:
                   window.$message.info("敬请期待")
                   break
               }
@@ -1061,7 +1062,7 @@ const createColumns = (): DataTableColumns<Job> => {
             })]
           }
         } else {
-          if (row.type === '数据采集任务' || row.type === '数据共享任务') {
+          if (row.type === JobType.cj || row.type === JobType.gx) {
             children = renderDataXJobActionButton(row, () => addSchedJobModalFormModelInit(row), tableDataInit)
           } else {
             children = renderWorkflowActionButton(row, tableDataInit)
@@ -1096,66 +1097,67 @@ const createColumns = (): DataTableColumns<Job> => {
 }
 
 const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if ((row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
   }
 
-  if ((row.type === '数据采集任务') && ![0, -1, 3].includes(row.status)) {
+  if ((row.type === JobType.cj) && ![0, -1, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
-  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if (!(row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('日志', () => showJobLogDrawer(row)))
     moreBtnChildren.push(showTextButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type.includes('质检') && ![-1, 2, 3].includes(row.status)) {
+  if (row.type.includes('zj') && ![-1, 2, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
-  if (row.type.includes('质检') && ![-1].includes(row.status)) {
+  if (row.type.includes('zj') && ![-1].includes(row.status)) {
     moreBtnChildren.push(showTextButton('质检配置', () => zjJobInspConfigModalInit(row)))
     moreBtnChildren.push(showTextButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
-  if (row.type === '数据采集任务' && row.status != -1) {
+  if (row.type === JobType.cj && row.status != -1) {
     moreBtnChildren.push(showTextButton('源表预览', () => tablePreview(row)))
   }
 
-  if ((row.type === '数据融合任务' || row.type === '单表融合任务') && ![-1, 2, 3].includes(row.status)) {
+  if ((row.type === JobType.rh) && ![-1, 2, 3].includes(row.status)) {
     moreBtnChildren.push(showTextButton('更新任务配置', () => showUpdateRhJobDialog(row)))
   }
 }
 
 // children直接添加更多中的组件
 const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
-  if ((row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+
+  if ((row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
   }
 
-  if ((row.type === '数据采集任务') && ![0, -1, 3].includes(row.status)) {
+  if ((row.type === JobType.cj) && ![0, -1, 3].includes(row.status)) {
     children.push(showButton('任务配置', () => showDataXJobSetupModal(row)))
   }
 
-  if (!(row.type === '数据采集任务' || row.type === '数据共享任务') && ![0, -1].includes(row.status)) {
+  if (!(row.type === JobType.cj || row.type === JobType.gx) && ![0, -1].includes(row.status)) {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type.includes('质检') && ![-1, 2, 3].includes(row.status)) {
+  if (row.type.includes('zj') && ![-1, 2, 3].includes(row.status)) {
     children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
   }
 
-  if (row.type.includes('质检') && ![-1].includes(row.status)) {
+  if (row.type.includes('zj') && ![-1].includes(row.status)) {
     children.push(showButton('质检配置', () => zjJobInspConfigModalInit(row)))
     children.push(showButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
-  if (row.type === '数据采集任务' && row.status != -1) {
+  if (row.type === JobType.cj && row.status != -1) {
     children.push(showButton('源表预览', () => tablePreview(row)))
   }
 
-  if ((row.type === '数据融合任务' || row.type === '单表融合任务') && ![-1, 2, 3].includes(row.status)) {
+  if (row.type === JobType.rh && ![-1, 2, 3].includes(row.status)) {
     children.push(showButton('更新任务配置', () => showUpdateRhJobDialog(row)))
   }
 }
@@ -1176,6 +1178,7 @@ const formSelect = ref({
   createBfJob: false,
   createRhJob: false,
   createRh2Job: false,
+  createRh3Job: false,
   createQcJob: false,
   quickCreate: false,
 })
@@ -1188,6 +1191,7 @@ const onModelAfterLeave = () => {
     createBfJob: false,
     createRhJob: false,
     createRh2Job: false,
+    createRh3Job: false,
     createQcJob: false,
     quickCreate: false,
   }
@@ -1298,17 +1302,28 @@ const onPositiveClick = async () => {
   if (formSelect.value.createRhJob) {
     rhJobModalFormRef.value?.validate((errors) => {
       if (!errors) {
-        createRhJob({
-          projectId: rhJobModalFormModel.value.projectId,
-          personId: rhJobModalFormModel.value.personId,
-          tableName: rhJobModalFormModel.value.tableName
-        }, projectTree.isBasicData, false).then(() => {
+        new Promise((resolve) => {
+          if (projectTree.isBasicData) {
+            resolve(RhJobSaveModel.createBasicDataRhJob({
+              projectId: rhJobModalFormModel.value.projectId,
+              personId: rhJobModalFormModel.value.personId,
+              tableName: rhJobModalFormModel.value.tableName
+            }))
+          } else {
+            resolve(RhJobSaveModel.createActionDataRhJob({
+              projectId: rhJobModalFormModel.value.projectId,
+              personId: rhJobModalFormModel.value.personId,
+              tableName: rhJobModalFormModel.value.tableName
+            }))
+          }
+        }).then(() => {
           tableDataInit()
         }).finally(() => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.createRhJob = false
         })
+
       } else {
         console.error(errors)
         isSaving.value = false
@@ -1319,16 +1334,37 @@ const onPositiveClick = async () => {
   if (formSelect.value.createRh2Job) {
     rh2JobModalFormRef.value?.validate((errors) => {
       if (!errors) {
-        createRhJob({
+        RhJobSaveModel.createActionData2LakeRh2Job({
           projectId: rh2JobModalFormModel.value.projectId,
           personId: rh2JobModalFormModel.value.personId,
           tableName: rh2JobModalFormModel.value.tableName
-        }, projectTree.isBasicData, true).then(() => {
+        }).then(() => {
           tableDataInit()
         }).finally(() => {
           isSaving.value = false
           showModalRef.value = false
           formSelect.value.createRh2Job = false
+        })
+      } else {
+        console.error(errors)
+        isSaving.value = false
+      }
+    })
+  }
+
+  if (formSelect.value.createRh3Job) {
+    rh2JobModalFormRef.value?.validate((errors) => {
+      if (!errors) {
+        RhJobSaveModel.createActionData2ThemeRh3Job({
+          projectId: rh2JobModalFormModel.value.projectId,
+          personId: rh2JobModalFormModel.value.personId,
+          tableName: rh2JobModalFormModel.value.tableName
+        }).then(() => {
+          tableDataInit()
+        }).finally(() => {
+          isSaving.value = false
+          showModalRef.value = false
+          formSelect.value.createRh3Job = false
         })
       } else {
         console.error(errors)
@@ -1354,27 +1390,28 @@ const onPositiveClick = async () => {
     })
   }
 
-  if (formSelect.value.quickCreate) {
-    if (!isEmpty(quickCreateModalFormModel.value.jobSelect)) {
-      quickCreateModalFormRef.value?.validate(async (errors) => {
-        if (!errors) {
-          await quickCreate().then(() => {
-            tableDataInit()
-          }).finally(() => {
-            isSaving.value = false
-            showModalRef.value = false
-            formSelect.value.quickCreate = false
-          })
-        } else {
-          console.error(errors)
-        }
-      })
-    } else {
-      window.$message.warning("未选择任务")
-    }
-  }
+  /*   if (formSelect.value.quickCreate) {
+      if (!isEmpty(quickCreateModalFormModel.value.jobSelect)) {
+        quickCreateModalFormRef.value?.validate(async (errors) => {
+          if (!errors) {
+            await quickCreate().then(() => {
+              tableDataInit()
+            }).finally(() => {
+              isSaving.value = false
+              showModalRef.value = false
+              formSelect.value.quickCreate = false
+            })
+          } else {
+            console.error(errors)
+          }
+        })
+      } else {
+        window.$message.warning("未选择任务")
+      }
+    } */
 }
 // endregion
+/*
 const quickCreate = async () => {
   const project = (await find_by_project_id(queryParam.value.projectId))
 
@@ -1450,6 +1487,7 @@ const quickCreate = async () => {
   }
 
 }
+*/
 
 // region 新增调度任务
 
@@ -1836,6 +1874,7 @@ const quickCreateModalFormRules = {
 
 const jobTypeTreeOptionsRef = ref<TreeSelectOption[]>([])
 
+/*
 const jobTypeTreeOptionsInit = () => {
   jobTypeTreeOptionsRef.value = cloneDeep([
     {
@@ -1893,7 +1932,9 @@ const jobTypeTreeOptionsInit = () => {
     }
   ])
 }
+*/
 
+/*
 const quickCreateModalInit = async () => {
   modalTitle = '快捷创建任务'
   formSelect.value.quickCreate = true
@@ -1913,7 +1954,9 @@ const quickCreateModalInit = async () => {
 
   showModalRef.value = true
 }
+*/
 
+/*
 const handleJobTreeOptionsUpdate = () => {
 
   //先获取已创建的任务名
@@ -1933,6 +1976,7 @@ const handleJobTreeOptionsUpdate = () => {
     jobTypeTreeOptionsRef.value[1].disabled = true
   }
 }
+*/
 
 const updateTreeOptionDisabledByKey = (treeOptions: TreeSelectOption[], disableKeys: string[]) => {
   for (const option of treeOptions) {

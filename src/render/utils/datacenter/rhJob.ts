@@ -10,9 +10,9 @@ import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {cloneDeep} from "lodash-es";
 
 export type RhFormModelType = {
-    jobJsonId?: string,
     personId: string,
     projectId: string,
+    jobJsonId?: string,
     tableName?: string
 }
 
@@ -64,7 +64,7 @@ const templateJson = {
     type: "流程",
     code: 'sjk45196358bf9149f289f431a3ed48d37b',
     modelXml: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<definitions xmlns=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:flowable=\"http://flowable.org/bpmn\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:omgdc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:omgdi=\"http://www.omg.org/spec/DD/20100524/DI\" typeLanguage=\"http://www.w3.org/2001/XMLSchema\" expressionLanguage=\"http://www.w3.org/1999/XPath\" targetNamespace=\"http://www.flowable.org/processdef\" exporter=\"Flowable Open Source Modeler\" exporterVersion=\"6.7.2\">\n    <process id=\"sjk45196358bf9149f289f431a3ed48d37b\" name=\"sjk45196358bf9149f289f431a3ed48d37b\" isExecutable=\"true\">\n        <startEvent id=\"sjkd564ce3ac49449feafe224a3ec7ce9de\" name=\"开始\" flowable:formFieldValidation=\"true\"/>\n        <userTask id=\"sjk584f23e6fbcb42528847a59c962bca83\" name=\"数据开发(Spark SQL)\" flowable:formFieldValidation=\"true\">\n            <extensionElements>\n                <flowable:taskListener event=\"create\" delegateExpression=\"${dataDevSpTaskListener}\"/>\n            </extensionElements>\n        </userTask>\n        <endEvent id=\"sjk515d0bf22e19430aa1ed28e5c5a8a096\" name=\"结束\"/>\n        <sequenceFlow id=\"sjk2e1a3b714a8840d4ad8aa77d9d258c62\" name=\"TDBS-Hive\" sourceRef=\"sjkd564ce3ac49449feafe224a3ec7ce9de\" targetRef=\"sjk584f23e6fbcb42528847a59c962bca83\"/>\n        <sequenceFlow id=\"sjk0e72c1985a1b44b98000fbe695b87ffb\" name=\"TDBS-Hive\" sourceRef=\"sjk584f23e6fbcb42528847a59c962bca83\" targetRef=\"sjk515d0bf22e19430aa1ed28e5c5a8a096\"/>\n    </process>\n</definitions>",
-    modelJson: "{\"nodeList\":[{\"id\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/ea223490b8676e353d40480c6b4d6de4.svg\",\"size\":\"20\",\"type\":\"startProcess\",\"name\":\"开始\"},{\"id\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"df_DEPART_TABLENAME_dwb\"},{\"id\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"sztk_TABLENAME_dm\"},{\"id\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/71f2f583f082a8d659c9336cab5dc360.svg\",\"size\":\"20\",\"delegateExpression\":\"dataDevSpTaskListener\",\"type\":\"component\",\"name\":\"数据开发(Spark SQL)\"},{\"id\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"sztk_TABLENAME_dm\"},{\"id\":\"sjk515d0bf22e19430aa1ed28e5c5a8a096\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/fc24a27468b1b125d7cf415739058b41.svg\",\"size\":\"20\",\"type\":\"endProcess\",\"name\":\"结束\"}],\"edgesList\":[{\"from\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"to\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"id\":\"sjkc257e38a8b59419fb7574dc427590c9c\"},{\"from\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"to\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"id\":\"sjkdeeab9335c0f471795dbfda467823292\"},{\"from\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"to\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"id\":\"sjkcde188685a9641a09516de0cee22039b\"},{\"from\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"to\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"id\":\"sjk2e1a3b714a8840d4ad8aa77d9d258c62\"},{\"from\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"to\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"id\":\"sjk291a008d3eca47f487bfa2c1d748e022\"},{\"from\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"to\":\"sjk515d0bf22e19430aa1ed28e5c5a8a096\",\"id\":\"sjk0e72c1985a1b44b98000fbe695b87ffb\"}]}",
+    modelJson: "{\"nodeList\":[{\"id\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/ea223490b8676e353d40480c6b4d6de4.svg\",\"size\":\"20\",\"type\":\"startProcess\",\"name\":\"开始\"},{\"id\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"df_{PROJECT}_{TABLE_NAME}_dwb\"},{\"id\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"sztk_{TABLE_NAME}_dm\"},{\"id\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/71f2f583f082a8d659c9336cab5dc360.svg\",\"size\":\"20\",\"delegateExpression\":\"dataDevSpTaskListener\",\"type\":\"component\",\"name\":\"数据开发(Spark SQL)\"},{\"id\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/f2bdf916796f505f3e63a2add285467a.svg\",\"size\":\"20\",\"type\":\"database\",\"database\":\"TDBS-Hive\",\"name\":\"TDBS-Hive\",\"databaseName\":6,\"tableName\":\"sztk_{TABLE_NAME}_dm\"},{\"id\":\"sjk515d0bf22e19430aa1ed28e5c5a8a096\",\"shape\":\"image\",\"image\":\"/szrzyt/data_center/tdbs-dev/fc24a27468b1b125d7cf415739058b41.svg\",\"size\":\"20\",\"type\":\"endProcess\",\"name\":\"结束\"}],\"edgesList\":[{\"from\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"to\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"id\":\"sjkc257e38a8b59419fb7574dc427590c9c\"},{\"from\":\"sjkd564ce3ac49449feafe224a3ec7ce9de\",\"to\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"id\":\"sjkdeeab9335c0f471795dbfda467823292\"},{\"from\":\"sjka1d8460e0fe5417e846cfbe764ff510b\",\"to\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"id\":\"sjkcde188685a9641a09516de0cee22039b\"},{\"from\":\"sjkc650b8c022eb470cb5e4ecd7dadcf07b\",\"to\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"id\":\"sjk2e1a3b714a8840d4ad8aa77d9d258c62\"},{\"from\":\"sjk584f23e6fbcb42528847a59c962bca83\",\"to\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"id\":\"sjk291a008d3eca47f487bfa2c1d748e022\"},{\"from\":\"sjkf13a977ed6394695a14e22ab257ba4a0\",\"to\":\"sjk515d0bf22e19430aa1ed28e5c5a8a096\",\"id\":\"sjk0e72c1985a1b44b98000fbe695b87ffb\"}]}",
     dataDevBizVo: {
         dataSyncDtoList: [],
         qualityInspectionDtoList: [],
@@ -76,18 +76,18 @@ const templateJson = {
                 sparkConfig: {
                     saveMode: "overwrite"
                 },
-                sql: "INSERT INTO\n  sztk_TABLENAME_dm\nSELECT\n  *\nFROM\n  df_DEPART_TABLENAME_dwb\nUNION ALL\nSELECT\n  t1.*\nFROM\n  sztk_TABLENAME_dm t1\n  LEFT JOIN (\n    SELECT\n      CONCAT(primId, OPT_SUBJECT_ID) AS uniqId\n    FROM\n      df_DEPART_TABLENAME_dwb\n  ) t2 ON CONCAT(t1.primId, t1.OPT_SUBJECT_ID) = t2.uniqId\nWHERE\n  t2.uniqId IS NULL",
+                sql: "INSERT INTO\n  sztk_{TABLE_NAME}_dm\nSELECT\n  *\nFROM\n  df_{PROJECT}_{TABLE_NAME}_dwb\nUNION ALL\nSELECT\n  t1.*\nFROM\n  sztk_{TABLE_NAME}_dm t1\n  LEFT JOIN (\n    SELECT\n      CONCAT({PRIM_COL_NAME}, OPT_SUBJECT_ID) AS uniqId\n    FROM\n      df_{PROJECT}_{TABLE_NAME}_dwb\n  ) t2 ON CONCAT(t1.{PRIM_COL_NAME}, t1.OPT_SUBJECT_ID) = t2.uniqId\nWHERE\n  t2.uniqId IS NULL",
                 id: "sjk584f23e6fbcb42528847a59c962bca83",
                 sourceDBId: [
                     6,
                     6
                 ],
                 sourceTable: [
-                    "df_DEPART_TABLENAME_dwb",
-                    "sztk_TABLENAME_dm"
+                    "df_{PROJECT}_{TABLE_NAME}_dwb",
+                    "sztk_{TABLE_NAME}_dm"
                 ],
                 targetDBId: 6,
-                targetTable: "sztk_TABLENAME_dm",
+                targetTable: "sztk_{TABLE_NAME}_dm",
                 taskType: "TDBS-HIVE2TDBS-HIVE"
             }
         ],
@@ -115,9 +115,9 @@ export const buildRh2Json = async (formModel: RhFormModelType) => {
     paramsJson.projectName = projectIdOptions.find(option => option.value === formModel.projectId).label as string
 
     paramsJson = JSON.parse(JSON.stringify(paramsJson)
-        .replaceAll('TABLENAME', formModel.tableName.toLowerCase())
-        .replaceAll('DEPART', tableAbbr.toLowerCase())
-        .replaceAll('primId', primId.toLowerCase())
+        .replaceAll('{TABLE_NAME}', formModel.tableName.toLowerCase())
+        .replaceAll('{PROJECT}', tableAbbr.toLowerCase())
+        .replaceAll('{PRIM_COL_NAME}', primId.toLowerCase())
     )
     return JSON.parse(updateSjkUUID(removeIds(paramsJson)))
 }
