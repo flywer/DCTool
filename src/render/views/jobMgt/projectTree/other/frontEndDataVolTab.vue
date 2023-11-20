@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import {Job, JobType} from "@common/types/jobMgt";
+import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_cj_job_page, get_dataXJob, get_job_project_by_id} from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
@@ -178,7 +178,10 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务类型',
       key: 'type',
-      width: '6%'
+      width: '6%',
+      render(row) {
+        return getJobTypeComment(row.type)
+      }
     },
     {
       title: '状态',

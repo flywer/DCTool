@@ -119,18 +119,17 @@ const generateSql = async () => {
 
 const generateSubSql = async (tableName: string) => {
 
-  const tableSql = await get_table_sql({tableName: tableName})
-
-  const departColName = tableSql[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+  const pColName = (await get_table_sql({tableName: tableName}))[0].pColName as string
 
   return `
     SELECT UUID(),
-           ${departColName},
+           OPT_SUBJECT_ID,
            '${tableName.toUpperCase()}',
-           COUNT(*),
+           COUNT( DISTINCT ${pColName}),
            NOW()
     FROM sztk_${tableName}
-    GROUP BY ${departColName}
+    WHERE OPT_SUBJECT_NAME IS NULL
+    GROUP BY OPT_SUBJECT_ID
     UNION ALL`
 }
 
