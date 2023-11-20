@@ -18,6 +18,7 @@ export const useProjectTreeStore = defineStore({
                 {
                     label: '全省数据归集',
                     key: '-1',
+                    isLeaf:false,
                     children: [
                         {
                             label: '基础数据归集',

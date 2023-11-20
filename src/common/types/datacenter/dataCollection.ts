@@ -219,4 +219,6 @@ export type DataXJobQueryParams = {
     jobContent?: string,
     projectName?: string,
     subsystemName?: '采集'
+    executeResult?:string
+    incrementOrFull?:string
 }

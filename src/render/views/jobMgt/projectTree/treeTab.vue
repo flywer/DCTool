@@ -104,7 +104,7 @@
             class="pr-2"
             style="height: calc(100vh - 162px);user-select: none"
             block-line
-            expand-on-click
+            :expand-on-click="false"
             selectable
             :cancelable="false"
             virtual-scroll
@@ -130,7 +130,14 @@
         />
       </n-layout-sider>
       <n-layout-content content-style="padding: 12px;border-left: 1px solid rgb(237 237 237)">
-        <template v-if="!useProjectTreeStore().selectedKeys[0].startsWith('2-')">
+        <job-overview-tab v-if="['-1'].includes(useProjectTreeStore().selectedKeys[0])"
+                          :selectedKey="useProjectTreeStore().selectedKeys[0]"
+        />
+
+        <template
+            v-if="useProjectTreeStore().selectedKeys[0].startsWith('0') ||
+            useProjectTreeStore().selectedKeys[0].startsWith('1')"
+        >
           <n-tabs type="line" animated>
             <n-tab-pane name="1" tab="数据归集任务">
               <job-tab/>
@@ -138,9 +145,6 @@
             <n-tab-pane name="2" tab="中台相关表">
               <project-tables-tab/>
             </n-tab-pane>
-            <!--            <n-tab-pane name="3" tab="质检情况">
-                          <job-inspection-tab/>
-                        </n-tab-pane>-->
           </n-tabs>
         </template>
         <!--省政数局主体信息采集-->
@@ -160,6 +164,7 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {useUserStore} from "@render/stores/user";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
+import JobOverviewTab from "@render/views/jobMgt/projectTree/jobOverviewTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
 import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
 import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
@@ -488,13 +493,11 @@ const handleExpandedKeys = (keys: Array<string>) => {
   useProjectTreeStore().expandedKeys = keys
 }
 
-const handleSelectedKeys = (keys: Array<string>) => {
+const handleSelectedKeys = (keys: Array<string>, nodes: TreeOption[]) => {
   useProjectTreeStore().selectedKeys = keys
 }
 
-const renderSuffix = ({option}: {
-  option: TreeOption
-}) => {
+const renderSuffix = ({option}: { option: TreeOption }) => {
   // 所属任务后缀
   if ((option.key.toString() == '0-6') ||
       (option.key.toString() == '0-11') ||
@@ -518,6 +521,7 @@ const renderSuffix = ({option}: {
 const renderSwitcherIcon = () => {
   return h(NIcon, null, {default: () => h(ChevronRight24Regular)})
 }
+
 </script>
 
 <style scoped>
