@@ -6,8 +6,8 @@ export const useProjectTreeStore = defineStore({
     id: 'projectTree',
     state: () => ({
         treeNodes: [] as TreeOption[],
-        selectedKeys: ['0-6-G1010'],
-        expandedKeys: ['-1', '0', '0-6', '0-6-G'],
+        selectedKeys: ['-1'],
+        expandedKeys: ['-1'],
         onlyShowUserJob: false, // 仅显示当前用户任务
         hideEmptyNodes: false, // 隐藏无任务空节点
         isBasicData: true //此项目是否为基础数据项目，否则为行为数据项目
