@@ -126,11 +126,10 @@
             :render-switcher-icon="renderSwitcherIcon"
 
             @focus="handleTreeFocus"
-
         />
       </n-layout-sider>
       <n-layout-content content-style="padding: 12px;border-left: 1px solid rgb(237 237 237)">
-        <job-overview-tab v-if="['-1'].includes(useProjectTreeStore().selectedKeys[0])"
+        <job-overview-tab v-if="showJobOverview && ['-1'].includes(useProjectTreeStore().selectedKeys[0])"
                           :selectedKey="useProjectTreeStore().selectedKeys[0]"
         />
 
@@ -188,6 +187,8 @@ import {Filter, FilterOff, Focus2} from '@vicons/tabler'
 
 // 任务树
 const tree = ref<TreeInst | null>(null)
+
+const showJobOverview = ref(false)
 
 // region 节点搜索
 const searchInput = ref(null)
@@ -257,10 +258,12 @@ const projectUserOptionsInit = async () => {
 // endregion
 
 onMounted(async () => {
+  showJobOverview.value = true
 
   await projectUserOptionsInit()
 
   useProjectTreeStore().treeNodesInit()
+
   await projectIdOptionsUpdate()
 
   // 初始化滚动到选中的节点上

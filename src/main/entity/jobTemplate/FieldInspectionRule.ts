@@ -51,6 +51,13 @@ export class FieldInspectionRule {
     })
     ruleList: string
 
+    // 排序号
+    @Column({
+        name: 'sort_num',
+        type: 'int'
+    })
+    sortNum: number
+
     @Column({
         name: 'create_time',
         type: 'datetime'

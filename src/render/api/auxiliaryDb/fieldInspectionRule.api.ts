@@ -18,3 +18,7 @@ export const field_insp_rule_delete = async (id: number): Promise<Result> => {
     return data
 }
 
+export const field_insp_rule_sort_num_save = async (ids: number[]): Promise<Result> => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.fieldInspectionRule.sortNumSave, ids))
+    return data
+}

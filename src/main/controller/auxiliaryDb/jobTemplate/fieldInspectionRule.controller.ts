@@ -1,6 +1,6 @@
 import {AppDataSource} from "@main/dataSource/data-source";
 import {FieldInspectionRule} from "@main/entity/jobTemplate/FieldInspectionRule";
-import {failure, Result} from "@main/vo/resultVo";
+import {failure, Result, success} from "@main/vo/resultVo";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
 import log from "electron-log";
@@ -49,7 +49,10 @@ export class FieldInspectionRuleController {
 
         return await AppDataSource.getRepository(FieldInspectionRule).find({
             where: findOption,
-            order: {createTime: 'asc'}
+            order: {
+                sortNum: 'asc',
+                createTime: 'asc'
+            }
         })
     }
 
@@ -84,6 +87,23 @@ export class FieldInspectionRuleController {
         } catch (error) {
             log.error(error)
             return failure('删除失败')
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.fieldInspectionRule.sortNumSave)
+    public async handleSortNumSave(ids: number[]) {
+        try {
+            for (let i = 0; i < ids.length; i++) {
+                const rule = await AppDataSource.getRepository(FieldInspectionRule).findOneBy({id: ids[i]})
+                if (rule) {
+                    rule.sortNum = i
+                    await AppDataSource.getRepository(FieldInspectionRule).save(rule)
+                }
+            }
+            return success('修改排序号成功')
+        } catch (error) {
+            log.error(error)
+            return failure('修改排序号失败')
         }
     }
 

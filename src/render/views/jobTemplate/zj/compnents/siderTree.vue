@@ -108,7 +108,7 @@
         selectable
         virtual-scroll
 
-        style="height: calc(100vh - 225px);user-select: none"
+        style="height: calc(100vh - 225px);"
 
         :data="treeNodes"
 
@@ -126,6 +126,8 @@
         :render-switcher-icon="renderSwitcherIcon"
 
         :render-label="renderLabel"
+
+        :nodeProps="nodeProps"
     />
   </template>
   <template v-else>
@@ -145,7 +147,7 @@ import {
 import {RemoveRound} from '@vicons/material'
 import {Search} from "@vicons/ionicons5"
 import {Filter, FilterOff, Focus2} from "@vicons/tabler"
-import {NButton, NIcon, NSpace, TreeInst, TreeOption} from "naive-ui"
+import {NButton, NIcon, NSpace, TreeDropInfo, TreeInst, TreeOption} from "naive-ui"
 import {h, ref, watch} from "vue";
 
 const props = defineProps({
@@ -189,6 +191,9 @@ const props = defineProps({
   expandOnClick: {
     type: Boolean,
     default: true
+  },
+  nodeProps: {
+    default: undefined
   }
 })
 

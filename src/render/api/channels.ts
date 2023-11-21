@@ -176,6 +176,7 @@ export const channels = reactive({
             findFieldInspectionRule: 'auxiliaryDb/fieldInspectionRule/findFieldInspectionRule',
             save: 'auxiliaryDb/fieldInspectionRule/save',
             delete: 'auxiliaryDb/fieldInspectionRule/delete',
+            sortNumSave: 'auxiliaryDb/fieldInspectionRule/sortNumSave',
         },
         departCatalogHookRecord: {
             updateByExcel: 'auxiliaryDb/departCatalogHookRecord/updateByExcel',

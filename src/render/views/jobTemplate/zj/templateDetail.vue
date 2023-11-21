@@ -60,6 +60,8 @@
                 @reload-tree="tableFieldTreeNodesInit"
 
                 :render-label="tableFieldTreeRenderLabel"
+
+                :node-props="nodeProps"
             />
           </n-gi>
         </n-grid>
@@ -519,6 +521,17 @@
     </template>
   </n-modal>
 
+  <n-dropdown
+      trigger="manual"
+      placement="bottom-start"
+      style="width: 200px;"
+      :show="showDropdown"
+      :options="(optionsRef as any)"
+      :x="dropDownPos.x"
+      :y="dropDownPos.y"
+      @select="handleDropdownSelect"
+      @clickoutside="handleClickoutside"
+  />
 </template>
 
 <script setup lang="ts">
@@ -527,7 +540,7 @@ import {JobTemplate} from "@main/entity/jobTemplate/JobTemplate";
 import {StructTableFieldType, TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
 import {
   field_insp_rule_delete,
-  field_insp_rule_save,
+  field_insp_rule_save, field_insp_rule_sort_num_save,
   find_field_insp_rule
 } from "@render/api/auxiliaryDb/fieldInspectionRule.api";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
@@ -540,6 +553,7 @@ import {
 import {get_norm, get_norm_code_set, sql_valid} from "@render/api/datacenter.api";
 import {datasourceOptions} from "@render/typings/datacenterOptions";
 import {nativeCopyText} from "@render/utils/common/clipboard";
+import {renderIcon} from "@render/utils/common/renderIcon";
 import {actionTableNames, basicTableNames} from "@render/utils/datacenter/constants";
 import {zjRulesList} from "@render/utils/datacenter/zjRulesList";
 import ArrowDivider from "@render/views/jobTemplate/zj/compnents/arrowDivider.vue";
@@ -555,12 +569,14 @@ import {
   NButton,
   FormItemRule,
   useThemeVars,
+  DropdownOption
 } from "naive-ui";
 import {format} from "sql-formatter";
 import {onMounted, ref, h} from "vue";
 import {GreaterThanEqualRound, LessThanEqualRound} from '@vicons/material'
 import {uuid} from "vue3-uuid";
-import {CircleSmall24Filled} from '@vicons/fluent'
+import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular} from '@vicons/fluent'
+import {VerticalAlignTopOutlined, VerticalAlignBottomOutlined} from '@vicons/antd'
 
 type RuleListType = {
   dimension: string
@@ -1042,6 +1058,143 @@ const handleTableFieldTreeNodeRemove = () => {
   }
   tableFieldTreeNodesInit()
 }
+
+// region 右键菜单
+const showDropdown = ref(false)
+const optionsRef = ref<DropdownOption[]>([])
+const dropDownPos = ref({
+  x: 0,
+  y: 0
+})
+
+const nodeProps = ({option}: { option: TreeOption }) => {
+  if (option.key != 'root' && typeof option.key == 'number') {
+    return {
+      onContextmenu(e: MouseEvent): void {
+        optionsRef.value = [
+          {
+            label: () => {
+              return h('div', {
+                style: {
+                  userSelect: 'none'
+                }
+              }, '置顶')
+            },
+            key: 'top',
+            treeKey: option.key,
+            icon: renderIcon(VerticalAlignTopOutlined)
+          },
+          {
+            label: () => {
+              return h('div', {
+                style: {
+                  userSelect: 'none'
+                }
+              }, '上移')
+            },
+            key: 'up',
+            treeKey: option.key,
+            icon: renderIcon(ArrowUp24Regular)
+          },
+          {
+            label: () => {
+              return h('div', {
+                style: {
+                  userSelect: 'none'
+                }
+              }, '下移')
+            },
+            key: 'down',
+            treeKey: option.key,
+            icon: renderIcon(ArrowDown24Regular)
+          },
+          {
+            label: () => {
+              return h('div', {
+                style: {
+                  userSelect: 'none'
+                }
+              }, '置底')
+            },
+            key: 'bottom',
+            treeKey: option.key,
+            icon: renderIcon(VerticalAlignBottomOutlined)
+          }
+        ]
+        showDropdown.value = true
+        dropDownPos.value.x = e.clientX
+        dropDownPos.value.y = e.clientY
+        e.preventDefault()
+      }
+    }
+  }
+
+}
+
+const handleDropdownSelect = (key: string, option: DropdownOption) => {
+  showDropdown.value = false
+
+  if (key == 'top') {
+    tableFieldTreeNodes.value[0].children = moveElementToTop(tableFieldTreeNodes.value[0].children, option.treeKey as number)
+  } else if (key == 'up') {
+    tableFieldTreeNodes.value[0].children = moveElementUp(tableFieldTreeNodes.value[0].children, option.treeKey as number)
+  } else if (key == 'down') {
+    tableFieldTreeNodes.value[0].children = moveElementDown(tableFieldTreeNodes.value[0].children, option.treeKey as number)
+  } else if (key == 'bottom') {
+    tableFieldTreeNodes.value[0].children = moveElementToBottom(tableFieldTreeNodes.value[0].children, option.treeKey as number)
+  }
+
+  const ids: number[] = tableFieldTreeNodes.value[0].children.filter(node => typeof node.key == 'number').map(node => node.key) as number[]
+
+  field_insp_rule_sort_num_save(ids).then(res => {
+    if (!res.success) {
+      window.$message.error(res.message)
+    }
+  })
+
+}
+
+function moveElementToTop(arr: TreeOption[], key: number): TreeOption[] {
+  const elementIndex = arr.findIndex((item) => item.key === key);
+  if (elementIndex > -1) {
+    const element = arr.splice(elementIndex, 1)[0];
+    arr.unshift(element);
+  }
+  return arr;
+}
+
+function moveElementUp(arr: TreeOption[], key: number): TreeOption[] {
+  const elementIndex = arr.findIndex((item) => item.key === key);
+  if (elementIndex > 0) {
+    const element = arr.splice(elementIndex, 1)[0];
+    arr.splice(elementIndex - 1, 0, element);
+  }
+  return arr;
+}
+
+function moveElementDown(arr: TreeOption[], key: number): TreeOption[] {
+  const elementIndex = arr.findIndex((item) => item.key === key);
+  if (elementIndex < arr.length - 1) {
+    const element = arr.splice(elementIndex, 1)[0];
+    arr.splice(elementIndex + 1, 0, element);
+  }
+  return arr;
+}
+
+function moveElementToBottom(arr: TreeOption[], key: number): TreeOption[] {
+  const elementIndex = arr.findIndex((item) => item.key === key);
+  if (elementIndex > -1) {
+    const element = arr.splice(elementIndex, 1)[0];
+    arr.push(element);
+  }
+  return arr;
+}
+
+const handleClickoutside = () => {
+  showDropdown.value = false
+}
+
+// endregion
 
 // endregion
 
@@ -1605,6 +1758,7 @@ const addStructTableFormModel = ref({
   templateId: null,
   createTime: null,
   updateTime: null,
+  sortNum: null,
 })
 const addStructTableModalFormRules = ref({
   tableName: {
