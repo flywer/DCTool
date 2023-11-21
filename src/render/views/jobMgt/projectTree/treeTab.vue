@@ -496,7 +496,7 @@ const handleExpandedKeys = (keys: Array<string>) => {
   useProjectTreeStore().expandedKeys = keys
 }
 
-const handleSelectedKeys = (keys: Array<string>, nodes: TreeOption[]) => {
+const handleSelectedKeys = (keys: Array<string>) => {
   useProjectTreeStore().selectedKeys = keys
 }
 

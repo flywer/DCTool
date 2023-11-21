@@ -147,7 +147,7 @@ import {
 import {RemoveRound} from '@vicons/material'
 import {Search} from "@vicons/ionicons5"
 import {Filter, FilterOff, Focus2} from "@vicons/tabler"
-import {NButton, NIcon, NSpace, TreeDropInfo, TreeInst, TreeOption} from "naive-ui"
+import {NButton, NIcon, NSpace, TreeInst, TreeOption} from "naive-ui"
 import {h, ref, watch} from "vue";
 
 const props = defineProps({
