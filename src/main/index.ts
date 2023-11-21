@@ -25,6 +25,8 @@ import {ExtractLawsController} from "@main/controller/toolbox/extractLaws.contro
 import {UpdaterController} from "@main/controller/updater.controller";
 import {XlsxController} from "@main/controller/xlsx.controller";
 import {AppDataSource} from "@main/dataSource/data-source";
+import {FrontSource} from "@main/dataSource/front-source";
+import {ShareSource} from "@main/dataSource/share-source";
 import {getAppSettings} from "@main/utils/configUtils";
 import {createWindow} from "@main/window/windowManager";
 import {appLogInit} from "../app/app.log";
@@ -55,10 +57,14 @@ async function electronAppInit() {
     app.on('window-all-closed', () => {
         TaskSchedulerController.getInstance().cronJobsStopAll()
         if (process.platform !== 'darwin') {
-            app.exit()
+            AppDataSource.destroy()
+            FrontSource.destroy()
+            ShareSource.destroy()
+
             if (tray != null) {
                 tray.destroy()
             }
+            app.exit()
         }
     })
 
