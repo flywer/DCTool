@@ -258,12 +258,12 @@ const projectUserOptionsInit = async () => {
 // endregion
 
 onMounted(async () => {
-  showJobOverview.value = true
-
-  await projectUserOptionsInit()
 
   useProjectTreeStore().treeNodesInit()
 
+  showJobOverview.value = true
+
+  await projectUserOptionsInit()
   await projectIdOptionsUpdate()
 
   // 初始化滚动到选中的节点上
