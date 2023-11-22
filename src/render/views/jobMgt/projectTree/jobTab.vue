@@ -1590,7 +1590,7 @@ const addSchedJobModalFormModelInit = async (v: Job) => {
   addSchedJobModalFormModel.value.jobContent = v.jobName
   addSchedJobModalFormModel.value.jobDesc = v.jobName
   addSchedJobModalFormModel.value.jobTemplateId = v.id
-  addSchedJobModalFormModel.value.projectName = (await get_project_by_pro_abbr(v.jobName.split("_")[1]))?.projectName || '未知项目'
+  addSchedJobModalFormModel.value.projectName = (await find_by_project_id(queryParam.value.projectId))?.projectName || '未知项目'
 
   const cron = (await find_by_project_id(queryParam.value.projectId))?.cjCron || null
   if (cron != null) {
