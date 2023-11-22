@@ -71,7 +71,7 @@ export const get_columns = async (datasourceId: string, tableName: string, onlyC
     // 取这个新数组中第二个元素（索引为1），也就是两个冒号之间的值。
     // 将这个值存储到一个新的数组中。
     // 最后返回新的数组即可。
-    if (data.code == -1) {
+    if (data?.code == -1) {
         return null
     } else {
         return data.data.map((item: string) => {
