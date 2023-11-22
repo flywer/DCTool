@@ -203,12 +203,12 @@ const customSort = (arr: any[]): any[] => {
       return 'right_dwd'
     } else if (tableName.endsWith('error_dwd')) {
       return 'error_dwd'
-    } else if (tableName.endsWith('dwb')) {
-      return 'dwb'
     } else if (tableName.endsWith('right_dwb')) {
       return 'right_dwb'
     } else if (tableName.endsWith('error_dwb')) {
       return 'error_dwb'
+    } else if (tableName.endsWith('dwb')) {
+      return 'dwb'
     } else {
       return ''
     }
@@ -233,7 +233,26 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '表描述',
       key: 'tableComment',
-      width: '22%'
+      width: '22%',
+      render(row) {
+        if (row.tableName.startsWith('di_') && row.tableName.endsWith('_temp_ods')) {
+          return 'ODS层临时表'
+        } else if (row.tableName.startsWith('di_') && row.tableName.endsWith('_ods')) {
+          return 'ODS层备份表'
+        } else if (row.tableName.startsWith('di_') && row.tableName.endsWith('_right_dwd')) {
+          return 'DWD层合格表'
+        } else if (row.tableName.startsWith('di_') && row.tableName.endsWith('_error_dwd')) {
+          return 'DWD层不合格表'
+        } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_right_dwb')) {
+          return 'DWB层合格表'
+        } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_error_dwb')) {
+          return 'DWB层不合格表'
+        } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_dwb')) {
+          return 'DWB层融合表'
+        } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_dm')) {
+          return 'DM层全量表'
+        }
+      }
     },
     {
       title: '创建时间',
