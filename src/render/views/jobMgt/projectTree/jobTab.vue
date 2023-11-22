@@ -685,7 +685,7 @@ import {
   update_sched_job
 } from "@render/api/datacenter.api";
 import {get_table_data} from "@render/api/front.api";
-import {find_by_project_id, get_project_by_pro_abbr} from "@render/api/auxiliaryDb/projectInfo.api";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import ZjJobInspConfigModal from "@render/components/datacenter/zjJobInspConfigModal.vue";
 import ZjJobInspSituationModal from "@render/components/datacenter/zjJobInspSituationModal.vue";
