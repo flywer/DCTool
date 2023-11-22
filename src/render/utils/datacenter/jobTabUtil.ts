@@ -4,7 +4,7 @@ import {DataDevBizVo} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import { TemplateStructTable } from "@main/entity/jobTemplate/TemplateStructTable";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
-import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
+import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {find_job_rel_by_job_id, find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {create_cron_job} from "@render/api/cron.api";
@@ -27,7 +27,6 @@ import {
     workflow_run
 } from "@render/api/datacenter.api";
 import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
-import {actionTableNames} from "@render/utils/datacenter/constants";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
