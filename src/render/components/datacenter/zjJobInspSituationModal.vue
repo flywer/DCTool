@@ -1,7 +1,7 @@
 <template>
   <n-modal
       v-model:show="_show"
-      :mask-closable="false"
+      :mask-closable="true"
       :closable="true"
       preset="dialog"
       role="dialog"
