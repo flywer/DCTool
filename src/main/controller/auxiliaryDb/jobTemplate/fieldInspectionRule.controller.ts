@@ -1,5 +1,6 @@
 import {AppDataSource} from "@main/dataSource/data-source";
 import {FieldInspectionRule} from "@main/entity/jobTemplate/FieldInspectionRule";
+import {TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
 import {failure, Result, success} from "@main/vo/resultVo";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
@@ -61,6 +62,12 @@ export class FieldInspectionRuleController {
         try {
             let result = new Result();
             result.data = await AppDataSource.getRepository(FieldInspectionRule).save(model)
+
+            const structTable = await AppDataSource.getRepository(TemplateStructTable).findOneBy({id: result.data.tableId})
+            structTable.updateTime = new Date()
+
+            await AppDataSource.getRepository(TemplateStructTable).save(structTable)
+
             result.success = true
             return result
         } catch (error) {

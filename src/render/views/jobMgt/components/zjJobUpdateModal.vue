@@ -141,7 +141,7 @@ const onUpdateZjJob = () => {
     if (!errors) {
       isSaving.value = true
       const model = new ZjJobSaveModel()
-      model.updateJobFieldInspRules(formModel.value.jobId, formModel.value.structTableId).then(() => {
+      model.updateJobFieldInspRules(formModel.value.jobId, formModel.value.structTableId,true,true).then(() => {
         _show.value = false
         emit('onAfterLeave')
       }).finally(() => isSaving.value = false)

@@ -37,8 +37,6 @@ export const formatDate2Day = (date: Date, isCN?: boolean): string => {
     }
 }
 
-
-
 export const isValidDateString = (dateString: string): boolean => {
     const timestamp = Date.parse(dateString);
     return !isNaN(timestamp);
@@ -117,4 +115,22 @@ export const getMondayOfCurrentWeek = (): Date => {
     mondayDate.setHours(0, 0, 0, 0);
 
     return mondayDate;
+}
+
+/**
+ * 计算一个时间与当前时间相差天数
+ **/
+export const calculateDaysDifferenceFromNow = (targetDate: string) => {
+    // 获取当前时间
+    const now = new Date();
+
+    // 将目标日期转换为时间对象
+    const givenDate = new Date(targetDate);
+
+    // 计算时间差值（毫秒数）
+    const timeDiffInMs = givenDate.getTime() - now.getTime();
+
+    // 将毫秒数转换为天数
+    // 返回结果
+    return Math.floor(timeDiffInMs / (1000 * 60 * 60 * 24));
 }

@@ -276,7 +276,7 @@ export class ZjJobSaveModel {
 
     }
 
-    public async updateJobFieldInspRules(workflowId: string, structTableId: number) {
+    public async updateJobFieldInspRules(workflowId: string, structTableId: number, showMessage?: boolean, saveStructTableJobRel?: boolean) {
         await this.setByWorkflowInfo(workflowId)
         await this.setTableFieldRules(structTableId)
 
@@ -291,8 +291,12 @@ export class ZjJobSaveModel {
 
         await update_workflow(workflowId, this).then((res) => {
             if (res.success) {
-                window.$message.success(res.message)
-                save_struct_table_job_rel(this.structTableId, workflowId)
+                if (showMessage) {
+                    window.$message.success('更新质检规则成功')
+                }
+                if (saveStructTableJobRel) {
+                    save_struct_table_job_rel(this.structTableId, workflowId)
+                }
             } else {
                 window.$message.error(res.message)
             }

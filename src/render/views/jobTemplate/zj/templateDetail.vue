@@ -34,6 +34,8 @@
                 @reload-tree="structTableTreeNodesInit"
 
                 :render-label="structTableTreeRenderLabel"
+
+                :node-props="structTableTreeNodeProps"
             />
           </n-gi>
           <n-gi :span="1">
@@ -61,7 +63,7 @@
 
                 :render-label="tableFieldTreeRenderLabel"
 
-                :node-props="nodeProps"
+                :node-props="tableFieldTreeNodeProps"
             />
           </n-gi>
         </n-grid>
@@ -524,13 +526,30 @@
   <n-dropdown
       trigger="manual"
       placement="bottom-start"
-      style="width: 200px;"
-      :show="showDropdown"
-      :options="(optionsRef as any)"
-      :x="dropDownPos.x"
-      :y="dropDownPos.y"
-      @select="handleDropdownSelect"
-      @clickoutside="handleClickoutside"
+      style="width: 150px;"
+      :show="showStructTableTreeDropdown"
+      :options="(structTableTreeDropdownOptions as any)"
+      :x="structTableTreeDropDownPos.x"
+      :y="structTableTreeDropDownPos.y"
+      @select="handleStructTableTreeNodeDropdownSelect"
+      @clickoutside="handleStructTableTreeDropdownClickOutside"
+  />
+
+  <n-dropdown
+      trigger="manual"
+      placement="bottom-start"
+      style="width: 120px;"
+      :show="showTableFieldTreeDropdown"
+      :options="(tableFieldTreeDropdownOptions as any)"
+      :x="tableFieldTreeDropDownPos.x"
+      :y="tableFieldTreeDropDownPos.y"
+      @select="handleTableFieldTreeNodeDropdownSelect"
+      @clickoutside="handleTableFieldTreeDropdownClickOutside"
+  />
+
+  <struct-table-rel-job-modal
+      v-model:show="structTableRelJobModalConfig.show"
+      :struct-table-id="structTableRelJobModalConfig.structTableId"
   />
 </template>
 
@@ -559,6 +578,7 @@ import {zjRulesList} from "@render/utils/datacenter/zjRulesList";
 import ArrowDivider from "@render/views/jobTemplate/zj/compnents/arrowDivider.vue";
 import SiderTree from "@render/views/jobTemplate/zj/compnents/siderTree.vue";
 import StructTableInfo from "@render/views/jobTemplate/zj/compnents/structTableInfo.vue";
+import StructTableRelJobModal from "@render/views/jobTemplate/zj/compnents/structTableRelJobModal.vue";
 import {cloneDeep, isEmpty} from "lodash-es";
 import {
   FormInst,
@@ -569,13 +589,13 @@ import {
   NButton,
   FormItemRule,
   useThemeVars,
-  DropdownOption
+  DropdownOption,
 } from "naive-ui";
 import {format} from "sql-formatter";
 import {onMounted, ref, h} from "vue";
 import {GreaterThanEqualRound, LessThanEqualRound} from '@vicons/material'
 import {uuid} from "vue3-uuid";
-import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular} from '@vicons/fluent'
+import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular, TaskListLtr24Regular} from '@vicons/fluent'
 import {VerticalAlignTopOutlined, VerticalAlignBottomOutlined} from '@vicons/antd'
 
 type RuleListType = {
@@ -886,6 +906,65 @@ const structTableTreeRenderLabel = (info: {
   }
 }
 
+// region 右键菜单
+const showStructTableTreeDropdown = ref(false)
+const structTableTreeDropdownOptions = ref<DropdownOption[]>([])
+const structTableTreeDropDownPos = ref({
+  x: 0,
+  y: 0
+})
+
+const structTableTreeNodeProps = ({option}: { option: TreeOption }) => {
+  if (typeof option.key == 'number') {
+    return {
+      onContextmenu(e: MouseEvent): void {
+        structTableTreeDropdownOptions.value = [
+          {
+            label: () => {
+              return h('div', {
+                style: {
+                  userSelect: 'none'
+                }
+              }, '查看关联任务')
+            },
+            key: 'viewJob',
+            treeKey: option.key,
+            icon: renderIcon(TaskListLtr24Regular)
+          },
+        ]
+        showStructTableTreeDropdown.value = true
+        structTableTreeDropDownPos.value.x = e.clientX
+        structTableTreeDropDownPos.value.y = e.clientY
+        e.preventDefault()
+      }
+    }
+  }
+
+}
+
+const handleStructTableTreeNodeDropdownSelect = (key: string, option: DropdownOption) => {
+  showStructTableTreeDropdown.value = false
+
+  if (key == 'viewJob') {
+    structTableRelJobModalConfig.value.show =true
+    structTableRelJobModalConfig.value.structTableId =option.treeKey
+
+  }
+
+}
+const handleStructTableTreeDropdownClickOutside = () => {
+  showStructTableTreeDropdown.value = false
+}
+// endregion
+
+// region 关联任务
+const structTableRelJobModalConfig = ref({
+  show: false,
+  structTableId: null
+})
+
+// endregion
+
 // endregion
 
 // region 表字段树
@@ -1060,18 +1139,18 @@ const handleTableFieldTreeNodeRemove = () => {
 }
 
 // region 右键菜单
-const showDropdown = ref(false)
-const optionsRef = ref<DropdownOption[]>([])
-const dropDownPos = ref({
+const showTableFieldTreeDropdown = ref(false)
+const tableFieldTreeDropdownOptions = ref<DropdownOption[]>([])
+const tableFieldTreeDropDownPos = ref({
   x: 0,
   y: 0
 })
 
-const nodeProps = ({option}: { option: TreeOption }) => {
+const tableFieldTreeNodeProps = ({option}: { option: TreeOption }) => {
   if (option.key != 'root' && typeof option.key == 'number') {
     return {
       onContextmenu(e: MouseEvent): void {
-        optionsRef.value = [
+        tableFieldTreeDropdownOptions.value = [
           {
             label: () => {
               return h('div', {
@@ -1121,9 +1200,9 @@ const nodeProps = ({option}: { option: TreeOption }) => {
             icon: renderIcon(VerticalAlignBottomOutlined)
           }
         ]
-        showDropdown.value = true
-        dropDownPos.value.x = e.clientX
-        dropDownPos.value.y = e.clientY
+        showTableFieldTreeDropdown.value = true
+        tableFieldTreeDropDownPos.value.x = e.clientX
+        tableFieldTreeDropDownPos.value.y = e.clientY
         e.preventDefault()
       }
     }
@@ -1131,8 +1210,8 @@ const nodeProps = ({option}: { option: TreeOption }) => {
 
 }
 
-const handleDropdownSelect = (key: string, option: DropdownOption) => {
-  showDropdown.value = false
+const handleTableFieldTreeNodeDropdownSelect = (key: string, option: DropdownOption) => {
+  // showTableFieldTreeDropdown.value = false
 
   if (key == 'top') {
     tableFieldTreeNodes.value[0].children = moveElementToTop(tableFieldTreeNodes.value[0].children, option.treeKey as number)
@@ -1154,7 +1233,7 @@ const handleDropdownSelect = (key: string, option: DropdownOption) => {
 
 }
 
-function moveElementToTop(arr: TreeOption[], key: number): TreeOption[] {
+const moveElementToTop = (arr: TreeOption[], key: number): TreeOption[] => {
   const elementIndex = arr.findIndex((item) => item.key === key);
   if (elementIndex > -1) {
     const element = arr.splice(elementIndex, 1)[0];
@@ -1163,7 +1242,7 @@ function moveElementToTop(arr: TreeOption[], key: number): TreeOption[] {
   return arr;
 }
 
-function moveElementUp(arr: TreeOption[], key: number): TreeOption[] {
+const moveElementUp = (arr: TreeOption[], key: number): TreeOption[] => {
   const elementIndex = arr.findIndex((item) => item.key === key);
   if (elementIndex > 0) {
     const element = arr.splice(elementIndex, 1)[0];
@@ -1172,7 +1251,7 @@ function moveElementUp(arr: TreeOption[], key: number): TreeOption[] {
   return arr;
 }
 
-function moveElementDown(arr: TreeOption[], key: number): TreeOption[] {
+const moveElementDown = (arr: TreeOption[], key: number): TreeOption[] => {
   const elementIndex = arr.findIndex((item) => item.key === key);
   if (elementIndex < arr.length - 1) {
     const element = arr.splice(elementIndex, 1)[0];
@@ -1181,7 +1260,7 @@ function moveElementDown(arr: TreeOption[], key: number): TreeOption[] {
   return arr;
 }
 
-function moveElementToBottom(arr: TreeOption[], key: number): TreeOption[] {
+const moveElementToBottom = (arr: TreeOption[], key: number): TreeOption[] => {
   const elementIndex = arr.findIndex((item) => item.key === key);
   if (elementIndex > -1) {
     const element = arr.splice(elementIndex, 1)[0];
@@ -1190,8 +1269,8 @@ function moveElementToBottom(arr: TreeOption[], key: number): TreeOption[] {
   return arr;
 }
 
-const handleClickoutside = () => {
-  showDropdown.value = false
+const handleTableFieldTreeDropdownClickOutside = () => {
+  showTableFieldTreeDropdown.value = false
 }
 
 // endregion

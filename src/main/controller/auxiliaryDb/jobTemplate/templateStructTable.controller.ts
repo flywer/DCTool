@@ -122,4 +122,15 @@ export class TemplateStructTableController {
             return failure('失败')
         }
     }
+
+    @IpcHandle(channels.auxiliaryDb.templateStructTable.findJobRelById)
+    public handleFindJobRelById(id: number) {
+        return AppDataSource.getRepository(TemplateTableJobRel).findBy({structTableId: id});
+    }
+
+    @IpcHandle(channels.auxiliaryDb.templateStructTable.findJobRelByJobId)
+    public handleFindJobRelByJobId(id: string) {
+        return AppDataSource.getRepository(TemplateTableJobRel).findBy({jobId: id});
+    }
+
 }

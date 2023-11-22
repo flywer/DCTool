@@ -2,9 +2,11 @@
 import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
 import {DataDevBizVo} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
+import { TemplateStructTable } from "@main/entity/jobTemplate/TemplateStructTable";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json, get_simp_zj_json, get_zj_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
+import {find_job_rel_by_job_id, find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {create_cron_job} from "@render/api/cron.api";
 import {
     datax_job_delete,
@@ -486,20 +488,17 @@ const checkZjJobInspConfig = async (job: Job): Promise<boolean> => {
 
 // 检查任务模板是否存在新版本
 const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
-    // TODO 暂时无法检测新质检模板
-    if (job.type === JobType.zj) {
+    if (job.type.includes('zj')) {
 
-        const tableName = job.jobName.split('_').pop()
-
-        let rulesUpdateTime: string
-        // 行为数据且不是数据湖质检任务
-        if (actionTableNames.includes(tableName) && !job.jobName.startsWith('zj_lake')) {
-            rulesUpdateTime = formatDate((await get_simp_zj_json(tableName))[0].simpZjUpdateTime)
+        const tableRel = (await find_job_rel_by_job_id(job.id))[0]
+        let structTable: TemplateStructTable
+        if (tableRel) {
+            structTable = (await find_template_struct_table({id: tableRel.structTableId}))[0]
         } else {
-            rulesUpdateTime = formatDate((await get_zj_json(tableName))[0].zjUpdateTime)
+            return true
         }
 
-        if (compareTimeStrings(job.updateTime, rulesUpdateTime) > -1) {
+        if (compareTimeStrings(job.updateTime, formatDate(structTable.updateTime)) > -1) {
             return true
         } else {
             return new Promise<boolean>((resolve) => {

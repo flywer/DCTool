@@ -171,6 +171,8 @@ export const channels = reactive({
             save: 'auxiliaryDb/templateStructTable/save',
             delete: 'auxiliaryDb/templateStructTable/delete',
             saveTableJobRel: 'auxiliaryDb/templateStructTable/saveTableJobRel',
+            findJobRelById: 'auxiliaryDb/templateStructTable/findJobRelById',
+            findJobRelByJobId: 'auxiliaryDb/templateStructTable/findJobRelByJobId',
         },
         fieldInspectionRule: {
             findFieldInspectionRule: 'auxiliaryDb/fieldInspectionRule/findFieldInspectionRule',

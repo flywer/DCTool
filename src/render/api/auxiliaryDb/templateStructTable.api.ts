@@ -1,4 +1,5 @@
 import {TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
+import {TemplateTableJobRel} from "@main/entity/jobTemplate/TemplateTableJobRel";
 import {Result} from "@main/vo/resultVo";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
@@ -22,3 +23,14 @@ export const save_struct_table_job_rel = async (structTableId: number, jobId: st
     const {data} = (await ipcInstance.send(channels.auxiliaryDb.templateStructTable.saveTableJobRel, structTableId, jobId))
     return data
 }
+
+export const find_job_rel_by_id = async (structTableId: number):Promise<TemplateTableJobRel[]> => {
+    const {data} = (await ipcInstance.send(channels.auxiliaryDb.templateStructTable.findJobRelById, structTableId))
+    return data
+}
+
+export const find_job_rel_by_job_id = async (jobId: string):Promise<TemplateTableJobRel[]> => {
+    const {data} = (await ipcInstance.send(channels.auxiliaryDb.templateStructTable.findJobRelByJobId, jobId))
+    return data
+}
+
