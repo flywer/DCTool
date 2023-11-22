@@ -6,6 +6,13 @@
       </n-h3>
 
       <n-grid :cols="2" :x-gap="12" :y-gap="12" class="mt-3" v-if="projectAbbr">
+        <n-gi :span="2">
+          <overview-data-x-job-card
+              title="全部任务"
+              :job-prefix="''"
+              :project-abbr="projectAbbr"
+          />
+        </n-gi>
         <n-gi :span="1">
           <overview-data-x-job-card
               title="采集任务"
@@ -28,6 +35,13 @@
         工作流任务
       </n-h3>
       <n-grid :cols="1" :x-gap="12" :y-gap="12" class="mt-3" v-if="projectAbbr">
+        <n-gi :span="1">
+          <overview-workflow-card
+              title="全部任务"
+              :job-prefix="''"
+              :project-abbr="projectAbbr"
+          />
+        </n-gi>
         <n-gi :span="1">
           <overview-workflow-card
               title="基础数据质检任务"
