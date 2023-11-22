@@ -37,7 +37,7 @@
           :size="'small'"
           :loading="isTableLoading"
           :striped="true"
-          :scroll-x="1200"
+          :scroll-x="1300"
       >
         <template #empty>
           <span style="color: rgba(194, 194, 194, 1)">未选择任务或未配置项目简称信息</span>
@@ -692,7 +692,7 @@ import ZjJobInspSituationModal from "@render/components/datacenter/zjJobInspSitu
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {convertCronExpression} from "@render/utils/common/cronUtils";
-import {formatDate} from "@render/utils/common/dateUtils";
+import {calculateDaysDifferenceFromNow, formatDate} from "@render/utils/common/dateUtils";
 import {createBfJob} from "@render/utils/datacenter/bfJob";
 import {CjFormModelType, createCjJob, createSchedJob, updateDataXJob} from "@render/utils/datacenter/cjJob";
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
@@ -727,7 +727,8 @@ import {
   NSpace,
   SelectGroupOption,
   SelectOption,
-  TreeSelectOption
+  TreeSelectOption,
+  NTag
 } from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
 
@@ -943,7 +944,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务类型',
       key: 'type',
-      width: '6%',
+      width: '5%',
       render(row) {
         return getJobTypeComment(row.type)
       }
@@ -960,7 +961,21 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '8%'
+      width: '8%',
+      render(row) {
+        if (row.lastExecTime != '-') {
+          if (calculateDaysDifferenceFromNow(row.lastExecTime) <= -7) {
+            return h(NTag, {
+              bordered: false,
+              type: 'warning'
+            }, row.lastExecTime)
+          } else {
+            return row.lastExecTime
+          }
+        } else {
+          return row.lastExecTime
+        }
+      }
     },
     {
       title: '下次执行时间',
@@ -980,7 +995,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '操作',
       key: 'actions',
-      width: '13%',
+      width: '12%',
       align: 'center',
       fixed: 'right',
       render(row) {
