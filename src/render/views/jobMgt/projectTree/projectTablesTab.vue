@@ -128,9 +128,12 @@ watch(defaultSelectedKeys, async (newValue) => {
     if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
       const projectId = segments[segments.length - 2]
       const project = (await find_by_project_id(projectId))
-      queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
-
-      await tableDataInit()
+      if (project) {
+        queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
+        await tableDataInit()
+      }else {
+        tableDataRef.value =[]
+      }
     }
 
   }
@@ -149,8 +152,11 @@ onMounted(async () => {
   if (pattern.test(segments[segments.length - 1]) && segments[segments.length - 1].length === 5) {
     const projectId = segments[segments.length - 2]
     const project = (await find_by_project_id(projectId))
-    queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
-    await tableDataInit()
+    if (project) {
+      queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
+      await tableDataInit()
+    }
+
   }
 })
 

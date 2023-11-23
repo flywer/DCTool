@@ -807,129 +807,134 @@ const setTitle = async (project: ProjectInfo) => {
 
 const tableDataInit = async () => {
   isTableLoading.value = true
+  try {
+    let jobs = []
 
-  let jobs = []
+    await setTitle(projectRef.value)
 
-  await setTitle(projectRef.value)
+    const projectAbbr = projectRef.value?.projectAbbr || '';
+    if (projectAbbr !== '') {
+      // region 采集任务
+      let dataXJobs = (await get_cj_job_page({
+        current: 1,
+        size: 10000,
+        jobDesc: `${projectAbbr}_${queryParam.value.tableAbbr}`,
+        subsystemName: "采集"
+      })).data?.records || []
 
-  const projectAbbr = projectRef.value?.projectAbbr || '';
-  if (projectAbbr !== '') {
-    // region 采集任务
-    let dataXJobs = (await get_cj_job_page({
-      current: 1,
-      size: 10000,
-      jobDesc: `${projectAbbr}_${queryParam.value.tableAbbr}`,
-      subsystemName: "采集"
-    })).data?.records || []
+      let newDataXJobs = []
 
-    let newDataXJobs = []
+      for (const v of dataXJobs) {
+        const schedJob = await getSchedJob(v.jobDesc)
 
-    for (const v of dataXJobs) {
-      const schedJob = await getSchedJob(v.jobDesc)
+        const job: Job = {
+          id: v.id,
+          jobName: v.jobDesc,
+          status: await getDataXJobStatus(v, schedJob),
+          type: getJobType(v.jobDesc),
+          schedMode: 2,
+          cron: schedJob?.jobCron || null,
+          lastExecTime: v.triggerLastTime || '--',
+          nextExecTime: dataXJobGetNextExecTime(schedJob),
+          createBy: null,
+          createTime: schedJob?.addTime || '--',
+          updateTime: schedJob?.updateTime || '--',
+          jobRerunType: null,
+          project: projectRef.value
+        }
 
-      const job: Job = {
-        id: v.id,
-        jobName: v.jobDesc,
-        status: await getDataXJobStatus(v, schedJob),
-        type: getJobType(v.jobDesc),
-        schedMode: 2,
-        cron: schedJob?.jobCron || null,
-        lastExecTime: v.triggerLastTime || '--',
-        nextExecTime: dataXJobGetNextExecTime(schedJob),
-        createBy: null,
-        createTime: schedJob?.addTime || '--',
-        updateTime: schedJob?.updateTime || '--',
-        jobRerunType: null,
-        project: projectRef.value
+        newDataXJobs.push(job)
       }
 
-      newDataXJobs.push(job)
-    }
-
-    // 若不存在采集任务
-    if (!newDataXJobs.some(job => job.type === JobType.cj)) {
-      newDataXJobs.push({
-        id: null,
-        jobName: `cj_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
-        status: -1,
-        type: JobType.cj,
-        schedMode: 2,
-        cron: null,
-        lastExecTime: '--',
-        nextExecTime: '未配置调度任务',
-        createBy: null
-      })
-    }
-
-    // 若不存在共享任务
-    if (!newDataXJobs.some(job => job.type === JobType.gx)) {
-      newDataXJobs.push({
-        id: null,
-        jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
-        status: -1,
-        type: JobType.gx,
-        schedMode: 2,
-        cron: null,
-        lastExecTime: '--',
-        nextExecTime: '未配置调度任务',
-        createBy: null
-      })
-    }
-
-    // 行为数据的共享任务不显示
-    if (!projectTree.isBasicData) {
-      newDataXJobs = newDataXJobs.filter(job => job.type !== JobType.gx)
-    }
-
-    // endregion
-
-    // region 工作流任务
-    const workflowJobs: Workflow[] = (await get_workflow_page({
-      page: 1,
-      size: 10000,
-      status: null,
-      procName: `${projectAbbr}_${queryParam.value.tableAbbr}`
-    })).data?.records || []
-
-    let newWorkflowJobs = []
-
-    for (const v of workflowJobs) {
-      const job: Job = {
-        id: v.id,
-        jobName: v.procName,
-        type: getJobType(v.procName),
-        status: getWorkflowJobStatus(v),
-        schedMode: parseInt(v.schedulingMode) == 1 ? 1 : 2,
-        cron: v.crontab == '' ? null : v.crontab,
-        lastExecTime: await workflowJobGetLastExecTime(v),
-        nextExecTime: workflowJobGetNextExecTime(v),
-        createBy: v.createBy,
-        code: v.procCode,
-        createTime: v.createTime,
-        updateTime: v.updateTime,
-        jobRerunType: v.editModel == 1 ? 2 : 1,
-        project: projectRef.value
+      // 若不存在采集任务
+      if (!newDataXJobs.some(job => job.type === JobType.cj)) {
+        newDataXJobs.push({
+          id: null,
+          jobName: `cj_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
+          status: -1,
+          type: JobType.cj,
+          schedMode: 2,
+          cron: null,
+          lastExecTime: '--',
+          nextExecTime: '未配置调度任务',
+          createBy: null
+        })
       }
 
-      newWorkflowJobs.push(job)
+      // 若不存在共享任务
+      if (!newDataXJobs.some(job => job.type === JobType.gx)) {
+        newDataXJobs.push({
+          id: null,
+          jobName: `gx_${projectAbbr}_${queryParam.value.tableAbbr.toString().toLowerCase()}`,
+          status: -1,
+          type: JobType.gx,
+          schedMode: 2,
+          cron: null,
+          lastExecTime: '--',
+          nextExecTime: '未配置调度任务',
+          createBy: null
+        })
+      }
+
+      // 行为数据的共享任务不显示
+      if (!projectTree.isBasicData) {
+        newDataXJobs = newDataXJobs.filter(job => job.type !== JobType.gx)
+      }
+
+      // endregion
+
+      // region 工作流任务
+      const workflowJobs: Workflow[] = (await get_workflow_page({
+        page: 1,
+        size: 10000,
+        status: null,
+        procName: `${projectAbbr}_${queryParam.value.tableAbbr}`
+      })).data?.records || []
+
+      let newWorkflowJobs = []
+
+      for (const v of workflowJobs) {
+        const job: Job = {
+          id: v.id,
+          jobName: v.procName,
+          type: getJobType(v.procName),
+          status: getWorkflowJobStatus(v),
+          schedMode: parseInt(v.schedulingMode) == 1 ? 1 : 2,
+          cron: v.crontab == '' ? null : v.crontab,
+          lastExecTime: await workflowJobGetLastExecTime(v),
+          nextExecTime: workflowJobGetNextExecTime(v),
+          createBy: v.createBy,
+          code: v.procCode,
+          createTime: v.createTime,
+          updateTime: v.updateTime,
+          jobRerunType: v.editModel == 1 ? 2 : 1,
+          project: projectRef.value
+        }
+
+        newWorkflowJobs.push(job)
+      }
+
+      // 添加未创建的任务
+      newWorkflowJobs = pushUnExistJobs(newWorkflowJobs, projectAbbr, queryParam.value.tableAbbr, projectTree.isBasicData)
+
+      // 行为数据的入库任务不显示
+      if (!projectTree.isBasicData) {
+        newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== JobType.rk)
+      }
+
+      // endregion
+
+      jobs.push(...newDataXJobs, ...newWorkflowJobs)
+    } else {
+      tableDataRef.value = []
     }
 
-    // 添加未创建的任务
-    newWorkflowJobs = pushUnExistJobs(newWorkflowJobs, projectAbbr, queryParam.value.tableAbbr, projectTree.isBasicData)
-
-    // 行为数据的入库任务不显示
-    if (!projectTree.isBasicData) {
-      newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== JobType.rk)
-    }
-
-    // endregion
-
-    jobs.push(...newDataXJobs, ...newWorkflowJobs)
-  } else {
-    tableDataRef.value = []
+    tableDataRef.value = jobs.sort(jobNameCompare)
+  } catch (e) {
+    console.error(e)
+    isTableLoading.value = false
+    window.$message.error('获取任务信息异常')
   }
-
-  tableDataRef.value = jobs.sort(jobNameCompare)
 
   isTableLoading.value = false
 }
