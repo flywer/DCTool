@@ -254,22 +254,27 @@ export class DepartCatalogHookRecordController {
                 .execute()
 
             for (const cityName of cityNames) {
+                //单位总数
+                const departCount = (await AppDataSource.getRepository(DepartCatalogHookRecord).findAndCountBy({cityName: cityName.cityName}))[1]
+
                 // 许可
                 const al: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
                     .query(`
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 4 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 5 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al = 6 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND al NOT IN (4,5,6)
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AL = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AL = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AL = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AL IN (1,2,3) UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AL IN (0,7)
                 `);
 
                 // 征收
                 const ae: DepartStr[] = await AppDataSource.getRepository(DepartCatalogHookRecord)
                     .query(`
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 4 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 5 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae = 6 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND ae NOT IN (4,5,6)
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AE = 4 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AE = 5 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AE = 6 UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AE IN (1,2,3) UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AE IN (0,7)
                 `);
 
                 // 行政检查
@@ -278,7 +283,8 @@ export class DepartCatalogHookRecordController {
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 4 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 5 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC = 6 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC NOT IN (4,5,6)
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC IN (1,2,3) UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AC IN (0,7)
                 `);
 
                 // 行政处罚
@@ -287,7 +293,8 @@ export class DepartCatalogHookRecordController {
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 4 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 5 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP = 6 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP NOT IN (4,5,6)
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP IN (1,2,3) UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AP IN (0,7)
                 `);
 
                 // 行政处罚
@@ -296,40 +303,52 @@ export class DepartCatalogHookRecordController {
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 4 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 5 UNION ALL
                 SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF = 6 UNION ALL
-                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF NOT IN (4,5,6)
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF IN (1,2,3) UNION ALL
+                SELECT GROUP_CONCAT(depart_name) AS 'departs' FROM depart_catalog_hook_record WHERE city_name = '${cityName.cityName}' AND AF IN (0,7)
                 `);
 
                 resultData.push({
                     cityName: cityName.cityName,
+                    departCount: departCount,
                     AL: {
                         nationalVertical: al[0].departs?.split(',') || [],
                         provincialVertical: al[1].departs?.split(',') || [],
                         yzf: al[2].departs?.split(',') || [],
-                        other: al[3].departs?.split(',') || []
+                        citySystem: al[3].departs?.split(',') || [],
+                        noSystem: [],
+                        noData: al[4].departs?.split(',') || [],
                     },
                     AE: {
                         nationalVertical: ae[0].departs?.split(',') || [],
                         provincialVertical: ae[1].departs?.split(',') || [],
                         yzf: ae[2].departs?.split(',') || [],
-                        other: ae[3].departs?.split(',') || []
+                        citySystem: ae[3].departs?.split(',') || [],
+                        noSystem: [],
+                        noData: ae[4].departs?.split(',') || [],
                     },
                     AC: {
                         nationalVertical: ac[0].departs?.split(',') || [],
                         provincialVertical: ac[1].departs?.split(',') || [],
                         yzf: ac[2].departs?.split(',') || [],
-                        other: ac[3].departs?.split(',') || []
+                        citySystem: ac[3].departs?.split(',') || [],
+                        noSystem: [],
+                        noData: ac[4].departs?.split(',') || [],
                     },
                     AP: {
                         nationalVertical: ap[0].departs?.split(',') || [],
                         provincialVertical: ap[1].departs?.split(',') || [],
                         yzf: ap[2].departs?.split(',') || [],
-                        other: ap[3].departs?.split(',') || []
+                        citySystem: ap[3].departs?.split(',') || [],
+                        noSystem: [],
+                        noData: ap[4].departs?.split(',') || [],
                     },
                     AF: {
                         nationalVertical: af[0].departs?.split(',') || [],
                         provincialVertical: af[1].departs?.split(',') || [],
                         yzf: af[2].departs?.split(',') || [],
-                        other: af[3].departs?.split(',') || []
+                        citySystem: af[3].departs?.split(',') || [],
+                        noSystem: [],
+                        noData: af[4].departs?.split(',') || [],
                     }
                 })
             }

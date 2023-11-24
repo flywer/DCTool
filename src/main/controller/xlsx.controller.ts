@@ -1,5 +1,10 @@
 import {FilePathType} from "@common/enum/filePath";
-import {DepartCaseVolumeExcelModel, DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
+import {
+    ProvincialDepartCaseVolumeExcelModel,
+    DepartDataVolExcelModel,
+    InspectionDataExcelModel,
+    CityDepartCaseVolumeExcelModel
+} from "@common/types/dataStat";
 import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
@@ -526,21 +531,19 @@ export class XlsxController {
 
     @IpcHandle(channels.xlsx.createDepartCaseVolumeExcel)
     public async handleCreateDepartCaseVolumeExcel(excelData: {
-        provincialData: DepartCaseVolumeExcelModel[],
-        cityData: DepartCaseVolumeExcelModel[]
+        provincialData: ProvincialDepartCaseVolumeExcelModel[],
+        cityData: CityDepartCaseVolumeExcelModel[]
     }) {
 
         const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
 
-        const createExcelData = (model: DepartCaseVolumeExcelModel[], isProvincial: boolean) => {
+        // region 省直单位
+
+        const createProvincialExcelData = (model: ProvincialDepartCaseVolumeExcelModel[]) => {
             const excelData: any[][] = []
-            if (isProvincial) {
-                excelData.push(['省直单位名称', '非“粤执法”推送案件量', '', '', '', '“粤执法”推送案件量', '总量']);
-                excelData.push(['', '国垂系统', '省垂系统', '自建系统', '合计', '', '']);
-            } else {
-                excelData.push(['地市名称', '非“粤执法”推送案件量', '', '', '', '“粤执法”推送案件量', '总量']);
-                excelData.push(['', '国垂系统', '省垂系统', '自建系统', '合计', '', '']);
-            }
+
+            excelData.push(['省直单位名称', '非“粤执法”推送案件量', '', '', '', '“粤执法”推送案件量', '总量']);
+            excelData.push(['', '国垂系统', '省垂系统', '自建系统', '合计', '', '']);
 
             model.forEach(depart => {
 
@@ -558,56 +561,404 @@ export class XlsxController {
             return excelData
         }
 
-        const headerCellsMerge = (worksheet: ExcelJS.Worksheet) => {
-            // 按开始行，开始列，结束行，结束列合并
-            worksheet.mergeCells(1, 1, 2, 1)
-            worksheet.mergeCells(1, 2, 1, 5)
-            worksheet.mergeCells(1, 6, 2, 6)
-            worksheet.mergeCells(1, 7, 2, 7)
-        }
-        const setColumnWidths = (worksheet: ExcelJS.Worksheet, columnWidths: number[]) => {
-            for (let i = 0; i < columnWidths.length; i++) {
-                worksheet.getColumn(i + 1).width = columnWidths[i];
-            }
-        }
-        const setHeaderCenter = (worksheet: ExcelJS.Worksheet) => {
-            worksheet.getRow(1).alignment = {
-                vertical: 'middle',
-                horizontal: 'center'
-            };
-            worksheet.getRow(2).alignment = {
-                vertical: 'middle',
-                horizontal: 'center'
-            };
-        }
-
-        //省直单位
         const provincialDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直单位推送案件量');
-        provincialDataWorksheet.addRows(createExcelData(excelData.provincialData, true));
 
-        headerCellsMerge(provincialDataWorksheet)
-        setColumnWidths(provincialDataWorksheet, [20, 12, 12, 12, 12, 24, 12])
-        setHeaderCenter(provincialDataWorksheet)
-        this.setCellBolder(provincialDataWorksheet)
+        provincialDataWorksheet.addRows(createProvincialExcelData(excelData.provincialData));
+
+        // 按开始行，开始列，结束行，结束列合并
+        provincialDataWorksheet.mergeCells(1, 1, 2, 1)
+        provincialDataWorksheet.mergeCells(1, 2, 1, 5)
+        provincialDataWorksheet.mergeCells(1, 6, 2, 6)
+        provincialDataWorksheet.mergeCells(1, 7, 2, 7)
+
+        this.setColumnWidths(provincialDataWorksheet, [20, 12, 12, 12, 12, 24, 12])
+
+        provincialDataWorksheet.getRow(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+        provincialDataWorksheet.getRow(2).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
 
         provincialDataWorksheet.getColumn(1).alignment = {
             vertical: 'middle',
             horizontal: 'center'
         };
 
-        // 地市数据
+        this.setCellBolder(provincialDataWorksheet)
+        // endregion
+
+        // region 地市数据
+
+        const setCityDataHeader = () => {
+            cityDataWorksheet.getCell('A1').value = '地市名称'
+            cityDataWorksheet.mergeCells('A1', 'A4')
+
+            cityDataWorksheet.getCell('B1').value = '地市执法部门数量'
+            cityDataWorksheet.mergeCells('B1', 'B4')
+
+            cityDataWorksheet.getColumn('B').width = 18
+
+            // region 行政许可
+            cityDataWorksheet.getCell('C1').value = '行政许可'
+            cityDataWorksheet.mergeCells('C1', 'K2')
+
+            cityDataWorksheet.getCell('C3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('C3', 'D3')
+
+            cityDataWorksheet.getCell('C4').value = '部门数量'
+            cityDataWorksheet.getCell('D4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('E3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('E3', 'F3')
+
+            cityDataWorksheet.getCell('E4').value = '部门数量'
+            cityDataWorksheet.getCell('F4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('G3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('G3', 'H3')
+
+            cityDataWorksheet.getCell('G4').value = '部门数量'
+            cityDataWorksheet.getCell('H4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('I3').value = '无系统'
+            cityDataWorksheet.mergeCells('I3', 'J3')
+
+            cityDataWorksheet.getCell('I4').value = '部门数量'
+            cityDataWorksheet.getCell('J4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('K3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('K4').value = '部门数量'
+
+            // endregion
+
+            // region 行政征收
+            cityDataWorksheet.getCell('L1').value = '行政许可'
+            cityDataWorksheet.mergeCells('L1', 'T2')
+
+            cityDataWorksheet.getCell('L3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('L3', 'M3')
+
+            cityDataWorksheet.getCell('L4').value = '部门数量'
+            cityDataWorksheet.getCell('M4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('N3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('N3', 'O3')
+
+            cityDataWorksheet.getCell('N4').value = '部门数量'
+            cityDataWorksheet.getCell('O4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('P3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('P3', 'Q3')
+
+            cityDataWorksheet.getCell('P4').value = '部门数量'
+            cityDataWorksheet.getCell('Q4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('R3').value = '无系统'
+            cityDataWorksheet.mergeCells('R3', 'S3')
+
+            cityDataWorksheet.getCell('R4').value = '部门数量'
+            cityDataWorksheet.getCell('S4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('T3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('T4').value = '部门数量'
+
+            // endregion
+
+            // region 行政征用
+            cityDataWorksheet.getCell('U1').value = '行政许可'
+            cityDataWorksheet.mergeCells('U1', 'AC2')
+
+            cityDataWorksheet.getCell('U3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('U3', 'V3')
+
+            cityDataWorksheet.getCell('U4').value = '部门数量'
+            cityDataWorksheet.getCell('V4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('W3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('W3', 'X3')
+
+            cityDataWorksheet.getCell('W4').value = '部门数量'
+            cityDataWorksheet.getCell('X4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('Y3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('Y3', 'Z3')
+
+            cityDataWorksheet.getCell('Y4').value = '部门数量'
+            cityDataWorksheet.getCell('Z4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AA3').value = '无系统'
+            cityDataWorksheet.mergeCells('AA3', 'AB3')
+
+            cityDataWorksheet.getCell('AA4').value = '部门数量'
+            cityDataWorksheet.getCell('AB4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AC3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('AC4').value = '部门数量'
+
+            // endregion
+
+            // region 粤执法
+            cityDataWorksheet.getCell('AD1').value = '“粤执法”'
+            cityDataWorksheet.mergeCells('AD1', 'AI1')
+
+            cityDataWorksheet.getCell('AD2').value = '行政检查'
+            cityDataWorksheet.mergeCells('AD2', 'AE3')
+            cityDataWorksheet.getCell('AD4').value = '部门数量'
+            cityDataWorksheet.getCell('AE4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AF2').value = '行政处罚'
+            cityDataWorksheet.mergeCells('AF2', 'AG3')
+            cityDataWorksheet.getCell('AF4').value = '部门数量'
+            cityDataWorksheet.getCell('AG4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AH2').value = '行政强制'
+            cityDataWorksheet.mergeCells('AH2', 'AI3')
+            cityDataWorksheet.getCell('AH4').value = '部门数量'
+            cityDataWorksheet.getCell('AI4').value = '推送案件数量'
+
+            // endregion
+
+            // region 非“粤执法”
+
+            cityDataWorksheet.getCell('AJ1').value = '非“粤执法”'
+            cityDataWorksheet.mergeCells('AJ1', 'BJ1')
+
+            // region 行政检查
+            cityDataWorksheet.getCell('AJ2').value = '行政检查'
+            cityDataWorksheet.mergeCells('AJ2', 'AR2')
+
+            cityDataWorksheet.getCell('AJ3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('AJ3', 'AK3')
+
+            cityDataWorksheet.getCell('AJ4').value = '部门数量'
+            cityDataWorksheet.getCell('AK4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AL3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('AL3', 'AM3')
+
+            cityDataWorksheet.getCell('AL4').value = '部门数量'
+            cityDataWorksheet.getCell('AM4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AN3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('AN3', 'AO3')
+
+            cityDataWorksheet.getCell('AN4').value = '部门数量'
+            cityDataWorksheet.getCell('AO4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AP3').value = '无系统'
+            cityDataWorksheet.mergeCells('AP3', 'AQ3')
+
+            cityDataWorksheet.getCell('AP4').value = '部门数量'
+            cityDataWorksheet.getCell('AQ4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AR3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('AR4').value = '部门数量'
+            // endregion
+
+            // region 行政处罚
+            cityDataWorksheet.getCell('AS2').value = '行政处罚'
+            cityDataWorksheet.mergeCells('AS2', 'BA2')
+
+            cityDataWorksheet.getCell('AS3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('AS3', 'AT3')
+
+            cityDataWorksheet.getCell('AS4').value = '部门数量'
+            cityDataWorksheet.getCell('AT4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AU3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('AU3', 'AV3')
+
+            cityDataWorksheet.getCell('AU4').value = '部门数量'
+            cityDataWorksheet.getCell('AV4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AW3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('AW3', 'AX3')
+
+            cityDataWorksheet.getCell('AW4').value = '部门数量'
+            cityDataWorksheet.getCell('AX4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('AY3').value = '无系统'
+            cityDataWorksheet.mergeCells('AY3', 'AZ3')
+
+            cityDataWorksheet.getCell('AY4').value = '部门数量'
+            cityDataWorksheet.getCell('AZ4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('BA3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('BA4').value = '部门数量'
+            // endregion
+
+            // region 行政强制
+            cityDataWorksheet.getCell('BB2').value = '行政处罚'
+            cityDataWorksheet.mergeCells('BB2', 'BJ2')
+
+            cityDataWorksheet.getCell('BB3').value = '国垂系统'
+            cityDataWorksheet.mergeCells('BB3', 'BC3')
+
+            cityDataWorksheet.getCell('BB4').value = '部门数量'
+            cityDataWorksheet.getCell('BC4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('BD3').value = '省垂系统'
+            cityDataWorksheet.mergeCells('BD3', 'BE3')
+
+            cityDataWorksheet.getCell('BD4').value = '部门数量'
+            cityDataWorksheet.getCell('BE4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('BF3').value = '市自建系统'
+            cityDataWorksheet.mergeCells('BF3', 'BG3')
+
+            cityDataWorksheet.getCell('BF4').value = '部门数量'
+            cityDataWorksheet.getCell('BG4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('BH3').value = '无系统'
+            cityDataWorksheet.mergeCells('BH3', 'BI3')
+
+            cityDataWorksheet.getCell('BH4').value = '部门数量'
+            cityDataWorksheet.getCell('BI4').value = '推送案件数量'
+
+            cityDataWorksheet.getCell('BJ3').value = '无职权/无数据'
+            cityDataWorksheet.getCell('BJ4').value = '部门数量'
+            // endregion
+
+            // endregion
+
+            cityDataWorksheet.getCell('BK1').value = '总量'
+            cityDataWorksheet.mergeCells('BK1', 'BK4')
+
+            cityDataWorksheet.getRow(1).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+            cityDataWorksheet.getRow(2).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+            cityDataWorksheet.getRow(3).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+            cityDataWorksheet.getRow(4).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+        }
+
+        const createCityExcelData = (model: CityDepartCaseVolumeExcelModel[]) => {
+            const excelData: any[][] = []
+
+            model.forEach(data => {
+                excelData.push([
+                    data.cityName,
+                    data.departCount,
+                    data.AL.nv.departCount,
+                    data.AL.nv.caseVolume,
+                    data.AL.pv.departCount,
+                    data.AL.pv.caseVolume,
+                    data.AL.citySystem.departCount,
+                    data.AL.citySystem.caseVolume,
+                    data.AL.noSystem.departCount,
+                    data.AL.noSystem.caseVolume,
+                    data.AL.noData.departCount,
+
+                    data.AE.nv.departCount,
+                    data.AE.nv.caseVolume,
+                    data.AE.pv.departCount,
+                    data.AE.pv.caseVolume,
+                    data.AE.citySystem.departCount,
+                    data.AE.citySystem.caseVolume,
+                    data.AE.noSystem.departCount,
+                    data.AE.noSystem.caseVolume,
+                    data.AE.noData.departCount,
+
+                    data.AR.nv.departCount,
+                    data.AR.nv.caseVolume,
+                    data.AR.pv.departCount,
+                    data.AR.pv.caseVolume,
+                    data.AR.citySystem.departCount,
+                    data.AR.citySystem.caseVolume,
+                    data.AR.noSystem.departCount,
+                    data.AR.noSystem.caseVolume,
+                    data.AR.noData.departCount,
+
+                    data.yzf.AC.departCount,
+                    data.yzf.AC.caseVolume,
+                    data.yzf.AP.departCount,
+                    data.yzf.AP.caseVolume,
+                    data.yzf.AF.departCount,
+                    data.yzf.AF.caseVolume,
+
+                    data.AC.nv.departCount,
+                    data.AC.nv.caseVolume,
+                    data.AC.pv.departCount,
+                    data.AC.pv.caseVolume,
+                    data.AC.citySystem.departCount,
+                    data.AC.citySystem.caseVolume,
+                    data.AC.noSystem.departCount,
+                    data.AC.noSystem.caseVolume,
+                    data.AC.noData.departCount,
+
+                    data.AP.nv.departCount,
+                    data.AP.nv.caseVolume,
+                    data.AP.pv.departCount,
+                    data.AP.pv.caseVolume,
+                    data.AP.citySystem.departCount,
+                    data.AP.citySystem.caseVolume,
+                    data.AP.noSystem.departCount,
+                    data.AP.noSystem.caseVolume,
+                    data.AP.noData.departCount,
+
+                    data.AF.nv.departCount,
+                    data.AF.nv.caseVolume,
+                    data.AF.pv.departCount,
+                    data.AF.pv.caseVolume,
+                    data.AF.citySystem.departCount,
+                    data.AF.citySystem.caseVolume,
+                    data.AF.noSystem.departCount,
+                    data.AF.noSystem.caseVolume,
+                    data.AF.noData.departCount,
+
+                    data.caseTotalVolume
+                ])
+            })
+
+            const numRows = excelData.length;
+            const numCols = excelData[0].length;
+            const totalRow: any[] = [];
+
+            for (let j = 0; j < numCols; j++) {
+                let columnSum = 0;
+                if (j === 0) {
+                    totalRow.push('合计')
+                    continue
+                } else {
+                    for (let i = 0; i < numRows; i++) {
+                        columnSum += excelData[i][j];
+                    }
+                }
+
+                totalRow.push(columnSum);
+            }
+
+            excelData.push(totalRow)
+
+            return excelData
+        }
+
         const cityDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市单位推送案件量');
-        cityDataWorksheet.addRows(createExcelData(excelData.cityData, false));
+        cityDataWorksheet.properties.defaultColWidth = 12
+        setCityDataHeader()
 
-        headerCellsMerge(cityDataWorksheet)
-        setColumnWidths(cityDataWorksheet, [12, 12, 12, 12, 12, 24, 12])
-        setHeaderCenter(cityDataWorksheet)
-        this.setCellBolder(cityDataWorksheet)
-
+        cityDataWorksheet.addRows(createCityExcelData(excelData.cityData));
         cityDataWorksheet.getColumn(1).alignment = {
             vertical: 'middle',
             horizontal: 'center'
-        };
+        }
+
+        this.setCellBolder(cityDataWorksheet)
+
+        // endregion
 
         await dialog.showSaveDialog({
             title: '选择文件保存位置',
@@ -642,5 +993,11 @@ export class XlsxController {
                 cell.border = border;
             });
         });
+    }
+
+    public setColumnWidths(worksheet: ExcelJS.Worksheet, columnWidths: number[]) {
+        for (let i = 0; i < columnWidths.length; i++) {
+            worksheet.getColumn(i + 1).width = columnWidths[i];
+        }
     }
 }

@@ -1,4 +1,9 @@
-import {DepartCaseVolumeExcelModel, DepartDataVolExcelModel, InspectionDataExcelModel} from "@common/types/dataStat";
+import {
+    ProvincialDepartCaseVolumeExcelModel,
+    DepartDataVolExcelModel,
+    InspectionDataExcelModel,
+    CityDepartCaseVolumeExcelModel
+} from "@common/types/dataStat";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
 
@@ -20,8 +25,8 @@ export const create_depart_data_vol_excel = async (excelData: {
 }
 
 export const create_depart_case_volume_excel = async (excelData: {
-    provincialData: DepartCaseVolumeExcelModel[],
-    cityData: DepartCaseVolumeExcelModel[]
+    provincialData: ProvincialDepartCaseVolumeExcelModel[],
+    cityData: CityDepartCaseVolumeExcelModel[]
 }) => {
     const {data} = await ipcInstance.send(channels.xlsx.createDepartCaseVolumeExcel, excelData)
     return data
