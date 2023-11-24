@@ -134,12 +134,21 @@ const generateData = () => {
 }
 
 const getProjectIdByDepartName = (departName: string): string => {
-  const project = projectIdOptions.find(project => {
-    const name = (project.label as string).replaceAll('数据归集', '').replaceAll('行政行为', '')
-    return name == departName;
-  })
+  if (departName == '广东省司法厅') {
+    return '21'
+  } else if (departName == '广东省市场监督管理局') {
+    return '10'
+  } else if (departName == '广东省政务服务数据管理局') {
+    return '64'
+  } else {
+    const project = projectIdOptions.find(project => {
+      const name = (project.label as string).replaceAll('数据归集', '').replaceAll('行政行为', '')
+      return name == departName;
+    })
 
-  return project?.value as string
+    return project?.value as string
+  }
+
 }
 
 </script>
