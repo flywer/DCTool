@@ -1,5 +1,5 @@
 <template>
-  <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 160px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
       <n-space inline class="float-right">
         <n-input-group>

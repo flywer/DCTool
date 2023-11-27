@@ -1,8 +1,9 @@
 <template>
-  <n-scrollbar class="pr-2" style="height: calc(100vh - 110px);" trigger="hover">
+  <n-scrollbar style="height: calc(100vh - 110px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
-      数据会根据案件编号去重<br>
-      案件量按数据所属单位统计
+      统计规则：<br>
+      1.数据根据<b>案件编号</b>去重<br>
+      2.案件量按照<b>数据所属单位</b>维度统计
     </n-alert>
 
     <n-space justify="center" align="center" class="mt-2">

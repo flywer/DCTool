@@ -16,15 +16,20 @@
       <n-tab-pane name="5" tab="全省单位数据量统计">
         <depart-data-volume-stat/>
       </n-tab-pane>
-      <n-tab-pane name="6" tab="主题库案件数量统计">
+      <n-tab-pane name="6" tab="主题库统计">
         <n-tabs type="line" animated>
-          <n-tab-pane name="1" tab="单位编目挂接情况">
-            <depart-catalog-hook-record-mgt/>
+          <n-tab-pane name="1" tab="数源单位案件量统计">
+            <data-source-case-volume-stat/>
           </n-tab-pane>
-          <n-tab-pane name="2" tab="案件数量统计">
+          <n-tab-pane name="2" tab="所属单位案件量统计">
             <theme-base-case-volume-stat/>
           </n-tab-pane>
+          <n-tab-pane name="3" tab="单位编目挂接情况管理">
+            <depart-catalog-hook-record-mgt/>
+          </n-tab-pane>
         </n-tabs>
+
+
       </n-tab-pane>
     </n-tabs>
   </n-layout>
@@ -35,8 +40,11 @@ import DataLakeDataStat from "@render/views/dataStat/dataLakeDataStat.vue";
 import DepartDataVolumeStat from "@render/views/dataStat/departDataVolumeStat.vue";
 import FrontEndDataStat from "@render/views/dataStat/frontEndDataStat.vue";
 import QualityInspStat from "@render/views/dataStat/qualityInspStat.vue";
-import DepartCatalogHookRecordMgt from "@render/views/dataStat/themeBaseCaseVolumeStat/departCatalogHookRecordMgt.vue";
-import ThemeBaseCaseVolumeStat from "@render/views/dataStat/themeBaseCaseVolumeStat/themeBaseCaseVolumeStat.vue";
+import DataSourceCaseVolumeStat from "@render/views/dataStat/themeBaseStat/dataSourceCaseVolumeStat.vue";
+import DepartCatalogHookRecordMgt
+  from "@render/views/dataStat/themeBaseStat/departCatalogHookRecordMgt.vue";
+import ThemeBaseCaseVolumeStat
+  from "@render/views/dataStat/themeBaseStat/dataOwnCaseVolumeStat.vue";
 import ThemeBaseDataStat from "@render/views/dataStat/themeBaseDataStat.vue";
 </script>
 

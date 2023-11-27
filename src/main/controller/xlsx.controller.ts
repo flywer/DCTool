@@ -5,6 +5,7 @@ import {
     InspectionDataExcelModel,
     CityDepartCaseVolumeExcelModel
 } from "@common/types/dataStat";
+import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
@@ -561,7 +562,7 @@ export class XlsxController {
             return excelData
         }
 
-        const provincialDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直单位推送案件量');
+        const provincialDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直部门');
 
         provincialDataWorksheet.addRows(createProvincialExcelData(excelData.provincialData));
 
@@ -946,7 +947,7 @@ export class XlsxController {
             return excelData
         }
 
-        const cityDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市单位推送案件量');
+        const cityDataWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市部门');
         cityDataWorksheet.properties.defaultColWidth = 12
         setCityDataHeader()
 
@@ -966,7 +967,119 @@ export class XlsxController {
                 name: 'xlsx',
                 extensions: ['xlsx']
             }],
-            defaultPath: '全省单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+            defaultPath: '全省数据所属单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
+
+    }
+
+    @IpcHandle(channels.xlsx.exportDataSourceDepartCaseVolume)
+    public async handleExportDataSourceDepartCaseVolume(provincialData: ThemeBaseDataSourceCaseVolume[], cityData: ThemeBaseDataSourceCaseVolume[]) {
+
+        const createExcelData = (data: ThemeBaseDataSourceCaseVolume[]): ThemeBaseDataSourceCaseVolume[][] => {
+            const excelData: any[][] = [];
+
+            excelData.push(['部门名称', '案件量']);
+            excelData.push(['', '行政许可', '行政处罚', '行政强制', '行政征收', '行政征用', '行政检查', '总量']);
+
+            const recordMap: Map<string, any[]> = new Map();
+
+            for (const item of data) {
+                const tableType = ['c1010', 'c2010', 'c3010', 'c4010', 'c4110', 'c6010']
+                let volume: any[] = []
+                if (recordMap.has(item.departName)) {
+                    volume = recordMap.get(item.departName)
+                } else {
+                    volume = [item.departName, 0, 0, 0, 0, 0, 0, 0]
+                }
+                volume[tableType.findIndex(value => value == item.tableType) + 1] = item.volume
+                volume[7] = volume[1] + volume[2] + volume[3] + volume[4] + volume[5] + volume[6]
+                recordMap.set(item.departName, volume)
+            }
+
+            excelData.push(...recordMap.values())
+
+            return excelData;
+        }
+
+        const totalRow = (worksheet: ExcelJS.Worksheet) => {
+
+            const dataTotal = [0, 0, 0, 0, 0, 0, 0]
+
+            worksheet.eachRow((row: ExcelJS.Row, rowNumber: number) => {
+                if (rowNumber > 2) {
+                    row.eachCell((cell: ExcelJS.Cell, colNumber: number) => {
+                        if (colNumber > 1) {
+                            dataTotal[colNumber - 2] += parseInt(cell.text)
+                        }
+                    })
+                }
+            })
+
+            return ['合计', ...dataTotal]
+
+        }
+
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+        const provinceWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('省直部门');
+        provinceWorksheet.addRows(createExcelData(provincialData))
+        provinceWorksheet.addRow(totalRow(provinceWorksheet))
+
+        provinceWorksheet.mergeCells('B1', 'G1')
+        provinceWorksheet.mergeCells('A1', 'A2')
+        provinceWorksheet.getCell('H1').value = '总量'
+        provinceWorksheet.mergeCells('H1', 'H2')
+
+        this.setCellBolder(provinceWorksheet)
+        provinceWorksheet.getColumn(1).width = 24
+        provinceWorksheet.getColumn(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+        provinceWorksheet.getRow(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+        provinceWorksheet.getRow(2).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+
+        const cityWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('地市部门');
+        cityWorksheet.addRows(createExcelData(cityData))
+        cityWorksheet.addRow(totalRow(cityWorksheet))
+
+        cityWorksheet.mergeCells('B1', 'G1')
+        cityWorksheet.mergeCells('A1', 'A2')
+        cityWorksheet.getCell('H1').value = '总量'
+        cityWorksheet.mergeCells('H1', 'H2')
+
+        this.setCellBolder(cityWorksheet)
+        cityWorksheet.getColumn(1).width = 24
+        cityWorksheet.getColumn(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+        cityWorksheet.getRow(1).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+        cityWorksheet.getRow(2).alignment = {
+            vertical: 'middle',
+            horizontal: 'center'
+        }
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '全省数源单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
         }).then(res => {
             if (!res.canceled) {
                 // 导出 Excel 文件

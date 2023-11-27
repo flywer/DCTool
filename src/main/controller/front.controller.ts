@@ -1,6 +1,7 @@
 import {FrontSource} from "@main/dataSource/front-source";
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
+import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {ThemeBaseDataVolume} from "@main/entity/frontEnd/ThemeBaseDataVolume";
 import {channels} from "@render/api/channels";
 import {Controller, IpcHandle} from "einf";
@@ -75,6 +76,19 @@ export class FrontController {
             },
             order: {updateTime: 'desc'}
         })
+    }
+
+    @IpcHandle(channels.front.getThemeBaseDataSourceCaseVolume)
+    public handleGetThemeBaseDataSourceCaseVolume() {
+        return FrontSource.getRepository(ThemeBaseDataSourceCaseVolume).query(`
+         SELECT id,table_type AS tableType, volume, depart_name AS departName, area_code AS areaCode, create_time as createTime
+         FROM xzzf_sjtj_theme_base_data_source_case_volume t1
+         WHERE create_time = (SELECT MAX(create_time) 
+                             FROM xzzf_sjtj_theme_base_data_source_case_volume t2 
+                             WHERE t1.depart_name = t2.depart_name)
+         ORDER BY table_type
+        `)
+
     }
 
 }

@@ -197,6 +197,7 @@ export const channels = reactive({
         generateInsertStatements: 'xlsx/generateInsertStatements',
         createDepartDataVolExcel: 'xlsx/createDepartDataVolExcel',
         createDepartCaseVolumeExcel: 'xlsx/createDepartCaseVolumeExcel',
+        exportDataSourceDepartCaseVolume: 'xlsx/exportDataSourceDepartCaseVolume',
     },
     front: {
         getTableData: 'front/getTableData',
@@ -204,6 +205,7 @@ export const channels = reactive({
         getFrontEndDataVolByDepartNameAndTableType: 'front/getFrontEndDataVolByDepartNameAndTableType',
         getDataLakeDataVolByDepartNameAndTableType: 'front/getDataLakeDataVolByDepartNameAndTableType',
         getThemeBaseDataVolByDepartNameAndTableType: 'front/getThemeBaseDataVolByDepartNameAndTableType',
+        getThemeBaseDataSourceCaseVolume: 'front/getThemeBaseDataSourceCaseVolume',
     },
     updater: {
         checkUpdate: "updater/checkUpdate",
