@@ -352,29 +352,31 @@ export class XlsxController {
             };
         }
 
-        const mergeCells = (worksheet: ExcelJS.Worksheet, col: string) => {
-            // 合并相同部门名称的单元格
-            let currentDepartment = '';
-            let mergeStartRowIndex = 2; // 从第二行开始合并，跳过标题行
-            for (let i = 2; i <= worksheet.rowCount; i++) {
-                const departmentCell = worksheet.getCell(`${col}${i}`);
+        /*
+                const mergeCells = (worksheet: ExcelJS.Worksheet, col: string) => {
+                    // 合并相同部门名称的单元格
+                    let currentDepartment = '';
+                    let mergeStartRowIndex = 2; // 从第二行开始合并，跳过标题行
+                    for (let i = 2; i <= worksheet.rowCount; i++) {
+                        const departmentCell = worksheet.getCell(`${col}${i}`);
 
-                if (departmentCell.text != currentDepartment) {
-                    if (i > mergeStartRowIndex + 1) {
+                        if (departmentCell.text != currentDepartment) {
+                            if (i > mergeStartRowIndex + 1) {
 
-                        // 只在至少有两行时进行单元格合并
-                        worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${i - 1}`);
+                                // 只在至少有两行时进行单元格合并
+                                worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${i - 1}`);
+                            }
+                            currentDepartment = departmentCell.text;
+                            mergeStartRowIndex = i;
+                        }
                     }
-                    currentDepartment = departmentCell.text;
-                    mergeStartRowIndex = i;
-                }
-            }
-            // 处理最后一组相同部门名称的单元格合并
-            if (worksheet.rowCount > mergeStartRowIndex + 1) {
+                    // 处理最后一组相同部门名称的单元格合并
+                    if (worksheet.rowCount > mergeStartRowIndex + 1) {
 
-                worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${worksheet.rowCount}`);
-            }
-        }
+                        worksheet.mergeCells(`${col}${mergeStartRowIndex}:${col}${worksheet.rowCount}`);
+                    }
+                }
+        */
 
         const setCountCol = (worksheet: ExcelJS.Worksheet, isBasicData: boolean) => {
             if (isBasicData) {
