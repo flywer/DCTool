@@ -671,7 +671,7 @@ export class XlsxController {
             // endregion
 
             // region 行政征用
-            cityDataWorksheet.getCell('U1').value = '行政许可'
+            cityDataWorksheet.getCell('U1').value = '行政征用'
             cityDataWorksheet.mergeCells('U1', 'AC2')
 
             cityDataWorksheet.getCell('U3').value = '国垂系统'
