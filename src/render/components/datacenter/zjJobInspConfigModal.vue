@@ -22,6 +22,13 @@
         :size="'small'"
     >
       <n-grid :cols="4" :x-gap="4">
+        <n-form-item-gi :span="4" label="数据源">
+          <n-input
+              v-model:value="formModel.dbName"
+              readonly
+          />
+        </n-form-item-gi>
+
         <n-form-item-gi :span="4" label="表名" path="tableName">
           <n-input
               v-model:value="formModel.tableName"
@@ -153,6 +160,8 @@ const formModelInit = async () => {
       formModel.value.tableName = data.tableName
     })
   } else {
+    formModel.value.dbId = '6'
+    formModel.value.dbName = "数据中台（TBDS）"
     formModel.value.tableName = props.tableName
     formModel.value.mechanismId = ''
     formModel.value.mechanismName = ''
