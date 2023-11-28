@@ -20,7 +20,6 @@ import {
 } from "@common/types/dataStat";
 import {export_catalog_hook_data} from "@render/api/auxiliaryDb/departCatalogHookRecord.api";
 import {table_preview} from "@render/api/datacenter.api";
-import {execute_sql} from "@render/api/shareBase.api";
 import {create_depart_case_volume_excel} from "@render/api/xlsx.api";
 import {ExecuteDCSql} from "@render/utils/datacenter/ExecuteDCSql";
 import {isEmpty} from "lodash-es";
