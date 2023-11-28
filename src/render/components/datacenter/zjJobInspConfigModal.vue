@@ -110,8 +110,8 @@ const mechanismOptions = ref<Array<SelectOption | SelectGroupOption>>()
 const formRef = ref<FormInst | null>(null);
 
 const formModel = ref({
-  dbId: '12',
-  dbName: "数据湖（TDSQL）",
+  dbId: '6',
+  dbName: "数据中台（TBDS）",
   mechanismId: '',
   mechanismName: '',
   pkeyName: '',
