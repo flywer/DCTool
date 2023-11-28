@@ -259,7 +259,9 @@ const projectUserOptionsInit = async () => {
 
 onMounted(async () => {
 
-  useProjectTreeStore().treeNodesInit()
+  if (isEmpty(useProjectTreeStore().treeNodes)) {
+    useProjectTreeStore().treeNodesInit()
+  }
 
   showJobOverview.value = true
 
