@@ -394,8 +394,8 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.tablePreview)
-    public async handleTablePreview(datasourceId: number, tableName: string) {
-        const query = `id=${datasourceId}&tableName=${tableName}&limitNum=10`;
+    public async handleTablePreview(datasourceId: number, tableName: string,limitNum?:number) {
+        const query = `id=${datasourceId}&tableName=${tableName}&limitNum=${limitNum||10}`;
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonGetRequest(`/datawork/dataSource/getLimitNum`, query))
         });

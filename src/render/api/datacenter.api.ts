@@ -222,8 +222,8 @@ export const get_table_info_by_id = async (tableId: string): Promise<DCCommonRes
     return data
 }
 
-export const table_preview = async (datasourceId: number, tableName: string) => {
-    const {data} = (await ipcInstance.send<string>(channels.datacenter.tablePreview, datasourceId, tableName))
+export const table_preview = async (datasourceId: number, tableName: string,limitNum?:number) => {
+    const {data} = (await ipcInstance.send<string>(channels.datacenter.tablePreview, datasourceId, tableName,limitNum))
     return data
 }
 
