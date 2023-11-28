@@ -2,7 +2,7 @@
   <n-layout>
     <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
       <div class="w-auto h-8 mb-2">
-        <div class="float-left leading-8 font-bold text-base" style="max-width: 40%">
+        <div class="float-left leading-8 font-bold text-base" style="max-width: 60%">
           <n-skeleton v-if="isTableLoading" :width="300" size="small"/>
           <n-ellipsis style="max-width: 100%" v-else>
             {{ title }}
