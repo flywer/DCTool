@@ -143,7 +143,6 @@ const formModel = ref({
     "df_{PROJECT}_{TABLE_NAME}_dwb",
     "df_{PROJECT}_{TABLE_NAME}_right_dwb",
     "df_{PROJECT}_{TABLE_NAME}_error_dwb",
-    "df_{PROJECT}_{TABLE_NAME}_odstj_dws"
   ]
 })
 
