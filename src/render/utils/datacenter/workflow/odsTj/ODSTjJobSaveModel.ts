@@ -6,7 +6,7 @@ import {Workflow} from "@render/utils/datacenter/workflow/Workflow";
 import {format} from "sql-formatter";
 
 /**
- * ODS数据量统计任务
+ * ODS数据量统计任务 将数据统计至数据湖
  **/
 export class ODSTjJobSaveModel extends Workflow {
     constructor() {
@@ -18,9 +18,10 @@ export class ODSTjJobSaveModel extends Workflow {
         const projectTableAbbr = project.tableAbbr
 
         const sourceTable = `di_${projectTableAbbr}_${model.tableName.toLowerCase()}_ods`
-        const aimTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase()}_odstj_dws`
+        // const aimTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase()}_odstj_dws`
+        const aimTable = `sjtj_ods_data_volume`
 
-        if (await get_columns('6', aimTable, true)) {
+        if (await get_columns('6', sourceTable, true)) {
 
             const sourceTablePrimColName = (await get_table_sql({tableName: model.tableName}))[0].pColName as string
 
@@ -33,7 +34,7 @@ export class ODSTjJobSaveModel extends Workflow {
                 },
                 {
                     tableName: aimTable,
-                    dBId: 6
+                    dBId: 12
                 }
             )
 
@@ -41,13 +42,13 @@ export class ODSTjJobSaveModel extends Workflow {
                 INSERT INTO
                  ${aimTable}
                  SELECT
-                    '${project.projectId}',
-                    '${project.projectName.replaceAll('数据归集', '').replaceAll('行政行为', '')}',
-                    ${project.projectName.startsWith('广东省') ? 1 : 2},
-                    '${model.tableName.toUpperCase()}',
+                    '${project.projectId}' AS project_id,
+                    '${project.projectName.replaceAll('数据归集', '').replaceAll('行政行为', '')}' AS depart_name,
+                    ${project.projectName.startsWith('广东省') ? 1 : 2} AS depart_area,
+                    '${model.tableName.toUpperCase()}' AS table_type,
                     COUNT(DISTINCT CONCAT(${sourceTablePrimColName}, cd_batch)) AS raw_data_volume,
                     COUNT(DISTINCT ${sourceTablePrimColName}) AS distinct_data_volume,
-                    CURRENT_TIMESTAMP()
+                    CURRENT_TIMESTAMP() AS create_time
                  FROM
                     ${sourceTable}`
 
@@ -67,13 +68,13 @@ export class ODSTjJobSaveModel extends Workflow {
                 dataDevBizVo: {
                     sparkSqlDtoList: [
                         {
-                            taskType: "TDBS-HIVE2TDBS-HIVE",
+                            taskType: "TDBS-HIVE2MYSQL",
                             sourceDBId: [6],
                             sourceTable: [sourceTable],
-                            targetDBId: 6,
+                            targetDBId: 12,
                             sql: format(sql),
                             sparkConfig: {
-                                saveMode: "overwrite"
+                                saveMode: "append"
                             },
                             targetTable: aimTable,
                             taskInfoDto: {
@@ -92,7 +93,7 @@ export class ODSTjJobSaveModel extends Workflow {
 
             await this.createJob(jobJson, '统计任务创建成功')
         } else {
-            window.$message.error(`目标表[${aimTable}]不存在`)
+            window.$message.error(`来源表[${sourceTable}]不存在`)
         }
     }
 }

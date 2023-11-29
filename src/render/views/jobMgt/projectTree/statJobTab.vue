@@ -315,7 +315,7 @@ const odsTableDataStatJobTableInit = async () => {
     } else {
       odsTableDataStatJobTableData.value.push({
         id: null,
-        jobName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
+        jobName: `odstj_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
         status: -1,
         type: JobType.odstj,
         schedMode: 0,
@@ -328,7 +328,7 @@ const odsTableDataStatJobTableInit = async () => {
 
     // endregion
 
-    // region  odstjbf
+/*     // region  odstjbf
     const odstjbfJobData: Workflow = (await get_workflow_page({
       page: 1,
       size: 1,
@@ -367,7 +367,7 @@ const odsTableDataStatJobTableInit = async () => {
         createBy: null
       })
     }
-    // endregion
+    // endregion */
 
   } catch (e) {
     console.error(e)
