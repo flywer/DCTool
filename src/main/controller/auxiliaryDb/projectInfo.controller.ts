@@ -22,8 +22,8 @@ export class ProjectInfoController {
     }
 
     @IpcHandle(channels.auxiliaryDb.projectInfo.updateProjectInfo)
-    public async handleUpdateProjectInfo(arr: ProjectInfo): Promise<ProjectInfo> {
-        return await AppDataSource.getRepository(ProjectInfo).save(arr)
+    public async handleUpdateProjectInfo(project: ProjectInfo): Promise<ProjectInfo> {
+        return await AppDataSource.getRepository(ProjectInfo).save(project)
     }
 
     @IpcHandle(channels.auxiliaryDb.projectInfo.findByProjectId)

@@ -108,6 +108,7 @@ const tableDataInit = async (param: string) => {
       records[i].projectAbbr = project.projectAbbr
       records[i].tableAbbr = project.tableAbbr
       records[i].id = project.id
+      records[i].cjCron = project.cjCron
     }
   }
 

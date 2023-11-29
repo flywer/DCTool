@@ -186,13 +186,13 @@ type Project = {
 const queryParam = ref('')
 
 onMounted(async () => {
-  await tableDataInit(queryParam.value)
+  await tableDataInit()
 })
 
-const tableDataInit = async (v: string) => {
+const tableDataInit = async () => {
   isTableLoading.value = true
 
-  tableDataRef.value = (await get_project_by_cj_cron_and_project_name(v)).map((v) => ({
+  tableDataRef.value = (await get_project_by_cj_cron_and_project_name(queryParam.value)).map((v) => ({
     id: v.id.toString(),
     projectName: v.projectName,
     projectId: v.projectId,
@@ -281,7 +281,7 @@ const deleteConfig = (row: Project) => {
     cron: null
   }).then(() => {
     window.$message.success('删除成功')
-    tableDataInit(queryParam.value)
+    tableDataInit()
   })
 
 }
@@ -415,7 +415,7 @@ const onSave = () => {
                   .then(() => {
                     showCreateModalRef.value = false
                     window.$message.success('保存成功')
-                    tableDataInit(queryParam.value)
+                    tableDataInit()
                   })
                   .finally(() => isSaving.value = false)
             }

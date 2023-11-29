@@ -60,7 +60,7 @@ function handleChange() {
 
 const handleBlur = () => {
   isEdit.value = false
-  inputValue.value = props.value.toString()
+  inputValue.value = props.value?.toString()
 }
 </script>
 
