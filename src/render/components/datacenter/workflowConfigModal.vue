@@ -185,7 +185,7 @@
 
 <script setup lang="ts">
 import {Workflow} from "@common/types/datacenter/workflow";
-import {get_workflow, get_workflow_page, update_workflow} from "@render/api/datacenter.api";
+import {get_workflow, get_workflow_page, update_workflow, workflow_active} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
 import {convertCronExpression, generateCronExpression, isDCCronExpressionValid} from "@render/utils/common/cronUtils";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
@@ -438,19 +438,42 @@ const handleDependencyWorkflowUpdate = async (id: string) => {
 
 const isSaving = ref(false)
 const handleSave = () => {
-  configFormRef.value?.validate(errors => {
+  configFormRef.value?.validate(async errors => {
     if (!errors) {
       isSaving.value = true
       if (schedulingTimeValid()) {
-        updateWorkflow().then(res => {
-          if (res.success) {
-            window.$message.success(res.message)
-            _show.value = false
-            emit('onAfterLeave')
-          } else {
-            window.$message.error(res.message)
-          }
-        }).finally(() => isSaving.value = false)
+        const workflow1: Workflow = (await get_workflow(workflow.id)).data
+        if (workflow1.status == '1') {
+          // 停用
+          await workflow_active({
+            id: workflow.id,
+            type: '02'
+          })
+          updateWorkflow().then(async res => {
+            if (res.success) {
+              await workflow_active({
+                id: workflow.id,
+                type: '01'
+              })
+              window.$message.success(res.message)
+              _show.value = false
+              emit('onAfterLeave')
+            } else {
+              window.$message.error(res.message)
+            }
+          }).finally(() => isSaving.value = false)
+        } else {
+          updateWorkflow().then(res => {
+            if (res.success) {
+              window.$message.success(res.message)
+              _show.value = false
+              emit('onAfterLeave')
+            } else {
+              window.$message.error(res.message)
+            }
+          }).finally(() => isSaving.value = false)
+        }
+
       }
     }
   })
@@ -471,7 +494,6 @@ const schedulingTimeValid = () => {
 }
 
 const updateWorkflow = async () => {
-
   const newJson: Workflow = JSON.parse(updateSjkUUID(workflow))
 
   let paramsJson = {
