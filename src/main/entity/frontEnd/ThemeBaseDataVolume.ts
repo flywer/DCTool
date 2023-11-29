@@ -1,7 +1,7 @@
 import {Column, Entity} from "typeorm";
 
 @Entity({
-    name: 'xzzf_sjtj_theme_base'
+    name: 'xzzf_sjtj_theme_base_data_volume'
 })
 export class ThemeBaseDataVolume {
 

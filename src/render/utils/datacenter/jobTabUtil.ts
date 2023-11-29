@@ -2,7 +2,7 @@
 import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
 import {DataDevBizVo} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
-import { TemplateStructTable } from "@main/entity/jobTemplate/TemplateStructTable";
+import {TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
@@ -588,10 +588,12 @@ export const workflowStart = async (job: Job, onSuccess: () => void) => {
         await workflowActive(job.id, '01', () => {
         })
     }
+
     workflow_run(param).then(async res => {
+
         if (res.code == 200) {
             window.$message.success(res.message)
-            await onSuccess()
+            onSuccess()
         } else {
             window.$message.error(res.message)
         }
@@ -671,6 +673,8 @@ export const getJobType = (jobName: string) => {
         case JobType.rh3:
         case JobType.rk:
         case JobType.gx:
+        case JobType.odstj:
+        case JobType.odstjbf:
             return jobPrefix;
         default:
             return JobType.unknown;

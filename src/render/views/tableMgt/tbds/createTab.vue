@@ -64,6 +64,11 @@
                   </n-checkbox>
                 </n-space>
                 <n-space>
+                  <n-checkbox value="df_{PROJECT}_{TABLE_NAME}_odstj_dws">
+                    DWS层ODS数据量统计表
+                  </n-checkbox>
+                </n-space>
+                <n-space>
                   <n-checkbox value="df_{PROJECT}_{TABLE_NAME}_dm">
                     DM层全量表
                   </n-checkbox>
@@ -137,7 +142,8 @@ const formModel = ref({
     "di_{PROJECT}_{TABLE_NAME}_error_dwd",
     "df_{PROJECT}_{TABLE_NAME}_dwb",
     "df_{PROJECT}_{TABLE_NAME}_right_dwb",
-    "df_{PROJECT}_{TABLE_NAME}_error_dwb"
+    "df_{PROJECT}_{TABLE_NAME}_error_dwb",
+    "df_{PROJECT}_{TABLE_NAME}_odstj_dws"
   ]
 })
 
@@ -199,7 +205,12 @@ const createTables = () => {
             .replaceAll('{PROJECT}', projectTableAbbr)
             .replaceAll('{TABLE_NAME}', tableSql.tableName as string)
 
-        createTable(tableName, tableSql, tableName.startsWith('df'))
+        if (tableName.includes('_odstj_dws')) {
+          createOdsTjDwsTable(tableName)
+        } else {
+          createTable(tableName, tableSql, tableName.startsWith('df'))
+        }
+
       })
 
     } else {
@@ -286,6 +297,76 @@ const createTable = (tableName: string, tableSql: SelectOption, hasOptCol: boole
   } else {
     paramsJson.ddlSql = `CREATE TABLE ${tableName} ${tableSql.sql}`
   }
+
+  createStatus.value.set(tableName, {
+    tableName: tableName,
+    isCreating: true,
+    isSuccess: false,
+    msg: '',
+  })
+
+  create_table(paramsJson).then((res) => {
+    createStatus.value.set(tableName, {
+      tableName: tableName,
+      isCreating: false,
+      isSuccess: res.success && res.code == 200,
+      msg: res.message,
+    })
+  }).finally(() => {
+    const newStatus = createStatus.value.get(tableName)
+    newStatus.isCreating = false
+    createStatus.value.set(tableName, newStatus)
+  })
+}
+
+const createOdsTjDwsTable = (tableName: string) => {
+  let paramsJson = cloneDeep(paramsModel)
+  paramsJson.namedJson = JSON.stringify([
+    {
+      id: 1,
+      table: "更新方式",
+      key: "自定义",
+      value: "",
+      saveValue: null,
+      flagUser: 1
+    },
+    {
+      id: '1638446496908140546',
+      table: "组织机构",
+      key: '自定义',
+      value: '',
+      saveValue: null,
+      flagUser: 1
+    }, {
+      id: '2',
+      table: "自定义内容",
+      key: '自定义',
+      value: null,
+      saveValue: null,
+      flagUser: 0,
+      selectList: []
+    }, {
+      id: "1640177719367512066",
+      table: "数据层级",
+      key: "自定义",
+      value: "",
+      saveValue: null,
+      flagUser: 1,
+    }
+  ])
+
+  paramsJson.tableName = tableName
+
+  paramsJson.ddlSql = `
+      CREATE TABLE ${tableName}
+      (
+        project_id   VARCHAR(24) COMMENT '数源单位归集项目ID标识',
+        depart_name VARCHAR(128) COMMENT '数源单位部门名称',
+        table_type  VARCHAR(128) COMMENT '数据元类型',
+        raw_data_volume INT COMMENT '原始数据量（根据业务主键ID、批次号去重）',
+        distinct_data_volume INT COMMENT '推送数据量（根据业务主键ID去重）',
+        create_time TIMESTAMP  COMMENT '统计时间'
+      ) COMMENT 'ODS数据量统计记录表' ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' STORED AS ORC`
 
   createStatus.value.set(tableName, {
     tableName: tableName,

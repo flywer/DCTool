@@ -70,6 +70,14 @@ export enum JobType {
      **/
         'gx' = 'gx',
     /**
+     * ODS表数据量统计任务
+     **/
+        'odstj' = 'odstj',
+    /**
+     * ODS表数据量统计备份任务
+     **/
+        'odstjbf' = 'odstjbf',
+    /**
      * 未知任务
      **/
         'unknown' = 'unknown'
@@ -101,6 +109,10 @@ export const getJobTypeComment = (type: JobType) => {
             return '数据入库任务'
         case JobType.gx:
             return '数据共享任务'
+        case JobType.odstj:
+            return 'ODS数据量统计任务'
+        case JobType.odstjbf:
+            return 'ODS数据量统计备份任务'
     }
 }
 

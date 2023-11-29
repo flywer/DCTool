@@ -57,10 +57,10 @@ export class FrontController {
     }
 
     @IpcHandle(channels.front.getDataLakeDataVolByDepartNameAndTableType)
-    public async handleGetDataLakeDataVolByDepartNameAndTableType(departName: string, tableType: string) {
+    public async handleGetDataLakeDataVolByDepartNameAndTableType(projectId: string, tableType: string) {
         return FrontSource.getRepository(DataLakeDataVolume).findOne({
             where: {
-                departName: Like(`${departName}%`),
+                projectId: Like(`${projectId}%`),
                 tableType: tableType
             },
             order: {updateTime: 'desc'}

@@ -43,3 +43,8 @@ export const get_project_info = async (): Promise<ProjectInfo[]> => {
     const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.projectInfo.getProjectInfo))
     return data
 }
+
+export const get_project_by_project_name = async (projectName: string): Promise<ProjectInfo[]> => {
+    const {data} = (await ipcInstance.send<string>(channels.auxiliaryDb.projectInfo.getProjectByProjectName, projectName))
+    return data
+}

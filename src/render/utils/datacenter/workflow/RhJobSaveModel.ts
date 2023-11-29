@@ -1,15 +1,13 @@
 import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {add_work_flow, get_columns} from "@render/api/datacenter.api";
+import {get_columns} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
-import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {removeIds} from "@render/utils/datacenter/removeIds";
 import {updateSjkUUID} from "@render/utils/datacenter/updateSjkUUID";
 import {Workflow} from "@render/utils/datacenter/workflow/Workflow";
 import {isEmpty} from "lodash-es";
 import {format} from "sql-formatter";
-import {uuid} from "vue3-uuid";
 
 export class RhJobSaveModel extends Workflow {
 
@@ -275,7 +273,7 @@ export class RhJobSaveModel extends Workflow {
                                 GROUP BY ${sourceTablePrimColName}) t2 ON t1.${sourceTablePrimColName} = t2.${sourceTablePrimColName}
             WHERE t2.${sourceTablePrimColName} IS NULL`
 
-            const {modelXml, modelJson} = createModalByTables({
+            const {modelXml, modelJson} = this.createModalByTables({
                     tableName: sourceTableNames,
                     dBId: 6
                 },
@@ -331,188 +329,11 @@ export class RhJobSaveModel extends Workflow {
         }
 
     }
-
-    public static getTaskDefKeyByModelXml(modelXml: string) {
-        const userTaskIdMatch = modelXml.match(/<userTask id="([^"]+)"/);
-        if (userTaskIdMatch && userTaskIdMatch.length > 1) {
-            return userTaskIdMatch[1];
-        }
-        return undefined;
-    }
-
-    public static getCodeByModelXml(modelXml: string) {
-        const userTaskIdMatch = modelXml.match(/<process id="([^"]+)"/);
-        if (userTaskIdMatch && userTaskIdMatch.length > 1) {
-            return userTaskIdMatch[1];
-        }
-        return undefined;
-    }
-
-    public static async createJob(json: any, successMsg: string) {
-        if (!await workflowJobNameExist(json.name)) {
-            add_work_flow(json).then((res) => {
-                if (res.code == 200) {
-                    window.$message.success(successMsg)
-                } else {
-                    window.$message.error(res.message)
-                }
-            })
-        } else {
-            window.$message.warning(`任务名[${json.name}]已存在`)
-        }
-    }
 }
 
 export type RhFormModel = {
     projectId: string,
     personId: string,
     tableName: string
-}
-
-type ModelJson = {
-    nodeList: {
-        id: string,
-        shape: string,
-        image: string,
-        size: string,
-        type: string,
-        name: string,
-        delegateExpression?: string
-        taskType?: string
-        database?: string
-        databaseName?: number
-        tableName?: string
-    }[],
-    edgesList: {
-        from: string,
-        to: string,
-        id: string
-    }[]
-}
-
-/**
- * 通过来源表与目标表创建modelXml与modelJson
- **/
-const createModalByTables = (sourceTable: {
-    tableName: string[],
-    dBId: number
-}, targetTable: {
-    tableName: string,
-    dBId: number
-}) => {
-    let modelJson: ModelJson = {
-        nodeList: [
-            {
-                id: "sjkccd4823a46b64b6ab8e27ca2d7d790ab",
-                shape: "image",
-                image: "/szrzyt/data_center/tdbs-dev/65accb422a8d3f181bbbc1c537006cc0.svg",
-                size: "20",
-                type: "startProcess",
-                name: "开始"
-            },
-            {
-                id: "sjk4885a18eddad4215a7c8d05645dc09a9",
-                shape: "image",
-                image: "/szrzyt/data_center/tdbs-dev/fea7e3bc7f3297c8652a8aa51c964606.svg",
-                size: "20",
-                delegateExpression: "dataDevSpTaskListener",
-                type: "component",
-                name: "数据开发(Spark SQL)",
-                taskType: "TDBS-Hive"
-            },
-            {
-                id: "sjk100325c69a3c4af9981f99cb8ac16dc2",
-                shape: "image",
-                image: "/szrzyt/data_center/tdbs-dev/198b2349289796a4476408838a50f944.svg",
-                size: "20",
-                type: "endProcess",
-                name: "结束"
-            }
-        ],
-        edgesList: []
-    }
-    const startProcessId = "sjkccd4823a46b64b6ab8e27ca2d7d790ab"
-    const sparkSqlId = "sjk4885a18eddad4215a7c8d05645dc09a9"
-    const endProcessId = "sjk100325c69a3c4af9981f99cb8ac16dc2"
-
-    sourceTable.tableName.forEach((tableName) => {
-
-        const nodeId = 'sjk' + uuid.v4().replace(/-/g, '')
-
-        modelJson.nodeList.push({
-            id: nodeId,
-            shape: "image",
-            image: "/szrzyt/data_center/tdbs-dev/32a601d50ea448553386f286a6911239.svg",
-            size: "20",
-            type: "database",
-            database: sourceTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
-            name: sourceTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
-            databaseName: sourceTable.dBId,
-            tableName: tableName
-        })
-
-        // 开始节点与来源表节点相连
-        modelJson.edgesList.push({
-            from: startProcessId,
-            to: nodeId,
-            id: 'sjk' + uuid.v4().replace(/-/g, '')
-        })
-
-        // 来源表节点相连与SparkSql节点相连
-        modelJson.edgesList.push({
-            from: nodeId,
-            to: sparkSqlId,
-            id: 'sjk' + uuid.v4().replace(/-/g, '')
-        })
-
-    })
-
-    const targetNodeId = 'sjk' + uuid.v4().replace(/-/g, '')
-
-    modelJson.nodeList.push({
-        id: targetNodeId,
-        shape: "image",
-        image: "/szrzyt/data_center/tdbs-dev/32a601d50ea448553386f286a6911239.svg",
-        size: "20",
-        type: "database",
-        database: targetTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
-        name: targetTable.dBId == 6 ? "TDBS-Hive" : 'MySQL',
-        databaseName: targetTable.dBId,
-        tableName: targetTable.tableName
-    })
-
-    // SparkSql节点与目标表相连
-    modelJson.edgesList.push({
-        from: sparkSqlId,
-        to: targetNodeId,
-        id: 'sjk' + uuid.v4().replace(/-/g, '')
-    })
-
-    // 目标表与结束节点相连
-    modelJson.edgesList.push({
-        from: targetNodeId,
-        to: endProcessId,
-        id: 'sjk' + uuid.v4().replace(/-/g, '')
-    })
-
-    const modelXml: string = `<?xml version="1.0" encoding="UTF-8"?>
-        <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:flowable="http://flowable.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.flowable.org/processdef" exporter="Flowable Open Source Modeler" exporterVersion="6.7.2">
-            <process id="sjk78ae83918154400aae62f5351dbd5194" name="sjk78ae83918154400aae62f5351dbd5194" isExecutable="true">
-                <startEvent id="sjkccd4823a46b64b6ab8e27ca2d7d790ab" name="开始" flowable:formFieldValidation="true"/>
-                <userTask id="sjk4885a18eddad4215a7c8d05645dc09a9" name="数据开发(Spark SQL)" flowable:formFieldValidation="true">
-                    <extensionElements>
-                        <flowable:taskListener event="create" delegateExpression="\${dataDevSpTaskListener}"/>
-                    </extensionElements>
-                </userTask>
-                <endEvent id="sjk100325c69a3c4af9981f99cb8ac16dc2" name="结束"/>
-                  </process>
-        </definitions>`
-
-    const json = JSON.parse(updateSjkUUID({modelXml: modelXml, modelJson: JSON.stringify(modelJson)}))
-
-    return {
-        modelXml: json.modelXml,
-        modelJson: json.modelJson
-    }
 }
 

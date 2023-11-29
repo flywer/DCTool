@@ -522,7 +522,7 @@ export class XlsxController {
                 name: 'xlsx',
                 extensions: ['xlsx']
             }],
-            defaultPath: '全省单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+            defaultPath: '全省数源单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
         }).then(res => {
             if (!res.canceled) {
                 // 导出 Excel 文件

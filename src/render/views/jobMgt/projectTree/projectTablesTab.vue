@@ -131,8 +131,8 @@ watch(defaultSelectedKeys, async (newValue) => {
       if (project) {
         queryParam.value = `${project.tableAbbr}_${segments[segments.length - 1].toLowerCase()}`
         await tableDataInit()
-      }else {
-        tableDataRef.value =[]
+      } else {
+        tableDataRef.value = []
       }
     }
 
@@ -196,6 +196,7 @@ const customSort = (arr: any[]): any[] => {
     'dwb',
     'right_dwb',
     'error_dwb',
+    'odstj_dws'
   ].forEach((item, index) => {
     map.set(item, index);
   });
@@ -215,6 +216,8 @@ const customSort = (arr: any[]): any[] => {
       return 'error_dwb'
     } else if (tableName.endsWith('dwb')) {
       return 'dwb'
+    } else if (tableName.endsWith('odstj_dws')) {
+      return 'odstj_dws'
     } else {
       return ''
     }
@@ -257,6 +260,8 @@ const createColumns = (): DataTableColumns<Table> => {
           return 'DWB层融合表'
         } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_dm')) {
           return 'DM层全量表'
+        } else if (row.tableName.startsWith('df_') && row.tableName.endsWith('_odstj_dws')) {
+          return 'DWS层ODS数据量统计表'
         }
       }
     },

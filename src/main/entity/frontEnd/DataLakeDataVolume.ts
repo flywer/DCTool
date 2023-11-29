@@ -15,10 +15,10 @@ export class DataLakeDataVolume {
     id: string
 
     @Column({
-        name: 'depart_name',
-        comment: '单位名称',
+        name: 'project_id',
+        comment: '数源单位项目ID',
     })
-    departName: string
+    projectId: string
 
     @Column({
         name: 'table_type',

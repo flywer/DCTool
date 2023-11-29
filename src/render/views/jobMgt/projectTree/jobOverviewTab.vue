@@ -105,6 +105,13 @@
               :project-abbr="projectAbbr"
           />
         </n-gi>
+        <n-gi :span="1">
+          <overview-workflow-card
+              title="ODS数据量统计任务"
+              job-prefix="odstj\_"
+              :project-abbr="projectAbbr"
+          />
+        </n-gi>
       </n-grid>
 
     </n-card>

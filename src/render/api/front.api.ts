@@ -15,8 +15,8 @@ export const get_FE_data_vol_by_depart_name_and_table_type = async (departName: 
     return data
 }
 
-export const get_data_lake_data_vol_by_depart_name_and_table_type = async (departName: string, tableType: string): Promise<DataLakeDataVolume> => {
-    const {data} = await ipcInstance.send(channels.front.getDataLakeDataVolByDepartNameAndTableType, departName, tableType)
+export const get_data_lake_data_vol_by_depart_name_and_table_type = async (projectId: string, tableType: string): Promise<DataLakeDataVolume> => {
+    const {data} = await ipcInstance.send(channels.front.getDataLakeDataVolByDepartNameAndTableType, projectId, tableType)
     return data
 }
 

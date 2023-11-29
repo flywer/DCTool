@@ -141,7 +141,10 @@
             <n-tab-pane name="1" tab="数据归集任务">
               <job-tab/>
             </n-tab-pane>
-            <n-tab-pane name="2" tab="中台相关表">
+            <n-tab-pane name="2" tab="数据统计任务">
+              <stat-job-tab/>
+            </n-tab-pane>
+            <n-tab-pane name="3" tab="中台相关表">
               <project-tables-tab/>
             </n-tab-pane>
           </n-tabs>
@@ -149,7 +152,7 @@
         <!--省政数局主体信息采集-->
         <szsj-subject-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-0'"/>
 
-        <front-end-data-vol-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-1-0'"/>
+        <!--        <front-end-data-vol-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-1-0'"/>-->
         <data-lake-data-vol-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-1-1'"/>
 
       </n-layout-content>
@@ -169,6 +172,7 @@ import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeD
 import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
 import ProjectTablesTab from "@render/views/jobMgt/projectTree/projectTablesTab.vue";
 import SzsjSubjectTab from "@render/views/jobMgt/projectTree/other/szsjSubjectTab.vue";
+import StatJobTab from "@render/views/jobMgt/projectTree/statJobTab.vue";
 import {
   Bookmark24Filled,
   ArrowMinimizeVertical24Regular,
