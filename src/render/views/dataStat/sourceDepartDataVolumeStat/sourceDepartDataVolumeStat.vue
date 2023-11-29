@@ -156,7 +156,7 @@ type FeDataVolumeRecord = {
 }
 
 const getFeDataVolumeByDepart = async (depart: FEDepartTableName): Promise<FeDataVolumeRecord> => {
-  let projectName = ''
+  let projectName: string
   // 若是基础数据
   if (isBasicTable(depart.tableType)) {
     projectName = depart.departName + '数据归集'

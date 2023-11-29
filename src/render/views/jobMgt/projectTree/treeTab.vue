@@ -169,7 +169,6 @@ import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
 import JobOverviewTab from "@render/views/jobMgt/projectTree/jobOverviewTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
 import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
-import FrontEndDataVolTab from "@render/views/jobMgt/projectTree/other/frontEndDataVolTab.vue";
 import ProjectTablesTab from "@render/views/jobMgt/projectTree/projectTablesTab.vue";
 import SzsjSubjectTab from "@render/views/jobMgt/projectTree/other/szsjSubjectTab.vue";
 import StatJobTab from "@render/views/jobMgt/projectTree/statJobTab.vue";
