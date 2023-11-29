@@ -24,7 +24,10 @@ export class ODSTjJobSaveModel extends Workflow {
 
             const sourceTablePrimColName = (await get_table_sql({tableName: model.tableName}))[0].pColName as string
 
-            const {modelXml, modelJson} = this.createModalByTables({
+            const {
+                modelXml,
+                modelJson
+            } = this.createModalByTables({
                     tableName: [sourceTable],
                     dBId: 6
                 },
@@ -40,6 +43,7 @@ export class ODSTjJobSaveModel extends Workflow {
                  SELECT
                     '${project.projectId}',
                     '${project.projectName.replaceAll('数据归集', '').replaceAll('行政行为', '')}',
+                    ${project.projectName.startsWith('广东省') ? 1 : 2},
                     '${model.tableName.toUpperCase()}',
                     COUNT(DISTINCT CONCAT(${sourceTablePrimColName}, cd_batch)) AS raw_data_volume,
                     COUNT(DISTINCT ${sourceTablePrimColName}) AS distinct_data_volume,

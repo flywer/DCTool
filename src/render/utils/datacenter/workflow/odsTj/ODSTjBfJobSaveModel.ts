@@ -39,6 +39,7 @@ export class ODSTjBfJobSaveModel extends Workflow {
             SELECT
              project_id,
              depart_name,
+             depart_area,
              table_type,
              raw_data_volume,
              distinct_data_volume,

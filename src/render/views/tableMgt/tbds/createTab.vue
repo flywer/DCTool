@@ -360,8 +360,9 @@ const createOdsTjDwsTable = (tableName: string) => {
   paramsJson.ddlSql = `
       CREATE TABLE ${tableName}
       (
-        project_id   VARCHAR(24) COMMENT '数源单位归集项目ID标识',
-        depart_name VARCHAR(128) COMMENT '数源单位部门名称',
+        project_id   VARCHAR(24) COMMENT '上报单位归集项目ID标识',
+        depart_name VARCHAR(128) COMMENT '上报单位部门名称',
+        depart_area INT COMMENT '单位区划（1省直;2:地市）',
         table_type  VARCHAR(128) COMMENT '数据元类型',
         raw_data_volume INT COMMENT '原始数据量（根据业务主键ID、批次号去重）',
         distinct_data_volume INT COMMENT '推送数据量（根据业务主键ID去重）',
