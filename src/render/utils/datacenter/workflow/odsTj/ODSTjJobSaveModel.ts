@@ -59,8 +59,6 @@ export class ODSTjJobSaveModel extends Workflow {
                 hours
             } = await this.createCronByProject(project, model.tableName)
 
-            console.log(minutes, hours)
-
             const jobJson = {
                 name: `odstj_${project.projectAbbr}_${model.tableName.toLowerCase()}`,
                 email: '',
@@ -123,37 +121,35 @@ export class ODSTjJobSaveModel extends Workflow {
                     hours++
                     minutes = 0
                 }
-
             }
-
             if (project.projectId == '6') {
-
                 if (['g1010', 'g1020',
                     'y2010', 'y2020', 'y2030', 'y3010'].includes(tableName.toLowerCase())) {
-                    return {
-                        minutes: minutes - 4,
-                        hours: hours
-                    }
+
                 } else {
-                    return {
-                        minutes: minutes - 2,
-                        hours: hours
+                    if (minutes + 3 >= 60) {
+                        minutes = 60 - (minutes + 3)
+                        hours++
+                    } else {
+                        minutes = minutes + 3
                     }
                 }
-
             } else if (['11', '5'].includes(project.projectId)) {
                 // 除开司法厅基础数据
-                return {
-                    minutes: minutes - 4,
-                    hours: hours
-                }
             } else {
                 let index = actionTableNames.findIndex(name => name == tableName.toLowerCase())
-
-                return {
-                    minutes: minutes - 6 + parseInt(String(index / 8)) * 2,
-                    hours: 12
+                const row = parseInt(String(index / 8))
+                if (minutes + row * 2 >= 60) {
+                    minutes = 60 - (minutes + row * 2)
+                    hours++
+                } else {
+                    minutes = minutes + row * 2
                 }
+            }
+
+            return {
+                minutes: minutes,
+                hours: hours
             }
         } else {
             return {

@@ -136,7 +136,7 @@ async function bootstrap() {
                         JobTemplateController,
                         TemplateStructTableController,
                         FieldInspectionRuleController,
-                        DepartCatalogHookRecordController
+                        DepartCatalogHookRecordController,
                     ],
                 injects: [{
                     name: 'IS_DEV',
