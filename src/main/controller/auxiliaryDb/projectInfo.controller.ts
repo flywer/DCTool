@@ -110,4 +110,14 @@ export class ProjectInfoController {
             }
         })
     }
+
+    @IpcHandle(channels.auxiliaryDb.projectInfo.getAllCollectionProject)
+    public async handleGetAllCollectionProject(isCollection: 0 | 1): Promise<ProjectInfo[]> {
+        return await AppDataSource.getRepository(ProjectInfo).find({
+            where: {
+                isCollectionProject: isCollection
+            },
+            order: {projectId: 'asc'}
+        })
+    }
 }

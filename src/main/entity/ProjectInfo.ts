@@ -20,4 +20,7 @@ export class ProjectInfo {
 
     @Column({name: 'cj_cron'})
     cjCron: string
+
+    @Column({name: 'is_collection_project'})
+    isCollectionProject: number
 }

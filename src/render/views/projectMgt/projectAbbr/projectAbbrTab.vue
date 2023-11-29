@@ -97,7 +97,8 @@ const tableDataInit = async (param: string) => {
             projectAbbr: '',
             tableAbbr: '',
             id: null,
-            cjCron: null
+            cjCron: null,
+            isCollectionProject: 1,
           }))) || [];
 
   paginationReactive.itemCount = data.total || 0
@@ -109,6 +110,7 @@ const tableDataInit = async (param: string) => {
       records[i].tableAbbr = project.tableAbbr
       records[i].id = project.id
       records[i].cjCron = project.cjCron
+      records[i].isCollectionProject = project.isCollectionProject
     }
   }
 

@@ -109,7 +109,8 @@ export const channels = reactive({
             getProjectByProjectName: 'auxiliaryDb/projectInfo/getProjectByProjectName',
             getProjectCjCron: 'auxiliaryDb/projectInfo/getProjectCjCron',
             getProjectByCjCronIsNull: 'auxiliaryDb/projectInfo/getProjectByCjCronIsNull',
-            updateCjCron: 'auxiliaryDb/projectInfo/updateCjCron'
+            updateCjCron: 'auxiliaryDb/projectInfo/updateCjCron',
+            getAllCollectionProject: 'auxiliaryDb/projectInfo/getAllCollectionProject',
         },
         user: {
             getAuthTokenByAccount: 'auxiliaryDb/user/getAuthTokenByAccount',

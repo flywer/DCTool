@@ -1,7 +1,9 @@
-import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
+import {ProjectInfo} from "@main/entity/ProjectInfo";
+import {find_by_project_id, get_all_collection_project} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_columns} from "@render/api/datacenter.api";
 import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptions";
+import {actionTableNames} from "@render/utils/datacenter/constants";
 import {Workflow} from "@render/utils/datacenter/workflow/Workflow";
 import {format} from "sql-formatter";
 
@@ -18,7 +20,7 @@ export class ODSTjJobSaveModel extends Workflow {
         const projectTableAbbr = project.tableAbbr
 
         const sourceTable = `di_${projectTableAbbr}_${model.tableName.toLowerCase()}_ods`
-        // const aimTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase()}_odstj_dws`
+
         const aimTable = `sjtj_ods_data_volume`
 
         if (await get_columns('6', sourceTable, true)) {
@@ -52,6 +54,13 @@ export class ODSTjJobSaveModel extends Workflow {
                  FROM
                     ${sourceTable}`
 
+            const {
+                minutes,
+                hours
+            } = await this.createCronByProject(project, model.tableName)
+
+            console.log(minutes, hours)
+
             const jobJson = {
                 name: `odstj_${project.projectAbbr}_${model.tableName.toLowerCase()}`,
                 email: '',
@@ -60,7 +69,8 @@ export class ODSTjJobSaveModel extends Workflow {
                 personName: personIdOptions.find(option => option.value === model.personId).label as string,
                 projectId: model.projectId,
                 projectName: projectIdOptions.find(option => option.value === model.projectId).label as string,
-                crontab: '',
+                crontab: `0 ${minutes} ${hours} ? * * *`,
+                schedulingMode: '2',
                 type: "流程",
                 code: this.getCodeByModelXml(modelXml),
                 modelXml: modelXml,
@@ -95,6 +105,63 @@ export class ODSTjJobSaveModel extends Workflow {
         } else {
             window.$message.error(`来源表[${sourceTable}]不存在`)
         }
+    }
+
+    private static async createCronByProject(project: ProjectInfo, tableName: string) {
+
+        const projects = await get_all_collection_project(1)
+
+        const index = projects.findIndex(p => p.projectId == project.projectId)
+
+        if (index != -1) {
+            let hours = 0
+            let minutes = -6
+
+            for (let i = 0; i <= index; i++) {
+                minutes += 6
+                if (minutes >= 60) {
+                    hours++
+                    minutes = 0
+                }
+
+            }
+
+            if (project.projectId == '6') {
+
+                if (['g1010', 'g1020',
+                    'y2010', 'y2020', 'y2030', 'y3010'].includes(tableName.toLowerCase())) {
+                    return {
+                        minutes: minutes - 4,
+                        hours: hours
+                    }
+                } else {
+                    return {
+                        minutes: minutes - 2,
+                        hours: hours
+                    }
+                }
+
+            } else if (['11', '5'].includes(project.projectId)) {
+                // 除开司法厅基础数据
+                return {
+                    minutes: minutes - 4,
+                    hours: hours
+                }
+            } else {
+                let index = actionTableNames.findIndex(name => name == tableName.toLowerCase())
+
+                return {
+                    minutes: minutes - 6 + parseInt(String(index / 8)) * 2,
+                    hours: 12
+                }
+            }
+        } else {
+            return {
+                minutes: 0,
+                hours: 12
+            }
+        }
+
     }
 }
 
