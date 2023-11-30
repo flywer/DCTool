@@ -253,7 +253,7 @@ const tablePreview = (row: { id?: string; tableName: any; tableComment?: string;
   isPreviewTableLoading.value = true
   modalTitle = row.tableName
 
-  table_preview(12, row.tableName).then(res => {
+  table_preview(8, row.tableName).then(res => {
     if (res.code == 200) {
       if (res.data.length != 0) {
 
