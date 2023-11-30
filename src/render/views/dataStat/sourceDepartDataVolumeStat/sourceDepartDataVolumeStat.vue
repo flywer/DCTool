@@ -9,6 +9,22 @@
     </n-alert>
 
     <n-card class="mt-2">
+      <n-checkbox-group v-model:value="syncData" :disabled="isGenerating">
+        <n-space item-style="display: flex;">
+          <n-checkbox value="syncOds" label="同步累计报送数据量"/>
+          <n-button size="tiny" type="info" @click="sync_ods_data_vol" :disabled="isGenerating">立即同步</n-button>
+          <n-divider :vertical="true" style="height: 100%"/>
+          <n-checkbox value="syncDataLake" label="同步数据湖数据量"/>
+          <n-button size="tiny" type="info" @click="sync_data_lake_data_vol" :disabled="isGenerating">立即同步
+          </n-button>
+          <n-divider :vertical="true" style="height: 100%"/>
+          <n-checkbox value="syncThemeBase" label="同步主题库数据量"/>
+          <n-button size="tiny" type="info" @click="sync_theme_base_data_vol" :disabled="isGenerating">立即同步
+          </n-button>
+        </n-space>
+      </n-checkbox-group>
+    </n-card>
+    <n-card class="mt-2">
       <n-checkbox-group v-model:value="filterData" :disabled="isGenerating">
         <n-space item-style="display: flex;">
           <n-checkbox value="fe" label="过滤累计报送数据量为空的数据"/>
@@ -29,11 +45,10 @@ import {SchedJob} from "@common/types/datacenter/dataCollection";
 import {DepartDataVolExcelModel} from "@common/types/dataStat";
 import {FEDepartTableName} from "@main/entity/FEDepartTableName";
 import {get_all_FE_TableName} from "@render/api/auxiliaryDb/preDatabase.api";
-import {get_project_by_project_name} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {datax_job_run, get_sched_job_page, table_preview} from "@render/api/datacenter.api";
 import {
-  get_data_lake_data_vol_by_depart_name_and_table_type,
+  get_data_lake_data_vol_by_depart_name_and_table_type, get_ods_data_volume,
   get_theme_base_data_vol_by_depart_name_and_table_type
 } from "@render/api/front.api";
 import {create_depart_data_vol_excel} from "@render/api/xlsx.api";
@@ -44,6 +59,8 @@ import {actionTableNames, basicTableNames} from "@render/utils/datacenter/consta
 import {ExecuteDCSql} from "@render/utils/datacenter/ExecuteDCSql";
 import {isNull} from "lodash-es";
 import {ref} from "vue";
+
+const syncData = ref(['syncOds', 'syncDataLake', 'syncThemeBase'])
 
 // 数据过滤
 const filterData = ref([])
@@ -58,21 +75,27 @@ const generateData = async () => {
   const basicDataArr: DepartDataVolExcelModel[] = []
   const actionDataArr: DepartDataVolExcelModel[] = []
 
-  buttonText.value = '正在同步数据湖数据量信息...'
-  await sync_data_lake_data_vol()
+  if (syncData.value.includes('syncOds')) {
+    await sync_ods_data_vol()
+  }
 
-  buttonText.value = '正在同步主题库数据量信息...'
-  await sync_theme_base_data_vol()
+  if (syncData.value.includes('syncDataLake')) {
+    await sync_data_lake_data_vol()
+  }
 
-  buttonText.value = '获取单位表名关联信息...'
+  if (syncData.value.includes('syncThemeBase')) {
+    await sync_theme_base_data_vol()
+  }
 
   // 获取单位表名关联数据
+  isGenerating.value = true
+  buttonText.value = '获取单位表名关联信息...'
   get_all_FE_TableName().then(async departs => {
     try {
       for (const depart of departs) {
         buttonText.value = `处理${depart.departName}数据...`
 
-        const feDataRecord = await getFeDataVolumeByDepart(depart)
+        const feDataRecord = await getOdsDatVolumeByDepart(depart)
 
         const dataLakeDataRecord = await get_data_lake_data_vol_by_depart_name_and_table_type(getProjectIdByDepartName(depart.departName), depart.tableType)
 
@@ -155,38 +178,58 @@ type FeDataVolumeRecord = {
   updateTime: Date
 }
 
-const getFeDataVolumeByDepart = async (depart: FEDepartTableName): Promise<FeDataVolumeRecord> => {
-  let projectName: string
-  // 若是基础数据
-  if (isBasicTable(depart.tableType)) {
-    projectName = depart.departName + '数据归集'
+const getOdsDatVolumeByDepart = async (depart: FEDepartTableName): Promise<FeDataVolumeRecord> => {
+
+  const odsDataVol = await get_ods_data_volume(depart.departName, depart.tableType.toUpperCase())
+
+  if (odsDataVol.at(0)) {
+    return {
+      departName: depart.departName,
+      dataCount: odsDataVol.at(0).distinctDataVolume.toString(),
+      updateTime: odsDataVol.at(0).createTime
+    }
   } else {
-    if (depart.departName.startsWith('广东省')) {
-      projectName = depart.departName + '数据归集'
-    } else {
-      projectName = depart.departName + '行政行为数据归集'
+    return {
+      departName: depart.departName,
+      dataCount: null,
+      updateTime: null
     }
   }
 
-  const projects = await get_project_by_project_name(projectName)
+}
 
-  for (const project of projects) {
-    const record: string[][] = (await table_preview(6, `df_${project.tableAbbr}_${depart.tableType.toLowerCase()}_odstj_dws`)).data
-    if (record && record.length > 1) {
-      const data = record.at(1)
-      // 确定是否是此项目
-      if (data.at(0) == project.projectId) {
-        return {
-          departName: data.at(1),
-          dataCount: data.at(4).toString(),
-          updateTime: new Date(data.at(5))
+const sync_ods_data_vol = async () => {
+  isGenerating.value = true
+  buttonText.value = '正在同步累计推送数据量信息...'
+
+  return new Promise<void>((resolve, reject) => {
+    datax_job_run({
+      jobId: '1092',
+      subsystemName: "采集"
+    }).then(() => {
+      const interval = setInterval(async () => {
+        const schedJob: SchedJob = (await get_sched_job_page({
+          current: 1,
+          size: 1,
+          jobContent: 'sjtj_ods_data_volume'
+        })).data?.records[0]
+
+        if (schedJob.handleStatus != 0) {
+          clearInterval(interval); // 停止循环
+          if (schedJob.handleStatus == 200) {
+            isGenerating.value = false
+            buttonText.value = '生成Excel'
+            resolve()
+          } else {
+            reject()
+            window.$message.error(`[${schedJob.jobContent}]执行异常`)
+            isGenerating.value = false
+            buttonText.value = '生成Excel'
+          }
         }
-      }
-    } else {
-      return null
-    }
-  }
-
+      }, 1000)
+    })
+  })
 }
 
 const getProjectIdByDepartName = (departName: string): string => {
@@ -208,6 +251,9 @@ const getProjectIdByDepartName = (departName: string): string => {
 }
 
 const sync_data_lake_data_vol = async () => {
+  isGenerating.value = true
+  buttonText.value = '正在同步数据湖数据量信息...'
+
   const executeDcSql = new ExecuteDCSql('12', 'mysql')
   await executeDcSql.execSql('truncate table xzzf_sjtj_data_lake', false)
 
@@ -257,6 +303,8 @@ const sync_data_lake_data_vol = async () => {
             if (schedJob.handleStatus != 0) {
               clearInterval(interval); // 停止循环
               if (schedJob.handleStatus == 200) {
+                isGenerating.value = false
+                buttonText.value = '生成Excel'
                 resolve()
               } else {
                 reject()
@@ -274,6 +322,9 @@ const sync_data_lake_data_vol = async () => {
 }
 
 const sync_theme_base_data_vol = async () => {
+  isGenerating.value = true
+  buttonText.value = '正在同步主题库数据量信息...'
+
   const executeDcSql = new ExecuteDCSql('8', 'mysql')
   await executeDcSql.execSql('truncate table xzzf_sjtj_theme_base_data_volume', false)
 
@@ -332,6 +383,8 @@ const sync_theme_base_data_vol = async () => {
             if (schedJob.handleStatus != 0) {
               clearInterval(interval2); // 停止循环
               if (schedJob.handleStatus == 200) {
+                isGenerating.value = false
+                buttonText.value = '生成Excel'
                 resolve()
               } else {
                 reject()

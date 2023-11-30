@@ -1,6 +1,7 @@
 import {FrontSource} from "@main/dataSource/front-source";
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
+import {OdsDataVolume} from "@main/entity/frontEnd/OdsDataVolume";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {ThemeBaseDataVolume} from "@main/entity/frontEnd/ThemeBaseDataVolume";
 import {channels} from "@render/api/channels";
@@ -88,7 +89,18 @@ export class FrontController {
                              WHERE t1.depart_name = t2.depart_name)
          ORDER BY table_type
         `)
+    }
 
+    @IpcHandle(channels.front.getOdsDataVolume)
+    public handleGetOdsDataVolume(departName: string, tableType: string) {
+        return FrontSource.getRepository(OdsDataVolume).find(
+            {
+                where: {
+                    departName: departName,
+                    tableType: tableType
+                },
+                order: {createTime: 'desc'}
+            })
     }
 
 }

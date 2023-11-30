@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
+import {OdsDataVolume} from "@main/entity/frontEnd/OdsDataVolume";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {ThemeBaseDataVolume} from "@main/entity/frontEnd/ThemeBaseDataVolume";
 import {DataSource} from "typeorm"
@@ -14,7 +15,7 @@ export const FrontSource = new DataSource({
     database: "lptdatashare",
     synchronize: false,
     logging: false,
-    entities: [ThemeBaseDataVolume, FrontEndDataVolume, DataLakeDataVolume, ThemeBaseDataSourceCaseVolume],
+    entities: [ThemeBaseDataVolume, FrontEndDataVolume, DataLakeDataVolume, ThemeBaseDataSourceCaseVolume,OdsDataVolume],
     migrations: [],
     subscribers: [],
 })
