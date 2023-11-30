@@ -245,7 +245,7 @@ export class XlsxController {
             const excelData: any[][] = [];
 
             if (isBasicData) {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
+                excelData.push(['上报单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
 
                 for (const item of data) {
 
@@ -262,7 +262,7 @@ export class XlsxController {
                     ]);
                 }
             } else {
-                excelData.push(['数源单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '数据湖数据量', '数据湖数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
+                excelData.push(['上报单位', '职权分类', '数据元分类号', '编目名称', '前置机表名', '累计报送数据量', '累计报送数据量统计时间', '数据湖数据量', '数据湖数据量统计时间', '主题库数据量', '主题库数据量统计时间']);
 
                 for (const item of data) {
 
@@ -522,7 +522,7 @@ export class XlsxController {
                 name: 'xlsx',
                 extensions: ['xlsx']
             }],
-            defaultPath: '全省数源单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+            defaultPath: '全省上报单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
         }).then(res => {
             if (!res.canceled) {
                 // 导出 Excel 文件
@@ -1081,7 +1081,7 @@ export class XlsxController {
                 name: 'xlsx',
                 extensions: ['xlsx']
             }],
-            defaultPath: '全省数源单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+            defaultPath: '全省上报单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
         }).then(res => {
             if (!res.canceled) {
                 // 导出 Excel 文件

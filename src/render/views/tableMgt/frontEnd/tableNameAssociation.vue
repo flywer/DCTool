@@ -97,7 +97,7 @@
           :size="'small'"
       >
         <n-grid :cols="10" :x-gap="4">
-          <n-form-item-gi :span="10" label="数源单位" path="departName">
+          <n-form-item-gi :span="10" label="上报单位" path="departName">
             <n-input v-model:value="tableNameAssocModelRef.departName"
                      @keydown.enter.prevent
             />
@@ -157,7 +157,7 @@ const tableCommentMap = ref<Map<string, string>>(new Map<string, string>())
 const createColumns = (): DataTableColumns<FEDepartTableName> => {
   return [
     {
-      title: '数源单位名称',
+      title: '上报单位名称',
       key: 'departName',
     },
     {
@@ -229,7 +229,7 @@ const tableNameAssocModalFormRules = ref({
   departName: {
     required: true,
     trigger: ['input'],
-    message: '请输入数源单位'
+    message: '请输入上报单位'
   },
   tableType: {
     required: true,

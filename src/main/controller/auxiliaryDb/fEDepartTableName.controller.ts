@@ -27,7 +27,7 @@ export class FEDepartTableNameController {
 
         const templateCheck = (worksheet: ExcelJS.Worksheet) => {
             return new Promise((resolve, reject) => {
-                if (worksheet.getCell('A2').text != '数源单位' || worksheet.getCell('B2').text != '数据元分类号' || worksheet.getCell('C2').text != '表名') {
+                if (worksheet.getCell('A2').text != '上报单位' || worksheet.getCell('B2').text != '数据元分类号' || worksheet.getCell('C2').text != '表名') {
                     reject(failure('模板错误：表头错误'))
                 }
 

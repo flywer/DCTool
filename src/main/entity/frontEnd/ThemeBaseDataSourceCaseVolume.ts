@@ -1,7 +1,7 @@
 import {Column, Entity} from "typeorm";
 
 /**
- * 主题库数源单位案件量统计表
+ * 主题库上报单位案件量统计表
  **/
 @Entity({
     name: 'xzzf_sjtj_theme_base_data_source_case_volume'

@@ -4,12 +4,12 @@
       <n-tab-pane name="1" tab="质检情况统计">
         <quality-insp-stat/>
       </n-tab-pane>
-      <n-tab-pane name="5" tab="全省数源单位数据量统计">
+      <n-tab-pane name="5" tab="全省上报单位数据量统计">
         <depart-data-volume-stat/>
       </n-tab-pane>
       <n-tab-pane name="6" tab="主题库统计">
         <n-tabs type="line" animated>
-          <n-tab-pane name="1" tab="数源单位案件量统计">
+          <n-tab-pane name="1" tab="上报单位案件量统计">
             <data-source-case-volume-stat/>
           </n-tab-pane>
           <n-tab-pane name="2" tab="所属单位案件量统计">

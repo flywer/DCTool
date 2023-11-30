@@ -16,7 +16,7 @@ export class DataLakeDataVolume {
 
     @Column({
         name: 'project_id',
-        comment: '数源单位项目ID',
+        comment: '上报单位项目ID',
     })
     projectId: string
 
