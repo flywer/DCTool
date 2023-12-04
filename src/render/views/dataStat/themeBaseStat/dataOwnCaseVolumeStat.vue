@@ -626,7 +626,7 @@ const getCityVolumeBySql = async (sql: string, limitNum?: number): Promise<strin
   const record: string[][] = (await table_preview(8, 'xzzf_sjtj_theme_base_case_volume', limitNum)).data
 
   const volumes = record.slice(1, record.length)
-  console.log(volumes)
+
   return volumes.map(value => value.at(1))
 }
 
