@@ -47,7 +47,7 @@ export class DepartCatalogHookRecord {
         type: 'int',
         comment: '行政许可'
     })
-    AL: number
+    AL: CatalogHookType
 
     // 行政征收
     @Column({
@@ -55,7 +55,7 @@ export class DepartCatalogHookRecord {
         type: 'int',
         comment: '行政征收'
     })
-    AE: number
+    AE: CatalogHookType
 
     // 行政检查
     @Column({
@@ -63,7 +63,7 @@ export class DepartCatalogHookRecord {
         type: 'int',
         comment: '行政检查'
     })
-    AC: number
+    AC: CatalogHookType
 
     // 行政处罚
     @Column({
@@ -71,7 +71,7 @@ export class DepartCatalogHookRecord {
         type: 'int',
         comment: '行政处罚'
     })
-    AP: number
+    AP: CatalogHookType
 
     // 行政强制
     @Column({
@@ -79,7 +79,7 @@ export class DepartCatalogHookRecord {
         type: 'int',
         comment: '行政强制'
     })
-    AF: number
+    AF: CatalogHookType
 
     @Column({
         name: 'update_time',

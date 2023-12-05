@@ -22,8 +22,6 @@ export type DCCommonResult<T> = {
     timestamp: number
 }
 
-
-
 // 字典值类型
 export type DC_DictItem = {
     id: string;
@@ -36,4 +34,12 @@ export type DC_DictItem = {
     status: string;
     subCount: any;
     children: any;
+}
+
+export enum DC_Datasource {
+    dataLake = '12',
+    shareBase = '11',
+    themeBase = '8',
+    frontEnd = '7',
+    tbds = '6',
 }

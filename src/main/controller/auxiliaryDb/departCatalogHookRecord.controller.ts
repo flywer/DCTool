@@ -363,4 +363,10 @@ export class DepartCatalogHookRecordController {
 
     }
 
+    @IpcHandle(channels.auxiliaryDb.departCatalogHookRecord.findCatalogHookRecordByDepartName)
+    public handleFindCatalogHookRecordByDepartName(departName: string) {
+        return AppDataSource.getRepository(DepartCatalogHookRecord).findOneBy({
+            departName: departName
+        })
+    }
 }

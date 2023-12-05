@@ -12,14 +12,14 @@
       <n-checkbox-group v-model:value="syncData" :disabled="isGenerating">
         <n-space item-style="display: flex;">
           <n-checkbox value="syncOds" label="同步累计报送数据量"/>
-          <n-button size="tiny" type="info" @click="sync_ods_data_vol" :disabled="isGenerating">立即同步</n-button>
+          <n-button size="tiny" type="info" @click="syncOdsDataVol" :disabled="isGenerating">立即同步</n-button>
           <n-divider :vertical="true" style="height: 100%"/>
           <n-checkbox value="syncDataLake" label="同步数据湖数据量"/>
-          <n-button size="tiny" type="info" @click="sync_data_lake_data_vol" :disabled="isGenerating">立即同步
+          <n-button size="tiny" type="info" @click="syncDataLakeDataVol" :disabled="isGenerating">立即同步
           </n-button>
           <n-divider :vertical="true" style="height: 100%"/>
           <n-checkbox value="syncThemeBase" label="同步主题库数据量"/>
-          <n-button size="tiny" type="info" @click="sync_theme_base_data_vol" :disabled="isGenerating">立即同步
+          <n-button size="tiny" type="info" @click="syncThemeBaseDataVol" :disabled="isGenerating">立即同步
           </n-button>
         </n-space>
       </n-checkbox-group>
@@ -76,99 +76,102 @@ const generateData = async () => {
   const actionDataArr: DepartDataVolExcelModel[] = []
 
   if (syncData.value.includes('syncOds')) {
-    await sync_ods_data_vol()
+    await syncOdsDataVol()
   }
 
   if (syncData.value.includes('syncDataLake')) {
-    await sync_data_lake_data_vol()
+    await syncDataLakeDataVol()
   }
 
   if (syncData.value.includes('syncThemeBase')) {
-    await sync_theme_base_data_vol()
+    await syncThemeBaseDataVol()
   }
 
   // 获取单位表名关联数据
   isGenerating.value = true
   buttonText.value = '获取单位表名关联信息...'
-  get_all_FE_TableName().then(async departs => {
-    try {
-      for (const depart of departs) {
-        buttonText.value = `处理${depart.departName}数据...`
+  get_all_FE_TableName()
+      .then(async departs => {
+        try {
+          for (const depart of departs) {
+            buttonText.value = `处理${depart.departName}数据...`
 
-        const feDataRecord = await getOdsDatVolumeByDepart(depart)
+            const feDataRecord = await getOdsDatVolumeByDepart(depart)
 
-        const dataLakeDataRecord = await get_data_lake_data_vol_by_depart_name_and_table_type(getProjectIdByDepartName(depart.departName), depart.tableType)
+            const dataLakeDataRecord = await get_data_lake_data_vol_by_depart_name_and_table_type(getProjectIdByDepartName(depart.departName), depart.tableType)
 
-        const themeBaseDataRecord = await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
+            const themeBaseDataRecord = await get_theme_base_data_vol_by_depart_name_and_table_type(depart.departName, depart.tableType)
 
-        if ((filterData.value.includes('fe') && isNull(feDataRecord)) ||
-            (filterData.value.includes('dataLake') && !isBasicTable(depart.tableType) && isNull(dataLakeDataRecord)) ||
-            (filterData.value.includes('themeBase') && isNull(themeBaseDataRecord))) {
-          continue
+            if ((filterData.value.includes('fe') && isNull(feDataRecord)) ||
+                (filterData.value.includes('dataLake') && !isBasicTable(depart.tableType) && isNull(dataLakeDataRecord)) ||
+                (filterData.value.includes('themeBase') && isNull(themeBaseDataRecord))) {
+              continue
+            }
+
+            const dataRow: DepartDataVolExcelModel = {
+              departName: depart.departName,
+              tableType: depart.tableType,
+              tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
+              feTableName: depart.tableName,
+              feDataCount: feDataRecord?.dataCount || '0',
+              feDataStatTime: feDataRecord?.updateTime ? formatDate2Day(feDataRecord?.updateTime, true) : '-',
+              dataLakeDataCount: dataLakeDataRecord?.dataCount || '0',
+              dataLakeDataStatTime: dataLakeDataRecord?.updateTime ? formatDate2Day(dataLakeDataRecord?.updateTime, true) : '-',
+              themeBaseDataCount: themeBaseDataRecord?.dataCount || '0',
+              themeBaseDataStatTime: themeBaseDataRecord?.updateTime ? formatDate2Day(themeBaseDataRecord?.updateTime, true) : '-',
+            }
+
+            // 基础数据
+            if (basicTableNames.includes(depart.tableType.toLowerCase())) {
+              basicDataArr.push(dataRow)
+            } else {
+              actionDataArr.push(dataRow)
+            }
+          }
+        } catch (e) {
+          window.$message.error('数据处理失败')
+          window.$message.error(e)
+          isGenerating.value = false
+          buttonText.value = `生成Excel`
+          console.log(e)
         }
 
-        const dataRow: DepartDataVolExcelModel = {
-          departName: depart.departName,
-          tableType: depart.tableType,
-          tableComment: (await get_table_sql({tableName: depart.tableType}))[0].comment,
-          feTableName: depart.tableName,
-          feDataCount: feDataRecord?.dataCount || '0',
-          feDataStatTime: feDataRecord?.updateTime ? formatDate2Day(feDataRecord?.updateTime, true) : '-',
-          dataLakeDataCount: dataLakeDataRecord?.dataCount || '0',
-          dataLakeDataStatTime: dataLakeDataRecord?.updateTime ? formatDate2Day(dataLakeDataRecord?.updateTime, true) : '-',
-          themeBaseDataCount: themeBaseDataRecord?.dataCount || '0',
-          themeBaseDataStatTime: themeBaseDataRecord?.updateTime ? formatDate2Day(themeBaseDataRecord?.updateTime, true) : '-',
+        const customSort = (a: DepartDataVolExcelModel, b: DepartDataVolExcelModel) => {
+          // 先按 departName 进行排序
+          const departNameComparison = a.departName.localeCompare(b.departName);
+          if (departNameComparison !== 0) {
+            return departNameComparison;
+          }
+
+          // departName 相同时，按 tableType 进行排序
+          return a.tableType.localeCompare(b.tableType);
         }
 
-        // 基础数据
-        if (basicTableNames.includes(depart.tableType.toLowerCase())) {
-          basicDataArr.push(dataRow)
-        } else {
-          actionDataArr.push(dataRow)
-        }
-      }
-    } catch (e) {
-      window.$message.error('数据处理失败')
-      window.$message.error(e)
-      isGenerating.value = false
-      buttonText.value = `生成Excel`
-      console.log(e)
-    }
+        basicDataArr.sort(customSort)
+        actionDataArr.sort(customSort)
 
-    const customSort = (a: DepartDataVolExcelModel, b: DepartDataVolExcelModel) => {
-      // 先按 departName 进行排序
-      const departNameComparison = a.departName.localeCompare(b.departName);
-      if (departNameComparison !== 0) {
-        return departNameComparison;
-      }
+        buttonText.value = `生成Excel中...`
 
-      // departName 相同时，按 tableType 进行排序
-      return a.tableType.localeCompare(b.tableType);
-    }
+        // 生成Excel
+        create_depart_data_vol_excel({
+          basicData: basicDataArr,
+          actionData: actionDataArr
+        }).catch(() => {
+          window.$message.error('生成Excel失败')
+          isGenerating.value = false
+          buttonText.value = `生成Excel`
+        })
 
-    basicDataArr.sort(customSort)
-    actionDataArr.sort(customSort)
-
-    buttonText.value = `生成Excel中...`
-
-    // 生成Excel
-    create_depart_data_vol_excel({
-      basicData: basicDataArr,
-      actionData: actionDataArr
-    }).catch(() => {
-      window.$message.error('生成Excel失败')
-      isGenerating.value = false
-      buttonText.value = `生成Excel`
-    })
-
-  }).catch(() => {
-    window.$message.error('获取单位表名关联数据失败')
-    isGenerating.value = false
-    buttonText.value = `生成Excel`
-  }).finally(() => {
-    isGenerating.value = false
-    buttonText.value = `生成Excel`
-  })
+      })
+      .catch(() => {
+        window.$message.error('获取单位表名关联数据失败')
+        isGenerating.value = false
+        buttonText.value = `生成Excel`
+      })
+      .finally(() => {
+        isGenerating.value = false
+        buttonText.value = `生成Excel`
+      })
 
 }
 
@@ -198,7 +201,7 @@ const getOdsDatVolumeByDepart = async (depart: FEDepartTableName): Promise<FeDat
 
 }
 
-const sync_ods_data_vol = async () => {
+const syncOdsDataVol = async () => {
   isGenerating.value = true
   buttonText.value = '正在同步累计推送数据量信息...'
 
@@ -250,7 +253,7 @@ const getProjectIdByDepartName = (departName: string): string => {
 
 }
 
-const sync_data_lake_data_vol = async () => {
+const syncDataLakeDataVol = async () => {
   isGenerating.value = true
   buttonText.value = '正在同步数据湖数据量信息...'
 
@@ -321,7 +324,7 @@ const sync_data_lake_data_vol = async () => {
 
 }
 
-const sync_theme_base_data_vol = async () => {
+const syncThemeBaseDataVol = async () => {
   isGenerating.value = true
   buttonText.value = '正在同步主题库数据量信息...'
 

@@ -187,6 +187,7 @@ export const channels = reactive({
             getCatalogHookInfoByDepartName: 'auxiliaryDb/departCatalogHookRecord/getCatalogHookInfoByDepartName',
             deleteCatalogHookRecord: 'auxiliaryDb/departCatalogHookRecord/deleteCatalogHookRecord',
             exportCatalogHookData: 'auxiliaryDb/departCatalogHookRecord/exportCatalogHookData',
+            findCatalogHookRecordByDepartName: 'auxiliaryDb/departCatalogHookRecord/findCatalogHookRecordByDepartName',
         }
     },
     cron: {
@@ -199,6 +200,7 @@ export const channels = reactive({
         createDepartDataVolExcel: 'xlsx/createDepartDataVolExcel',
         createDepartCaseVolumeExcel: 'xlsx/createDepartCaseVolumeExcel',
         exportDataSourceDepartCaseVolume: 'xlsx/exportDataSourceDepartCaseVolume',
+        exportDataLakeOwnDepartCaseVolume: 'xlsx/exportDataLakeOwnDepartCaseVolume',
     },
     front: {
         getTableData: 'front/getTableData',
@@ -208,6 +210,7 @@ export const channels = reactive({
         getThemeBaseDataVolByDepartNameAndTableType: 'front/getThemeBaseDataVolByDepartNameAndTableType',
         getThemeBaseDataSourceCaseVolume: 'front/getThemeBaseDataSourceCaseVolume',
         getOdsDataVolume: 'front/getOdsDataVolume',
+        getDataLakeOwnDepartCaseVolume: 'front/getDataLakeOwnDepartCaseVolume',
     },
     updater: {
         checkUpdate: "updater/checkUpdate",

@@ -1,5 +1,7 @@
+import {AppDataSource} from "@main/dataSource/data-source";
 import {FrontSource} from "@main/dataSource/front-source";
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
+import {DataLakeOwnDepartCaseVolume} from "@main/entity/frontEnd/dataLakeOwnDepartCaseVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
 import {OdsDataVolume} from "@main/entity/frontEnd/OdsDataVolume";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
@@ -103,4 +105,10 @@ export class FrontController {
             })
     }
 
+    @IpcHandle(channels.front.getDataLakeOwnDepartCaseVolume)
+    public handleGetDataLakeOwnDepartCaseVolume() {
+        return FrontSource.getRepository(DataLakeOwnDepartCaseVolume).find({
+            order: {subjectName: 'asc'}
+        })
+    }
 }

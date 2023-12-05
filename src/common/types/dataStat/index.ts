@@ -23,7 +23,7 @@ export type InspectionDataExcelModel = {
     inspectionTime: string
 }
 
-//【主题库案件数量统计】
+// region【主题库案件数量统计】
 // 编目挂接信息数据
 export type CatalogHookData = {
     cityName: string,
@@ -87,3 +87,85 @@ type SystemStatsInfo = {
     departCount: number,
     caseVolume: number
 }
+
+// endregion
+
+// region【主题库案件数量统计】
+export class DataLakeOwnDepartCaseVolumeExcelModel {
+    subjectName: string
+    ownDepartName: string
+    caseTotalVolume: number
+    AL: DataLakeCaseVolumeNoYzfStatInfo
+    AE: DataLakeCaseVolumeNoYzfStatInfo
+    AR: DataLakeCaseVolumeNoYzfStatInfo // 行政征用
+    yzf: {
+        AC: number,
+        AP: number,
+        AF: number,
+    }
+    AC: DataLakeCaseVolumeNoYzfStatInfo
+    AP: DataLakeCaseVolumeNoYzfStatInfo
+    AF: DataLakeCaseVolumeNoYzfStatInfo
+
+    constructor() {
+        this.caseTotalVolume = 0
+
+        this.AL = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+
+        this.AE = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+
+        this.AR = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+
+        this.yzf = {
+            AC: 0,
+            AP: 0,
+            AF: 0
+        }
+        this.AC = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+        this.AP = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+        this.AF = {
+            nv: 0,
+            pv: 0,
+            citySystem: 0,
+            noSystem: 0,
+        }
+    }
+}
+
+type DataLakeCaseVolumeNoYzfStatInfo = {
+    // 国垂
+    nv: number,
+    // 省垂
+    pv: number,
+    // 市自建系统
+    citySystem: number,
+    // 无系统
+    noSystem: number
+}
+
+// endregion

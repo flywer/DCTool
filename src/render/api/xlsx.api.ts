@@ -2,7 +2,7 @@ import {
     ProvincialDepartCaseVolumeExcelModel,
     DepartDataVolExcelModel,
     InspectionDataExcelModel,
-    CityDepartCaseVolumeExcelModel
+    CityDepartCaseVolumeExcelModel, DataLakeOwnDepartCaseVolumeExcelModel
 } from "@common/types/dataStat";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {channels} from "@render/api/channels";
@@ -35,5 +35,10 @@ export const create_depart_case_volume_excel = async (excelData: {
 
 export const export_data_source_depart_case_volume = async (provincialData: ThemeBaseDataSourceCaseVolume[], cityData: ThemeBaseDataSourceCaseVolume[]) => {
     const {data} = await ipcInstance.send(channels.xlsx.exportDataSourceDepartCaseVolume, provincialData, cityData)
+    return data
+}
+
+export const export_data_lake_own_depart_case_volume = async (model: DataLakeOwnDepartCaseVolumeExcelModel[]) => {
+    const {data} = await ipcInstance.send(channels.xlsx.exportDataLakeOwnDepartCaseVolume, model)
     return data
 }

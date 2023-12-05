@@ -1,4 +1,5 @@
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
+import {DataLakeOwnDepartCaseVolume} from "@main/entity/frontEnd/dataLakeOwnDepartCaseVolume";
 import {FrontEndDataVolume} from "@main/entity/frontEnd/FrontEndDataVolume";
 import {OdsDataVolume} from "@main/entity/frontEnd/OdsDataVolume";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
@@ -33,5 +34,10 @@ export const get_theme_base_data_source_case_volume = async (): Promise<ThemeBas
 
 export const get_ods_data_volume = async (departName: string, tableType: string): Promise<OdsDataVolume[]> => {
     const {data} = await ipcInstance.send(channels.front.getOdsDataVolume, departName, tableType)
+    return data
+}
+
+export const get_data_lake_own_depart_case_volume = async (): Promise<DataLakeOwnDepartCaseVolume[]> => {
+    const {data} = await ipcInstance.send(channels.front.getDataLakeOwnDepartCaseVolume)
     return data
 }

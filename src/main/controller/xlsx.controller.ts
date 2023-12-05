@@ -3,9 +3,10 @@ import {
     ProvincialDepartCaseVolumeExcelModel,
     DepartDataVolExcelModel,
     InspectionDataExcelModel,
-    CityDepartCaseVolumeExcelModel
+    CityDepartCaseVolumeExcelModel, DataLakeOwnDepartCaseVolumeExcelModel
 } from "@common/types/dataStat";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
+import {getResourcePath} from "@main/utils/appPath";
 import {getCurrentTimeInSeconds, getDayString} from "@main/utils/dateUtils";
 import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
@@ -13,10 +14,36 @@ import {formatDate} from "@render/utils/common/dateUtils";
 import {Controller, IpcHandle} from "einf";
 import {dialog} from "electron";
 import * as ExcelJS from 'exceljs';
+import {join} from "path";
 
 @Controller()
 export class XlsxController {
     constructor() {
+    }
+
+    public setCellBolder(worksheet: ExcelJS.Worksheet) {
+        // 遍历每个单元格，并为其添加边框
+        worksheet.eachRow({includeEmpty: false}, (row: ExcelJS.Row) => {
+            row.eachCell({includeEmpty: true}, (cell: ExcelJS.Cell) => {
+                // 获取当前单元格的边框
+                const border = cell.border || {};
+
+                // 设置边框样式
+                border.top = {style: 'thin'};
+                border.left = {style: 'thin'};
+                border.bottom = {style: 'thin'};
+                border.right = {style: 'thin'};
+
+                // 更新单元格的边框
+                cell.border = border;
+            });
+        });
+    }
+
+    public setColumnWidths(worksheet: ExcelJS.Worksheet, columnWidths: number[]) {
+        for (let i = 0; i < columnWidths.length; i++) {
+            worksheet.getColumn(i + 1).width = columnWidths[i];
+        }
     }
 
     @IpcHandle(channels.xlsx.createDataInpsStat)
@@ -1091,28 +1118,107 @@ export class XlsxController {
 
     }
 
-    public setCellBolder(worksheet: ExcelJS.Worksheet) {
-        // 遍历每个单元格，并为其添加边框
-        worksheet.eachRow({includeEmpty: true}, (row: ExcelJS.Row) => {
-            row.eachCell({includeEmpty: true}, (cell: ExcelJS.Cell) => {
-                // 获取当前单元格的边框
-                const border = cell.border || {};
+    @IpcHandle(channels.xlsx.exportDataLakeOwnDepartCaseVolume)
+    public async handleExportDataLakeOwnDepartCaseVolume(model: DataLakeOwnDepartCaseVolumeExcelModel[]) {
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+        const filePath = join(getResourcePath(), '/assets/excelTemplate/dataLakeOwnDepartCaseVolumeTemplate.xlsx')
+        await workbook.xlsx.readFile(filePath);
 
-                // 设置边框样式
-                border.top = {style: 'thin'};
-                border.left = {style: 'thin'};
-                border.bottom = {style: 'thin'};
-                border.right = {style: 'thin'};
+        const dataWorksheet: ExcelJS.Worksheet = workbook.getWorksheet(1)
 
-                // 更新单元格的边框
-                cell.border = border;
-            });
-        });
-    }
+        const createExcelData = (model: DataLakeOwnDepartCaseVolumeExcelModel[]) => {
+            const excelData: any[][] = [];
 
-    public setColumnWidths(worksheet: ExcelJS.Worksheet, columnWidths: number[]) {
-        for (let i = 0; i < columnWidths.length; i++) {
-            worksheet.getColumn(i + 1).width = columnWidths[i];
+            model.forEach(data => {
+                excelData.push([
+                    data.subjectName,
+                    data.ownDepartName ? data.ownDepartName : '无所属单位名称',
+
+                    data.AL.nv,
+                    data.AL.pv,
+                    data.AL.citySystem,
+                    data.AL.noSystem,
+
+                    data.AE.nv,
+                    data.AE.pv,
+                    data.AE.citySystem,
+                    data.AE.noSystem,
+
+                    data.AR.nv,
+                    data.AR.pv,
+                    data.AR.citySystem,
+                    data.AR.noSystem,
+
+                    data.yzf.AC,
+                    data.yzf.AP,
+                    data.yzf.AF,
+
+                    data.AC.nv,
+                    data.AC.pv,
+                    data.AC.citySystem,
+                    data.AC.noSystem,
+
+                    data.AP.nv,
+                    data.AP.pv,
+                    data.AP.citySystem,
+                    data.AP.noSystem,
+
+                    data.AF.nv,
+                    data.AF.pv,
+                    data.AF.citySystem,
+                    data.AF.noSystem,
+
+                    data.caseTotalVolume
+                ])
+            })
+
+            const numRows = excelData.length;
+            const numCols = excelData[0].length;
+            const totalRow: any[] = [];
+
+            for (let j = 0; j < numCols; j++) {
+                let columnSum = 0;
+                if (j === 0) {
+                    totalRow.push('合计')
+                    continue
+                } else if (j === 1) {
+                    totalRow.push('')
+                    continue
+                } else {
+                    for (let i = 0; i < numRows; i++) {
+                        columnSum += excelData[i][j];
+                    }
+                }
+
+                totalRow.push(columnSum);
+            }
+
+            excelData.push(totalRow)
+
+            return excelData
         }
+
+        dataWorksheet.addRows(createExcelData(model))
+
+        this.setCellBolder(dataWorksheet)
+        dataWorksheet.getColumn(1).width = 30
+        dataWorksheet.getColumn(2).width = 30
+
+        //   dataWorksheet.mergeCells(`A${model.length + 5}`, `B${model.length + 5}`)
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '数据湖全省数据所属单位案件量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
     }
+
 }

@@ -28,3 +28,8 @@ export const export_catalog_hook_data = async (): Promise<Result> => {
     const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.exportCatalogHookData)
     return data
 }
+
+export const find_catalog_hook_record_by_depart_name = async (departName: string): Promise<DepartCatalogHookRecord> => {
+    const {data} = await ipcInstance.send(channels.auxiliaryDb.departCatalogHookRecord.findCatalogHookRecordByDepartName, departName)
+    return data
+}

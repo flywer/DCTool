@@ -1,10 +1,11 @@
+import {DC_Datasource} from "@common/types/datacenter/common";
 import {exec_sql} from "@render/api/datacenter.api";
 
 /**
  * 执行中台Sql工具类
  **/
 export class ExecuteDCSql {
-    sourceId: string
+    sourceId: DC_Datasource | number | string
     dbType: 'tbds-hive' | 'mysql'
     sourceName: string
     dataTierCode: string
@@ -15,7 +16,7 @@ export class ExecuteDCSql {
     ddlSql: string
     tableName: string
 
-    constructor(sourceId?: string, dbType?: 'tbds-hive' | 'mysql') {
+    constructor(sourceId?: DC_Datasource | number | string, dbType?: 'tbds-hive' | 'mysql') {
         this.sourceId = sourceId || '6'
         this.dbType = dbType || 'tbds-hive'
 
