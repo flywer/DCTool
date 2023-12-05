@@ -1,4 +1,3 @@
-import {AppDataSource} from "@main/dataSource/data-source";
 import {FrontSource} from "@main/dataSource/front-source";
 import {DataLakeDataVolume} from "@main/entity/frontEnd/DataLakeDataVolume";
 import {DataLakeOwnDepartCaseVolume} from "@main/entity/frontEnd/dataLakeOwnDepartCaseVolume";
