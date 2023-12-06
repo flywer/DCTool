@@ -13,6 +13,7 @@ import {CronController} from "@main/controller/cron.controller";
 import {DatacenterController} from "@main/controller/datacenter.controller";
 import {FrontController} from "@main/controller/front.controller";
 import {JobDetailController} from "@main/controller/jobDetail.controller";
+import {JobTreeController} from "@main/controller/jobTree.controller";
 import {LdDecryptController} from "@main/controller/ldDecrypt.controller";
 import {LoginController} from "@main/controller/login.controller";
 import {ProjectInfoController} from "@main/controller/auxiliaryDb/projectInfo.controller";
@@ -137,6 +138,7 @@ async function bootstrap() {
                         TemplateStructTableController,
                         FieldInspectionRuleController,
                         DepartCatalogHookRecordController,
+                        JobTreeController
                     ],
                 injects: [{
                     name: 'IS_DEV',

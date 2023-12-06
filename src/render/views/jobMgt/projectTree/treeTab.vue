@@ -166,6 +166,7 @@ import {useProjectTreeStore} from "@render/stores/projectTree";
 import {useUserStore} from "@render/stores/user";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
 import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
+import leafNodeSuffix from "@render/views/jobMgt/components/leafNodeSuffix.vue";
 import JobOverviewTab from "@render/views/jobMgt/projectTree/jobOverviewTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
 import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
@@ -273,6 +274,8 @@ onMounted(async () => {
 
   // 初始化滚动到选中的节点上
   tree.value?.scrollTo({key: useProjectTreeStore().selectedKeys[0]})
+
+  useProjectTreeStore().nodeSuffixInit()
 })
 
 const handleLoad = (node: TreeOption) => {
@@ -523,7 +526,12 @@ const renderSuffix = ({option}: { option: TreeOption }) => {
           {default: () => h(Bookmark24Filled)}
       )
     }
+  } else if (option.isLeaf && (option.key.toString().startsWith('1-'))) {
+    return h(leafNodeSuffix, {
+      nodeKey: option.key
+    })
   }
+
 }
 
 const renderSwitcherIcon = () => {

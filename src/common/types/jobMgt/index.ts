@@ -132,3 +132,14 @@ export enum JobStatus {
     // 任务未反馈
     noFeedback,
 }
+
+export type ActionJobNodeSuffix = {
+    cjJob: JobStatus
+    zj1Job: JobStatus
+    bfJob: JobStatus
+    qcJob: JobStatus
+    rh1Job: JobStatus
+    rh2Job: JobStatus
+    zj2Job: JobStatus
+    rh3Job: JobStatus
+}

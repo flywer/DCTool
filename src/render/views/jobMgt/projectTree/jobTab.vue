@@ -785,7 +785,7 @@ const pageInit = async (selectedKeys: string[]) => {
 
 const title = ref('')
 
-const tableDataRef = ref([])
+const tableDataRef = ref<Job[]>([])
 
 const isTableLoading = ref(false)
 
@@ -930,6 +930,8 @@ const tableDataInit = async () => {
     }
 
     tableDataRef.value = jobs.sort(jobNameCompare)
+
+    useProjectTreeStore().updateNodeSuffix(projectTree.selectedKeys[0], tableDataRef.value)
   } catch (e) {
     console.error(e)
     isTableLoading.value = false

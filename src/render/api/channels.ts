@@ -235,5 +235,10 @@ export const channels = reactive({
     },
     extractLaws: {
         extract: 'extractLaws/extract'
+    },
+    jobTree: {
+        updateNodeSuffix: 'jobTree/UpdateNodeSuffix',
+        sendNodeSuffixUpdated: 'jobTree/sendNodeSuffixUpdated',
+        getNodeSuffix: 'jobTree/getNodeSuffix',
     }
 })

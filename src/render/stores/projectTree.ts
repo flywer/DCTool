@@ -1,3 +1,6 @@
+import {ActionJobNodeSuffix, Job, JobStatus, JobType} from "@common/types/jobMgt";
+import {get_node_suffix, update_node_suffix} from "@render/api/jobTree.api";
+import {formatDate} from "@render/utils/common/dateUtils";
 import {NTag, TreeOption} from "naive-ui";
 import {defineStore} from "pinia";
 import {h} from "vue";
@@ -10,7 +13,9 @@ export const useProjectTreeStore = defineStore({
         expandedKeys: ['-1'],
         onlyShowUserJob: false, // 仅显示当前用户任务
         hideEmptyNodes: false, // 隐藏无任务空节点
-        isBasicData: true //此项目是否为基础数据项目，否则为行为数据项目
+        isBasicData: true, //此项目是否为基础数据项目，否则为行为数据项目
+        nodeSuffix: new Map<string, ActionJobNodeSuffix>(), // 叶子节点的后缀渲染配置
+        nodeSuffixUpdateTime: formatDate(new Date()),
     }),
     actions: {
         treeNodesInit() {
@@ -269,5 +274,63 @@ export const useProjectTreeStore = defineStore({
                 }
             ]
         },
+        updateNodeSuffix(nodeKey: string, jobs: Job[]) {
+
+            if (nodeKey.startsWith('1-')) {
+
+                const suffix: ActionJobNodeSuffix = {
+                    cjJob: JobStatus.noCreate,
+                    zj1Job: JobStatus.noCreate,
+                    bfJob: JobStatus.noCreate,
+                    qcJob: JobStatus.noCreate,
+                    rh1Job: JobStatus.noCreate,
+                    rh2Job: JobStatus.noCreate,
+                    zj2Job: JobStatus.noCreate,
+                    rh3Job: JobStatus.noCreate
+                }
+
+                for (let i = 0; i < jobs.length; i++) {
+                    switch (jobs[i].type) {
+                        case JobType.cj:
+                            suffix.cjJob = jobs[i].status
+                            break
+                        case JobType.zj1:
+                            suffix.zj1Job = jobs[i].status
+                            break
+                        case JobType.bf:
+                            suffix.bfJob = jobs[i].status
+                            break
+                        case JobType.qc:
+                            suffix.qcJob = jobs[i].status
+                            break
+                        case JobType.rh1:
+                            suffix.rh1Job = jobs[i].status
+                            break
+                        case JobType.rh2:
+                            suffix.rh2Job = jobs[i].status
+                            break
+                        case JobType.zj2:
+                            suffix.zj2Job = jobs[i].status
+                            break
+                        case JobType.rh3:
+                            suffix.rh3Job = jobs[i].status
+                            break
+                    }
+                }
+                this.nodeSuffix.set(nodeKey, suffix)
+
+                this.nodeSuffixUpdateTime = formatDate(new Date())
+
+                update_node_suffix(this.nodeSuffix).catch(e => {
+                    console.error(e)
+                })
+            }
+        },
+        nodeSuffixInit() {
+            get_node_suffix().then(res => {
+                this.nodeSuffix = res
+                this.nodeSuffixUpdateTime = formatDate(new Date())
+            })
+        }
     }
 })
