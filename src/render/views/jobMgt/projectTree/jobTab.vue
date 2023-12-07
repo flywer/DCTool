@@ -467,11 +467,25 @@
       preset="card"
       role="card"
       :show-icon="false"
-      :title="previewModalTitle"
       :size="'small'"
       style="width: calc(100vw - 100px);"
   >
+    <template #header>
+      <n-space>
+        {{ previewModalTitle }}
+        <span :style="{
+           color: useThemeVars().value.textColor3,
+           fontSize: '12px',
+           float: 'right',
+           lineHeight: '28px'
+       }"
+        >
+          数据量：{{ tableDataCount }}
+        </span>
+      </n-space>
 
+
+    </template>
     <n-data-table
         style="overflow: auto"
         class="mt-2 mb-2"
@@ -684,7 +698,7 @@ import {
   get_workflow_page,
   update_sched_job
 } from "@render/api/datacenter.api";
-import {get_table_data} from "@render/api/front.api";
+import {get_table_data, get_table_data_count} from "@render/api/front.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import ZjJobInspConfigModal from "@render/components/datacenter/zjJobInspConfigModal.vue";
@@ -728,7 +742,7 @@ import {
   SelectGroupOption,
   SelectOption,
   TreeSelectOption,
-  NTag
+  NTag, useThemeVars
 } from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
 
@@ -2087,10 +2101,6 @@ let previewModalTitle = '';
 
 const previewColsRef = ref([])
 
-const tableHeadCol = ref([])
-
-const tableRows = ref([])
-
 const previewTableDataRef = ref([])
 
 const isPreviewTableLoading = ref(false)
@@ -2105,9 +2115,9 @@ const tablePreview = async (row: Job) => {
 
   previewModalTitle = tableName
 
+  getTableDataCount(tableName)
+
   get_table_data(tableName, 10, true).then(res => {
-    tableHeadCol.value = res[0]
-    tableRows.value = res.slice(1)
 
     // 创建表头
     previewColsRef.value = res[0].map((col: string) => ({
@@ -2121,24 +2131,39 @@ const tablePreview = async (row: Job) => {
     }));
 
     // 处理数据
-    previewTableDataRef.value = transform(previewColsRef.value, res.slice(1).map((item: {
-          [s: string]: unknown;
-        } | ArrayLike<unknown>) =>
-            Object.values(item).map(
-                (value) => {
-                  if (value === null) {
-                    return 'null'
-                  } else if (value instanceof Date) {
-                    return formatDate(value)
-                  } else {
-                    return value.toString()
-                  }
-                }
-            )
-    ));
+    previewTableDataRef.value =
+        transform(previewColsRef.value, res.slice(1)
+            .map((item: {
+                  [s: string]: unknown;
+                } | ArrayLike<unknown>) =>
+                    Object.values(item).map(
+                        (value) => {
+                          if (value === null) {
+                            return 'null'
+                          } else if (value instanceof Date) {
+                            return formatDate(value)
+                          } else {
+                            return value.toString()
+                          }
+                        }
+                    )
+            ));
   }).finally(() => isPreviewTableLoading.value = false)
 
   showPreviewModalRef.value = true
+}
+
+let tableDataCount = ''
+
+const isGetDataCount = ref(false)
+
+const getTableDataCount = (tableName: string) => {
+  tableDataCount = ''
+  isGetDataCount.value = true
+  get_table_data_count(tableName)
+      .then(res => {
+        tableDataCount = res
+      }).finally(() => isGetDataCount.value = false)
 }
 
 interface ObjA {

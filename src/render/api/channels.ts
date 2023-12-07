@@ -211,6 +211,7 @@ export const channels = reactive({
         getThemeBaseDataSourceCaseVolume: 'front/getThemeBaseDataSourceCaseVolume',
         getOdsDataVolume: 'front/getOdsDataVolume',
         getDataLakeOwnDepartCaseVolume: 'front/getDataLakeOwnDepartCaseVolume',
+        getTableDataCount: 'front/getTableDataCount',
     },
     updater: {
         checkUpdate: "updater/checkUpdate",

@@ -12,6 +12,11 @@ export const get_table_data = async (tableName: string, limitNum: number, cdTime
     return data
 }
 
+export const get_table_data_count = async (tableName: string) => {
+    const {data} = await ipcInstance.send<string>(channels.front.getTableDataCount, tableName)
+    return data
+}
+
 export const get_FE_data_vol_by_depart_name_and_table_type = async (departName: string, tableType: string): Promise<FrontEndDataVolume> => {
     const {data} = await ipcInstance.send(channels.front.getFrontEndDataVolByDepartNameAndTableType, departName, tableType)
     return data

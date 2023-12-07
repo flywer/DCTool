@@ -38,6 +38,20 @@ export class FrontController {
         return data
     }
 
+    @IpcHandle(channels.front.getTableDataCount)
+    public async handleGetTableDataCount(tableName: string) {
+        try {
+            const dataQuery = `SELECT COUNT(*) as count FROM ${tableName} `;
+
+            const record = await FrontSource.manager.query(dataQuery)
+
+            return record[0].count
+        } catch (error) {
+            log.error(error)
+            return 0
+        }
+    }
+
     public async handleInsertToThemeBaseDataVolume(res: any[]) {
         return FrontSource.getRepository(ThemeBaseDataVolume).insert(res)
     }
