@@ -2,20 +2,25 @@
   <n-scrollbar class="pr-2" style="height: calc(100vh - 170px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
       <n-space inline class="float-right">
-        <n-input
-            v-model:value="queryParam"
-            placeholder="搜索"
-            @update:value="handleSearch"
-            clearable
-            :readonly="isTableLoading"
-        >
-          <template #prefix>
-            <n-icon>
-              <Search/>
-            </n-icon>
-          </template>
-        </n-input>
-        <n-button secondary strong @click="tableDataInit(queryParam)">
+        <n-input-group>
+          <n-input
+              v-model:value="queryParam"
+              placeholder="搜索"
+              clearable
+              :readonly="isTableLoading"
+              @keydown.enter="handleSearch"
+          >
+            <template #prefix>
+              <n-icon>
+                <Search/>
+              </n-icon>
+            </template>
+          </n-input>
+          <n-button type="primary" ghost @click="handleSearch">
+            搜索
+          </n-button>
+        </n-input-group>
+        <n-button secondary strong @click="tableDataInit">
           刷新
           <template #icon>
             <n-icon>
@@ -54,7 +59,7 @@
       v-model:show="showEditModalRef"
       :table-id="editModalModelRef.tableId"
       :title="editModalTitle"
-      @onAfterLeave="tableDataInit(queryParam)"
+      @onAfterLeave="tableDataInit"
   />
 
   <n-modal
@@ -96,7 +101,7 @@ import {DataTableColumns, NButton, NIcon, NSpace, NInput} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 
 onMounted(() => {
-  tableDataInit(queryParam.value)
+  tableDataInit()
 })
 
 const sourceId = 6
@@ -153,22 +158,22 @@ const paginationReactive = reactive({
   itemCount: 0,
   onChange: (page: number) => {
     paginationReactive.page = page
-    tableDataInit(queryParam.value)
+    tableDataInit()
   },
   onUpdatePageSize: (pageSize: number) => {
     paginationReactive.pageSize = pageSize
     paginationReactive.page = 1
-    tableDataInit(queryParam.value)
+    tableDataInit()
   }
 })
 
-const tableDataInit = async (v: string) => {
+const tableDataInit = async () => {
   isTableLoading.value = true
 
   const result = await get_tables_info_page({
     size: paginationReactive.pageSize,
     page: paginationReactive.page,
-    likeValue: v,
+    likeValue: queryParam.value,
     sourceId: sourceId
   })
 
@@ -178,9 +183,9 @@ const tableDataInit = async (v: string) => {
   isTableLoading.value = false
 }
 
-const handleSearch = (v: string) => {
+const handleSearch = () => {
   paginationReactive.page = 1
-  tableDataInit(v)
+  tableDataInit()
 }
 
 // region 编辑
@@ -203,7 +208,7 @@ const tableDelete = (row: PageTableType) => {
   table_delete(row.id).then(res => {
     if (res.code == 200 && res.success) {
       window.$message.success("删除成功")
-      tableDataInit(queryParam.value)
+      tableDataInit()
     } else {
       window.$message.error(res.message)
     }
