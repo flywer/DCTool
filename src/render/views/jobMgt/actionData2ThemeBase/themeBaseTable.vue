@@ -30,81 +30,23 @@
     </n-scrollbar>
   </n-layout>
 
-  <n-modal
-      v-model:show="showPreviewModalRef"
-      :mask-closable="true"
-      :closable="true"
-      preset="card"
-      role="card"
-      :show-icon="false"
-      :title="modalTitle"
-      :size="'small'"
-      style="width: calc(100vw - 100px);"
-  >
-
-    <n-data-table
-        style="overflow: auto"
-        class="mt-2 mb-2"
-        :key="(row) => row.id"
-        :columns="previewColsRef"
-        :data="previewTableDataRef"
-        :bordered="true"
-        :size="'small'"
-        :striped="true"
-        :loading="isPreviewTableLoading"
-        :max-height="450"
-    />
-
-  </n-modal>
-
-
-  <n-modal
-      v-model:show="showUpdateModalRef"
-      :mask-closable="true"
-      :closable="true"
-      preset="dialog"
-      role="dialog"
-      :show-icon="false"
-      :title="modalTitle"
-      :size="'small'"
-  >
-    <n-form
-        class="mt-4"
-        ref="modalFormRef"
-        :model="modalFormModel"
-        :rules="modalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="2" :x-gap="4">
-        <n-form-item-gi label="表名" path="tableName">
-          <n-input v-model:value="modalFormModel.tableName" placeholder=""
-                   @keydown.enter.prevent
-                   readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi label="注释" path="tableComment">
-          <n-input ref="commentInputRef" v-model:value="modalFormModel.tableComment" placeholder="输入注释"
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-    <template #action>
-      <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
-      <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
-    </template>
-  </n-modal>
-
+  <table-preview-modal
+      v-model:show="tablePreviewConfig.show"
+      :datasource-id="tablePreviewConfig.datasourceId"
+      :table-name="tablePreviewConfig.tableName"
+  />
 
 </template>
 
 <script setup lang="ts">
-import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
+import {DC_Datasource} from "@common/types/datacenter/common";
+import {exec_sql, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
+import TablePreviewModal from "@render/views/jobMgt/components/tablePreviewModal.vue";
 import {Refresh} from '@vicons/ionicons5'
-import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
+import {DataTableColumns, NButton, NSpace, NPopconfirm} from "naive-ui";
 import {h, onMounted, reactive, ref, watch, computed} from "vue";
 
 const queryParam = ref('')
@@ -233,165 +175,18 @@ const paginationReactive = reactive({
 })
 
 //region 预览
-const showPreviewModalRef = ref(false)
-
-let modalTitle = '';
-
-const previewColsRef = ref([])
-
-const tableHeadCol = ref([])
-
-const tableRows = ref([])
-
-const previewTableDataRef = ref([])
-
-const isPreviewTableLoading = ref(false)
-const tablePreview = (row: { id?: string; tableName: any; tableComment?: string; createTime?: string; }) => {
-  previewColsRef.value = []
-  previewTableDataRef.value = []
-
-  isPreviewTableLoading.value = true
-  modalTitle = row.tableName
-
-  table_preview(8, row.tableName).then(res => {
-    if (res.code == 200) {
-      if (res.data.length != 0) {
-
-        tableHeadCol.value = res.data[0]
-        tableRows.value = res.data.slice(1)
-
-        // 创建表头
-        previewColsRef.value = res.data[0].map((col: any) => ({
-          title: col,
-          key: col,
-          // fixed: key.split('.')[1] === 'id' ? 'left' : false
-          width: '200px',
-          ellipsis: {
-            tooltip: true
-          }
-        }));
-
-        // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item: { [s: string]: unknown; } | ArrayLike<unknown>) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
-        )
-
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | { [s: string]: unknown; }) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
-        ));
-      }
-    } else {
-      window.$message.error(res.message)
-    }
-  }).finally(() => isPreviewTableLoading.value = false)
-
-  showPreviewModalRef.value = true
-}
-
-interface ObjA {
-  title: string;
-  key: string
-}
-
-type ObjB = Array<string[]>;
-
-const transform = (objA: ObjA[], objB: ObjB): Record<string, string>[] => {
-  const transformed: Record<string, string>[] = [];
-  for (const row of objB) {
-    const obj: Record<string, string> = {};
-    for (let i = 0; i < row.length && i < objA.length; i++) {
-      obj[objA[i].key] = row[i];
-    }
-    transformed.push(obj);
-  }
-  return transformed;
-}
-// endregion
-
-//region 修改表注解
-const showUpdateModalRef = ref(false)
-
-const commentInputRef = ref(null)
-
-/* const updateTableComment = (row: Table) => {
-  modalFormModel.value.id = row.id
-  modalFormModel.value.tableName = row.tableName
-  modalFormModel.value.tableComment = row.tableComment
-
-  commentInputRef.value?.focus()
-
-  showUpdateModalRef.value = true
-} */
-
-const modalFormRef = ref<FormInst | null>(null);
-
-const modalFormModel = ref({
-  id: null,
-  tableName: '',
-  tableComment: ''
+const tablePreviewConfig = ref({
+  show: false,
+  tableName: null,
+  datasourceId: null
 })
 
-const modalFormRules = {
-  tableName: {
-    required: true
-  },
-  tableComment: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入注释'
-  }
+const tablePreview = (row: Table) => {
+  tablePreviewConfig.value.show = true
+  tablePreviewConfig.value.tableName = row.tableName
+  tablePreviewConfig.value.datasourceId = DC_Datasource.themeBase
 }
-
-const onNegativeClick = () => {
-  showUpdateModalRef.value = false
-}
-
-const isSaving = ref(false)
-
-let paramModel = {
-  sourceId: '12',
-  dbType: 'mysql',
-  sourceName: '',
-  dataTierCode: '',
-  dataTierName: '',
-  namedJson: '',
-  datamodelTableFieldsVoList: [],
-  lifeCycle: '1',
-  ddlSql: '',
-  tableName: 'execSql'
-}
-
-const onPositiveClick = () => {
-  isSaving.value = true
-
-  modalFormRef.value?.validate(async (errors) => {
-    if (!errors) {
-
-      paramModel.ddlSql = `ALTER TABLE ${modalFormModel.value.tableName} SET TBLPROPERTIES ('comment' = '${modalFormModel.value.tableComment}')`
-
-      await exec_sql(paramModel).then((res) => {
-        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          window.$message.success('执行成功')
-          showUpdateModalRef.value = false
-          tableDataInit()
-        } else {
-          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
-        }
-      }).finally(() => {
-        isSaving.value = false
-      })
-    } else {
-      console.error(errors)
-    }
-  })
-
-}
-
-//endregion
+// endregion
 
 // region 删除
 const tableDelete = (row: Table) => {
@@ -407,6 +202,19 @@ const tableDelete = (row: Table) => {
 //endregion
 
 //region  清空表
+let paramModel = {
+  sourceId: '6',
+  dbType: 'tbds-hive',
+  sourceName: '',
+  dataTierCode: '',
+  dataTierName: '',
+  namedJson: '',
+  datamodelTableFieldsVoList: [],
+  lifeCycle: '1',
+  ddlSql: '',
+  tableName: 'execSql'
+}
+
 const tableTruncate = async (row: Table) => {
 
   paramModel.ddlSql = `TRUNCATE TABLE ${row.tableName}`
@@ -414,7 +222,6 @@ const tableTruncate = async (row: Table) => {
   await exec_sql(paramModel).then((res) => {
     if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
       window.$message.success('执行成功')
-      showUpdateModalRef.value = false
     } else {
       window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
     }

@@ -34,34 +34,14 @@
     </n-scrollbar>
   </n-layout>
 
-  <n-modal
-      v-model:show="showPreviewModalRef"
-      :mask-closable="true"
-      :closable="true"
-      preset="card"
-      role="card"
-      :show-icon="false"
-      :title="modalTitle"
-      :size="'small'"
-      style="width: calc(100vw - 100px);"
-  >
+  <table-preview-modal
+      v-model:show="tablePreviewConfig.show"
+      :datasource-id="tablePreviewConfig.datasourceId"
+      :table-name="tablePreviewConfig.tableName"
+  />
 
-    <n-data-table
-        style="overflow: auto"
-        class="mt-2 mb-2"
-        :key="(row) => row.id"
-        :columns="previewColsRef"
-        :data="previewTableDataRef"
-        :bordered="true"
-        :size="'small'"
-        :striped="true"
-        :loading="isPreviewTableLoading"
-        :max-height="450"
-    />
 
-  </n-modal>
-
-  <n-modal
+<!--  <n-modal
       v-model:show="showUpdateModalRef"
       :mask-closable="true"
       :closable="true"
@@ -96,23 +76,25 @@
       <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
       <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
     </template>
-  </n-modal>
+  </n-modal>-->
 
 </template>
 
 <script setup lang="ts">
-import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {exec_sql, get_tables_info_page, table_delete, table_preview} from "@render/api/datacenter.api";
+import {DC_Datasource} from "@common/types/datacenter/common";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
+import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
+import {exec_sql, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {renderIcon} from "@render/utils/common/renderIcon";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
+import TablePreviewModal from "@render/views/jobMgt/components/tablePreviewModal.vue";
+import {Clean} from '@vicons/carbon'
 import {Refresh} from '@vicons/ionicons5'
 import {ArrowBackUp} from '@vicons/tabler'
-import {Clean} from '@vicons/carbon'
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, FormInst, NButton, NSpace, NPopconfirm} from "naive-ui";
-import {h, onMounted, ref, watch, computed} from "vue";
+import {DataTableColumns, FormInst, NButton, NPopconfirm, NSpace} from "naive-ui";
+import {computed, h, onMounted, ref, watch} from "vue";
 
 const queryParam = ref('')
 
@@ -312,91 +294,24 @@ const createColumns = (): DataTableColumns<Table> => {
 const columnsRef = ref(createColumns())
 
 //region 预览
-const showPreviewModalRef = ref(false)
+const tablePreviewConfig = ref({
+  show: false,
+  tableName: null,
+  datasourceId: null
+})
 
-let modalTitle = '';
-
-const previewColsRef = ref([])
-
-const tableHeadCol = ref([])
-
-const tableRows = ref([])
-
-const previewTableDataRef = ref([])
-
-const isPreviewTableLoading = ref(false)
-const tablePreview = (row: { id?: string; tableName: any; tableComment?: string; createTime?: string; }) => {
-  previewColsRef.value = []
-  previewTableDataRef.value = []
-
-  isPreviewTableLoading.value = true
-  modalTitle = row.tableName
-
-  table_preview(6, row.tableName).then(res => {
-    if (res.code == 200) {
-      if (res.data && res.data.length != 0) {
-
-        tableHeadCol.value = res.data[0]
-        tableRows.value = res.data.slice(1)
-
-        // 创建表头
-        previewColsRef.value = res.data[0].map((col: any) => ({
-          title: col,
-          key: col,
-          // fixed: key.split('.')[1] === 'id' ? 'left' : false
-          width: '200px',
-          ellipsis: {
-            tooltip: true
-          }
-        }));
-
-        // 处理数据
-        previewTableDataRef.value = res.data.slice(1).map((item: { [s: string]: unknown; } | ArrayLike<unknown>) =>
-            Object.values(item).map(
-                (value) => (value === null ? 'null' : value.toString())
-            )
-        )
-
-        previewTableDataRef.value = transform(previewColsRef.value, res.data.slice(1).map((item: ArrayLike<unknown> | {
-              [s: string]: unknown;
-            }) =>
-                Object.values(item).map(
-                    (value) => (value === null ? 'null' : value.toString())
-                )
-        ));
-      }
-    } else {
-      window.$message.error(res.message)
-    }
-  }).finally(() => isPreviewTableLoading.value = false)
-
-  showPreviewModalRef.value = true
+const tablePreview = (row: Table) => {
+  tablePreviewConfig.value.show = true
+  tablePreviewConfig.value.tableName = row.tableName
+  tablePreviewConfig.value.datasourceId = DC_Datasource.tbds
 }
 
-interface ObjA {
-  title: string;
-  key: string
-}
-
-type ObjB = Array<string[]>;
-
-const transform = (objA: ObjA[], objB: ObjB): Record<string, string>[] => {
-  const transformed: Record<string, string>[] = [];
-  for (const row of objB) {
-    const obj: Record<string, string> = {};
-    for (let i = 0; i < row.length && i < objA.length; i++) {
-      obj[objA[i].key] = row[i];
-    }
-    transformed.push(obj);
-  }
-  return transformed;
-}
 // endregion
 
 //region 修改表注解
 const showUpdateModalRef = ref(false)
 
-const commentInputRef = ref(null)
+// const commentInputRef = ref(null)
 
 /* const updateTableComment = (row: Table) => {
   modalFormModel.value.id = row.id
@@ -416,6 +331,7 @@ const modalFormModel = ref({
   tableComment: ''
 })
 
+/*
 const modalFormRules = {
   tableName: {
     required: true
@@ -426,6 +342,7 @@ const modalFormRules = {
     message: '请输入注释'
   }
 }
+*/
 
 const onNegativeClick = () => {
   showUpdateModalRef.value = false
