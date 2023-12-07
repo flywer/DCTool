@@ -480,7 +480,7 @@
            lineHeight: '28px'
        }"
         >
-          数据量：{{ tableDataCount }}
+          数据量：<template v-if="!isGetDataCount">{{ tableDataCount }}</template>
         </span>
       </n-space>
 
@@ -2158,7 +2158,6 @@ let tableDataCount = ''
 const isGetDataCount = ref(false)
 
 const getTableDataCount = (tableName: string) => {
-  tableDataCount = ''
   isGetDataCount.value = true
   get_table_data_count(tableName)
       .then(res => {
