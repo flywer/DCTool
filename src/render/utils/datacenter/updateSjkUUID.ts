@@ -1,4 +1,5 @@
 // 更新其中sjk开头的uuid
+import {ArrayUtils} from "@render/utils/common/ArrayUtils";
 import {uuid} from "vue3-uuid";
 
 export const updateSjkUUID = (json: any) => {
@@ -12,7 +13,7 @@ export const updateSjkUUID = (json: any) => {
         jsonIds.push(idStr.replace(/"id":"|"/g, ''));
     })
 
-    const mergeArr = mergeArrays(xmlIds, jsonIds)
+    const mergeArr = ArrayUtils.mergeAndDistinctArrays(xmlIds, jsonIds)
 
     let jsonStr = JSON.stringify(json, null, 2)
 
@@ -24,9 +25,4 @@ export const updateSjkUUID = (json: any) => {
     }
 
     return jsonStr
-}
-
-function mergeArrays(arr1: string[], arr2: string[]): string[] {
-    const mergedArray = [...arr1, ...arr2];
-    return Array.from(new Set(mergedArray));
 }

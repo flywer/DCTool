@@ -161,10 +161,13 @@
 </template>
 
 <script setup lang="ts">
-import {get_job_project_list_all, get_workflow_list_by_project_id} from "@render/api/datacenter.api";
+import {JobType} from "@common/types/jobMgt";
+import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
+import {get_cj_job_page, get_job_project_list_all, get_workflow_list_by_project_id} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {useUserStore} from "@render/stores/user";
 import {projectIdOptions, projectIdOptionsUpdate} from "@render/typings/datacenterOptions";
+import {ArrayUtils} from "@render/utils/common/ArrayUtils";
 import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
 import leafNodeSuffix from "@render/views/jobMgt/components/leafNodeSuffix.vue";
 import JobOverviewTab from "@render/views/jobMgt/projectTree/jobOverviewTab.vue";
@@ -342,8 +345,22 @@ const handleLoad = (node: TreeOption) => {
 
 const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> => {
   const projectId = node.key.toString().split('-')[2]
+  const projectName = (await find_by_project_id(projectId)).projectName
+
+  // 采集任务
+  const allDataXJobs = (await get_cj_job_page({
+    current: 1,
+    size: 100,
+    projectName: projectName,
+    subsystemName: "采集"
+  })).data.records.map((job: { jobContent: string; }) => job.jobContent.split('_')[2])
+
   // 工作流任务
-  const allActionRkJobNames = (await get_workflow_list_by_project_id(projectId)).data.map(job => job.procName.toLowerCase().split('_')[2])
+  const allActionJobNames = (await get_workflow_list_by_project_id(projectId)).data
+      .filter(job => !job.procName.startsWith(JobType.odstj))
+      .map(job => job.procName.toLowerCase().split('_')[2])
+
+  const allJobs = ArrayUtils.mergeAndDistinctArrays(allDataXJobs, allActionJobNames)
 
   let children: TreeOption[] = []
 
@@ -359,7 +376,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const c10Nodes = c10Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const c10Nodes = c10Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(c10Nodes)) {
       c10Options.children = c10Nodes
       children.push(c10Options)
@@ -381,7 +398,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const c20Nodes = c20Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const c20Nodes = c20Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(c20Nodes)) {
       c20Options.children = c20Nodes
       children.push(c20Options)
@@ -403,7 +420,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const c30Nodes = c30Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const c30Nodes = c30Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(c30Nodes)) {
       c30Options.children = c30Nodes
       children.push(c30Options)
@@ -424,7 +441,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const c40Nodes = c40Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const c40Nodes = c40Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(c40Nodes)) {
       c40Options.children = c40Nodes
       children.push(c40Options)
@@ -445,7 +462,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const nodes = c41Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const nodes = c41Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(nodes)) {
       c41Options.children = nodes
       children.push(c41Options)
@@ -467,7 +484,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const nodes = c60Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const nodes = c60Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(nodes)) {
       c60Options.children = nodes
       children.push(c60Options)
@@ -488,7 +505,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
   }
 
   if (useProjectTreeStore().hideEmptyNodes) {
-    const nodes = c70Options.children.filter(node => allActionRkJobNames.includes(node.label.toLowerCase()))
+    const nodes = c70Options.children.filter(node => allJobs.includes(node.label.toLowerCase()))
     if (!isEmpty(nodes)) {
       c70Options.children = nodes
       children.push(c70Options)
