@@ -152,17 +152,23 @@
                                     :size="'small'"
                                 />
                               </n-form-item-gi>
-                              <n-form-item-gi :span="6" label="从表数据表" path="fromTableDataTable">
-                                <n-input v-model:value="customFormModel.fromTableDataTable"/>
+
+                              <n-form-item-gi :span="12" label="从表数据表" path="fromTableDataTable">
+                                <n-auto-complete
+                                    v-model:value="customFormModel.fromTableDataTable"
+                                    :options="fromTableDataTableOptions"
+                                    placeholder="从表数据表"
+                                    clearable
+                                />
                               </n-form-item-gi>
 
-                              <n-form-item-gi :span="6" label="从表字段" path="fromTableField">
+                              <n-form-item-gi :span="12" label="从表字段" path="fromTableField">
                                 <n-input v-model:value="customFormModel.fromTableField"/>
                               </n-form-item-gi>
                             </n-grid>
                           </template>
 
-                          <!--主外键一致性质检-->
+                          <!--空值质检-->
                           <template v-else-if="customFormModel.inspRuleId === '3'"/>
 
                           <!--唯一值质检-->
@@ -300,6 +306,14 @@
                                          placeholder="请输入正则表达式"
                                 />
                               </n-form-item-gi>
+                              <n-gi :span="12">
+                                <n-card :content-style="{padding:'8px'}">
+                                  <n-space>
+                                    <n-button text type="info" @click="createUsccRegExp()">统一社会信用代码
+                                    </n-button>
+                                  </n-space>
+                                </n-card>
+                              </n-gi>
                             </n-grid>
                           </template>
 
@@ -600,7 +614,7 @@ import StructTableInfo from "@render/views/jobTemplate/zj/compnents/structTableI
 import StructTableRelJobModal from "@render/views/jobTemplate/zj/compnents/structTableRelJobModal.vue";
 import {xcodeLight} from "@uiw/codemirror-theme-xcode";
 import {basicSetup, minimalSetup} from "codemirror";
-import {cloneDeep, isEmpty, isNull} from "lodash-es";
+import {cloneDeep, isEmpty} from "lodash-es";
 import {
   FormInst,
   TreeOption,
@@ -2053,6 +2067,31 @@ const customSqlInputFeedback = computed(() => {
 
 // endregion
 
+// region 正则质检快捷输入
+const createUsccRegExp = () => {
+  customFormModel.value.regularValue = '^[0-9A-HJ-NPQRTUWXY]{2}[0-9]{6}[0-9A-Z]{9}[0-9A-HJ-NPQRTUWXY]$'
+}
+
+// endregion
+
+// 外键关联表名模糊匹配
+const fromTableDataTableOptions = computed(() => {
+  if (customFormModel.value.fromTableDataTable) {
+    return [
+      'df_ssft_z2020_dwb',
+      'df_{PROJECT}_c2010_right_dwb',
+      'df_{PROJECT}_c3010_right_dwb',
+      'df_{PROJECT}_c4010_right_dwb',
+      'df_{PROJECT}_c4110_right_dwb',
+      'df_{PROJECT}_c6010_right_dwb',
+    ].filter(value => value.includes(customFormModel.value.fromTableDataTable)).map((value) => {
+      return {
+        label: value,
+        value: value
+      }
+    })
+  }
+})
 </script>
 
 <style scoped>
