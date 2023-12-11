@@ -314,10 +314,20 @@
                                     clearable
                                 />
                               </n-form-item-gi>
-                              <n-form-item-gi :span="12" label="质检SQL" path="customSql" id="customSqlFormItem">
+                              <n-form-item-gi :span="12" label="质检SQL" path="customSql" id="customSqlFormItem"
+                                              :validation-status="customSqlInputStatus"
+                                              :feedback="customSqlInputFeedback"
+                              >
                                 <n-grid :cols="12" :x-gap="12" class="mb-2">
                                   <n-gi :span="10">
-                                    <n-input :value="customSqlPrefix" readonly/>
+                                    <n-card :content-style="{padding:'2px'}">
+                                      <code-mirror
+                                          v-model="customSqlPrefix"
+                                          :readonly="true"
+                                          :wrap="true"
+                                          :extensions="[minimalSetup,xcodeLight,sql()]"
+                                      />
+                                    </n-card>
                                   </n-gi>
                                   <n-gi :span="2">
                                     <n-space justify="end">
@@ -329,12 +339,20 @@
                                   </n-gi>
                                 </n-grid>
 
-                                <n-input type="textarea" v-model:value="customFormModel.customSql"
-                                         placeholder="请输入WHERE子句"
-                                         spellcheck="false"
-                                         :show-count="true"
+                                <n-card class="mt-2"
+                                        :content-style="{padding:'4px'}"
+                                        :style="{borderColor:customSqlInputStatus==='error'?'red':'rgb(239, 239, 245)'}"
+                                >
+                                  <code-mirror
+                                      ref="cm"
+                                      v-model="customFormModel.customSql"
+                                      placeholder="请输入WHERE子句"
+                                      :wrap="true"
+                                      :extensions="[basicSetup,xcodeLight,sql()]"
+                                      @focus="customSqlFocus"
+                                  />
+                                </n-card>
 
-                                />
                               </n-form-item-gi>
                               <n-form-item-gi :span="12" label="质检规则描述" path="customDescribe">
                                 <n-input type="textarea" v-model:value="customFormModel.customDescribe"
@@ -554,6 +572,7 @@
 </template>
 
 <script setup lang="ts">
+import {sql} from "@codemirror/lang-sql"
 import {FieldInspectionRule} from "@main/entity/jobTemplate/FieldInspectionRule";
 import {JobTemplate} from "@main/entity/jobTemplate/JobTemplate";
 import {StructTableFieldType, TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
@@ -579,7 +598,9 @@ import ArrowDivider from "@render/views/jobTemplate/zj/compnents/arrowDivider.vu
 import SiderTree from "@render/views/jobTemplate/zj/compnents/siderTree.vue";
 import StructTableInfo from "@render/views/jobTemplate/zj/compnents/structTableInfo.vue";
 import StructTableRelJobModal from "@render/views/jobTemplate/zj/compnents/structTableRelJobModal.vue";
-import {cloneDeep, isEmpty} from "lodash-es";
+import {xcodeLight} from "@uiw/codemirror-theme-xcode";
+import {basicSetup, minimalSetup} from "codemirror";
+import {cloneDeep, isEmpty, isNull} from "lodash-es";
 import {
   FormInst,
   TreeOption,
@@ -592,8 +613,9 @@ import {
   DropdownOption,
 } from "naive-ui";
 import {format} from "sql-formatter";
-import {onMounted, ref, h} from "vue";
+import {onMounted, ref, h, computed, Ref} from "vue";
 import {GreaterThanEqualRound, LessThanEqualRound} from '@vicons/material'
+import CodeMirror from 'vue-codemirror6';
 import {uuid} from "vue3-uuid";
 import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular, TaskListLtr24Regular} from '@vicons/fluent'
 import {VerticalAlignTopOutlined, VerticalAlignBottomOutlined} from '@vicons/antd'
@@ -946,8 +968,8 @@ const handleStructTableTreeNodeDropdownSelect = (key: string, option: DropdownOp
   showStructTableTreeDropdown.value = false
 
   if (key == 'viewJob') {
-    structTableRelJobModalConfig.value.show =true
-    structTableRelJobModalConfig.value.structTableId =option.treeKey
+    structTableRelJobModalConfig.value.show = true
+    structTableRelJobModalConfig.value.structTableId = option.treeKey
 
   }
 
@@ -1063,6 +1085,11 @@ const handleTableFieldTreeKeyUpdate = async (keys: (string | number)[]) => {
   if (await res) {
     tableFieldTreeSelectedKeys.value = keys
     selectedTableFieldId.value = keys[0]
+    if (cm.value) {
+      cm.value.setCursor(0)
+    }
+    cmIsFocused.value = false
+
     if (keys[0] != 'root') {
       // 跳转到其他字段
       fieldInspectionRuleInit()
@@ -1106,6 +1133,10 @@ const handleTableFieldTreeNodeAdd = () => {
 
   tableFieldTreeSelectedKeys.value = [key]
   selectedTableFieldId.value = key
+  if (cm.value) {
+    cm.value.setCursor(0)
+  }
+  cmIsFocused.value = false
 
   fieldInspectionRuleInit()
 
@@ -1744,6 +1775,10 @@ const handleFieldInspRuleSave = () => {
   }
 
   if (selectedRuleType.value == 1) {
+    if (customSqlInputStatus.value === 'error') {
+      return 0
+    }
+
     customFormRef.value?.validate(errors => {
       if (!errors) {
         fieldInspRuleSaving.value = true
@@ -1984,6 +2019,40 @@ const handleReferenceFormRuleIdUpdate = () => {
 }
 
 // endregion
+
+// region codemirror
+const cm: Ref<InstanceType<typeof CodeMirror> | undefined> = ref();
+
+const cmIsFocused = ref(false)
+
+const customSqlFocus = (v: boolean) => {
+  if (v) {
+    cmIsFocused.value = true
+  }
+}
+
+const customSqlInputStatus = computed(() => {
+  if (customSqlInputFeedback.value.length > 0) {
+    return 'error'
+  } else {
+    return undefined
+  }
+})
+
+const customSqlInputFeedback = computed(() => {
+  if (cmIsFocused.value && customFormModel.value.inspRuleId === '17') {
+    if (customFormModel.value.customSql && customFormModel.value.customSql.length > 0) {
+      return ''
+    } else {
+      return '自定义SQL不能为空'
+    }
+  } else {
+    return ''
+  }
+})
+
+// endregion
+
 </script>
 
 <style scoped>

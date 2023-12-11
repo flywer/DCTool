@@ -6,25 +6,18 @@
           color:useThemeVars().value.textColor3,
           fontSize:'14px'
         }" class="ml-4"
-      > {{ tableComment }}</span>
+      > {{ tableComment }}
+      </span>
     </div>
   </n-h4>
   <n-divider style="margin: 8px 0 8px 0"/>
-<!--  <n-button @click="createJob">创建任务</n-button>-->
-  <JsonEditorVue
+
+  <code-mirror
       v-model="templateJson"
-      v-bind="{
-        mode:'text',
-        mainMenuBar:true,
-        statusBar:false,
-        navigationBar:false,
-        askToFormat:false,
-        escapeControlCharacters:false,
-        escapeUnicodeCharacters:false,
-        flattenColumns:false,
-      }"
-      style="height: calc(100vh - 250px)"
+      :wrap="true"
+      :extensions="[basicSetup,xcodeLight,json()]"
   />
+
 </template>
 
 <script setup lang="ts">
@@ -34,9 +27,12 @@ import {find_field_insp_rule} from "@render/api/auxiliaryDb/fieldInspectionRule.
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
+import {xcodeLight} from "@uiw/codemirror-theme-xcode";
+import {basicSetup} from "codemirror";
 import {useThemeVars} from "naive-ui";
 import {ref, watch, onMounted} from "vue";
-import JsonEditorVue from 'json-editor-vue'
+import {json} from "@codemirror/lang-json"
+import CodeMirror from "vue-codemirror6";
 
 const props = defineProps({
   structTableId: {
@@ -70,17 +66,13 @@ const init = async () => {
 const createTestJson = async () => {
   const model = new ZjJobSaveModel(`test_${structTable.value.tableName.toLowerCase()}`, '', '')
   await model.setTableFieldRules(props.structTableId)
-  model.setGlobalVariable({project: 'ssft', tableName: 'c1010'})
-  templateJson.value = model
-}
+  model.setGlobalVariable({
+    project: 'ssft',
+    tableName: 'c1010'
+  })
 
-const createJob = async () => {
-  const model = new ZjJobSaveModel(`test_${structTable.value.tableName.toLowerCase()}`, '', '')
-  await model.setTableFieldRules(props.structTableId)
-  model.setGlobalVariable({project: 'ssft', tableName: 'c1010'})
-  await model.createZjJob()
+  templateJson.value = JSON.stringify(model, null, 2)
 }
-
 </script>
 
 <style scoped>

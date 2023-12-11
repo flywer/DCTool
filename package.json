@@ -15,10 +15,14 @@
   },
   "dependencies": {
     "@antv/g6": "^4.8.21",
+    "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lang-sql": "^6.5.4",
     "@node-rs/jieba": "^1.7.2",
     "@types/node": "^20.2.5",
+    "@uiw/codemirror-theme-xcode": "^4.21.21",
     "animate.css": "^4.1.1",
     "caniuse-lite": "^1.0.30001562",
+    "codemirror": "^6.0.1",
     "cron": "^2.4.0",
     "cron-parser": "^4.9.0",
     "crypto-ts": "^1.0.2",
@@ -26,7 +30,6 @@
     "electron-log": "^4.4.8",
     "electron-updater": "^5.3.0",
     "exceljs": "^4.3.0",
-    "json-editor-vue": "^0.11.0",
     "jsonfile": "^6.1.0",
     "lodash-es": "^4.17.21",
     "mysql2": "^2.3.3",
@@ -36,6 +39,7 @@
     "typeorm": "0.3.17",
     "vue": "^3.2.38",
     "vue-clipboard3": "^2.0.0",
+    "vue-codemirror6": "^1.1.31",
     "vue3-uuid": "^1.0.0"
   },
   "devDependencies": {
@@ -44,7 +48,6 @@
     "@types/lodash-es": "^4.17.6",
     "@vicons/antd": "^0.12.0",
     "@vicons/carbon": "^0.12.0",
-    "@vicons/fa": "^0.12.0",
     "@vicons/fluent": "^0.12.0",
     "@vicons/ionicons5": "^0.12.0",
     "@vicons/material": "^0.12.0",

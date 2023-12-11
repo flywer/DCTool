@@ -72,25 +72,20 @@
       </n-tooltip>
     </n-space>
 
-    <JsonEditorVue
-        class="mt-4"
-        v-model="saveModel"
-        v-bind="{
-        mode:'text',
-        mainMenuBar:true,
-        statusBar:false,
-        navigationBar:false,
-        askToFormat:false,
-        escapeControlCharacters:false,
-        escapeUnicodeCharacters:false,
-        flattenColumns:false,
-      }"
-        style="height: calc(100vh - 350px)"
-    />
+    <n-scrollbar style="height: calc(100vh - 350px)">
+      <code-mirror
+          v-model="saveModelJsonStr"
+          class="mt-2"
+          :wrap="true"
+          :extensions="[basicSetup,xcodeLight,json()]"
+      />
+    </n-scrollbar>
   </n-scrollbar>
 </template>
 
 <script setup lang="ts">
+import {json} from "@codemirror/lang-json";
+import {sql} from "@codemirror/lang-sql";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
@@ -98,10 +93,12 @@ import {personIdOptions, projectIdOptions} from "@render/typings/datacenterOptio
 import {copyText} from "@render/utils/common/clipboard";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
-import JsonEditorVue from "json-editor-vue";
+import {xcodeLight} from "@uiw/codemirror-theme-xcode";
+import {basicSetup} from "codemirror";
 import {FormInst, SelectOption} from "naive-ui";
 import {onMounted, ref} from "vue";
 import {QuestionCircleTwotone} from '@vicons/antd'
+import CodeMirror from "vue-codemirror6";
 
 onMounted(async () => {
   await jobTemplateOptionsInit()
@@ -161,8 +158,8 @@ const rules = {
     message: '请选择责任人'
   }
 }
-
 const saveModel = ref<ZjJobSaveModel>()
+const saveModelJsonStr = ref('')
 
 const isGenerating = ref(false)
 const generate = () => {
@@ -173,13 +170,21 @@ const generate = () => {
       // 结构表名
       const tableName = (tableNameOptions.value.find(item => item.value === formModel.value.structTableId).label as string).toLowerCase()
 
-      const {projectAbbr, tableAbbr} = (await find_by_project_id(formModel.value.projectId))
+      const {
+        projectAbbr,
+        tableAbbr
+      } = (await find_by_project_id(formModel.value.projectId))
 
       saveModel.value = new ZjJobSaveModel(`zj_${projectAbbr}_${tableName}`, '', '')
       await saveModel.value.setTableFieldRules(parseInt(formModel.value.structTableId))
       saveModel.value.setPerson(formModel.value.personId)
       saveModel.value.setProject(formModel.value.projectId)
-      saveModel.value.setGlobalVariable({project: tableAbbr, tableName: tableName})
+      saveModel.value.setGlobalVariable({
+        project: tableAbbr,
+        tableName: tableName
+      })
+
+      saveModelJsonStr.value = JSON.stringify(saveModel.value, null, 2)
 
       isGenerating.value = false
     }
