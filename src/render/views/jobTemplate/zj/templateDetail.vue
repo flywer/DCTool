@@ -11,7 +11,7 @@
 
     <n-layout has-sider style="height: calc(100vh - 145px);">
       <n-layout-sider
-          :width="480"
+          :width="550"
           content-style="padding: 8px 8px 8px 8px;overflow:hidden"
       >
         <n-grid :cols="35">
