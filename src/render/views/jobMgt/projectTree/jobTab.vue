@@ -1741,6 +1741,10 @@ const jobTemplateOptionsInit = async (tableName: string) => {
       })
     }
   }
+  jobTemplateOptions.value = jobTemplateOptions.value.sort((a, b) => {
+    return a.label.toString().localeCompare(b.label.toString())
+  })
+
 }
 
 const createZjJobModalInit = async (project: ProjectInfo, isActionCompleteInsp: boolean) => {
