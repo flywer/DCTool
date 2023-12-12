@@ -328,10 +328,38 @@
                                     clearable
                                 />
                               </n-form-item-gi>
-                              <n-form-item-gi :span="12" label="质检SQL" path="customSql" id="customSqlFormItem"
+                              <n-form-item-gi :span="12" path="customSql" id="customSqlFormItem"
                                               :validation-status="customSqlInputStatus"
                                               :feedback="customSqlInputFeedback"
                               >
+                                <template #label>
+                                  <n-space style="gap: 2px">
+                                    <span>质检SQL</span>
+                                    <n-tooltip trigger="hover" :scrollable="true" style="width: 400px;">
+                                      <template #trigger>
+                                        <n-icon size="16">
+                                          <QuestionCircleTwotone/>
+                                        </n-icon>
+                                      </template>
+                                      1.质检SQL逻辑：此处填写的是查询出<b>不合格</b>数据的SQL<br>
+                                      2.关联查询需特殊写法<br>
+                                      &nbsp;&nbsp;关联查询其他表时，需在其表名前添加<n-text code>xzzf_ods.</n-text><br>
+                                      &nbsp;&nbsp;若子查询内关联查询主表时，需直接用主表名，如主表名是
+                                      <n-text code>di_sts_c6010_temp_ods</n-text>
+                                      <br>
+                                      &nbsp;&nbsp;子查询内where要区别于外部where，使用
+                                      <n-text code>WHere</n-text>
+                                      关键字代替<br>
+                                      <code-mirror
+                                          v-model="customSqlToolTipSql"
+                                          :readonly="true"
+                                          :wrap="true"
+                                          :extensions="[minimalSetup,xcodeDark,sql()]"
+                                      />
+                                    </n-tooltip>
+                                  </n-space>
+
+                                </template>
                                 <n-grid :cols="12" :x-gap="12" class="mb-2">
                                   <n-gi :span="10">
                                     <n-card :content-style="{padding:'2px'}">
@@ -612,7 +640,7 @@ import ArrowDivider from "@render/views/jobTemplate/zj/compnents/arrowDivider.vu
 import SiderTree from "@render/views/jobTemplate/zj/compnents/siderTree.vue";
 import StructTableInfo from "@render/views/jobTemplate/zj/compnents/structTableInfo.vue";
 import StructTableRelJobModal from "@render/views/jobTemplate/zj/compnents/structTableRelJobModal.vue";
-import {xcodeLight} from "@uiw/codemirror-theme-xcode";
+import {xcodeLight, xcodeDark} from "@uiw/codemirror-theme-xcode";
 import {basicSetup, minimalSetup} from "codemirror";
 import {cloneDeep, isEmpty} from "lodash-es";
 import {
@@ -632,7 +660,7 @@ import {GreaterThanEqualRound, LessThanEqualRound} from '@vicons/material'
 import CodeMirror from 'vue-codemirror6';
 import {uuid} from "vue3-uuid";
 import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular, TaskListLtr24Regular} from '@vicons/fluent'
-import {VerticalAlignTopOutlined, VerticalAlignBottomOutlined} from '@vicons/antd'
+import {VerticalAlignTopOutlined, VerticalAlignBottomOutlined, QuestionCircleTwotone} from '@vicons/antd'
 
 type RuleListType = {
   dimension: string
@@ -2092,6 +2120,9 @@ const fromTableDataTableOptions = computed(() => {
     })
   }
 })
+
+const customSqlToolTipSql = ref('WHERE NOT EXISTS ( SELECT t1.C603000 FROM xzzf_ods.df_sts_c6030_dwb t1 WHere t1.C603000 = di_sts_c6010_temp_ods.C603000 )')
+
 </script>
 
 <style scoped>
