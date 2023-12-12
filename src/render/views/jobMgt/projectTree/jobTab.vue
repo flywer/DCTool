@@ -667,6 +667,7 @@
       v-model:show="zjJobUpdateModalConfig.show"
       :table-abbr="queryParam.tableAbbr"
       :job-id="zjJobUpdateModalConfig.jobId"
+      @on-after-leave="tableDataInit"
   />
 
   <zj-job-insp-config-modal

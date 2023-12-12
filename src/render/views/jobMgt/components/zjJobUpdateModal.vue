@@ -132,6 +132,10 @@ const jobTemplateOptionsInit = async (tableName: string) => {
       value: table.id.toString()
     })
   }
+
+  jobTemplateOptions.value = jobTemplateOptions.value.sort((a, b) => {
+    return a.label.toString().localeCompare(b.label.toString())
+  })
 }
 
 const isSaving = ref(false)
@@ -141,7 +145,7 @@ const onUpdateZjJob = () => {
     if (!errors) {
       isSaving.value = true
       const model = new ZjJobSaveModel()
-      model.updateJobFieldInspRules(formModel.value.jobId, formModel.value.structTableId,true,true).then(() => {
+      model.updateJobFieldInspRules(formModel.value.jobId, formModel.value.structTableId, true, true).then(() => {
         _show.value = false
         emit('onAfterLeave')
       }).finally(() => isSaving.value = false)

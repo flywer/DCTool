@@ -152,9 +152,6 @@
         <!--省政数局主体信息采集-->
         <szsj-subject-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-0'"/>
 
-        <!--        <front-end-data-vol-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-1-0'"/>-->
-        <data-lake-data-vol-tab v-if="useProjectTreeStore().selectedKeys[0]==='2-1-1'"/>
-
       </n-layout-content>
     </n-layout>
   </n-scrollbar>
@@ -172,7 +169,6 @@ import {nTreeFindOptionByKey} from "@render/utils/naiveui/treeOption";
 import leafNodeSuffix from "@render/views/jobMgt/components/leafNodeSuffix.vue";
 import JobOverviewTab from "@render/views/jobMgt/projectTree/jobOverviewTab.vue";
 import JobTab from "@render/views/jobMgt/projectTree/jobTab.vue";
-import DataLakeDataVolTab from "@render/views/jobMgt/projectTree/other/dataLakeDataVolTab.vue";
 import ProjectTablesTab from "@render/views/jobMgt/projectTree/projectTablesTab.vue";
 import SzsjSubjectTab from "@render/views/jobMgt/projectTree/other/szsjSubjectTab.vue";
 import StatJobTab from "@render/views/jobMgt/projectTree/statJobTab.vue";

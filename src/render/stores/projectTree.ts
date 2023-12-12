@@ -253,22 +253,6 @@ export const useProjectTreeStore = defineStore({
                                     key: '2-0',
                                     isLeaf: true
                                 },
-                                {
-                                    label: '全省数据统计',
-                                    key: '2-1',
-                                    children: [
-                                        /* {
-                                            label: '累计报送数据量数据同步',
-                                            key: '2-1-0',
-                                            isLeaf: true
-                                        }, */
-                                        {
-                                            label: '数据湖数据量数据同步',
-                                            key: '2-1-1',
-                                            isLeaf: true
-                                        }
-                                    ]
-                                },
                             ]
                         }]
                 }
