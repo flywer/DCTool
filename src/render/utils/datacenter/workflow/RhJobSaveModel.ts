@@ -234,7 +234,7 @@ export class RhJobSaveModel extends Workflow {
 
             const sourceTableColumnsAlias = sourceTableColumns.filter(col => !col.toLowerCase().startsWith('opt_')).map(col => 't1.' + col)
 
-            let rh3Sql: string = ''
+            let rh3Sql: string
 
             if (model.tableName.toLowerCase() === 'c7090') {
                 sourceTableNames.push(...['df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
