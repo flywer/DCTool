@@ -222,58 +222,151 @@ export class RhJobSaveModel extends Workflow {
         const sourceTableColumns = await get_columns('6', sourceTable, true)
 
         if (!isEmpty(sourceTableColumns)) {
-            const sourceTablePrimColName = (await get_table_sql({tableName: model.tableName}))[0].pColName as string
-
             const aimTable = `df_sztk_${model.tableName.toLowerCase()}_dm`
-
-            const sourceTableColumnsAlias = sourceTableColumns.filter(col => !col.toLowerCase().startsWith('opt_')).map(col => 't1.' + col)
-
-            // 不需要主表关联的表
-            const noJoinTable = ['c1010', 'c2010', 'c3010', 'c4010', 'c4110', 'c6010', 'c6030']
-            let joinSql: string
 
             // 使用到的来源表
             let sourceTableNames: string[] = [sourceTable, aimTable]
 
-            if (noJoinTable.includes(model.tableName.toLowerCase())) {
+            // 来源表主表名
+            const sourceTableSql = (await get_table_sql({tableName: model.tableName}))[0]
+            const sourceTablePrimColName = sourceTableSql.pColName
+            const sourceTableUsccColName = sourceTableSql.sql.split('\n').find(str => str.includes("'数据编目挂接单位统一社会信用代码'")).trim().split(' ')[0]
+
+            const sourceTableColumnsAlias = sourceTableColumns.filter(col => !col.toLowerCase().startsWith('opt_')).map(col => 't1.' + col)
+
+            let rh3Sql: string = ''
+
+            if (model.tableName.toLowerCase() === 'c7090') {
                 sourceTableNames.push(...['df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
+                sourceTableNames.push(...[
+                    `df_${projectTableAbbr}_c1010_right_dwb`,
+                    `df_${projectTableAbbr}_c2010_right_dwb`,
+                    `df_${projectTableAbbr}_c3010_right_dwb`,
+                    `df_${projectTableAbbr}_c4010_right_dwb`,
+                    `df_${projectTableAbbr}_c6010_right_dwb`
+                ])
 
-                joinSql = `
-                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t1.Z202000
-                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
-            } else {
-                // 将要关联的主表名称
-                let joinMainTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase().slice(0, 2)}010_right_dwb`
-                const joinMainTablePrimColName = (await get_table_sql({tableName: `${model.tableName.toLowerCase().slice(0, 2)}010`}))[0].pColName as string
-
-                sourceTableNames.push(...[joinMainTable, 'df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
-
-                joinSql = `
-                     INNER JOIN ${joinMainTable} mainTable ON t1.${joinMainTablePrimColName} = mainTable.${joinMainTablePrimColName}
-                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = mainTable.Z202000
-                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
-            }
-
-            const sql = `
-            INSERT INTO ${aimTable}
-            SELECT ${sourceTableColumnsAlias.join(',')},
+                rh3Sql = `
+                INSERT INTO ${aimTable}
+                SELECT ${sourceTableColumnsAlias.join(',')},
                    z2010.Z201013 AS OPT_AREA_CODE,
                    z2010.Z201012 AS OPT_FIELD_CODE,
                    z2020.Z202000 AS OPT_SUBJECT_ID,
                    z2020.Z202001 AS OPT_SUBJECT_NAME,
                    z2010.Z201000 AS OPT_DEPT_ID,
                    z2010.Z201001 AS OPT_DEPT_NAME
-            FROM ${sourceTable} t1
-                     ${joinSql}
-            UNION ALL
-            SELECT t1.*
-            FROM ${aimTable} t1
-                     LEFT JOIN (SELECT ${sourceTablePrimColName}
-                                FROM ${sourceTable}
-                                GROUP BY ${sourceTablePrimColName}) t2 ON t1.${sourceTablePrimColName} = t2.${sourceTablePrimColName}
-            WHERE t2.${sourceTablePrimColName} IS NULL`
+                FROM ${sourceTable} t1
+                   INNER JOIN df_${projectTableAbbr}_c1010_right_dwb t2 ON t1.C201000 = t2.C101000
+                   INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t2.Z202000
+                   INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000
+                WHERE t1.C209001 ='01'
+                UNION ALL
+                SELECT ${sourceTableColumnsAlias.join(',')},
+                   z2010.Z201013 AS OPT_AREA_CODE,
+                   z2010.Z201012 AS OPT_FIELD_CODE,
+                   z2020.Z202000 AS OPT_SUBJECT_ID,
+                   z2020.Z202001 AS OPT_SUBJECT_NAME,
+                   z2010.Z201000 AS OPT_DEPT_ID,
+                   z2010.Z201001 AS OPT_DEPT_NAME
+                FROM ${sourceTable} t1
+                   INNER JOIN df_${projectTableAbbr}_c2010_right_dwb t2 ON t1.C201000 = t2.C201000
+                   INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t2.Z202000
+                   INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000
+                WHERE t1.C209001 ='02'
+                UNION ALL
+                SELECT ${sourceTableColumnsAlias.join(',')},
+                   z2010.Z201013 AS OPT_AREA_CODE,
+                   z2010.Z201012 AS OPT_FIELD_CODE,
+                   z2020.Z202000 AS OPT_SUBJECT_ID,
+                   z2020.Z202001 AS OPT_SUBJECT_NAME,
+                   z2010.Z201000 AS OPT_DEPT_ID,
+                   z2010.Z201001 AS OPT_DEPT_NAME
+                FROM ${sourceTable} t1
+                   INNER JOIN df_${projectTableAbbr}_c3010_right_dwb t2 ON t1.C201000 = t2.C301000
+                   INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t2.Z202000
+                   INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000
+                WHERE t1.C209001 ='03'
+                UNION ALL
+                SELECT ${sourceTableColumnsAlias.join(',')},
+                   z2010.Z201013 AS OPT_AREA_CODE,
+                   z2010.Z201012 AS OPT_FIELD_CODE,
+                   z2020.Z202000 AS OPT_SUBJECT_ID,
+                   z2020.Z202001 AS OPT_SUBJECT_NAME,
+                   z2010.Z201000 AS OPT_DEPT_ID,
+                   z2010.Z201001 AS OPT_DEPT_NAME
+                FROM ${sourceTable} t1
+                   INNER JOIN df_${projectTableAbbr}_c4010_right_dwb t2 ON t1.C201000 = t2.C401000
+                   INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t2.Z202000
+                   INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000
+                WHERE t1.C209001 ='04'
+                UNION ALL
+                                SELECT ${sourceTableColumnsAlias.join(',')},
+                   z2010.Z201013 AS OPT_AREA_CODE,
+                   z2010.Z201012 AS OPT_FIELD_CODE,
+                   z2020.Z202000 AS OPT_SUBJECT_ID,
+                   z2020.Z202001 AS OPT_SUBJECT_NAME,
+                   z2010.Z201000 AS OPT_DEPT_ID,
+                   z2010.Z201001 AS OPT_DEPT_NAME
+                FROM ${sourceTable} t1
+                   INNER JOIN df_${projectTableAbbr}_c6010_right_dwb t2 ON t1.C201000 = t2.C601000
+                   INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t2.Z202000
+                   INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000
+                WHERE t1.C209001 ='06'
+                UNION ALL
+                SELECT t1.*
+                FROM ${aimTable} t1
+                        LEFT JOIN (SELECT CONCAT(${sourceTablePrimColName},${sourceTableUsccColName}) AS uniqId
+                                    FROM ${sourceTable}
+                                   ) t2 ON CONCAT(t1.${sourceTablePrimColName},t1.${sourceTableUsccColName}) = t2.uniqId
+                WHERE t2.uniqId IS NULL`
+            } else {
+                // 不需要主表关联的表
+                const noJoinTable = ['c1010', 'c2010', 'c3010', 'c4010', 'c4110', 'c6010', 'c6030']
+                let joinSql: string
 
-            const {modelXml, modelJson} = this.createModalByTables({
+                if (noJoinTable.includes(model.tableName.toLowerCase())) {
+                    sourceTableNames.push(...['df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
+
+                    joinSql = `
+                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = t1.Z202000
+                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
+                } else {
+                    // 将要关联的主表名称
+                    let joinMainTable = `df_${projectTableAbbr}_${model.tableName.toLowerCase().slice(0, 2)}010_right_dwb`
+                    const joinMainTablePrimColName = (await get_table_sql({tableName: `${model.tableName.toLowerCase().slice(0, 2)}010`}))[0].pColName as string
+
+                    sourceTableNames.push(...[joinMainTable, 'df_ssft_z2020_dwb', 'df_ssft_z2010_dwb'])
+
+                    joinSql = `
+                     INNER JOIN ${joinMainTable} mainTable ON t1.${joinMainTablePrimColName} = mainTable.${joinMainTablePrimColName}
+                     INNER JOIN df_ssft_z2020_dwb z2020 ON z2020.Z202000 = mainTable.Z202000
+                     INNER JOIN df_ssft_z2010_dwb z2010 ON z2020.Z201000 = z2010.Z201000`
+                }
+
+                rh3Sql = `
+                INSERT INTO ${aimTable}
+                SELECT ${sourceTableColumnsAlias.join(',')},
+                    z2010.Z201013 AS OPT_AREA_CODE,
+                    z2010.Z201012 AS OPT_FIELD_CODE,
+                    z2020.Z202000 AS OPT_SUBJECT_ID,
+                    z2020.Z202001 AS OPT_SUBJECT_NAME,
+                    z2010.Z201000 AS OPT_DEPT_ID,
+                    z2010.Z201001 AS OPT_DEPT_NAME
+                FROM ${sourceTable} t1
+                     ${joinSql}
+                UNION ALL
+                SELECT t1.*
+                    FROM ${aimTable} t1
+                            LEFT JOIN (SELECT CONCAT(${sourceTablePrimColName},${sourceTableUsccColName}) AS uniqId
+                                    FROM ${sourceTable}
+                                   ) t2 ON CONCAT(t1.${sourceTablePrimColName},t1.${sourceTableUsccColName}) = t2.uniqId
+                    WHERE t2.uniqId IS NULL`
+            }
+
+            const {
+                modelXml,
+                modelJson
+            } = this.createModalByTables({
                     tableName: sourceTableNames,
                     dBId: 6
                 },
@@ -303,7 +396,7 @@ export class RhJobSaveModel extends Workflow {
                             sourceDBId: sourceTableNames.map(() => 6),
                             sourceTable: sourceTableNames,
                             targetDBId: 6,
-                            sql: format(sql),
+                            sql: format(rh3Sql),
                             sparkConfig: {
                                 saveMode: "overwrite"
                             },
@@ -327,6 +420,13 @@ export class RhJobSaveModel extends Workflow {
         } else {
             window.$message.error(`来源表[${sourceTable}]不存在`)
         }
+
+    }
+
+    /**
+     * 创建C7090入库多表融合任务
+     **/
+    public static async createC7090Rh3Job() {
 
     }
 }
