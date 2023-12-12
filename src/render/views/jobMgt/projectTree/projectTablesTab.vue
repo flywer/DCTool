@@ -40,60 +40,25 @@
       :table-name="tablePreviewConfig.tableName"
   />
 
-
-<!--  <n-modal
-      v-model:show="showUpdateModalRef"
-      :mask-closable="true"
-      :closable="true"
-      preset="dialog"
-      role="dialog"
-      :show-icon="false"
-      :title="modalTitle"
-      :size="'small'"
-  >
-    <n-form
-        class="mt-4"
-        ref="modalFormRef"
-        :model="modalFormModel"
-        :rules="modalFormRules"
-        :size="'small'"
-    >
-      <n-grid :cols="2" :x-gap="4">
-        <n-form-item-gi label="表名" path="tableName">
-          <n-input v-model:value="modalFormModel.tableName" placeholder=""
-                   @keydown.enter.prevent
-                   readonly
-          />
-        </n-form-item-gi>
-        <n-form-item-gi label="注释" path="tableComment">
-          <n-input ref="commentInputRef" v-model:value="modalFormModel.tableComment" placeholder="输入注释"
-                   @keydown.enter.prevent
-          />
-        </n-form-item-gi>
-      </n-grid>
-    </n-form>
-    <template #action>
-      <n-button type="primary" :size="'small'" @click="onPositiveClick" :loading="isSaving">保存</n-button>
-      <n-button :size="'small'" @click="onNegativeClick">返回</n-button>
-    </template>
-  </n-modal>-->
-
 </template>
 
 <script setup lang="ts">
 import {DC_Datasource} from "@common/types/datacenter/common";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {exec_sql, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
+import {get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {renderIcon} from "@render/utils/common/renderIcon";
+import {CreateDCTable} from "@render/utils/datacenter/CreateDCTable";
+import {ExecuteDCSql} from "@render/utils/datacenter/ExecuteDCSql";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import TablePreviewModal from "@render/views/jobMgt/components/tablePreviewModal.vue";
 import {Clean} from '@vicons/carbon'
 import {Refresh} from '@vicons/ionicons5'
 import {ArrowBackUp} from '@vicons/tabler'
+import {TableAdd24Regular} from '@vicons/fluent'
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, FormInst, NButton, NPopconfirm, NSpace} from "naive-ui";
+import {DataTableColumns, NButton, NPopconfirm, NSpace} from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
 
 const queryParam = ref('')
@@ -264,12 +229,6 @@ const createColumns = (): DataTableColumns<Table> => {
           showButton('预览', () => {
             tablePreview(row)
           }),
-          /*  h(NButton, {
-             size: 'small',
-             onClick: () => {
-               updateTableComment(row)
-             }
-           }, {default: () => '修改表注解'}), */
           h(NPopconfirm, {
             positiveText: '确定',
             negativeText: '取消',
@@ -308,89 +267,6 @@ const tablePreview = (row: Table) => {
 
 // endregion
 
-//region 修改表注解
-const showUpdateModalRef = ref(false)
-
-// const commentInputRef = ref(null)
-
-/* const updateTableComment = (row: Table) => {
-  modalFormModel.value.id = row.id
-  modalFormModel.value.tableName = row.tableName
-  modalFormModel.value.tableComment = row.tableComment
-
-  commentInputRef.value?.focus()
-
-  showUpdateModalRef.value = true
-} */
-
-const modalFormRef = ref<FormInst | null>(null);
-
-const modalFormModel = ref({
-  id: null,
-  tableName: '',
-  tableComment: ''
-})
-
-/*
-const modalFormRules = {
-  tableName: {
-    required: true
-  },
-  tableComment: {
-    required: true,
-    trigger: ['input'],
-    message: '请输入注释'
-  }
-}
-*/
-
-const onNegativeClick = () => {
-  showUpdateModalRef.value = false
-}
-
-const isSaving = ref(false)
-
-let paramModel = {
-  sourceId: '6',
-  dbType: 'tbds-hive',
-  sourceName: '',
-  dataTierCode: '',
-  dataTierName: '',
-  namedJson: '',
-  datamodelTableFieldsVoList: [],
-  lifeCycle: '1',
-  ddlSql: '',
-  tableName: 'execSql'
-}
-
-const onPositiveClick = () => {
-  isSaving.value = true
-
-  modalFormRef.value?.validate(async (errors) => {
-    if (!errors) {
-
-      paramModel.ddlSql = `ALTER TABLE ${modalFormModel.value.tableName} SET TBLPROPERTIES ('comment' = '${modalFormModel.value.tableComment}')`
-
-      await exec_sql(paramModel).then((res) => {
-        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          window.$message.success('执行成功')
-          showUpdateModalRef.value = false
-          tableDataInit()
-        } else {
-          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
-        }
-      }).finally(() => {
-        isSaving.value = false
-      })
-    } else {
-      console.error(errors)
-    }
-  })
-
-}
-
-//endregion
-
 // region 删除
 const tableDelete = (row: Table) => {
   table_delete(row.id).then(res => {
@@ -406,20 +282,13 @@ const tableDelete = (row: Table) => {
 
 //region  清空表
 const tableTruncate = async (row: Table) => {
-
-  paramModel.ddlSql = `TRUNCATE TABLE ${row.tableName}`
-
-  await exec_sql(paramModel).then((res) => {
-    if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-      window.$message.success('执行成功')
-      showUpdateModalRef.value = false
-    } else {
-      window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
-    }
-  })
+  const executeDcSql = new ExecuteDCSql()
+  await executeDcSql.execSql(`TRUNCATE TABLE ${row.tableName}`, true)
 }
 
 //endregion
+
+// region 实用方法
 const toolOptions = [
   {
     label: 'ODS数据回流至临时表',
@@ -428,55 +297,91 @@ const toolOptions = [
   },
   {
     label: '清空所有相关表',
-    key: 'ALL_CLEAR',
+    key: 'ALL_CLEAN',
     icon: renderIcon(Clean)
+  },
+  {
+    label: '创建未创建的相关表',
+    key: 'ALL_CREATE',
+    icon: renderIcon(TableAdd24Regular)
   }
 ]
 
 const handleToolSelect = async (key: string) => {
   if (key === 'ODS') {
-    const tempOdsTable = tableDataRef.value.find(row => row.tableName.includes('_temp_ods'))
-    const odsTable = tableDataRef.value.find(row => row.tableName.includes('_ods') && !row.tableName.includes('_temp_'))
+    await odsDataBack2Temp()
+  } else if (key === 'ALL_CLEAN') {
+    allClean()
+  } else if (key === 'ALL_CREATE') {
+    allCreate().then(() => {
+      tableDataInit()
+    })
+  }
+}
 
-    if (tempOdsTable && odsTable) {
-      const pColName = (await get_table_sql({
-        tableName: tempOdsTable.tableName.split('_')[2]
-      }))[0].pColName
+const odsDataBack2Temp = async () => {
+  const tempOdsTable = tableDataRef.value.find(row => row.tableName.includes('_temp_ods'))
+  const odsTable = tableDataRef.value.find(row => row.tableName.includes('_ods') && !row.tableName.includes('_temp_'))
 
-      paramModel.ddlSql = `insert into ${tempOdsTable.tableName}
+  if (tempOdsTable && odsTable) {
+    const pColName = (await get_table_sql({
+      tableName: tempOdsTable.tableName.split('_')[2]
+    }))[0].pColName
+
+    const sql = `insert into ${tempOdsTable.tableName}
       select t1.* from ${odsTable.tableName} t1
       INNER JOIN (SELECT ${pColName}, MAX(cd_time) AS max_cd_time
                                FROM ${odsTable.tableName}
                                GROUP BY ${pColName}) t2
                               ON t1.${pColName} = t2.${pColName} AND t1.cd_time = t2.max_cd_time`
 
-      window.$message.info('执行需要时间...')
-      exec_sql(paramModel).then((res) => {
-        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          window.$message.success('执行[ODS数据回流至临时表]成功')
-        } else {
-          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
-        }
-      })
-    } else {
-      window.$message.error(`表不存在，无法执行`)
-    }
+    window.$message.info('执行需要时间...')
 
-  } else if (key === 'ALL_CLEAR') {
-    tableDataRef.value.forEach(table => {
-      paramModel.ddlSql = `TRUNCATE TABLE ${table.tableName}`
-
-      exec_sql(paramModel).then((res) => {
-        if ((res.code == 500 && res.message === '服务器内部错误') || (res.code == 200 && res.success)) {
-          window.$message.success(`已清空${table.tableName}`)
-        } else {
-          window.$message.error(`执行失败,${res.message.replace(/建表失败，/g, '')}`)
-        }
-      })
-    })
+    const executeDcSql = new ExecuteDCSql()
+    await executeDcSql.execSql(sql, true)
+  } else {
+    window.$message.error(`表不存在，无法执行`)
   }
 }
 
+const allClean = () => {
+  tableDataRef.value.forEach(table => {
+    const executeDcSql = new ExecuteDCSql()
+    executeDcSql.execSql(`TRUNCATE TABLE ${table.tableName}`, false).then(() => {
+      window.$message.success(`已清空${table.tableName}`)
+    })
+  })
+}
+
+const allCreate = async () => {
+  const tables = [
+    `di_${queryParam.value}_temp_ods`,
+    `di_${queryParam.value}_ods`,
+    `di_${queryParam.value}_right_dwd`,
+    `di_${queryParam.value}_error_dwd`,
+    `df_${queryParam.value}_dwb`,
+    `df_${queryParam.value}_right_dwb`,
+    `df_${queryParam.value}_error_dwb`
+  ]
+
+  const existTables = tableDataRef.value.map(table => table.tableName)
+
+  const absentTables = tables.filter(table => !existTables.includes(table))
+
+  await Promise.all(absentTables.map(async table => {
+    const tableSql = (await get_table_sql({tableName: queryParam.value.split('_')[1]}))[0]
+
+    const res = await CreateDCTable.createTable(table, tableSql.sql, table.startsWith('df_'))
+    if (res.success) {
+      window.$message.success(`创建${table}成功`)
+    } else {
+      window.$message.error(`创建${table}失败`)
+    }
+  }))
+
+}
+
+// endregion
 </script>
 
 <style scoped>
