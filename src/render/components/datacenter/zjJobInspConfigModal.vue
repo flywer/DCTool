@@ -92,6 +92,10 @@ const props = defineProps({
     type: String,
     required: true,
     default: null
+  },
+  departName: {
+    type: String,
+    default: null
   }
 })
 
@@ -147,6 +151,14 @@ const formRules = {
 const formModelInit = async () => {
   isValidConfigRef.value = await getCustomTableValidConfig(props.tableName)
 
+  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: {
+    name: any;
+    id: any;
+  }) => ({
+    label: `${v.name}`,
+    value: v.id
+  })))
+
   if (isValidConfigRef.value) {
     // 若已配置
     get_valid_config_page(props.tableName).then(res => {
@@ -163,19 +175,11 @@ const formModelInit = async () => {
     formModel.value.dbId = '6'
     formModel.value.dbName = "数据中台（TBDS）"
     formModel.value.tableName = props.tableName
-    formModel.value.mechanismId = ''
-    formModel.value.mechanismName = ''
+    formModel.value.mechanismId = mechanismOptions.value.filter(opt => opt.label.toString() === props.departName)[0]?.value as string || ''
+    formModel.value.mechanismName = props.departName
     formModel.value.pkeyName = (await get_table_sql({tableName: props.tableName.split('_')[2]}))[0].pColName.toLowerCase()
     formModel.value.cdBatchName = 'cd_batch'
   }
-
-  mechanismOptions.value = (await gte_usrc_org_tree()).data.sort(customSort).map(((v: {
-    name: any;
-    id: any;
-  }) => ({
-    label: `${v.name}`,
-    value: v.id
-  })))
 
 }
 

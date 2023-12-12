@@ -672,6 +672,7 @@
   <zj-job-insp-config-modal
       v-model:show="showZjJobInspConfigModal"
       :table-name="zjJobInspConfigModalConfig.tableName"
+      :depart-name="zjJobInspConfigModalConfig.departName"
   />
 
   <zj-job-insp-situation-modal
@@ -2047,7 +2048,8 @@ const handleJobTreeUpdateValue = async (v: string[]) => {
 //region 质检配置管理
 const showZjJobInspConfigModal = ref(false)
 const zjJobInspConfigModalConfig = ref({
-  tableName: null
+  tableName: null,
+  departName: null
 })
 
 const zjJobInspConfigModalInit = async (job: Job) => {
@@ -2056,6 +2058,10 @@ const zjJobInspConfigModalInit = async (job: Job) => {
   const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
 
   zjJobInspConfigModalConfig.value.tableName = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
+
+  const projectName = job.project.projectName.replaceAll('行政行为', '')
+  zjJobInspConfigModalConfig.value.departName = projectName.slice(0, projectName.indexOf('数据归集'))
+
   showZjJobInspConfigModal.value = true
 }
 
