@@ -253,6 +253,11 @@ export const useProjectTreeStore = defineStore({
                                     key: '2-0',
                                     isLeaf: true
                                 },
+                                {
+                                    label: '无用任务',
+                                    key: '2-1',
+                                    isLeaf: true
+                                }
                             ]
                         }]
                 }
