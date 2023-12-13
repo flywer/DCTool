@@ -84,12 +84,8 @@ import {get_table_data} from "@render/api/front.api";
 import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {calculateDaysDifferenceFromNow, formatDate} from "@render/utils/common/dateUtils";
-import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
   dataXJobGetNextExecTime,
-  dataXJobRun,
-  dataXJobStart,
-  dataXJobStop,
   getDataXJobStatus,
   getJobType,
   getSchedJob, getWorkflowJobStatus,
@@ -97,7 +93,6 @@ import {
   setJobStatus,
   showButton,
   showButtonPopover,
-  showConfirmation,
   showTextButton, workflowJobGetLastExecTime, workflowJobGetNextExecTime,
 } from "@render/utils/datacenter/jobTabUtil";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
