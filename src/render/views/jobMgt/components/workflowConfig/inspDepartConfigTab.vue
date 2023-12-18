@@ -200,6 +200,7 @@ const handleSave = () => {
             .then(async res => {
               if (res.code == 200) {
                 window.$message.success('配置成功')
+                isValidConfigRef.value = await getCustomTableValidConfig(formModel.tableName)
               } else {
                 window.$message.error(res.message)
               }
