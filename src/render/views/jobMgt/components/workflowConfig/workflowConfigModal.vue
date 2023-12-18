@@ -82,7 +82,7 @@ watch(_show, (v) => {
 
 const workflow = ref<Workflow>(null)
 const isUpdated = ref(false)
-watch(workflow, (v) => {
+watch(workflow, () => {
   isUpdated.value = true
 })
 
