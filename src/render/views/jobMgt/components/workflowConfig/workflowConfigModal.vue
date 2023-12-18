@@ -82,8 +82,11 @@ watch(_show, (v) => {
 
 const workflow = ref<Workflow>(null)
 const isUpdated = ref(false)
-watch(workflow, () => {
-  isUpdated.value = true
+
+watch(workflow, (newValue, oldValue) => {
+  if (newValue && oldValue) {
+    isUpdated.value = true
+  }
 })
 
 const workflowType = ref<JobType>(null)
@@ -94,8 +97,10 @@ const init = async () => {
 }
 
 const onAfterLeave = () => {
+  workflow.value = null
   if (isUpdated.value) {
     emit('onAfterLeave')
+    isUpdated.value = false
   }
 }
 </script>
