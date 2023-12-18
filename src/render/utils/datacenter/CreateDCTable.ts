@@ -1,4 +1,4 @@
-import {create_table} from "@render/api/datacenter.api";
+import {create_table, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {format} from "sql-formatter";
 
 export class CreateDCTable {
@@ -76,5 +76,34 @@ export class CreateDCTable {
         const newFields = `cd_batch VARCHAR(50) COMMENT '批次号',
     ${fieldStr}`;
         return `${preSql} ${newFields} ${postSql}`;// 拼接新增字段后的完整sql语句
+    }
+
+    /**
+     * 表删除重建
+     **/
+    public static async deleteTableReCreate(tableName: string, tableSql: string) {
+        const table = (await get_tables_info_page({
+            size: 1,
+            page: 1,
+            sourceId: 6,
+            likeValue: tableName
+        })).data?.records[0] || null
+
+        if (table) {
+            table_delete(table.id).then(async res => {
+                if (res.code == 200 && res.success) {
+                    const res = await this.createTable(tableName, tableSql, tableName.startsWith('df'))
+                    if (res.success) {
+                        window.$message.success(`重建${tableName}成功`)
+                    } else {
+                        window.$message.error(`重建${tableName}失败`)
+                    }
+                } else {
+                    window.$message.error(`删除${tableName}失败`)
+                }
+            })
+        } else {
+            window.$message.info(`${tableName}不存在`)
+        }
     }
 }

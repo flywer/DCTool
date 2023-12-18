@@ -375,7 +375,8 @@ const allCreate = async () => {
     if (res.success) {
       window.$message.success(`创建${table}成功`)
     } else {
-      window.$message.error(`创建${table}失败`)
+      window.$message.info(`创建${table}失败,正在重建`)
+      await CreateDCTable.deleteTableReCreate(table, tableSql.sql)
     }
   }))
 
