@@ -130,7 +130,7 @@ export class TemplateStructTableController {
 
     @IpcHandle(channels.auxiliaryDb.templateStructTable.findJobRelByJobId)
     public handleFindJobRelByJobId(id: string) {
-        return AppDataSource.getRepository(TemplateTableJobRel).findBy({jobId: id});
+        return AppDataSource.getRepository(TemplateTableJobRel).findOneBy({jobId: id});
     }
 
 }

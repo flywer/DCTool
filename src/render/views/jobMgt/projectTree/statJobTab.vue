@@ -41,7 +41,7 @@
 
   <workflow-config-modal
       v-model:show="workflowModalConfig.show"
-      :job-id="workflowModalConfig.workflowId"
+      :workflow-id="workflowModalConfig.workflowId"
       :editable="workflowModalConfig.editable"
       @onAfterLeave="tableDataInit"
   />
@@ -54,7 +54,6 @@ import {Workflow} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobStatus, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {create_table, get_job_project_by_id, get_workflow_page} from "@render/api/datacenter.api";
-import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {calculateDaysDifferenceFromNow} from "@render/utils/common/dateUtils";
 import {renderIcon} from "@render/utils/common/renderIcon";
@@ -72,6 +71,7 @@ import {
 import {ODSTjBfJobSaveModel} from "@render/utils/datacenter/workflow/odsTj/ODSTjBfJobSaveModel";
 import {ODSTjJobSaveModel} from "@render/utils/datacenter/workflow/odsTj/ODSTjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import WorkflowConfigModal from "@render/views/jobMgt/components/workflowConfig/workflowConfigModal.vue";
 import {Refresh} from "@vicons/ionicons5";
 import {TableAdd24Regular} from "@vicons/fluent";
 import {VNode} from "@vue/runtime-core";
@@ -328,46 +328,46 @@ const odsTableDataStatJobTableInit = async () => {
 
     // endregion
 
-/*     // region  odstjbf
-    const odstjbfJobData: Workflow = (await get_workflow_page({
-      page: 1,
-      size: 1,
-      status: null,
-      procName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr}`
-    })).data?.records.at(0) || null
+    /*     // region  odstjbf
+        const odstjbfJobData: Workflow = (await get_workflow_page({
+          page: 1,
+          size: 1,
+          status: null,
+          procName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr}`
+        })).data?.records.at(0) || null
 
-    if (odstjbfJobData) {
-      const odsTjBfJob: Job = {
-        id: odstjbfJobData.id,
-        jobName: odstjbfJobData.procName,
-        type: getJobType(odstjbfJobData.procName),
-        status: getWorkflowJobStatus(odstjbfJobData),
-        schedMode: parseInt(odstjbfJobData.schedulingMode) == 1 ? 1 : 2,
-        cron: odstjbfJobData.crontab == '' ? null : odstjbfJobData.crontab,
-        lastExecTime: await workflowJobGetLastExecTime(odstjbfJobData),
-        nextExecTime: workflowJobGetNextExecTime(odstjbfJobData),
-        createBy: odstjbfJobData.createBy,
-        code: odstjbfJobData.procCode,
-        createTime: odstjbfJobData.createTime,
-        updateTime: odstjbfJobData.updateTime,
-        jobRerunType: odstjbfJobData.editModel == 1 ? 2 : 1,
-        project: projectRef.value
-      }
-      odsTableDataStatJobTableData.value.push(odsTjBfJob)
-    } else {
-      odsTableDataStatJobTableData.value.push({
-        id: null,
-        jobName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
-        status: -1,
-        type: JobType.odstjbf,
-        schedMode: 0,
-        cron: null,
-        lastExecTime: '--',
-        nextExecTime: '未配置调度任务',
-        createBy: null
-      })
-    }
-    // endregion */
+        if (odstjbfJobData) {
+          const odsTjBfJob: Job = {
+            id: odstjbfJobData.id,
+            jobName: odstjbfJobData.procName,
+            type: getJobType(odstjbfJobData.procName),
+            status: getWorkflowJobStatus(odstjbfJobData),
+            schedMode: parseInt(odstjbfJobData.schedulingMode) == 1 ? 1 : 2,
+            cron: odstjbfJobData.crontab == '' ? null : odstjbfJobData.crontab,
+            lastExecTime: await workflowJobGetLastExecTime(odstjbfJobData),
+            nextExecTime: workflowJobGetNextExecTime(odstjbfJobData),
+            createBy: odstjbfJobData.createBy,
+            code: odstjbfJobData.procCode,
+            createTime: odstjbfJobData.createTime,
+            updateTime: odstjbfJobData.updateTime,
+            jobRerunType: odstjbfJobData.editModel == 1 ? 2 : 1,
+            project: projectRef.value
+          }
+          odsTableDataStatJobTableData.value.push(odsTjBfJob)
+        } else {
+          odsTableDataStatJobTableData.value.push({
+            id: null,
+            jobName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
+            status: -1,
+            type: JobType.odstjbf,
+            schedMode: 0,
+            cron: null,
+            lastExecTime: '--',
+            nextExecTime: '未配置调度任务',
+            createBy: null
+          })
+        }
+        // endregion */
 
   } catch (e) {
     console.error(e)

@@ -29,7 +29,7 @@ export const find_job_rel_by_id = async (structTableId: number):Promise<Template
     return data
 }
 
-export const find_job_rel_by_job_id = async (jobId: string):Promise<TemplateTableJobRel[]> => {
+export const find_job_rel_by_job_id = async (jobId: string):Promise<TemplateTableJobRel> => {
     const {data} = (await ipcInstance.send(channels.auxiliaryDb.templateStructTable.findJobRelByJobId, jobId))
     return data
 }

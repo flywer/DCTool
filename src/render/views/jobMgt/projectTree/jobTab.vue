@@ -658,7 +658,7 @@
 
   <workflow-config-modal
       v-model:show="workflowModalConfig.show"
-      :job-id="workflowModalConfig.workflowId"
+      :workflow-id="workflowModalConfig.workflowId"
       :editable="workflowModalConfig.editable"
       @onAfterLeave="tableDataInit"
   />
@@ -668,12 +668,6 @@
       :table-abbr="queryParam.tableAbbr"
       :job-id="zjJobUpdateModalConfig.jobId"
       @on-after-leave="tableDataInit"
-  />
-
-  <zj-job-insp-config-modal
-      v-model:show="showZjJobInspConfigModal"
-      :table-name="zjJobInspConfigModalConfig.tableName"
-      :depart-name="zjJobInspConfigModalConfig.departName"
   />
 
   <zj-job-insp-situation-modal
@@ -702,8 +696,6 @@ import {
 } from "@render/api/datacenter.api";
 import {get_table_data, get_table_data_count} from "@render/api/front.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
-import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
-import ZjJobInspConfigModal from "@render/components/datacenter/zjJobInspConfigModal.vue";
 import ZjJobInspSituationModal from "@render/components/datacenter/zjJobInspSituationModal.vue";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {personIdOptions} from "@render/typings/datacenterOptions";
@@ -732,6 +724,7 @@ import {updateRhJob} from "@render/utils/datacenter/rhJob";
 import {RhJobSaveModel} from "@render/utils/datacenter/workflow/RhJobSaveModel";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import WorkflowConfigModal from "@render/views/jobMgt/components/workflowConfig/workflowConfigModal.vue";
 import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import {Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
@@ -1153,7 +1146,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
   }
 
   if (row.type.includes('zj') && ![-1].includes(row.status)) {
-    moreBtnChildren.push(showTextButton('质检配置', () => zjJobInspConfigModalInit(row)))
+    // moreBtnChildren.push(showTextButton('质检配置', () => zjJobInspConfigModalInit(row)))
     moreBtnChildren.push(showTextButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
@@ -1187,7 +1180,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
   }
 
   if (row.type.includes('zj') && ![-1].includes(row.status)) {
-    children.push(showButton('质检配置', () => zjJobInspConfigModalInit(row)))
+    // children.push(showButton('质检配置', () => zjJobInspConfigModalInit(row)))
     children.push(showButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
@@ -2044,28 +2037,6 @@ const handleJobTreeUpdateValue = async (v: string[]) => {
     quickCreateModalFormModel.value.targetTableName = `di_${project.tableAbbr}_${quickCreateModalFormModel.value.tableName}_temp_ods`
   }
 }
-//endregion
-
-//region 质检配置管理
-const showZjJobInspConfigModal = ref(false)
-const zjJobInspConfigModalConfig = ref({
-  tableName: null,
-  departName: null
-})
-
-const zjJobInspConfigModalInit = async (job: Job) => {
-  const workflow = (await get_workflow(job.id)).data
-
-  const dataDevBizVo: DataDevBizVo = JSON.parse(workflow.businessParamsJson)
-
-  zjJobInspConfigModalConfig.value.tableName = dataDevBizVo.qualityInspectionDtoList[0].sourceTableName
-
-  const projectName = job.project.projectName.replaceAll('行政行为', '')
-  zjJobInspConfigModalConfig.value.departName = projectName.slice(0, projectName.indexOf('数据归集'))
-
-  showZjJobInspConfigModal.value = true
-}
-
 //endregion
 
 // region 日志

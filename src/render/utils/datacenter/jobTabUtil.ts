@@ -489,7 +489,7 @@ const checkZjJobInspConfig = async (job: Job): Promise<boolean> => {
 const checkJobRulesUpdateTime = async (job: Job): Promise<boolean> => {
     if (job.type.includes('zj')) {
 
-        const tableRel = (await find_job_rel_by_job_id(job.id))[0]
+        const tableRel = await find_job_rel_by_job_id(job.id)
         let structTable: TemplateStructTable
         if (tableRel) {
             structTable = (await find_template_struct_table({id: tableRel.structTableId}))[0]
