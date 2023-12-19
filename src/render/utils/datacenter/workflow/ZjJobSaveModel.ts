@@ -134,7 +134,10 @@ export class ZjJobSaveModel {
 
     // 通过质检模板结构表ID设置字段质检规则
     public async setTableFieldRules(structTableId: number) {
-        const inspRules = await find_field_insp_rule({tableId: structTableId})
+        const inspRules = await find_field_insp_rule({
+            tableId: structTableId,
+            enabled: 1
+        })
 
         this.dataDevBizVo.qualityInspectionDtoList[0].qualityInspectionFieldList = []
 

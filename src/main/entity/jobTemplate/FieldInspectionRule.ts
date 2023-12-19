@@ -58,6 +58,13 @@ export class FieldInspectionRule {
     })
     sortNum: number
 
+    // 是否启用
+    @Column({
+        name: 'enabled',
+        type: 'int'
+    })
+    enabled: number
+
     @Column({
         name: 'create_time',
         type: 'datetime'

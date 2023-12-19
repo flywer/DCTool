@@ -41,6 +41,10 @@ export class FieldInspectionRuleController {
             findOption.tableId = params.tableId
         }
 
+        if (params.enabled) {
+            findOption.enabled = params.enabled
+        }
+
         if (params.createTime) {
             findOption.createTime = params.createTime
         }
@@ -111,6 +115,22 @@ export class FieldInspectionRuleController {
         } catch (error) {
             log.error(error)
             return failure('修改排序号失败')
+        }
+    }
+
+    @IpcHandle(channels.auxiliaryDb.fieldInspectionRule.updateInspRuleEnabled)
+    public async handleUpdateInspRuleEnabled(id: number, enabled: 0 | 1) {
+        try {
+            const rule = await AppDataSource.getRepository(FieldInspectionRule).findOneBy({id: id})
+            rule.enabled = enabled
+            rule.updateTime = new Date()
+
+            await this.handleSave(rule)
+
+            return success(enabled == 1 ? '启用成功' : '停用成功')
+        } catch (error) {
+            log.error(error)
+            return failure(enabled == 1 ? '启用失败' : '停用失败')
         }
     }
 

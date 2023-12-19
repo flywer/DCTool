@@ -8,6 +8,10 @@
         }" class="ml-4"
       > {{ tableComment }}
       </span>
+      <n-text class="ml-4" depth="3" style="font-size: 12px">
+        质检字段数：{{inspRules.length}}
+      </n-text>
+
     </div>
   </n-h4>
   <n-divider style="margin: 8px 0 8px 0"/>
@@ -46,7 +50,7 @@ onMounted(async () => {
   await createTestJson()
 })
 
-watch(() => props.structTableId, async (v) => {
+watch(() => props.structTableId, async () => {
   await init()
   await createTestJson()
 })
@@ -58,7 +62,7 @@ const tableComment = ref(null)
 const templateJson = ref(null)
 
 const init = async () => {
-  inspRules.value = await find_field_insp_rule({tableId: props.structTableId})
+  inspRules.value = await find_field_insp_rule({tableId: props.structTableId,enabled:1})
   structTable.value = (await find_template_struct_table({id: props.structTableId}))[0]
   tableComment.value = (await get_table_sql({tableName: structTable.value.tableName}))[0].comment
 }

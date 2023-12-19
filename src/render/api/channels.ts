@@ -180,6 +180,7 @@ export const channels = reactive({
             save: 'auxiliaryDb/fieldInspectionRule/save',
             delete: 'auxiliaryDb/fieldInspectionRule/delete',
             sortNumSave: 'auxiliaryDb/fieldInspectionRule/sortNumSave',
+            updateInspRuleEnabled: 'auxiliaryDb/fieldInspectionRule/updateInspRuleEnabled',
         },
         departCatalogHookRecord: {
             updateByExcel: 'auxiliaryDb/departCatalogHookRecord/updateByExcel',

@@ -72,8 +72,21 @@
       <n-layout-content content-style="padding:0 0 0 8px;border-left: 1px solid rgb(237 237 237)">
         <n-card :content-style="{padding:'8px',overflow:'hidden'}">
           <template v-if="selectedTableFieldId!='root'">
+            <n-card
+                v-if="selectedTableFieldId != null"
+                :content-style="{padding:'8px',overflow:'hidden'}"
+            >
+              <n-space justify="space-between">
+                <div style="line-height: 25px">是否启用</div>
+                <n-switch
+                    v-model:value="inspRuleEnabled"
+                    @update:value="handleUpdateInspRuleEnabled"
+                />
+              </n-space>
+            </n-card>
             <n-tabs
                 v-if="selectedTableFieldId != null"
+                class="mt-2"
                 type="segment"
                 v-model:value="selectedRuleType"
                 :animated="true"
@@ -81,7 +94,7 @@
                 @update:value="handleRuleTypeUpdate"
             >
               <n-tab-pane :name="1" tab="自定义">
-                <n-scrollbar style="height: calc(100vh - 212px);" trigger="hover">
+                <n-scrollbar style="height: calc(100vh - 257px);" trigger="hover">
                   <n-form ref="customFormRef"
                           class="mt-4 pr-4"
                           :size="'small'"
@@ -343,7 +356,9 @@
                                       </template>
                                       1.质检SQL逻辑：此处填写的是查询出<b>不合格</b>数据的SQL<br>
                                       2.关联查询需特殊写法<br>
-                                      &nbsp;&nbsp;关联查询其他表时，需在其表名前添加<n-text code>xzzf_ods.</n-text><br>
+                                      &nbsp;&nbsp;关联查询其他表时，需在其表名前添加
+                                      <n-text code>xzzf_ods.</n-text>
+                                      <br>
                                       &nbsp;&nbsp;若子查询内关联查询主表时，需直接用主表名，如主表名是
                                       <n-text code>di_sts_c6010_temp_ods</n-text>
                                       <br>
@@ -427,7 +442,7 @@
                 </n-scrollbar>
               </n-tab-pane>
               <n-tab-pane :name="2" tab="引用">
-                <n-scrollbar style="height: calc(100vh - 212px);" trigger="hover">
+                <n-scrollbar style="height: calc(100vh - 257px);" trigger="hover">
                   <n-form ref="referenceFormRef"
                           class="mt-4 pr-4"
                           :size="'small'"
@@ -621,7 +636,7 @@ import {StructTableFieldType, TemplateStructTable} from "@main/entity/jobTemplat
 import {
   field_insp_rule_delete,
   field_insp_rule_save, field_insp_rule_sort_num_save,
-  find_field_insp_rule
+  find_field_insp_rule, update_insp_rule_enabled
 } from "@render/api/auxiliaryDb/fieldInspectionRule.api";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
@@ -656,7 +671,12 @@ import {
 } from "naive-ui";
 import {format} from "sql-formatter";
 import {onMounted, ref, h, computed, Ref} from "vue";
-import {GreaterThanEqualRound, LessThanEqualRound} from '@vicons/material'
+import {
+  GreaterThanEqualRound,
+  LessThanEqualRound,
+  RadioButtonCheckedFilled,
+  RadioButtonUncheckedFilled
+} from '@vicons/material'
 import CodeMirror from 'vue-codemirror6';
 import {uuid} from "vue3-uuid";
 import {CircleSmall24Filled, ArrowUp24Regular, ArrowDown24Regular, TaskListLtr24Regular} from '@vicons/fluent'
@@ -1055,6 +1075,14 @@ const tableFieldTreeNodesInit = async () => {
     isLeaf: true,
     ruleType: v.ruleType,
     inspectionRuleId: v.ruleType == 1 ? JSON.parse(v.ruleList)[0].inspectionRuleId : null,
+    prefix: () => {
+      if (v.enabled) {
+        return h(NIcon, {color: "#0e7a0d"}, {default: () => h(RadioButtonCheckedFilled)})
+      } else {
+        return h(NIcon, {color: "#0e7a0d"}, {default: () => h(RadioButtonUncheckedFilled)})
+      }
+    }
+
   }))
 
   if (tableFieldTreeNodes.value.length > 0) {
@@ -1353,6 +1381,7 @@ const handleTableFieldTreeDropdownClickOutside = () => {
 // region 自定义表单
 const fieldInspectionRule = ref<FieldInspectionRule>(new FieldInspectionRule())
 const selectedRuleType = ref(1)
+const inspRuleEnabled = ref(true)
 const customFormModelBackup = ref(null)
 
 const fieldNameInputRef = ref(null)
@@ -1363,6 +1392,7 @@ const fieldInspectionRuleInit = () => {
       if (res.length > 0) {
         fieldInspectionRule.value = res[0]
         selectedRuleType.value = fieldInspectionRule.value.ruleType
+        inspRuleEnabled.value = fieldInspectionRule.value.enabled == 1
 
         if (selectedRuleType.value == 1) {
           await customFormInit(fieldInspectionRule.value)
@@ -1389,6 +1419,8 @@ const fieldInspectionRuleInit = () => {
     referenceFormModel.value.jobTemplateId = null
     referenceFormModel.value.structTableId = null
     referenceFormModel.value.referenceRuleId = null
+
+    inspRuleEnabled.value = true
 
     jobTemplateOptionsInit()
   }
@@ -2122,6 +2154,20 @@ const fromTableDataTableOptions = computed(() => {
 })
 
 const customSqlToolTipSql = ref('WHERE NOT EXISTS ( SELECT t1.C603000 FROM xzzf_ods.df_sts_c6030_dwb t1 WHere t1.C603000 = di_sts_c6010_temp_ods.C603000 )')
+
+const handleUpdateInspRuleEnabled = (v: boolean) => {
+  if (selectedTableFieldId.value) {
+    update_insp_rule_enabled(selectedTableFieldId.value, v ? 1 : 0).then(res => {
+      if (res.success) {
+        tableFieldTreeNodesInit()
+      } else {
+        window.$message.error(res.message)
+      }
+    })
+  } else {
+    window.$message.warning('未选择字段')
+  }
+}
 
 </script>
 
