@@ -82,7 +82,7 @@
 
   <workflow-config-modal
       v-model:show="workflowModalConfig.show"
-      :job-id="workflowModalConfig.workflowId"
+      :workflow-id="workflowModalConfig.workflowId"
       :editable="workflowModalConfig.editable"
       @onAfterLeave="tableDataInit"
   />
@@ -94,7 +94,6 @@ import {Job, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {get_job_project_by_id, get_workflow_list_by_project_id} from "@render/api/datacenter.api";
-import WorkflowConfigModal from "@render/components/datacenter/workflowConfigModal.vue";
 import {personIdOptions} from "@render/typings/datacenterOptions";
 import {actionTableNames} from "@render/utils/datacenter/constants";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
@@ -108,6 +107,7 @@ import {
 } from "@render/utils/datacenter/jobTabUtil";
 import {RkJobSaveModel} from "@render/utils/datacenter/workflow/RkJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
+import WorkflowConfigModal from "@render/views/jobMgt/components/workflowConfig/workflowConfigModal.vue";
 import {Add, Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {DataTableColumns, FormInst, NButton, NIcon, NSpace, SelectOption} from "naive-ui";
