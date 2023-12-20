@@ -43,6 +43,7 @@ import {DC_Datasource} from "@common/types/datacenter/common";
 import {exec_sql, get_tables_info_page, table_delete} from "@render/api/datacenter.api";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
+import {actionTableNames} from "@render/utils/datacenter/constants";
 import {showButton, showConfirmation} from "@render/utils/datacenter/jobTabUtil";
 import TablePreviewModal from "@render/views/jobMgt/components/tablePreviewModal.vue";
 import {Refresh} from '@vicons/ionicons5'
@@ -91,12 +92,14 @@ const tableDataInit = async () => {
   isTableLoading.value = true
 
   if (queryParam.value.length > 0) {
-    tableDataRef.value = (await get_tables_info_page({
+    const records = (await get_tables_info_page({
       size: 100,
       page: 1,
       sourceId: 8,
       likeValue: queryParam.value
     })).data?.records || []
+
+    tableDataRef.value = records.filter(table => actionTableNames.includes(table.tableName.split('_')[1].toLowerCase()))
   }
 
   isTableLoading.value = false
