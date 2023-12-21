@@ -53,6 +53,7 @@ import {
   find_template_struct_table,
   save_struct_table_job_rel
 } from "@render/api/auxiliaryDb/templateStructTable.api";
+import {get_workflow, workflow_active} from "@render/api/datacenter.api";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import {FormInst, NButton, SelectOption} from "naive-ui";
 import {onMounted, reactive, ref, watch} from "vue";
@@ -141,8 +142,29 @@ const handleUpdateRules = () => {
   formRef.value?.validate(async errors => {
     if (!errors) {
       isUpdating.value = true
+
+      const workflowStatus = props.workflow.status
+
+      // 停用工作流
+      await workflow_active({
+        id: props.workflow.id,
+        type: '02'
+      })
+
       const model = new ZjJobSaveModel()
       model.updateJobFieldInspRules(props.workflow.id, formModel.structTableId, true, false)
+          .then(async () => {
+            if (workflowStatus == '1') {
+              // 再启用工作流
+              await workflow_active({
+                id: props.workflow.id,
+                type: '01'
+              })
+            }
+
+            const newWorkflow: Workflow = (await get_workflow(props.workflow.id)).data
+            emit('update:workflow', newWorkflow)
+          })
           .finally(() => isUpdating.value = false)
     }
   })

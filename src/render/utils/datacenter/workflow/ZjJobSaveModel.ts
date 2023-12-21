@@ -266,9 +266,9 @@ export class ZjJobSaveModel {
         this.personName = workflow.personName
         this.projectId = workflow.projectId
         this.projectName = workflow.projectName
-        this.dependencyProjectId = workflow.dependencyProjectId.toString()
+        this.dependencyProjectId = workflow.dependencyProjectId?.toString() || null
         this.dependencyProjectName = workflow.dependencyProjectName
-        this.dependencyWorkflowId = workflow.dependencyWorkflowId.toString()
+        this.dependencyWorkflowId = workflow.dependencyWorkflowId?.toString() || null
         this.dependencyWorkflowName = workflow.dependencyWorkflowName
         this.schedulingMode = parseInt(workflow.schedulingMode)
         this.crontab = workflow.crontab

@@ -663,13 +663,6 @@
       @onAfterLeave="tableDataInit"
   />
 
-  <zj-job-update-modal
-      v-model:show="zjJobUpdateModalConfig.show"
-      :table-abbr="queryParam.tableAbbr"
-      :job-id="zjJobUpdateModalConfig.jobId"
-      @on-after-leave="tableDataInit"
-  />
-
   <zj-job-insp-situation-modal
       v-model:show="zjJobInspSituationModalConfig.show"
       :insp-table-db-id="zjJobInspSituationModalConfig.inspTableDbId"
@@ -725,7 +718,6 @@ import {RhJobSaveModel} from "@render/utils/datacenter/workflow/RhJobSaveModel";
 import {ZjJobSaveModel} from "@render/utils/datacenter/workflow/ZjJobSaveModel";
 import JobLogDrawer from "@render/views/jobMgt/components/jobLogDrawer.vue";
 import WorkflowConfigModal from "@render/views/jobMgt/components/workflowConfig/workflowConfigModal.vue";
-import ZjJobUpdateModal from "@render/views/jobMgt/components/zjJobUpdateModal.vue";
 import {Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
@@ -1141,12 +1133,7 @@ const moreBtnPopoverChildrenPush = (row: Job, moreBtnChildren: VNode[]) => {
     moreBtnChildren.push(showTextButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type.includes('zj') && ![-1, 2, 3].includes(row.status)) {
-    moreBtnChildren.push(showTextButton('更新规则', () => showZjJobUpdateModal(row)))
-  }
-
   if (row.type.includes('zj') && ![-1].includes(row.status)) {
-    // moreBtnChildren.push(showTextButton('质检配置', () => zjJobInspConfigModalInit(row)))
     moreBtnChildren.push(showTextButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
@@ -1175,12 +1162,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
     children.push(showButton('任务配置', () => showWorkflowConfigModal(row)))
   }
 
-  if (row.type.includes('zj') && ![-1, 2, 3].includes(row.status)) {
-    children.push(showButton('更新规则', () => showZjJobUpdateModal(row)))
-  }
-
   if (row.type.includes('zj') && ![-1].includes(row.status)) {
-    // children.push(showButton('质检配置', () => zjJobInspConfigModalInit(row)))
     children.push(showButton('质检情况', () => zjJobInspSituationModalInt(row)))
   }
 
@@ -2046,18 +2028,6 @@ const drawerJobRef = ref<Job>(null)
 const showJobLogDrawer = (v: Job) => {
   drawerJobRef.value = v
   showDrawerRef.value = true
-}
-//endregion
-
-// region 质检规则更新
-const zjJobUpdateModalConfig = ref({
-  show: false,
-  jobId: null
-})
-
-const showZjJobUpdateModal = (v: Job) => {
-  zjJobUpdateModalConfig.value.show = true
-  zjJobUpdateModalConfig.value.jobId = v.id
 }
 //endregion
 
