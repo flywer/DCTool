@@ -133,7 +133,7 @@ const handleSave = () => {
       .catch((error) => {
         console.error(error)
       })
-      .finally(() => isSaving.value = true)
+      .finally(() => isSaving.value = false)
 }
 
 const isUpdating = ref(false)
