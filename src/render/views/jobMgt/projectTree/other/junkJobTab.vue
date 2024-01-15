@@ -219,7 +219,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务类型',
       key: 'type',
-      width: '5%',
+      width: '6%',
       render(row) {
         return getJobTypeComment(row.type)
       }
@@ -236,7 +236,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '上次执行时间',
       key: 'lastExecTime',
-      width: '8%',
+      width: '7%',
       render(row) {
         if (row.lastExecTime != '-') {
           if (calculateDaysDifferenceFromNow(row.lastExecTime) <= -7) {
@@ -270,7 +270,7 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '操作',
       key: 'actions',
-      width: '12%',
+      width: '15%',
       align: 'center',
       fixed: 'right',
       render(row) {
