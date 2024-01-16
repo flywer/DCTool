@@ -26,7 +26,6 @@
 
 <script setup lang="ts">
 import ConvertExcelDataTab from "@render/views/toolbox/convertExcelDataTab.vue";
-import ExtractLawsTab from "@render/views/toolbox/extractLawsTab.vue";
 import FlattenTextTab from "@render/views/toolbox/flattenTextTab.vue";
 import GetTypeFromJsonTab from "@render/views/toolbox/getTypeFromJsonTab.vue";
 import LdDecryptTab from "@render/views/toolbox/ldDecryptTab.vue";
