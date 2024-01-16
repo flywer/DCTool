@@ -1,9 +1,10 @@
 import {FilePathType} from "@common/enum/filePath";
 import {
-    ProvincialDepartCaseVolumeExcelModel,
+    CityDepartCaseVolumeExcelModel,
+    DataLakeOwnDepartCaseVolumeExcelModel,
     DepartDataVolExcelModel,
-    InspectionDataExcelModel,
-    CityDepartCaseVolumeExcelModel, DataLakeOwnDepartCaseVolumeExcelModel
+    InspectionDataExcelModel, InspectionWrongFieldDataExcelModel,
+    ProvincialDepartCaseVolumeExcelModel
 } from "@common/types/dataStat";
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {getResourcePath} from "@main/utils/appPath";
@@ -12,9 +13,11 @@ import {checkPath} from "@main/utils/fsUtils";
 import {channels} from "@render/api/channels";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {Controller, IpcHandle} from "einf";
-import {dialog} from "electron";
+import {dialog, net} from "electron";
 import * as ExcelJS from 'exceljs';
 import {join} from "path";
+import log from "electron-log";
+import {CreditPublicityXzcf} from "@common/types/creditPublicity";
 
 @Controller()
 export class XlsxController {
@@ -1221,4 +1224,139 @@ export class XlsxController {
         })
     }
 
+    @IpcHandle(channels.xlsx.exportCreditPublicityData)
+    public async handleExportCreditPublicityData(dataType: string) {
+
+        type CreditPublicityResult = {
+            code: number,
+            data: {
+                page: number,
+                pageSize: number,
+                records: number,
+                rows: CreditPublicityXzcf[],
+                total: number,
+                totalPage: number
+            },
+            message: string,
+            success: boolean
+        }
+
+        const getData = (tableName: string, page: number, rows: number, orderArgs: string) => {
+            return new Promise<CreditPublicityResult>(async (resolve, reject) => {
+                const request = net.request({
+                    method: 'POST',
+                    url: `https://credit.gd.gov.cn/gdcreditwebApi2//company/web/booleanQueryListByPageSimple`,
+                });
+
+                request.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+                request.write(`tableName=${tableName}&page=${page}&rows=${rows}&orderArgs=${orderArgs}`)
+
+                let data = '';
+
+                request.on('response', (response) => {
+                    response.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
+                    response.on('end', () => {
+                        try {
+                            resolve(JSON.parse(data))
+                        } catch (err) {
+                            log.error(data)
+                            resolve(null)
+                        }
+                    });
+                });
+
+                request.on('error', (err) => {
+                    reject(err)
+                });
+
+                request.end();
+            })
+        }
+
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+        const xzcfWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('行政处罚');
+        xzcfWorksheet.addRow(['企业名称', '统一社会信用代码', '从业许可证号', '法人姓名', '身份证号', '违法行为事实', '处罚决定日期'])
+
+        let curPage = 1
+        while (1) {
+            const result = await getData(dataType, curPage, 75, `[{"cf_jdrq_sort":"desc"}]`)
+            console.log(result.message, curPage)
+
+            result.data.rows.forEach(row => {
+                xzcfWorksheet.addRow([row.cf_xdr_mc, row.cf_xdr_shxym, '', row.cf_frdb, row.cf_fr_zjhm, row.cf_sy, row.cf_jdrq])
+            })
+
+            if (result.data.page >= result.data.totalPage) {
+                break
+            } else {
+                curPage++
+            }
+        }
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '全省上报单位数据量统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
+
+    }
+
+    @IpcHandle(channels.xlsx.exportInspWrongFieldData)
+    public async handleExportInspWrongFieldData(data: InspectionWrongFieldDataExcelModel[]) {
+
+
+        const createExcelData = (model: InspectionWrongFieldDataExcelModel[]) => {
+            const excelData: any[][] = [];
+            excelData.push(['质检门户所属单位', '编目挂接单位名称', '行为类型', '质检表名', '表中文名', '问题字段名', '问题字段中文名', '具体问题', '问题数据量']);
+
+            model.forEach(item => {
+                excelData.push([
+                    item.ownDepartName,
+                    item.catalogDepartName,
+                    item.actionType,
+                    item.tableName,
+                    item.tableNameCn,
+                    item.wrongFieldName,
+                    item.wrongFieldNameCn,
+                    item.wrongReason,
+                    item.count
+                ])
+            })
+
+            return excelData
+        }
+
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+        const worksheet: ExcelJS.Worksheet = workbook.addWorksheet('质检问题统计');
+
+        worksheet.addRows(createExcelData(data))
+
+        this.setColumnWidths(worksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '质检问题数据统计-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
+    }
 }

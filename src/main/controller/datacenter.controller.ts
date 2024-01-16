@@ -394,8 +394,8 @@ export class DatacenterController {
     }
 
     @IpcHandle(channels.datacenter.tablePreview)
-    public async handleTablePreview(datasourceId: number, tableName: string,limitNum?:number) {
-        const query = `id=${datasourceId}&tableName=${tableName}&limitNum=${limitNum||10}`;
+    public async handleTablePreview(datasourceId: number, tableName: string, limitNum?: number) {
+        const query = `id=${datasourceId}&tableName=${tableName}&limitNum=${limitNum || 10}`;
         return new Promise<any>(async (resolve) => {
             resolve(await this.commonGetRequest(`/datawork/dataSource/getLimitNum`, query))
         });
@@ -571,6 +571,21 @@ export class DatacenterController {
         const query: string = `datasourceId=${datasourceId}&tableName=${tableName}`;
         return new Promise<any>(async (resolve) => {
             resolve(this.commonGetRequest(`/gather/api/metadata/getColumnsInfo`, query))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getInspectionPortalRecordDetail)
+    public handleGetInspectionPortalRecordDetail(params: any) {
+        return new Promise<any>(async (resolve) => {
+            resolve(await this.commonPostRequest(`/qaportal/dwInspectionPortalRecordDetail/page`, params))
+        });
+    }
+
+    @IpcHandle(channels.datacenter.getInspectionPortalConfigByTable)
+    public handleGetInspectionPortalConfigByTable(dbId: number | string, tableName: string) {
+        const query: string = `dbId=${dbId}&tableName=${tableName}`;
+        return new Promise<any>(async (resolve) => {
+            resolve(this.commonGetRequest(`/qaportal/dwInspectionPortalConfig/getByTable`, query))
         });
     }
 

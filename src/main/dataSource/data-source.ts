@@ -16,6 +16,7 @@ import {TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable"
 import {User} from "@main/entity/User";
 import {DataSource} from "typeorm"
 import {ProjectInfo} from "../entity/ProjectInfo"
+import {InspectionWrongRecord} from "@main/entity/InspectionWrongRecord";
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -42,7 +43,8 @@ export const AppDataSource = new DataSource({
         TemplateStructTable,
         FieldInspectionRule,
         TemplateTableJobRel,
-        DepartCatalogHookRecord
+        DepartCatalogHookRecord,
+        InspectionWrongRecord
     ],
     migrations: [],
     subscribers: [],

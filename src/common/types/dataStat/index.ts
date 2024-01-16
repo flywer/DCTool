@@ -169,3 +169,16 @@ type DataLakeCaseVolumeNoYzfStatInfo = {
 }
 
 // endregion
+
+// 【质检问题统计】数据导出model类型
+export type InspectionWrongFieldDataExcelModel = {
+    ownDepartName: string,
+    catalogDepartName: string,
+    actionType: string,
+    tableName: string,
+    tableNameCn: string,
+    wrongFieldName: string,
+    wrongFieldNameCn: string,
+    wrongReason: string,
+    count: number
+}

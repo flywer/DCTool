@@ -1,5 +1,5 @@
 <template>
-  <n-scrollbar class="pr-2" style="height: calc(100vh - 165px);" trigger="hover">
+  <n-scrollbar class="pr-2" style="height: calc(100vh - 160px);" trigger="hover">
     <n-alert type="default" :show-icon="false">
       所选单位在该时间内的每个数据表的数据质检情况，生成规则如下:<br/>
       1.若同一业务表的多条质检记录中质检时间为同一天且质检总量相同时，则只保留质检时间最新的那一条记录；<br/>
@@ -13,7 +13,7 @@
               label-placement="left"
       >
         <n-grid :cols="10" :x-gap="12">
-          <n-form-item-gi :span="4" label="部门选择">
+          <n-form-item-gi :span="4" label="组织机构选择">
             <n-tree-select
                 v-model:value="formModel.orgIds"
                 multiple
@@ -23,6 +23,7 @@
                 :options="orgSelectOptionsRef"
                 :size="'small'"
                 clearable
+                filterable
                 :consistent-menu-width="false"
             />
           </n-form-item-gi>
@@ -121,7 +122,7 @@ onMounted(() => {
 const orgSelectOptionsInit = async () => {
   orgSelectOptionsRef.value = [
     {
-      label: '已质检部门',
+      label: '已质检组织机构',
       key: '0',
       children: []
     }
@@ -149,6 +150,7 @@ const customSort = (a: any, b: any) => {
     return a.orgName.localeCompare(b.orgName);
   }
 };
+
 const isClick = ref(false)
 const isBuilding = ref(false)
 const percentage = ref(0)
@@ -204,10 +206,10 @@ const createExcel = async () => {
 
       let dataSata: InspectionDataExcelModel[] = []
 
-      // 遍历各个部门
+      // 遍历各个组织机构
       for (let i = 0; i < formModel.value.orgIds.length; i++) {
         const orgId = formModel.value.orgIds[i]
-        // 遍历各个部门的各个表
+        // 遍历各个组织机构的各个表
         for (let j = 0; j < tableNames.length; j++) {
 
           percentage.value = Number((((i * tableNames.length + j + 1) / (formModel.value.orgIds.length * tableNames.length)) * 100).toFixed(1));
@@ -264,7 +266,7 @@ const createExcel = async () => {
       window.$message.warning('未选择数据类型')
     }
   } else {
-    window.$message.warning('未选择部门')
+    window.$message.warning('未选择组织机构')
   }
 
   isBuilding.value = false

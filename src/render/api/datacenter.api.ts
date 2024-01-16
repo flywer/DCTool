@@ -7,6 +7,7 @@ import {FieldType, PageTableType, TableInfoType} from "@common/types/datacenter/
 import {Workflow} from "@common/types/datacenter/workflow";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
+import {InspectionRecordDetail} from "@common/types/datacenter/qaportal";
 
 export const get_user = async () => {
     const {data} = (await ipcInstance.send<string>(channels.datacenter.getUser))
@@ -301,7 +302,7 @@ type GetInspRecordPageType = {
     size: number,
     orgIds: string[],
     inspTime: string[],
-    likeName: string,
+    likeName?: string,
     likeType?: 1
 }
 
@@ -383,5 +384,21 @@ export const get_norm_code_set = async (normId: string): Promise<DCCommonResult<
 
 export const get_columns_info = async (datasourceId: number | string, tableName: string): Promise<DCCommonResult<ColumnInfo[]>> => {
     const {data} = (await ipcInstance.send(channels.datacenter.getColumnsInfo, datasourceId, tableName))
+    return data
+}
+
+export const get_inspection_record_detail = async (params: {
+    inspectionRecordId: string,
+    page: number,
+    size: number,
+    likeName?: string,
+    likeType?: number
+}): Promise<DCCommonResult<InspectionRecordDetail>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getInspectionPortalRecordDetail, params))
+    return data
+}
+
+export const get_inspection_config_by_table = async (datasourceId: number | string, tableName: string): Promise<DCCommonResult<any>> => {
+    const {data} = (await ipcInstance.send(channels.datacenter.getInspectionPortalConfigByTable, datasourceId, tableName))
     return data
 }

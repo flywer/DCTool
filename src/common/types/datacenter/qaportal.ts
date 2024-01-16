@@ -14,3 +14,13 @@ export interface InspectionRecord {
     unRepairRecordSum: number;
     isProcessor: number;
 }
+
+export type InspectionRecordDetail = {
+    page: number,
+    size: number,
+    orders: unknown,
+    total: number,
+    records: any[],
+    fields: string[],
+    wfields: string[]
+}

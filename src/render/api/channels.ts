@@ -97,6 +97,8 @@ export const channels = reactive({
         getNorm: 'datacenter/getNorm',
         getNormCodeSet: 'datacenter/getNormCodeSet',
         getColumnsInfo: 'datacenter/getColumnsInfo',
+        getInspectionPortalRecordDetail: 'datacenter/getInspectionPortalRecordDetail',
+        getInspectionPortalConfigByTable: 'datacenter/getInspectionPortalConfigByTable',
     },
     auxiliaryDb: {
         projectInfo: {
@@ -202,6 +204,8 @@ export const channels = reactive({
         createDepartCaseVolumeExcel: 'xlsx/createDepartCaseVolumeExcel',
         exportDataSourceDepartCaseVolume: 'xlsx/exportDataSourceDepartCaseVolume',
         exportDataLakeOwnDepartCaseVolume: 'xlsx/exportDataLakeOwnDepartCaseVolume',
+        exportCreditPublicityData: 'xlsx/exportCreditPublicityData',
+        exportInspWrongFieldData: 'xlsx/exportInspWrongFieldData',
     },
     front: {
         getTableData: 'front/getTableData',
@@ -242,5 +246,10 @@ export const channels = reactive({
         updateNodeSuffix: 'jobTree/UpdateNodeSuffix',
         sendNodeSuffixUpdated: 'jobTree/sendNodeSuffixUpdated',
         getNodeSuffix: 'jobTree/getNodeSuffix',
+    },
+    inspectionWrongRecord: {
+        findInspectionWrongRecord: 'inspectionWrongRecord/findInspectionWrongRecord',
+        findByInspectionRecordId: 'inspectionWrongRecord/findByInspectionRecordId',
+        saveWrongRecord: 'inspectionWrongRecord/saveWrongRecord',
     }
 })
