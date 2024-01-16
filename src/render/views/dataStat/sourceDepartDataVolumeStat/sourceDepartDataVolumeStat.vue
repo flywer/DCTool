@@ -339,16 +339,18 @@ const syncThemeBaseDataVol = async () => {
   const generateSubSql = async (tableName: string) => {
     const tableSql = await get_table_sql({tableName: tableName})
 
-    let departColName = tableSql[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+    const departColName = tableSql[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+
+    const pColName = (await get_table_sql({tableName: tableName}))[0].pColName as string
 
     // 有些单位名称会带有括号，需去掉，比如市场监管局
     const departName = `IF(LOCATE('(', ${departColName}) > 0, SUBSTRING(${departColName}, 1, LOCATE('(', ${departColName}) - 1), ${departColName})`
 
     return `
-    SELECT UUID()                       ,
-           ${departName}                ,
-           '${tableName.toUpperCase()}' ,
-           COUNT(*)                     ,
+    SELECT UUID()                        ,
+           ${departName}                 ,
+           '${tableName.toUpperCase()}'  ,
+           COUNT( DISTINCT ${pColName} ) ,
            NOW()
     FROM sztk_${tableName}
     GROUP BY ${departColName}
