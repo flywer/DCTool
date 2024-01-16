@@ -1,0 +1,52 @@
+/**
+ * 信用公示行政处罚
+ **/
+export class CreditPublicityXzcf {
+    cf_fr_zjlx: string;
+    cf_nr: string;
+    hid: string;
+    cf_xdr_gszc: string;
+    exp_flag: string;
+    cf_xdr_shxym: string;
+    cf_sjly: string;
+    cf_wsh: string;
+    cf_wsh_qkh: string;
+    cf_fr_zjhm: string;
+    cf_xdr_zjlx: string;
+    loginid: string;
+    cf_frdb: string;
+    cf_nr_wfff: string;
+    only1_md5: string;
+    first_add_time: string;
+    cf_xdr_lb: string;
+    cf_xdr_zjhm: string;
+    cf_cfjg: string;
+    cf_xdr_shzz: string;
+    other_md5: string;
+    cf_xdr_mc_qkh: string;
+    cf_yj: string;
+    cf_xdr_mc: string;
+    cf_xdr_swdj: string;
+    cf_jdrq: string;
+    bz: string;
+    bz_old: string;
+    cf_xdr_zzjg: string;
+    cf_xdr_sydw: string;
+    cf_sy: string;
+    cf_nr_zkdx: string;
+    cf_wfxw: string;
+    exp_flag_time: string;
+    over_date_type: string;
+    cf_nr_fk: string;
+    cf_yxq: string;
+    cf_sjlydm: string;
+    sjc: string;
+    cd_operation: string;
+    issuccess: string;
+    cf_cflb: string;
+    cd_time: string;
+    departid: string;
+    updatetime: string;
+    depttype: string;
+    add_time: string;
+}
