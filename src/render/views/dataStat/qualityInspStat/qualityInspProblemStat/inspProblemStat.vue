@@ -55,7 +55,6 @@ import {
   save_wrong_records
 } from "@render/api/auxiliaryDb/inspectionWrongRecord.api";
 import {InspectionWrongRecord} from "@main/entity/InspectionWrongRecord";
-import {ArrayUtils} from "@render/utils/common/ArrayUtils";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
 import {find_field_insp_rule} from "@render/api/auxiliaryDb/fieldInspectionRule.api";
 import {export_insp_wrong_field_data} from "@render/api/xlsx.api";

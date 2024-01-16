@@ -146,7 +146,7 @@ const handleLoad = async () => {
         current: 1,
         size: 100,
         jobContent: props.jobPrefix + abbr
-      })).data.records
+      }))?.data?.records || []
       volumes.value.running += logs.filter(log => log.handleCode_dictText == '运行中').length
     }
     resolve()

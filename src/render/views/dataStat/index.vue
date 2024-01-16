@@ -49,8 +49,6 @@ import DepartCatalogHookRecordMgt
   from "@render/views/dataStat/themeBaseStat/departCatalogHookRecordMgt.vue";
 import ThemeBaseCaseVolumeStat
   from "@render/views/dataStat/themeBaseStat/dataOwnCaseVolumeStat.vue";
-import OverallProblemStat from "@render/views/dataStat/qualityInspStat/qualityInspProblemStat/overallProblemStat.vue";
-import FieldProblemStat from "@render/views/dataStat/qualityInspStat/qualityInspProblemStat/fieldProblemStat.vue";
 import InspProblemStat from "@render/views/dataStat/qualityInspStat/qualityInspProblemStat/inspProblemStat.vue";
 </script>
 
