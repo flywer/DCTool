@@ -10,9 +10,6 @@
       <n-tab-pane name="3" tab="备份任务">
         <bf-job/>
       </n-tab-pane>
-      <n-tab-pane name="4" tab="融合任务">
-        <rh-job/>
-      </n-tab-pane>
       <n-tab-pane name="5" tab="清除任务">
         <qc-job/>
       </n-tab-pane>
@@ -30,7 +27,6 @@
 import CjJob from "@render/views/jobCreate/cjJob/index.vue";
 import ZjJob from "@render/views/jobCreate/zjJob/index.vue";
 import BfJob from "@render/views/jobCreate/bfJob/index.vue";
-import RhJob from "@render/views/jobCreate/rhJob/index.vue";
 import QcJob from "@render/views/jobCreate/qcJob/index.vue";
 import RkJob from "@render/views/jobCreate/rkJob/index.vue";
 import GxJob from "@render/views/jobCreate/gxJob/index.vue";
