@@ -172,7 +172,7 @@ const createExcel = async () => {
               tableName: key,
               tableNameCn: (await get_table_sql({tableName: key.split('_')[2].toUpperCase()}))[0].comment,
               wrongFieldName: v.wrongFieldName,
-              wrongFieldNameCn: (await find_field_insp_rule({fieldName: v.wrongFieldName}))[0].fieldComment,
+              wrongFieldNameCn: (await find_field_insp_rule({fieldName: v.wrongFieldName}))[0]?.fieldComment || '',
               wrongReason: v.wrongReason,
               count: v.wrongFieldCount
             }))))
@@ -201,7 +201,7 @@ const createExcel = async () => {
         .catch((error) => {
           window.$notification.create({
             title: "处理质检问题异常",
-            content: error,
+            content: error.toString(),
             type: "error"
           })
           buttonText.value = `生成Excel`
