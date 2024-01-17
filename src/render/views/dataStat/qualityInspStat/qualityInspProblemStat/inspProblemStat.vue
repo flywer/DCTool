@@ -361,15 +361,13 @@ const getInspRecordDetail = async (inspectionRecordId: string, tableName: string
           departFieldName = (await get_table_sql({tableName: tableAbbr}))[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0];
         }
         const departColName: string = record[departFieldName.toLowerCase()];
-        //return StringUtils.isMessyCode(departColName);
         return departColName.includes('�')
       }));
 
       const hasWrongChar = judges.some(judge => judge);
 
-      // Retry if data contain wrong characters
       if (hasWrongChar) {
-        console.log('Data error, refetching...');
+        console.log(`page:${curPage},Data error, refetching...`);
         return await fetchData(inspectionRecordId, curPage, size, field);
       } else {
         return data;

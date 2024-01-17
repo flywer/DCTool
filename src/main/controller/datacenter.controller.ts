@@ -9,6 +9,7 @@ import {dialog, net} from "electron";
 import log from 'electron-log'
 import {isEmpty} from "lodash";
 import {join} from "path";
+import jschardet from 'jschardet';
 
 @Controller()
 export class DatacenterController {
@@ -658,16 +659,28 @@ export class DatacenterController {
             const authToken = await this.getAuthToken(await this.getAccountByConfig())
             if (authToken != null) {
                 request.setHeader('Authorization', `bearer ${authToken}`)
-                request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-
-                let data = '';
+                request.setHeader('Content-Type', 'application/json'); // ;charset=UTF-8
 
                 request.on('response', (response) => {
+                    let chunks = [];
+
                     response.on('data', (chunk) => {
-                        data += chunk;
+                        chunks.push(chunk); // 这里保存的是Buffer类型的数据而不是字符串
                     });
 
                     response.on('end', () => {
+                        const bufferData = Buffer.concat(chunks); // 将所有的Buffer合并为一个
+                        const encodingDetected = jschardet.detect(bufferData);
+
+                        let data: string | string[];
+
+                        const encodings = ["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"];
+                        // 检查检测到的编码是否属于允许的编码
+                        if (encodings.includes(encodingDetected.encoding.toLowerCase())) {
+                            data = bufferData.toString(encodingDetected.encoding as BufferEncoding);
+                        } else {
+                            data = bufferData.toString('utf-8'); // 使用默认的编码
+                        }
                         try {
                             const res = JSON.parse(data);
                             if (res.code == '4010') {
