@@ -1840,6 +1840,7 @@ const handleFieldInspRuleSave = () => {
   fieldInspectionRule.tableId = selectedStructTableId.value
   fieldInspectionRule.updateTime = new Date()
   fieldInspectionRule.ruleType = selectedRuleType.value
+  fieldInspectionRule.enabled = inspRuleEnabled.value ? 1 : 0
 
   if (typeof selectedTableFieldId.value === 'number') {
     fieldInspectionRule.id = selectedTableFieldId.value
