@@ -386,6 +386,11 @@ const getInspRecordDetail = async (inspectionRecordId: string, tableName: string
   })).data
 
   if (data && data.fields) {
+    // 数据编目挂接单位字段名称
+    const departFieldName = (await get_table_sql({tableName: tableName.split('_')[2]}))[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
+
+    const config = await get_inspection_config_by_table(6, tableName);
+
     // 表字段
     const fields = data.fields
 
@@ -395,7 +400,7 @@ const getInspRecordDetail = async (inspectionRecordId: string, tableName: string
       }
 
       let curPage = 1
-      const size = 1000
+      const size = 10000
 
       // 根据主键去重
       const pKeyMap = new Map<string, string>();
@@ -416,11 +421,15 @@ const getInspRecordDetail = async (inspectionRecordId: string, tableName: string
           for (const record of data.records) {
             const pKey: string = record['主键']
 
-            const tableAbbr = tableName.split('_')[2]
+            let departColName: string = record[departFieldName.toLowerCase()]
 
-            // 数据编目挂接单位名称
-            const departFieldName = (await get_table_sql({tableName: tableAbbr}))[0].sql.split('\n').find(str => str.includes("'数据编目挂接单位名称'")).trim().split(' ')[0]
-            const departColName: string = record[departFieldName.toLowerCase()]
+            if (departColName.length > 125) {
+              if (config.success) {
+                departColName = config.data.mechanismName
+              } else {
+                continue
+              }
+            }
 
             if (!pKeyMap.has(pKey)) {
               pKeyMap.set(pKey, departColName)
