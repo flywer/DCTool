@@ -615,14 +615,33 @@ export class DatacenterController {
                 request.setHeader('Authorization', `bearer ${authToken}`)
                 //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-                let data = '';
+                // let data = '';
 
                 request.on('response', (response) => {
+                    let chunks = [];
+
                     response.on('data', (chunk) => {
-                        data += chunk;
+                        chunks.push(chunk); // 这里保存的是Buffer类型的数据而不是字符串
                     });
 
+                    /* response.on('data', (chunk) => {
+                        data += chunk;
+                    });*/
+
                     response.on('end', () => {
+                        const bufferData = Buffer.concat(chunks); // 将所有的Buffer合并为一个
+                        const encodingDetected = jschardet.detect(bufferData);
+
+                        let data: string | string[];
+
+                        const encodings = ["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"];
+                        // 检查检测到的编码是否属于允许的编码
+                        if (encodings.includes(encodingDetected.encoding.toLowerCase())) {
+                            data = bufferData.toString(encodingDetected.encoding as BufferEncoding);
+                        } else {
+                            data = bufferData.toString('utf-8'); // 使用默认的编码
+                        }
+
                         try {
                             const res = JSON.parse(data);
                             if (res?.res_body?.includes('4010')) {
@@ -630,8 +649,13 @@ export class DatacenterController {
                             }
                             resolve(res);
                         } catch (err) {
-                            log.error(data)
-                            this.handleAuthTokenNotice()
+                            log.error(err)
+                            // 服务器JVM GC内存泄露
+                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded')) {
+                                resolve(null);
+                            } else {
+                                this.handleAuthTokenNotice()
+                            }
                             resolve(null);
                         }
                     });
@@ -689,7 +713,12 @@ export class DatacenterController {
                             resolve(res);
                         } catch (err) {
                             log.error(err)
-                            this.handleAuthTokenNotice()
+                            // 服务器JVM GC内存泄露
+                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded')) {
+                                resolve(null);
+                            } else {
+                                this.handleAuthTokenNotice()
+                            }
                             resolve(null);
                         }
                     });
