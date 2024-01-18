@@ -43,6 +43,7 @@ import {AppController} from './controller/app.controller'
 import {WindowController} from "@main/controller/window.controller";
 import "reflect-metadata";
 import {InspectionWrongRecordController} from "@main/controller/inspectionWrongRecord.controller";
+import {JobOverviewStatRecordController} from "@main/controller/auxiliaryDb/jobOverviewStatRecord.controller";
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
@@ -140,7 +141,8 @@ async function bootstrap() {
                         FieldInspectionRuleController,
                         DepartCatalogHookRecordController,
                         JobTreeController,
-                        InspectionWrongRecordController
+                        InspectionWrongRecordController,
+                        JobOverviewStatRecordController
                     ],
                 injects: [{
                     name: 'IS_DEV',

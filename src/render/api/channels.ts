@@ -191,6 +191,10 @@ export const channels = reactive({
             deleteCatalogHookRecord: 'auxiliaryDb/departCatalogHookRecord/deleteCatalogHookRecord',
             exportCatalogHookData: 'auxiliaryDb/departCatalogHookRecord/exportCatalogHookData',
             findCatalogHookRecordByDepartName: 'auxiliaryDb/departCatalogHookRecord/findCatalogHookRecordByDepartName',
+        },
+        jobOverviewStatRecord: {
+            fetchData: 'auxiliaryDb/jobOverviewStatRecord/fetchData',
+            saveRecord: 'auxiliaryDb/jobOverviewStatRecord/saveRecord',
         }
     },
     cron: {

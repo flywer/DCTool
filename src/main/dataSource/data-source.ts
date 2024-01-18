@@ -17,6 +17,7 @@ import {User} from "@main/entity/User";
 import {DataSource} from "typeorm"
 import {ProjectInfo} from "../entity/ProjectInfo"
 import {InspectionWrongRecord} from "@main/entity/InspectionWrongRecord";
+import {JobOverviewStatRecord} from "@main/entity/JobOverviewStatRecord";
 
 export const AppDataSource = new DataSource({
     type: "mysql",
@@ -44,7 +45,8 @@ export const AppDataSource = new DataSource({
         FieldInspectionRule,
         TemplateTableJobRel,
         DepartCatalogHookRecord,
-        InspectionWrongRecord
+        InspectionWrongRecord,
+        JobOverviewStatRecord
     ],
     migrations: [],
     subscribers: [],
