@@ -412,7 +412,7 @@ const handleWorkflowSelectSearch = async (query: string) => {
   if (!isEmpty(configModelRef.value.dependencyWorkflowId)) {
     // 当前若已有依赖，查看此依赖是否存在于前十条
     const dependencyWorkflow = (await get_workflow(configModelRef.value.dependencyWorkflowId)).data
-    if (!workflowJobs.some(workflow => workflow.id === dependencyWorkflow.id)) {
+    if (dependencyWorkflow && !workflowJobs.some(workflow => workflow.id === dependencyWorkflow.id)) {
       // 不存在则添加
       workflowOptions.value.push({
         label: dependencyWorkflow.procName,
