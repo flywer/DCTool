@@ -328,10 +328,10 @@ export class XlsxController {
                 return '行政职权类事项'
             } else if (tableType.startsWith('F30')) {
                 return '“双随机、一公开”事项'
-            } else if (tableType.startsWith('D')) {
-                return '执法对象'
             } else if (tableType.startsWith('DATA_CHECK')) {
                 return '数据对账信息'
+            } else if (tableType.startsWith('D')) {
+                return '执法对象'
             } else if (tableType.startsWith('C10')) {
                 return '行政许可'
             } else if (tableType.startsWith('C20') || tableType == 'C2100') {
