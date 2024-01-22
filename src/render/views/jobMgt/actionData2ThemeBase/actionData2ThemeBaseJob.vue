@@ -227,10 +227,6 @@ const createColumns = (): DataTableColumns<Job> => {
       fixed: 'right',
       render(row) {
 
-        let container = h(NSpace, {
-          justify: 'center'
-        })
-
         let children: VNode[] = renderWorkflowActionButton(row, tableDataInit)
 
         if (![0, -1].includes(row.status)) {
@@ -238,9 +234,9 @@ const createColumns = (): DataTableColumns<Job> => {
           children.push(showButton('任务配置', () => showWorkflowConfigModal(row)))
         }
 
-        container.children = children
-
-        return container
+        return h(NSpace, {
+          justify: 'center',
+        }, () => children)
       }
     }
   ]

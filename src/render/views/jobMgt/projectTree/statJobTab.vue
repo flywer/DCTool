@@ -191,10 +191,6 @@ const createColumns = (): DataTableColumns<Job> => {
       align: 'center',
       fixed: 'right',
       render(row) {
-        let container = h(NSpace, {
-          justify: 'center'
-        })
-
         let children: VNode[] = []
 
         // 未创建的任务
@@ -250,9 +246,9 @@ const createColumns = (): DataTableColumns<Job> => {
           childrenPushMoreBtn(row, children)
         }
 
-        container.children = children
-
-        return container
+        return h(NSpace, {
+          justify: 'center',
+        }, () => children)
       }
     }
   ]

@@ -91,7 +91,7 @@ export const showButton = (text: string, onClick: () => any) => {
                 await onClick()
             }
         },
-        {default: () => text})
+        () => text)
 }
 
 export const showConfirmation = (text: string, onPositiveClick: () => any) => {

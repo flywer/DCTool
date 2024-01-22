@@ -37,7 +37,7 @@ import {NIcon, useNotification, NButton} from "naive-ui";
 import {h, onMounted, ref} from 'vue'
 import type {MenuOption, MenuInst} from 'naive-ui'
 import {RouterLink, useRouter} from "vue-router";
-import {Sql,Template} from '@vicons/carbon'
+import {Sql, Template} from '@vicons/carbon'
 import {LibraryAddOutlined} from '@vicons/material'
 import {
   AppsListDetail24Regular,
@@ -252,7 +252,7 @@ ipc.on(channels.app.sendAppInstallNotice, () => {
   notification.create({
     title: "应用更新",
     content: () => {
-      return h('div', {}, [
+      return h('div', {}, () => [
         '新版本下载完毕！',
         h(NButton, {
           quaternary: true,

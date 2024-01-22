@@ -1,5 +1,11 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 160px);" trigger="hover">
+    <n-alert type="default" :show-icon="false">
+      统计规则如下:<br/>
+      1.统计每条拥有错误数据，且未处理的质检记录的问题情况，包括错误字段、问题数据量，同时根据主键去重；<br/>
+      2.对于入库质检，若有多条质检记录，则只会统计最新的质检记录，因入库质检每次皆为全量质检；<br/>
+      3.统计报表的结果包含历史错误数据
+    </n-alert>
     <n-card class="mt-2" :content-style="{paddingBottom:0}">
       <n-form ref="formRef"
               inline
@@ -242,15 +248,23 @@ const getTableInspectionRecords = async (orgId: string) => {
        **/
       if (record.totalRecordSum > 0 && record.aimRecordSum >= 0 && record.wrongRecordSum > 0 && record.isProcessor === 0) {
 
-        if (tableInspectionRecordsMap.has(record.sourceTableName)) {
-
-          const inspectionRecordIds = tableInspectionRecordsMap.get(record.sourceTableName)
-          inspectionRecordIds.push(record.inspectionRecordId)
-
-          tableInspectionRecordsMap.set(record.sourceTableName, inspectionRecordIds)
+        if (record.sourceTableName.startsWith('df_') && record.sourceTableName.endsWith('_dwb')) {
+          // 入库质检
+          if (!tableInspectionRecordsMap.has(record.sourceTableName)) {
+            tableInspectionRecordsMap.set(record.sourceTableName, [record.inspectionRecordId])
+          }
         } else {
-          tableInspectionRecordsMap.set(record.sourceTableName, [record.inspectionRecordId])
+          if (tableInspectionRecordsMap.has(record.sourceTableName)) {
+
+            const inspectionRecordIds = tableInspectionRecordsMap.get(record.sourceTableName)
+            inspectionRecordIds.push(record.inspectionRecordId)
+
+            tableInspectionRecordsMap.set(record.sourceTableName, inspectionRecordIds)
+          } else {
+            tableInspectionRecordsMap.set(record.sourceTableName, [record.inspectionRecordId])
+          }
         }
+
       }
     })
 

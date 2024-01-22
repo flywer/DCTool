@@ -403,10 +403,6 @@ const createColumns = (): DataTableColumns<Job> => {
       align: 'center',
       fixed: 'right',
       render(row) {
-
-        let container = h(NSpace, {
-          justify: 'center'
-        })
         let children: VNode[] = renderDataXJobActionButton(row, () => addSchedJobModalFormModelInit(row), tableDataInit)
 
         if (children.length == 3) {
@@ -428,9 +424,9 @@ const createColumns = (): DataTableColumns<Job> => {
           childrenPushMoreBtn(row, children)
         }
 
-        container.children = children
-
-        return container
+        return h(NSpace, {
+          justify: 'center',
+        }, () => children)
       }
     }
   ]
@@ -449,7 +445,6 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
     children.push(showButton('日志', () => showJobLogDrawer(row)))
     children.push(showButton('调度配置', () => showDataXJobSetupModal(row)))
   }
-
 }
 
 const columnsRef = ref(createColumns())
