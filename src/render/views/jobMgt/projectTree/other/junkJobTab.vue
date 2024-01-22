@@ -164,7 +164,7 @@ const tableDataInit = async () => {
       type: getJobType(v.jobDesc),
       schedMode: 2,
       cron: schedJob?.jobCron || null,
-      lastExecTime: v.triggerLastTime || '--',
+      lastExecTime: schedJob.incStartTime || '--',
       nextExecTime: dataXJobGetNextExecTime(schedJob),
       createBy: null,
       createTime: schedJob?.addTime || '--',
