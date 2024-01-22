@@ -87,7 +87,7 @@ export class CreateDCTable {
             page: 1,
             sourceId: 6,
             likeValue: tableName
-        })).data?.records[0] || null
+        })).data?.records?.at(0) || null
 
         if (table) {
             table_delete(table.id).then(async res => {
