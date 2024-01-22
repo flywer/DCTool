@@ -242,6 +242,8 @@ const getProjectIdByDepartName = (departName: string): string => {
     return '10'
   } else if (departName == '广东省政务服务数据管理局') {
     return '64'
+  } else if (departName == '中共广东省委宣传部') {
+    return '71'
   } else {
     const project = projectIdOptions.find(project => {
       const name = (project.label as string).replaceAll('数据归集', '').replaceAll('行政行为', '')

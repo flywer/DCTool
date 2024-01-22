@@ -514,8 +514,8 @@ export class XlsxController {
         // endregion
 
         // region 省直部门行为数据
-        const provinceData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => item.departName.startsWith('广东省'));
-        const cityData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => !item.departName.startsWith('广东省'));
+        const provinceData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => item.departName.startsWith('广东省') || item.departName.startsWith('中共'));
+        const cityData: DepartDataVolExcelModel[] = excelData.actionData.filter((item) => !item.departName.startsWith('广东省') && !item.departName.startsWith('中共'));
 
         const columnWidths = [25, 20, 20, 30, 30, 15, 26, 15, 26, 15, 26];
 
