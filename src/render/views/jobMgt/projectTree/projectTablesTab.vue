@@ -29,6 +29,9 @@
           :loading="isTableLoading"
           :striped="true"
       >
+        <template #empty>
+          <span style="color: rgba(194, 194, 194, 1)">未创建相关表</span>
+        </template>
       </n-data-table>
 
     </n-scrollbar>
@@ -57,8 +60,9 @@ import {Clean} from '@vicons/carbon'
 import {Refresh} from '@vicons/ionicons5'
 import {ArrowBackUp} from '@vicons/tabler'
 import {TableAdd24Regular} from '@vicons/fluent'
+import {ExclamationCircleOutlined} from '@vicons/antd'
 import {isEmpty} from "lodash-es";
-import {DataTableColumns, NButton, NPopconfirm, NSpace} from "naive-ui";
+import {DataTableColumns, NButton, NIcon, NPopconfirm, NSpace, NTooltip} from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
 
 const queryParam = ref('')
@@ -91,6 +95,7 @@ type Table = {
   tableName: string
   tableComment: string
   createTime: string
+  storageFormat: string
 }
 
 onMounted(async () => {
@@ -184,12 +189,31 @@ const createColumns = (): DataTableColumns<Table> => {
     {
       title: '表名称',
       key: 'tableName',
-      width: '25%'
+      width: '25%',
+      render(row) {
+        return h(NSpace, null, () => {
+          if (row.storageFormat) {
+            return row.tableName
+          } else {
+            return [
+              row.tableName,
+              h(NTooltip, {trigger: 'hover'}, {
+                trigger: () => {
+                  return h(NIcon, {color: '#dc9715'}, h(ExclamationCircleOutlined))
+                },
+                default: () => {
+                  return '未配置存储格式，建议删除重建'
+                }
+              })
+            ]
+          }
+        })
+      }
     },
     {
       title: '表描述',
       key: 'tableComment',
-      width: '22%',
+      width: '15%',
       render(row) {
         if (row.tableName.startsWith('di_') && row.tableName.endsWith('_temp_ods')) {
           return 'ODS层临时表'
