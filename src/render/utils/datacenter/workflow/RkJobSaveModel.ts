@@ -145,6 +145,9 @@ export class RkJobSaveModel {
             sourceTableColumns = elements.commonArr1
         }
 
+        // 现将cd_time替换成当前时间
+        sourceTableColumns = sourceTableColumns.map(item => item.includes('cd_time') ? 'current_timestamp() as cd_time' : item);
+
         this.dataDevBizVo.sparkSqlDtoList[0].sql = format(`INSERT INTO ${this.dataDevBizVo.sparkSqlDtoList[0].targetTable}
                    SELECT ${sourceTableColumns.join(',')}
                   FROM ${this.dataDevBizVo.sparkSqlDtoList[0].sourceTable[0]}`, {language: 'mysql'})
