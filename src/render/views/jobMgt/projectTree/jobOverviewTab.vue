@@ -16,14 +16,14 @@
         <n-gi :span="1">
           <overview-data-x-job-card
               title="采集任务"
-              :job-prefix="'cj_'"
+              job-prefix="cj\_"
               :project-abbr="projectAbbr"
           />
         </n-gi>
         <n-gi :span="1">
           <overview-data-x-job-card
               title="共享任务"
-              :job-prefix="'gx_'"
+              job-prefix="gx\_"
               :project-abbr="projectAbbr"
           />
         </n-gi>
