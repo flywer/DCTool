@@ -678,7 +678,7 @@ import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {find_job_rel_by_job_id, find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
+import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {
   get_cj_job_page,
   get_columns,
@@ -726,13 +726,10 @@ import {
   SelectGroupOption,
   SelectOption,
   TreeSelectOption,
-  DataTableBaseColumn,
-  NButton, NSpace, NTag, NIcon, NTooltip,
+  NButton, NSpace, NTag, NIcon,
   useThemeVars,
 } from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
-import {ErrorCircle24Filled} from "@vicons/fluent";
-import {ExclamationCircleOutlined} from "@vicons/antd";
 
 const projectTree = useProjectTreeStore()
 
