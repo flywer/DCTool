@@ -1,9 +1,11 @@
 import {ProjectInfo} from "@common/types";
+import {VNode} from "@vue/runtime-core";
 
 export  type Job = {
     id: string
     type: JobType,
-    jobName: string
+    jobName: string,
+    jobNameVNode?: VNode,
     status: JobStatus
     // 1:依赖调度；2:定时调度
     schedMode: 1 | 2

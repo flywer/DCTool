@@ -1,7 +1,7 @@
 // 这里存放jobTab.vue中使用的一些工具方法
 import {DataXJob_Page, DataXJobLog, SchedJob} from "@common/types/datacenter/dataCollection";
 import {DataDevBizVo} from "@common/types/datacenter/workflow";
-import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
+import {getJobTypeComment, Job, JobStatus, JobType} from "@common/types/jobMgt";
 import {TemplateStructTable} from "@main/entity/jobTemplate/TemplateStructTable";
 import {get_max_running_workflow_num} from "@render/api/auxiliaryDb/dict.api";
 import {get_rh_json} from "@render/api/auxiliaryDb/jobJson.api";
@@ -30,9 +30,10 @@ import {compareTimeStrings, formatDate} from "@render/utils/common/dateUtils";
 import {VNode} from "@vue/runtime-core";
 import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
-import {NButton, NList, NListItem, NPopconfirm, NPopover, NTag} from "naive-ui";
+import {NButton, NIcon, NList, NListItem, NPopconfirm, NPopover, NSpace, NTag, NTooltip} from "naive-ui";
 import {h} from "vue";
 import {uuid} from "vue3-uuid";
+import {ErrorCircle24Filled} from "@vicons/fluent";
 
 // 查询中台表的质检任务是否已配置
 /**
@@ -1053,4 +1054,36 @@ export const getTableCommentByProName = async (procName: string) => {
     return (await get_table_sql({
         tableName: procName.split('_')[2]
     }))[0].comment as string
+}
+
+export const setJobsNameVNode = async (jobs: Job[]) => {
+    for (let job of jobs) {
+        // 判断质检任务是否已配置质检规则
+        if (job.type.includes('zj') && job.status != JobStatus.noCreate) {
+            const tableRel = await find_job_rel_by_job_id(job.id)
+            if (!tableRel) {
+                job.jobNameVNode = h(NSpace, {}, () => [
+                    job.jobName,
+                    h(NTooltip, {trigger: 'hover'}, {
+                        trigger: () => {
+                            return h(NIcon, {
+                                size: '16',
+                                color: '#ff9900',
+                                style: {paddingTop: '4px'}
+                            }, () => h(ErrorCircle24Filled))
+                        },
+                        default: () => {
+                            return '未配置质检规则模板'
+                        }
+                    }),
+                ])
+            } else {
+                job.jobNameVNode = null
+            }
+        } else {
+            job.jobNameVNode = null
+        }
+    }
+
+    return jobs
 }

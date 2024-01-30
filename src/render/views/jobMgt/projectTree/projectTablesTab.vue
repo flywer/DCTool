@@ -59,8 +59,7 @@ import TablePreviewModal from "@render/views/jobMgt/components/tablePreviewModal
 import {Clean} from '@vicons/carbon'
 import {Refresh} from '@vicons/ionicons5'
 import {ArrowBackUp} from '@vicons/tabler'
-import {TableAdd24Regular} from '@vicons/fluent'
-import {ExclamationCircleOutlined} from '@vicons/antd'
+import {ErrorCircle24Filled, TableAdd24Regular} from '@vicons/fluent'
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, NButton, NIcon, NPopconfirm, NSpace, NTooltip} from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
@@ -199,7 +198,11 @@ const createColumns = (): DataTableColumns<Table> => {
               row.tableName,
               h(NTooltip, {trigger: 'hover'}, {
                 trigger: () => {
-                  return h(NIcon, {color: '#dc9715'}, h(ExclamationCircleOutlined))
+                  return h(NIcon, {
+                    size: '16',
+                    color: '#ff9900',
+                    style: {paddingTop: '4px'}
+                  }, h(ErrorCircle24Filled))
                 },
                 default: () => {
                   return '未配置存储格式，建议删除重建'

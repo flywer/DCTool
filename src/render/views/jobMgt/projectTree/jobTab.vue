@@ -678,7 +678,7 @@ import {DataDevBizVo, Workflow} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobType} from "@common/types/jobMgt";
 import {find_job_template} from "@render/api/auxiliaryDb/jobTemplate.api";
 import {get_table_sql} from "@render/api/auxiliaryDb/tableSql.api";
-import {find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
+import {find_job_rel_by_job_id, find_template_struct_table} from "@render/api/auxiliaryDb/templateStructTable.api";
 import {
   get_cj_job_page,
   get_columns,
@@ -705,7 +705,7 @@ import {
   getSchedJob,
   getWorkflowJobStatus,
   jobNameCompare,
-  pushUnExistJobs, renderDataXJobActionButton, renderWorkflowActionButton,
+  pushUnExistJobs, renderDataXJobActionButton, renderWorkflowActionButton, setJobsNameVNode,
   setJobStatus,
   showButton, showButtonPopover,
   showConfirmation, showTextButton,
@@ -723,14 +723,16 @@ import {isEmpty} from "lodash-es";
 import {
   DataTableColumns,
   FormInst,
-  NButton,
-  NSpace,
   SelectGroupOption,
   SelectOption,
   TreeSelectOption,
-  NTag, useThemeVars
+  DataTableBaseColumn,
+  NButton, NSpace, NTag, NIcon, NTooltip,
+  useThemeVars,
 } from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
+import {ErrorCircle24Filled} from "@vicons/fluent";
+import {ExclamationCircleOutlined} from "@vicons/antd";
 
 const projectTree = useProjectTreeStore()
 
@@ -931,6 +933,8 @@ const tableDataInit = async () => {
 
     tableDataRef.value = jobs.sort(jobNameCompare)
 
+    tableDataRef.value = await setJobsNameVNode(tableDataRef.value)
+
     useProjectTreeStore().updateNodeSuffix(projectTree.selectedKeys[0], tableDataRef.value)
   } catch (e) {
     console.error(e)
@@ -946,7 +950,14 @@ const createColumns = (): DataTableColumns<Job> => {
     {
       title: '任务名',
       key: 'jobName',
-      width: '8%'
+      width: '8%',
+      render(row) {
+        if (row.jobNameVNode) {
+          return row.jobNameVNode
+        } else {
+          return row.jobName
+        }
+      }
     },
     {
       title: '任务类型',
