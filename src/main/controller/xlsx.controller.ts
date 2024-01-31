@@ -1338,12 +1338,15 @@ export class XlsxController {
             return excelData
         }
 
-        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
-        const worksheet: ExcelJS.Worksheet = workbook.addWorksheet('质检问题统计');
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook()
+        const dataLakeInspWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('入湖质检问题统计')
+        const themeBaseInspWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('入库质检问题统计')
 
-        worksheet.addRows(createExcelData(data))
+        dataLakeInspWorksheet.addRows(createExcelData(data.filter(item => item.tableName.toLowerCase().endsWith('_temp_ods'))))
+        themeBaseInspWorksheet.addRows(createExcelData(data.filter(item => !item.tableName.toLowerCase().endsWith('_temp_ods'))))
 
-        this.setColumnWidths(worksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
+        this.setColumnWidths(dataLakeInspWorksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
+        this.setColumnWidths(themeBaseInspWorksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
 
         await dialog.showSaveDialog({
             title: '选择文件保存位置',
