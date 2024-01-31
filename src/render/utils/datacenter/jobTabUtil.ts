@@ -831,7 +831,7 @@ export const getSchedJob = async (jobName: string): Promise<SchedJob> => {
         current: 1,
         size: 10000,
         jobContent: jobName
-    })).data.records[0] || null
+    })).data?.records[0] || null
 }
 
 export const convertToSixFields = (cron: string): string => {
