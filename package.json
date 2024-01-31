@@ -37,6 +37,7 @@
     "pinia": "2.1.4",
     "reflect-metadata": "^0.1.13",
     "sql-formatter": "12.2.3",
+    "sqlite3": "^5.1.7",
     "typeorm": "0.3.17",
     "vue": "^3.2.38",
     "vue-clipboard3": "^2.0.0",

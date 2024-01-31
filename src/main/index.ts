@@ -44,6 +44,8 @@ import {WindowController} from "@main/controller/window.controller";
 import "reflect-metadata";
 import {InspectionWrongRecordController} from "@main/controller/inspectionWrongRecord.controller";
 import {JobOverviewStatRecordController} from "@main/controller/auxiliaryDb/jobOverviewStatRecord.controller";
+import {LocalCacheSource} from "@main/dataSource/localCache-source";
+import {JobTableItemCacheController} from "@main/controller/localCache/jobTableItemCache.controller";
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
@@ -142,7 +144,8 @@ async function bootstrap() {
                         DepartCatalogHookRecordController,
                         JobTreeController,
                         InspectionWrongRecordController,
-                        JobOverviewStatRecordController
+                        JobOverviewStatRecordController,
+                        JobTableItemCacheController
                     ],
                 injects: [{
                     name: 'IS_DEV',
@@ -161,6 +164,10 @@ async function bootstrap() {
             await taskSchedulerInstance.cronJobsStartAll()
 
         }).catch(error => log.error('应用程序数据源连接失败', error))
+
+        LocalCacheSource.initialize().then(async () => {
+            log.info("本地缓存库连接初始化成功")
+        }).catch(error => log.error('本地缓存库连接失败', error))
 
     } catch (error) {
         log.error(error)

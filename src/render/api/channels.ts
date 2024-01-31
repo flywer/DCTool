@@ -255,5 +255,13 @@ export const channels = reactive({
         findInspectionWrongRecord: 'inspectionWrongRecord/findInspectionWrongRecord',
         findByInspectionRecordId: 'inspectionWrongRecord/findByInspectionRecordId',
         saveWrongRecord: 'inspectionWrongRecord/saveWrongRecord',
+    },
+    localCache: {
+        jobTableItem: {
+            save: 'localCache/save',
+            fetchByTreeNodeKey: 'localCache/fetchByTreeNodeKey',
+            remove: 'localCache/remove'
+        }
     }
 })
+

@@ -18,7 +18,7 @@
                       </template>
                     </n-button>-->
 
-          <n-button secondary strong @click="tableDataInit">
+          <n-button secondary strong @click="tableDataInit(false)">
             刷新
             <template #icon>
               <n-icon>
@@ -730,6 +730,7 @@ import {
   useThemeVars,
 } from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
+import {fetch_job_table_item_cache, save_job_table_item_cache} from "@render/api/localCache/jobTableItem.api";
 
 const projectTree = useProjectTreeStore()
 
@@ -776,7 +777,7 @@ const pageInit = async (selectedKeys: string[]) => {
     if (projectRef.value != null) {
       isValidConfigRef.value = await getDCTableIsValidConfig(projectRef.value.tableAbbr, queryParam.value.tableAbbr)
     }
-    await tableDataInit()
+    await tableDataInit(true)
   }
 }
 
@@ -804,12 +805,52 @@ const setTitle = async (project: ProjectInfo) => {
   }
 }
 
-const tableDataInit = async () => {
-  isTableLoading.value = true
-  try {
-    let jobs = []
 
+const tableDataInit = async (fetchCache?: boolean) => {
+  // 当前查询的节点值
+  const curKey = useProjectTreeStore().selectedKeys[0]
+  isTableLoading.value = true
+
+  try {
+    tableDataRef.value = []
+
+    // 1.获取标题
     await setTitle(projectRef.value)
+
+    // 是否要获取缓存内数据
+    if (fetchCache) {
+      // 2.获取缓存数据
+      const cacheItems = await fetch_job_table_item_cache(useProjectTreeStore().selectedKeys[0])
+
+      // 3.若存在缓存数据，则先获取缓存数据
+      if (!isEmpty(cacheItems)) {
+        try {
+
+          // 检查当前是否已选择其他节点
+          if (curKey !== useProjectTreeStore().selectedKeys[0]) {
+            // 如果不相等，说明有新的加载已经开始，忽略当前的结果
+            return
+          }
+
+          tableDataRef.value = cacheItems.map(item => {
+            try {
+              // 试着解析job字符串为Job对象
+              return JSON.parse(item.job) as Job;
+            } catch (e) {
+              throw e;
+            }
+          }).sort(jobNameCompare)
+
+          isTableLoading.value = false
+        } catch (e) {
+          tableDataRef.value = []
+          isTableLoading.value = true
+        }
+      }
+    }
+
+
+    let jobs = []
 
     const projectAbbr = projectRef.value?.projectAbbr || '';
     if (projectAbbr !== '') {
@@ -924,13 +965,32 @@ const tableDataInit = async () => {
       // endregion
 
       jobs.push(...newDataXJobs, ...newWorkflowJobs)
-    } else {
-      tableDataRef.value = []
     }
 
-    tableDataRef.value = jobs.sort(jobNameCompare)
+    // 检查当前是否已选择其他节点
+    if (curKey !== useProjectTreeStore().selectedKeys[0]) {
+      // 如果不相等，说明有新的加载已经开始，忽略当前的结果
+      return
+    }
 
+    // 若不存在缓存
+    if (isEmpty(tableDataRef.value)) {
+      tableDataRef.value = jobs.sort(jobNameCompare)
+    } else {
+      // 判断缓存内数据是否与接口数据相同
+      if (areJobsArraysEqual(tableDataRef.value, jobs)) {
+        // 相同则直接获取接口数据
+        tableDataRef.value = jobs.sort(jobNameCompare)
+      } else {
+        // 不相同则进行去重
+        tableDataRef.value = mergeJobs(tableDataRef.value, jobs).sort(jobNameCompare)
+      }
+    }
+
+    // 设置任务名称VNode
     tableDataRef.value = await setJobsNameVNode(tableDataRef.value)
+
+    await save_job_table_item_cache(projectTree.selectedKeys[0], tableDataRef.value)
 
     useProjectTreeStore().updateNodeSuffix(projectTree.selectedKeys[0], tableDataRef.value)
   } catch (e) {
@@ -940,6 +1000,59 @@ const tableDataInit = async () => {
   }
 
   isTableLoading.value = false
+}
+
+const mergeJobs = (A: Job[], B: Job[]): Job[] => {
+  // 合并并去重
+  const mergedJobs = [...A, ...B].reduce((acc: { [key: string]: Job }, job: Job) => {
+    // 检查job是否已经在accumulator中, 使用jobName作为唯一标识符
+    const existingJob = acc[job.jobName];
+    if (!existingJob) {
+      // 如果没有, 直接将job添加进accumulator
+      acc[job.jobName] = job;
+    } else {
+      // 获取现有job和当前job的updateTime值，如果不存在或无效设置为最早可能的日期
+      const existingJobUpdateTime = new Date(existingJob.updateTime).getTime() || 0;
+      const currentJobUpdateTime = new Date(job.updateTime).getTime() || 0;
+
+      // 比较updateTime，或者如果updateTime不存在或无效，优先使用B中的job
+      if (!existingJobUpdateTime || currentJobUpdateTime >= existingJobUpdateTime) {
+        acc[job.jobName] = job;
+      }
+
+    }
+    return acc;
+  }, {});
+
+  // 将结果对象转换为数组
+  return Object.values(mergedJobs)
+}
+
+
+function areJobsArraysEqual(arrayA: Job[], arrayB: Job[]): boolean {
+
+  arrayA.sort(jobNameCompare)
+  arrayB.sort(jobNameCompare)
+
+  // 如果长度不等，直接返回false
+  if (arrayA.length !== arrayB.length) {
+    return false;
+  }
+
+  // 检查每个元素的指定字段是否相等
+  for (let i = 0; i < arrayA.length; i++) {
+    if (
+        arrayA[i].id !== arrayB[i].id ||
+        arrayA[i].jobName !== arrayB[i].jobName ||
+        arrayA[i].type !== arrayB[i].type
+    ) {
+      // 如果有任何一个字段不等，返回false
+      return false;
+    }
+  }
+
+  // 如果所有元素的指定字段都相等，则数组相等
+  return true;
 }
 
 const createColumns = (): DataTableColumns<Job> => {
