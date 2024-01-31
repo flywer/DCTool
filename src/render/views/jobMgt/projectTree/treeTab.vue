@@ -352,7 +352,7 @@ const setDefaultActionTable = async (node: TreeOption): Promise<TreeOption[]> =>
     size: 100,
     projectName: projectName,
     subsystemName: "采集"
-  }))?.data.records.map((job: { jobContent: string; }) => job.jobContent.split('_')[2]) || []
+  }))?.data?.records.map((job: { jobContent: string; }) => job.jobContent.split('_')[2]) || []
 
   // 工作流任务
   const allActionJobNames = (await get_workflow_list_by_project_id(projectId)).data
