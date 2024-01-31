@@ -46,8 +46,8 @@
             </template>
           </n-timeline-item>
         </n-timeline>
-        <n-empty v-else description="无运行日志"/>
-        <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前100条</n-space>
+        <n-empty v-else :description="emptyDesc"/>
+        <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前50条</n-space>
       </n-spin>
     </n-drawer-content>
   </n-drawer>
@@ -79,6 +79,7 @@ const showDrawerRef = ref(false)
 const loading = ref(false)
 const logItemsRef = ref([])
 const showTipRef = ref(false)
+let emptyDesc = ''
 
 watch(() => props.job, (newValue: Job) => {
   loading.value = true
@@ -106,13 +107,19 @@ watch(() => showDrawerRef.value, (newValue: boolean) => {
 })
 
 const showDataXJobLog = async (v: Job) => {
+  emptyDesc = '正在加载日志...'
+
   const logs: DataXJobLog[] = (await get_datax_job_log({
     current: 1,
-    size: 100,
+    size: 50,
     jobContent: v.jobName
-  })).data.records
+  })).data?.records || []
 
-  showTipRef.value = logs.length >= 100;
+  if (isEmpty(logs)) {
+    emptyDesc = '无运行日志'
+  }
+
+  showTipRef.value = logs.length >= 50;
 
   logItemsRef.value = []
 
@@ -188,9 +195,15 @@ const getDataXJobLogInfo = (logString: string) => {
 }
 
 const showWorkflowLog = async (v: Job) => {
-  const logs: WorkflowLog[] = (await get_workflow_log(v.id, 100, 1)).data.records
+  emptyDesc = '正在加载日志...'
 
-  showTipRef.value = logs.length >= 100;
+  const logs: WorkflowLog[] = (await get_workflow_log(v.id, 50, 1)).data.records
+
+  if (isEmpty(logs)) {
+    emptyDesc = '无运行日志'
+  }
+
+  showTipRef.value = logs.length >= 50;
 
   logItemsRef.value = []
 
