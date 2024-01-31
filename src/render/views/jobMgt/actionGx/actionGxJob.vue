@@ -1,6 +1,13 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
+      <n-space inline class="float-left" style="line-height: 30px">
+        <template v-if="isLoadingRemoteData">
+          <n-spin size="12"/>
+          <n-text depth="3">正在获取中台最新数据...</n-text>
+        </template>
+      </n-space>
+
       <n-space inline class="float-right">
         <n-input-group>
           <n-input
@@ -255,8 +262,9 @@ import {convertCronExpression} from "@render/utils/common/cronUtils";
 import {formatDate} from "@render/utils/common/dateUtils";
 import {createSchedJob} from "@render/utils/datacenter/cjJob";
 import {
+  areJobsArraysEqual,
   getDataXJobStatus,
-  getSchedJob,
+  getSchedJob, jobNameCompare, mergeJobs,
   renderDataXJobActionButton,
   setJobStatus,
   showButton, showButtonPopover,
@@ -269,9 +277,11 @@ import {parseExpression} from "cron-parser";
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, FormInst, NButton, NSpace} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
+import {fetch_job_table_item_cache, save_job_table_item_cache} from "@render/api/localCache/jobTableItem.api";
 
 const tableDataRef = ref([])
 const isTableLoading = ref(false)
+const isLoadingRemoteData = ref(false)
 
 const projectId = '27'
 
@@ -284,6 +294,30 @@ onMounted(() => {
 const tableDataInit = async () => {
   isTableLoading.value = true
 
+  // 获取缓存数据
+  const cacheItems = await fetch_job_table_item_cache('actionDataGx')
+  // 若存在缓存数据，则先获取缓存数据
+  if (!isEmpty(cacheItems)) {
+    try {
+      tableDataRef.value = cacheItems.map(item => {
+        try {
+          // 试着解析job字符串为Job对象
+          return JSON.parse(item.job) as Job;
+        } catch (e) {
+          throw e;
+        }
+      }).sort(customSort)
+
+      isTableLoading.value = false
+    } catch (e) {
+      tableDataRef.value = []
+      isTableLoading.value = true
+    }
+  }
+
+  // region 获取中台数据
+  isLoadingRemoteData.value = true
+
   const project = (await find_by_project_id(projectId))
 
   // 共享任务
@@ -292,46 +326,68 @@ const tableDataInit = async () => {
     size: 10000,
     projectName: project.projectName,
     subsystemName: "采集"
-  })).data.records
-
-  const filterJobs = allGxJobs.filter((job: {
-    jobDesc: string;
-  }) => job.jobDesc.includes(queryParam.value))
+  })).data?.records || []
 
   let newJobs = []
 
-  for (const v of filterJobs) {
-    const schedJob = await getSchedJob(v.jobDesc)
+  if (!isEmpty(allGxJobs)) {
+    const filterJobs = allGxJobs.filter((job: {
+      jobDesc: string;
+    }) => job.jobDesc.includes(queryParam.value))
 
-    const job: Job = {
-      id: v.id,
-      jobName: v.jobDesc,
-      type: JobType.gx,
-      status: await getDataXJobStatus(v, schedJob),
-      schedMode: 2,
-      cron: schedJob?.jobCron || null,
-      lastExecTime: v.triggerLastTime || '--',
-      nextExecTime: cjJobGetNextExecTime(schedJob),
-      createBy: null,
-      comment: await getTableComment(v.jobDesc),
-      createTime: schedJob?.addTime || '--',
-      updateTime: schedJob?.updateTime || '--',
-      project: project,
-      jobRerunType: v.editModel == 1 ? 2 : 1,
+    for (const v of filterJobs) {
+      const schedJob = await getSchedJob(v.jobDesc)
+
+      const job: Job = {
+        id: v.id,
+        jobName: v.jobDesc,
+        type: JobType.gx,
+        status: await getDataXJobStatus(v, schedJob),
+        schedMode: 2,
+        cron: schedJob?.jobCron || null,
+        lastExecTime: v.triggerLastTime || '--',
+        nextExecTime: cjJobGetNextExecTime(schedJob),
+        createBy: null,
+        comment: await getTableComment(v.jobDesc),
+        createTime: schedJob?.addTime || '--',
+        updateTime: schedJob?.updateTime || '--',
+        project: project,
+        jobRerunType: v.editModel == 1 ? 2 : 1,
+      }
+
+      newJobs.push(job)
     }
-
-    newJobs.push(job)
   }
 
-  tableDataRef.value = newJobs.sort((a, b) => {
-    const aSplit = a.jobName.split("_");
-    const bSplit = b.jobName.split("_");
-    const aSplitValue = aSplit[2];
-    const bSplitValue = bSplit[2];
-    return aSplitValue.localeCompare(bSplitValue);
-  })
+  isLoadingRemoteData.value = false
+  // endregion
+
+  // 若不存在缓存
+  if (isEmpty(tableDataRef.value)) {
+    tableDataRef.value = newJobs.sort(customSort)
+  } else {
+    // 判断缓存内数据是否与接口数据相同
+    if (areJobsArraysEqual(tableDataRef.value, newJobs)) {
+      // 相同则直接获取接口数据
+      tableDataRef.value = newJobs.sort(jobNameCompare)
+    } else {
+      // 不相同则进行去重
+      tableDataRef.value = mergeJobs(tableDataRef.value, newJobs).sort(customSort)
+    }
+  }
+
+  await save_job_table_item_cache('actionDataGx', tableDataRef.value)
+
 
   isTableLoading.value = false
+}
+
+const customSort = (a: Job, b: Job) => {
+  const aSplit = a.jobName.split("_");
+  const bSplit = b.jobName.split("_");
+  const aSplitValue = aSplit[2];
+  const bSplitValue = bSplit[2];
+  return aSplitValue.localeCompare(bSplitValue)
 }
 
 const cjJobGetNextExecTime = (schedJob: any) => {

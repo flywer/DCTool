@@ -1,6 +1,13 @@
 <template>
   <n-scrollbar class="pr-2" style="height: calc(100vh - 95px);" trigger="hover">
     <div class="w-auto h-8 mb-2">
+      <n-space inline class="float-left" style="line-height: 30px">
+        <template v-if="isLoadingRemoteData">
+          <n-spin size="12"/>
+          <n-text depth="3">正在获取中台最新数据...</n-text>
+        </template>
+      </n-space>
+
       <n-space inline class="float-right">
         <n-button secondary type="info" @click="saveModalInit">
           创建
@@ -98,7 +105,8 @@ import {personIdOptions} from "@render/typings/datacenterOptions";
 import {actionTableNames} from "@render/utils/datacenter/constants";
 import {workflowJobNameExist} from "@render/utils/datacenter/jobNameExist";
 import {
-  getWorkflowJobStatus,
+  areJobsArraysEqual,
+  getWorkflowJobStatus, jobNameCompare, mergeJobs,
   renderWorkflowActionButton,
   setJobStatus,
   showButton,
@@ -112,9 +120,12 @@ import {Add, Refresh} from '@vicons/ionicons5'
 import {VNode} from "@vue/runtime-core";
 import {DataTableColumns, FormInst, NButton, NIcon, NSpace, SelectOption} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
+import {fetch_job_table_item_cache, save_job_table_item_cache} from "@render/api/localCache/jobTableItem.api";
+import {isEmpty} from "lodash-es";
 
 const tableDataRef = ref([])
 const isTableLoading = ref(false)
+const isLoadingRemoteData = ref(false)
 
 // 数据湖行政行为数据归集
 const projectId = '39'
@@ -132,6 +143,30 @@ onMounted(async () => {
 // region 表格
 const tableDataInit = async () => {
   isTableLoading.value = true
+
+  // 获取缓存数据
+  const cacheItems = await fetch_job_table_item_cache('actionData2DataLake')
+  // 若存在缓存数据，则先获取缓存数据
+  if (!isEmpty(cacheItems)) {
+    try {
+      tableDataRef.value = cacheItems.map(item => {
+        try {
+          // 试着解析job字符串为Job对象
+          return JSON.parse(item.job) as Job;
+        } catch (e) {
+          throw e;
+        }
+      }).sort(customSort)
+
+      isTableLoading.value = false
+    } catch (e) {
+      tableDataRef.value = []
+      isTableLoading.value = true
+    }
+  }
+
+  // region 获取中台数据
+  isLoadingRemoteData.value = true
 
   // 工作流任务
   const allActionRkJobs: Workflow[] = (await get_workflow_list_by_project_id(projectId)).data
@@ -162,15 +197,34 @@ const tableDataInit = async () => {
     newJobs.push(job)
   }
 
-  tableDataRef.value = newJobs.sort((a, b) => {
-    const aSplit = a.jobName.split("_");
-    const bSplit = b.jobName.split("_");
-    const aSplitValue = aSplit[2];
-    const bSplitValue = bSplit[2];
-    return aSplitValue.localeCompare(bSplitValue);
-  })
+  isLoadingRemoteData.value = false
+  // endregion
+
+  // 若不存在缓存
+  if (isEmpty(tableDataRef.value)) {
+    tableDataRef.value = newJobs.sort(customSort)
+  } else {
+    // 判断缓存内数据是否与接口数据相同
+    if (areJobsArraysEqual(tableDataRef.value, newJobs)) {
+      // 相同则直接获取接口数据
+      tableDataRef.value = newJobs.sort(jobNameCompare)
+    } else {
+      // 不相同则进行去重
+      tableDataRef.value = mergeJobs(tableDataRef.value, newJobs).sort(customSort)
+    }
+  }
+
+  await save_job_table_item_cache('actionData2DataLake', tableDataRef.value)
 
   isTableLoading.value = false
+}
+
+const customSort = (a: Job, b: Job) => {
+  const aSplit = a.jobName.split("_");
+  const bSplit = b.jobName.split("_");
+  const aSplitValue = aSplit[2];
+  const bSplitValue = bSplit[2];
+  return aSplitValue.localeCompare(bSplitValue)
 }
 
 const getTableComment = async (procName: string) => {

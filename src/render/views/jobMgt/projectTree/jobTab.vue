@@ -699,12 +699,13 @@ import {CjFormModelType, createCjJob, createSchedJob, updateDataXJob} from "@ren
 import {getTablesOptions} from "@render/utils/datacenter/getTablesOptions";
 import {createGxJob} from "@render/utils/datacenter/gxJob";
 import {
+  areJobsArraysEqual,
   dataXJobGetNextExecTime,
   getDataXJobStatus,
   getDCTableIsValidConfig, getJobType,
   getSchedJob,
   getWorkflowJobStatus,
-  jobNameCompare,
+  jobNameCompare, mergeJobs,
   pushUnExistJobs, renderDataXJobActionButton, renderWorkflowActionButton, setJobsNameVNode,
   setJobStatus,
   showButton, showButtonPopover,
@@ -1000,59 +1001,6 @@ const tableDataInit = async (fetchCache?: boolean) => {
   }
 
   isTableLoading.value = false
-}
-
-const mergeJobs = (A: Job[], B: Job[]): Job[] => {
-  // 合并并去重
-  const mergedJobs = [...A, ...B].reduce((acc: { [key: string]: Job }, job: Job) => {
-    // 检查job是否已经在accumulator中, 使用jobName作为唯一标识符
-    const existingJob = acc[job.jobName];
-    if (!existingJob) {
-      // 如果没有, 直接将job添加进accumulator
-      acc[job.jobName] = job;
-    } else {
-      // 获取现有job和当前job的updateTime值，如果不存在或无效设置为最早可能的日期
-      const existingJobUpdateTime = new Date(existingJob.updateTime).getTime() || 0;
-      const currentJobUpdateTime = new Date(job.updateTime).getTime() || 0;
-
-      // 比较updateTime，或者如果updateTime不存在或无效，优先使用B中的job
-      if (!existingJobUpdateTime || currentJobUpdateTime >= existingJobUpdateTime) {
-        acc[job.jobName] = job;
-      }
-
-    }
-    return acc;
-  }, {});
-
-  // 将结果对象转换为数组
-  return Object.values(mergedJobs)
-}
-
-
-function areJobsArraysEqual(arrayA: Job[], arrayB: Job[]): boolean {
-
-  arrayA.sort(jobNameCompare)
-  arrayB.sort(jobNameCompare)
-
-  // 如果长度不等，直接返回false
-  if (arrayA.length !== arrayB.length) {
-    return false;
-  }
-
-  // 检查每个元素的指定字段是否相等
-  for (let i = 0; i < arrayA.length; i++) {
-    if (
-        arrayA[i].id !== arrayB[i].id ||
-        arrayA[i].jobName !== arrayB[i].jobName ||
-        arrayA[i].type !== arrayB[i].type
-    ) {
-      // 如果有任何一个字段不等，返回false
-      return false;
-    }
-  }
-
-  // 如果所有元素的指定字段都相等，则数组相等
-  return true;
 }
 
 const createColumns = (): DataTableColumns<Job> => {
