@@ -3,7 +3,7 @@
       v-model:show="showDrawerRef"
       :width="220"
   >
-    <n-drawer-content title="日志" :native-scrollbar="false" closable>
+    <n-drawer-content :native-scrollbar="false" closable>
       <n-spin :size="14" :show="loading">
         <n-timeline v-if="!isEmpty(logItemsRef)">
           <n-timeline-item v-for="item in logItemsRef"
@@ -49,6 +49,17 @@
         <n-empty v-else :description="emptyDesc"/>
         <n-space v-if="showTipRef" class="mt-4" style="color: #999999" justify="center">仅显示前50条</n-space>
       </n-spin>
+      <template #header>
+        <n-space>
+          <span>日志</span>
+          <n-button text style="font-size: 16px" @click=" handleLoad(job)" :disabled="loading">
+            <n-icon style="line-height: 24px">
+              <ArrowClockwise24Filled/>
+            </n-icon>
+          </n-button>
+        </n-space>
+
+      </template>
     </n-drawer-content>
   </n-drawer>
 </template>
@@ -58,7 +69,12 @@ import {DataXJobLog} from "@common/types/datacenter/dataCollection";
 import {WorkflowLog} from "@common/types/datacenter/workflow";
 import {Job, JobType} from "@common/types/jobMgt";
 import {get_datax_job_log, get_workflow_log} from "@render/api/datacenter.api";
-import {CheckmarkCircle24Regular, ChevronUp24Regular, DismissCircle24Regular} from "@vicons/fluent";
+import {
+  CheckmarkCircle24Regular,
+  ChevronUp24Regular,
+  DismissCircle24Regular,
+  ArrowClockwise24Filled
+} from "@vicons/fluent";
 import {isEmpty} from "lodash-es";
 import {NSpace} from "naive-ui";
 import {ref, watch} from "vue";
@@ -82,18 +98,7 @@ const showTipRef = ref(false)
 let emptyDesc = ''
 
 watch(() => props.job, (newValue: Job) => {
-  loading.value = true
-  if (newValue != null) {
-    logItemsRef.value = []
-
-    showDrawerRef.value = props.show
-    if (newValue.type === JobType.cj || newValue.type === JobType.gx) {
-      showDataXJobLog(newValue)
-    } else {
-      showWorkflowLog(newValue)
-    }
-  }
-  loading.value = false
+  handleLoad(newValue)
 })
 
 watch(() => props.show, (newValue: boolean) => {
@@ -106,6 +111,21 @@ watch(() => showDrawerRef.value, (newValue: boolean) => {
   }
 })
 
+const handleLoad = (newValue: Job) => {
+  loading.value = true
+  if (newValue != null) {
+    logItemsRef.value = []
+
+    showDrawerRef.value = props.show
+    if (newValue.type === JobType.cj || newValue.type === JobType.gx) {
+      showDataXJobLog(newValue)
+    } else {
+      showWorkflowLog(newValue)
+    }
+  }
+  loading.value = false
+}
+
 const showDataXJobLog = async (v: Job) => {
   emptyDesc = '正在加载日志...'
 
@@ -113,7 +133,7 @@ const showDataXJobLog = async (v: Job) => {
     current: 1,
     size: 50,
     jobContent: v.jobName
-  })).data?.records || []
+  }))?.data?.records || []
 
   if (isEmpty(logs)) {
     emptyDesc = '无运行日志'
