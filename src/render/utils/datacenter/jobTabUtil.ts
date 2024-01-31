@@ -787,8 +787,8 @@ export const getDataXJobStatus = async (v: {
             current: 1,
             size: 1,
             jobContent: v.jobDesc
-        })).data.records[0]
-        if (log != undefined) {
+        })).data?.records[0]
+        if (log) {
             if (log.handleCode == 200) { //若成功
                 if (schedJob?.triggerStatus == 1) {
                     return 2
@@ -1114,27 +1114,27 @@ export const areJobsArraysEqual = (arrayA: Job[], arrayB: Job[]): boolean => {
 }
 
 export const mergeJobs = (A: Job[], B: Job[]): Job[] => {
-  // 合并并去重
-  const mergedJobs = [...A, ...B].reduce((acc: { [key: string]: Job }, job: Job) => {
-    // 检查job是否已经在accumulator中, 使用jobName作为唯一标识符
-    const existingJob = acc[job.jobName];
-    if (!existingJob) {
-      // 如果没有, 直接将job添加进accumulator
-      acc[job.jobName] = job;
-    } else {
-      // 获取现有job和当前job的updateTime值，如果不存在或无效设置为最早可能的日期
-      const existingJobUpdateTime = new Date(existingJob.updateTime).getTime() || 0;
-      const currentJobUpdateTime = new Date(job.updateTime).getTime() || 0;
+    // 合并并去重
+    const mergedJobs = [...A, ...B].reduce((acc: { [key: string]: Job }, job: Job) => {
+        // 检查job是否已经在accumulator中, 使用jobName作为唯一标识符
+        const existingJob = acc[job.jobName];
+        if (!existingJob) {
+            // 如果没有, 直接将job添加进accumulator
+            acc[job.jobName] = job;
+        } else {
+            // 获取现有job和当前job的updateTime值，如果不存在或无效设置为最早可能的日期
+            const existingJobUpdateTime = new Date(existingJob.updateTime).getTime() || 0;
+            const currentJobUpdateTime = new Date(job.updateTime).getTime() || 0;
 
-      // 比较updateTime，或者如果updateTime不存在或无效，优先使用B中的job
-      if (!existingJobUpdateTime || currentJobUpdateTime >= existingJobUpdateTime) {
-        acc[job.jobName] = job;
-      }
+            // 比较updateTime，或者如果updateTime不存在或无效，优先使用B中的job
+            if (!existingJobUpdateTime || currentJobUpdateTime >= existingJobUpdateTime) {
+                acc[job.jobName] = job;
+            }
 
-    }
-    return acc;
-  }, {});
+        }
+        return acc;
+    }, {});
 
-  // 将结果对象转换为数组
-  return Object.values(mergedJobs)
+    // 将结果对象转换为数组
+    return Object.values(mergedJobs)
 }
