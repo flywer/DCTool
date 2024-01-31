@@ -1342,8 +1342,33 @@ export class XlsxController {
         const dataLakeInspWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('入湖质检问题统计')
         const themeBaseInspWorksheet: ExcelJS.Worksheet = workbook.addWorksheet('入库质检问题统计')
 
-        dataLakeInspWorksheet.addRows(createExcelData(data.filter(item => item.tableName.toLowerCase().endsWith('_temp_ods'))))
-        themeBaseInspWorksheet.addRows(createExcelData(data.filter(item => !item.tableName.toLowerCase().endsWith('_temp_ods'))))
+
+        const customSort = (a: InspectionWrongFieldDataExcelModel, b: InspectionWrongFieldDataExcelModel) => {
+            // Compare by ownDepartName
+            let comparison = a.ownDepartName.localeCompare(b.ownDepartName);
+            if (comparison !== 0) return comparison;
+
+            // If ownDepartName is equal, compare by catalogDepartName
+            comparison = a.catalogDepartName.localeCompare(b.catalogDepartName);
+            if (comparison !== 0) return comparison;
+
+            // If catalogDepartName is equal, compare by actionType
+            comparison = a.actionType.localeCompare(b.actionType);
+            if (comparison !== 0) return comparison;
+
+            // If actionType is equal, compare by wrongFieldName
+            return a.wrongFieldName.localeCompare(b.wrongFieldName);
+        }
+
+
+        dataLakeInspWorksheet.addRows(createExcelData(data
+            .filter(item => item.tableName.toLowerCase().endsWith('_temp_ods'))
+            .sort(customSort)
+        ))
+        themeBaseInspWorksheet.addRows(createExcelData(data
+            .filter(item => !item.tableName.toLowerCase().endsWith('_temp_ods'))
+            .sort(customSort)
+        ))
 
         this.setColumnWidths(dataLakeInspWorksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
         this.setColumnWidths(themeBaseInspWorksheet, [25, 25, 10, 25, 25, 12, 20, 35, 15])
