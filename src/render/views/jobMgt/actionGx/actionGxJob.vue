@@ -326,7 +326,7 @@ const tableDataInit = async () => {
     size: 10000,
     projectName: project.projectName,
     subsystemName: "采集"
-  })).data?.records || []
+  }))?.data?.records || []
 
   let newJobs = []
 
