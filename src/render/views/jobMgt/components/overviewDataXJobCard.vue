@@ -189,7 +189,7 @@ const dataStat = () => {
         jobDesc: props.jobPrefix + abbr,
         executeResult: '0',
         subsystemName: "采集"
-      })).data.total
+      })).data?.total || 0
       volumes.value.exception += total
     }
     resolve()
