@@ -335,18 +335,18 @@ const checkRunningNum = async (): Promise<boolean> => {
     const maxRunningNum = (await get_max_running_workflow_num()).value
 
     // 正在运行的工作流任务
-    const runningJobs = (await get_workflow_page({
+    const runningJobsNum = (await get_workflow_page({
         page: 1,
         size: parseInt(maxRunningNum),
         status: '4',
         procName: ``
-    })).data.records
+    })).data.total
 
-    if (runningJobs.length >= parseInt(maxRunningNum)) {
+    if (runningJobsNum >= parseInt(maxRunningNum)) {
         return new Promise<boolean>((resolve) => {
             window.$dialog.warning({
                 title: '警告',
-                content: `目前正在运行的工作流有${runningJobs.length}个，是否继续执行此任务？`,
+                content: `目前正在运行的工作流有${runningJobsNum}个，是否继续执行此任务？`,
                 positiveText: '确定',
                 negativeText: '取消',
                 onPositiveClick: () => {
