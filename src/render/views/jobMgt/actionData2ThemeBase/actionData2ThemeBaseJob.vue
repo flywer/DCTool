@@ -121,7 +121,6 @@ import {VNode} from "@vue/runtime-core";
 import {DataTableColumns, FormInst, NButton, NIcon, NSpace, SelectOption} from "naive-ui";
 import {h, onMounted, reactive, ref} from "vue";
 import {fetch_job_table_item_cache, save_job_table_item_cache} from "@render/api/localCache/jobTableItem.api";
-import {useProjectTreeStore} from "@render/stores/projectTree";
 import {isEmpty} from "lodash-es";
 
 const tableDataRef = ref([])
