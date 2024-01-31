@@ -6,6 +6,7 @@
           <n-skeleton v-if="isTableLoading" :width="300" size="small"/>
           <n-ellipsis style="max-width: 100%" v-else>
             {{ title }}
+            <n-spin v-if="isLoadingRemoteData" :size="12" class="pl-2"/>
           </n-ellipsis>
         </div>
         <n-space inline class="float-right" style="max-width: 60%">
@@ -790,6 +791,8 @@ const tableDataRef = ref<Job[]>([])
 
 const isTableLoading = ref(false)
 
+const isLoadingRemoteData = ref(false)
+
 const setTitle = async (project: ProjectInfo) => {
   const tableComment = (await get_table_sql({
     tableName: queryParam.value?.tableAbbr.toString().toUpperCase()
@@ -805,7 +808,6 @@ const setTitle = async (project: ProjectInfo) => {
     title.value = tableComment
   }
 }
-
 
 const tableDataInit = async (fetchCache?: boolean) => {
   // 当前查询的节点值
@@ -850,6 +852,8 @@ const tableDataInit = async (fetchCache?: boolean) => {
       }
     }
 
+    // region 获取数据中台数据
+    isLoadingRemoteData.value = true
 
     let jobs = []
 
@@ -967,12 +971,15 @@ const tableDataInit = async (fetchCache?: boolean) => {
 
       jobs.push(...newDataXJobs, ...newWorkflowJobs)
     }
+    //endregion
 
     // 检查当前是否已选择其他节点
     if (curKey !== useProjectTreeStore().selectedKeys[0]) {
       // 如果不相等，说明有新的加载已经开始，忽略当前的结果
       return
     }
+
+    isLoadingRemoteData.value = false
 
     // 若不存在缓存
     if (isEmpty(tableDataRef.value)) {
