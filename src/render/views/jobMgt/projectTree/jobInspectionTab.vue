@@ -119,7 +119,7 @@ const tableDataInit = async () => {
 
   const records = data?.records || []
 
-  paginationReactive.itemCount = data.total || 0
+  paginationReactive.itemCount = data?.total || 0
 
   if (records.length > 0) {
     tableDataRef.value = records.map(((v: InspectionRecord) => ({
