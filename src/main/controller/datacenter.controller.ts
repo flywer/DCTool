@@ -615,8 +615,6 @@ export class DatacenterController {
                 request.setHeader('Authorization', `bearer ${authToken}`)
                 //  request.setHeader('Content-Type', 'application/json;charset=UTF-8');
 
-                // let data = '';
-
                 request.on('response', (response) => {
                     let chunks = [];
 
@@ -624,24 +622,8 @@ export class DatacenterController {
                         chunks.push(chunk); // 这里保存的是Buffer类型的数据而不是字符串
                     });
 
-                    /* response.on('data', (chunk) => {
-                        data += chunk;
-                    });*/
-
                     response.on('end', () => {
-                        const bufferData = Buffer.concat(chunks); // 将所有的Buffer合并为一个
-                        const encodingDetected = jschardet.detect(bufferData);
-
-                        let data: string | string[];
-
-                        const encodings = ["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"];
-                        // 检查检测到的编码是否属于允许的编码
-                        if (encodings.includes(encodingDetected.encoding.toLowerCase())) {
-                            data = bufferData.toString(encodingDetected.encoding as BufferEncoding);
-                        } else {
-                            data = bufferData.toString('utf-8'); // 使用默认的编码
-                        }
-
+                        const data = this.decodeBuffer(chunks)
                         try {
                             const res = JSON.parse(data);
                             if (res?.res_body?.includes('4010')) {
@@ -649,9 +631,10 @@ export class DatacenterController {
                             }
                             resolve(res);
                         } catch (err) {
+                            log.error(data)
                             log.error(err)
                             // 服务器JVM GC内存泄露
-                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded')) {
+                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded')|| data.includes('502 Bad Gateway')) {
                                 resolve(null);
                             } else {
                                 this.handleAuthTokenNotice()
@@ -693,18 +676,8 @@ export class DatacenterController {
                     });
 
                     response.on('end', () => {
-                        const bufferData = Buffer.concat(chunks); // 将所有的Buffer合并为一个
-                        const encodingDetected = jschardet.detect(bufferData);
+                        const data = this.decodeBuffer(chunks)
 
-                        let data: string | string[];
-
-                        const encodings = ["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"];
-                        // 检查检测到的编码是否属于允许的编码
-                        if (encodings.includes(encodingDetected.encoding.toLowerCase())) {
-                            data = bufferData.toString(encodingDetected.encoding as BufferEncoding);
-                        } else {
-                            data = bufferData.toString('utf-8'); // 使用默认的编码
-                        }
                         try {
                             const res = JSON.parse(data);
                             if (res.code == '4010') {
@@ -712,9 +685,10 @@ export class DatacenterController {
                             }
                             resolve(res);
                         } catch (err) {
+                            log.error(data)
                             log.error(err)
-                            // 服务器JVM GC内存泄露
-                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded')) {
+                            // 服务器JVM GC内存泄露  ；
+                            if (data.includes('nested exception is java.lang.OutOfMemoryError: GC overhead limit exceeded') || data.includes('502 Bad Gateway')) {
                                 resolve(null);
                             } else {
                                 this.handleAuthTokenNotice()
@@ -739,5 +713,22 @@ export class DatacenterController {
 
         })
 
+    }
+
+    private decodeBuffer(chunks: any[]) {
+        const bufferData = Buffer.concat(chunks); // 将所有的Buffer合并为一个
+        const encodingDetected = jschardet.detect(bufferData);
+
+        let data: string | string[];
+
+        const encodings = ["ascii", "utf8", "utf-8", "utf16le", "ucs2", "ucs-2", "base64", "base64url", "latin1", "binary", "hex"];
+        // 检查检测到的编码是否属于允许的编码
+        if (encodings.includes(encodingDetected.encoding.toLowerCase())) {
+            data = bufferData.toString(encodingDetected.encoding as BufferEncoding);
+        } else {
+            data = bufferData.toString('utf-8'); // 使用默认的编码
+        }
+
+        return data
     }
 }
