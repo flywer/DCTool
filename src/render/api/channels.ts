@@ -210,6 +210,7 @@ export const channels = reactive({
         exportDataLakeOwnDepartCaseVolume: 'xlsx/exportDataLakeOwnDepartCaseVolume',
         exportCreditPublicityData: 'xlsx/exportCreditPublicityData',
         exportInspWrongFieldData: 'xlsx/exportInspWrongFieldData',
+        exportGdZwfwOrgTaskType: 'xlsx/exportGdZwfwOrgTaskType',
     },
     front: {
         getTableData: 'front/getTableData',
@@ -262,6 +263,10 @@ export const channels = reactive({
             fetchByTreeNodeKey: 'localCache/fetchByTreeNodeKey',
             remove: 'localCache/remove'
         }
+    },
+    gdZwfw: {
+        fetchOrgNode: 'GdZwfw/fetchOrgNode',
+        fetchTaskTypeList: 'GdZwfw/fetchTaskTypeList',
     }
 })
 

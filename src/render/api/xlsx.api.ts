@@ -7,6 +7,7 @@ import {
 import {ThemeBaseDataSourceCaseVolume} from "@main/entity/frontEnd/ThemeBaseDataSourceCaseVolume";
 import {channels} from "@render/api/channels";
 import {ipcInstance} from "@render/plugins";
+import {ZwfwOrgTask} from "@common/types/Gdzwfw";
 
 export const create_data_inps_stat = (dataSata: InspectionDataExcelModel[]) => {
     return ipcInstance.send<string>(channels.xlsx.createDataInpsStat, dataSata)
@@ -50,5 +51,10 @@ export const export_credit_publicity_data = async (dataType: string) => {
 
 export const export_insp_wrong_field_data = async (model: InspectionWrongFieldDataExcelModel[]) => {
     const {data} = await ipcInstance.send(channels.xlsx.exportInspWrongFieldData, model)
+    return data
+}
+
+export const export_gdZwfw_org_task_type = async (model: ZwfwOrgTask[]) => {
+    const {data} = await ipcInstance.send(channels.xlsx.exportGdZwfwOrgTaskType, model)
     return data
 }

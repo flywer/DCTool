@@ -18,6 +18,7 @@ import * as ExcelJS from 'exceljs';
 import {join} from "path";
 import log from "electron-log";
 import {CreditPublicityXzcf} from "@common/types/creditPublicity";
+import {ZwfwOrgTask} from "@common/types/Gdzwfw";
 
 @Controller()
 export class XlsxController {
@@ -1387,4 +1388,86 @@ export class XlsxController {
             }
         })
     }
+
+    @IpcHandle(channels.xlsx.exportGdZwfwOrgTaskType)
+    public async handleExportGdZwfwOrgTaskType(data: ZwfwOrgTask[]) {
+
+        // 将ZwfwOrgTask数组按city属性分组为二维数组
+        function groupByCity(tasks: ZwfwOrgTask[]): Map<string, ZwfwOrgTask[]> {
+            const map = new Map<string, ZwfwOrgTask[]>();
+
+            for (const task of tasks) {
+                // 如果该city已存在于map中，则直接向对应数组添加当前元素
+                if (map.has(task.city)) {
+                    map.get(task.city)!.push(task);
+                } else {
+                    // 否则为该city创建新数组，并将当前元素添加到数组中
+                    map.set(task.city, [task]);
+                }
+            }
+            return map
+        }
+
+        const dataMapByCity = groupByCity(data)
+
+        const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+
+        dataMapByCity.forEach((tasks, city) => {
+
+            if (city === '') {
+                city = '省级部门'
+            }
+
+            const worksheet: ExcelJS.Worksheet = workbook.addWorksheet(city);
+
+            // 添加表头
+            worksheet.addRow(['部门名称', '部门区划', '实施清单']);
+            worksheet.addRow(['部门名称', '部门区划', '行政许可', '行政处罚', '行政强制', '行政征收', '行政检查']);
+
+            // 合并单元格
+            worksheet.mergeCells('A1', 'A2')
+            worksheet.mergeCells('B1', 'B2')
+            worksheet.mergeCells('C1', 'G1')
+
+            // 添加数据
+            tasks.forEach(task => {
+                worksheet.addRow([
+                    task.orgName,
+                    task.orgAreaCode,
+                    task.taskType.AL ? '√' : '×',
+                    task.taskType.AP ? '√' : '×',
+                    task.taskType.AF ? '√' : '×',
+                    task.taskType.AE ? '√' : '×',
+                    task.taskType.AC ? '√' : '×'
+                ]);
+            })
+
+            this.setCellBolder(worksheet)
+            worksheet.getColumn(1).width = 30
+
+            worksheet.getRow(1).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+            worksheet.getRow(2).alignment = {
+                vertical: 'middle',
+                horizontal: 'center'
+            }
+        })
+
+        await dialog.showSaveDialog({
+            title: '选择文件保存位置',
+            filters: [{
+                name: 'xlsx',
+                extensions: ['xlsx']
+            }],
+            defaultPath: '广东省政务服务网实施清单-' + getDayString() + '-' + getCurrentTimeInSeconds()
+        }).then(res => {
+            if (!res.canceled) {
+                // 导出 Excel 文件
+                (workbook.xlsx as ExcelJS.Xlsx).writeFile(res.filePath)
+            }
+        })
+    }
+
 }

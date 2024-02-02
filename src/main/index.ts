@@ -46,6 +46,7 @@ import {InspectionWrongRecordController} from "@main/controller/inspectionWrongR
 import {JobOverviewStatRecordController} from "@main/controller/auxiliaryDb/jobOverviewStatRecord.controller";
 import {LocalCacheSource} from "@main/dataSource/localCache-source";
 import {JobTableItemCacheController} from "@main/controller/localCache/jobTableItemCache.controller";
+import {GdZwfwController} from "@main/controller/toolbox/gdZwfw.controller";
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 
@@ -145,7 +146,8 @@ async function bootstrap() {
                         JobTreeController,
                         InspectionWrongRecordController,
                         JobOverviewStatRecordController,
-                        JobTableItemCacheController
+                        JobTableItemCacheController,
+                        GdZwfwController
                     ],
                 injects: [{
                     name: 'IS_DEV',
