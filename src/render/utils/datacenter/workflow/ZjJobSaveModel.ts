@@ -220,6 +220,14 @@ export class ZjJobSaveModel {
                 if (res.code == 200) {
                     window.$message.success(`质检任务[${this.name}]创建成功`)
                     save_struct_table_job_rel(this.structTableId, res.data.id)
+                        .then((res => {
+                            if (!res.success) {
+                                window.$message.error(`质检任务[${this.name}]关联规则模板失败，请检查前置机连接情况`)
+                            }
+                        }))
+                        .catch((err) => {
+                            window.$message.error(`质检任务[${this.name}]关联规则模板失败，请检查前置机连接情况`)
+                        })
                 } else {
                     window.$message.error(res.message)
                 }

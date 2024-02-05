@@ -19,7 +19,7 @@ export const struct_table_delete = async (id: number) => {
     return data
 }
 
-export const save_struct_table_job_rel = async (structTableId: number, jobId: string) => {
+export const save_struct_table_job_rel = async (structTableId: number, jobId: string): Promise<Result> => {
     const {data} = (await ipcInstance.send(channels.auxiliaryDb.templateStructTable.saveTableJobRel, structTableId, jobId))
     return data
 }
