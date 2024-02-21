@@ -675,6 +675,7 @@ export const getJobType = (jobName: string) => {
         case JobType.rk:
         case JobType.gx:
         case JobType.odstj:
+        case JobType.odsrh:
         case JobType.odstjbf:
             return jobPrefix;
         default:

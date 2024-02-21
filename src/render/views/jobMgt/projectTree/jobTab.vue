@@ -966,7 +966,7 @@ const tableDataInit = async (fetchCache?: boolean) => {
       if (!projectTree.isBasicData) {
         newWorkflowJobs = newWorkflowJobs.filter(job => job.type !== JobType.rk)
       }
-      newWorkflowJobs = newWorkflowJobs.filter(job => ![JobType.odstj, JobType.odstjbf].includes(job.type))
+      newWorkflowJobs = newWorkflowJobs.filter(job => ![JobType.odstj, JobType.odstjbf,JobType.odsrh].includes(job.type))
       // endregion
 
       jobs.push(...newDataXJobs, ...newWorkflowJobs)

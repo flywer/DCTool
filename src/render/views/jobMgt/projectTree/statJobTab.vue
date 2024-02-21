@@ -78,6 +78,7 @@ import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, NButton, NSpace, NTag} from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
+import {ODSRhJobSaveModel} from "@render/utils/datacenter/workflow/odsTj/ODSRhJobSaveModel";
 
 // 创建计算属性来获取 Pinia 存储中的值
 const selectedKeys = computed(() => useProjectTreeStore().selectedKeys)
@@ -220,6 +221,15 @@ const createColumns = (): DataTableColumns<Job> => {
                   }, 500)
                 })
                 break
+              case JobType.odsrh:
+                ODSRhJobSaveModel.createODSRhJob({
+                  projectId: project.projectId,
+                  personId: datacenterProjectRef.value?.userId,
+                  tableName: queryParam.value.tableAbbr
+                }).then(() => {
+                  tableDataInit()
+                })
+                break
             }
 
           })]
@@ -276,6 +286,9 @@ const columnsRef = ref(createColumns())
 const odsTableDataStatJobTableData = ref([])
 const isOdsTableDataStatJobTableLoading = ref(false)
 const odsTableDataStatJobTableInit = async () => {
+  // 当前查询的节点值
+  const curKey = useProjectTreeStore().selectedKeys[0]
+
   isOdsTableDataStatJobTableLoading.value = true
   try {
     odsTableDataStatJobTableData.value = []
@@ -307,63 +320,72 @@ const odsTableDataStatJobTableInit = async () => {
         jobRerunType: odstjJobData.editModel == 1 ? 2 : 1,
         project: projectRef.value
       }
-      odsTableDataStatJobTableData.value.push(odsTjJob)
+      if (curKey == useProjectTreeStore().selectedKeys[0]) {
+        odsTableDataStatJobTableData.value.push(odsTjJob)
+      }
     } else {
-      odsTableDataStatJobTableData.value.push({
-        id: null,
-        jobName: `odstj_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
-        status: -1,
-        type: JobType.odstj,
-        schedMode: 0,
-        cron: null,
-        lastExecTime: '--',
-        nextExecTime: '未配置调度任务',
-        createBy: null
-      })
+      if (curKey == useProjectTreeStore().selectedKeys[0]) {
+        odsTableDataStatJobTableData.value.push({
+          id: null,
+          jobName: `odstj_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
+          status: -1,
+          type: JobType.odstj,
+          schedMode: 0,
+          cron: null,
+          lastExecTime: '--',
+          nextExecTime: '未配置调度任务',
+          createBy: null
+        })
+      }
     }
 
     // endregion
 
-    /*     // region  odstjbf
-        const odstjbfJobData: Workflow = (await get_workflow_page({
-          page: 1,
-          size: 1,
-          status: null,
-          procName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr}`
-        })).data?.records.at(0) || null
+    // region  odsrh
+    const odsrhJobData: Workflow = (await get_workflow_page({
+      page: 1,
+      size: 1,
+      status: null,
+      procName: `odsrh_${projectAbbr}_${queryParam.value.tableAbbr}`
+    })).data?.records.at(0) || null
 
-        if (odstjbfJobData) {
-          const odsTjBfJob: Job = {
-            id: odstjbfJobData.id,
-            jobName: odstjbfJobData.procName,
-            type: getJobType(odstjbfJobData.procName),
-            status: getWorkflowJobStatus(odstjbfJobData),
-            schedMode: parseInt(odstjbfJobData.schedulingMode) == 1 ? 1 : 2,
-            cron: odstjbfJobData.crontab == '' ? null : odstjbfJobData.crontab,
-            lastExecTime: await workflowJobGetLastExecTime(odstjbfJobData),
-            nextExecTime: workflowJobGetNextExecTime(odstjbfJobData),
-            createBy: odstjbfJobData.createBy,
-            code: odstjbfJobData.procCode,
-            createTime: odstjbfJobData.createTime,
-            updateTime: odstjbfJobData.updateTime,
-            jobRerunType: odstjbfJobData.editModel == 1 ? 2 : 1,
-            project: projectRef.value
-          }
-          odsTableDataStatJobTableData.value.push(odsTjBfJob)
-        } else {
-          odsTableDataStatJobTableData.value.push({
-            id: null,
-            jobName: `odstjbf_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
-            status: -1,
-            type: JobType.odstjbf,
-            schedMode: 0,
-            cron: null,
-            lastExecTime: '--',
-            nextExecTime: '未配置调度任务',
-            createBy: null
-          })
-        }
-        // endregion */
+    if (odsrhJobData) {
+      const odsrhJob: Job = {
+        id: odsrhJobData.id,
+        jobName: odsrhJobData.procName,
+        type: getJobType(odsrhJobData.procName),
+        status: getWorkflowJobStatus(odsrhJobData),
+        schedMode: parseInt(odsrhJobData.schedulingMode) == 1 ? 1 : 2,
+        cron: odsrhJobData.crontab == '' ? null : odsrhJobData.crontab,
+        lastExecTime: await workflowJobGetLastExecTime(odsrhJobData),
+        nextExecTime: workflowJobGetNextExecTime(odsrhJobData),
+        createBy: odsrhJobData.createBy,
+        code: odsrhJobData.procCode,
+        createTime: odsrhJobData.createTime,
+        updateTime: odsrhJobData.updateTime,
+        jobRerunType: odsrhJobData.editModel == 1 ? 2 : 1,
+        project: projectRef.value
+      }
+      if (curKey == useProjectTreeStore().selectedKeys[0]) {
+        odsTableDataStatJobTableData.value.push(odsrhJob)
+      }
+    } else {
+      if (curKey == useProjectTreeStore().selectedKeys[0]) {
+        odsTableDataStatJobTableData.value.push({
+          id: null,
+          jobName: `odsrh_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
+          status: -1,
+          type: JobType.odsrh,
+          schedMode: 0,
+          cron: null,
+          lastExecTime: '--',
+          nextExecTime: '未配置调度任务',
+          createBy: null
+        })
+      }
+    }
+
+    // endregion
 
   } catch (e) {
     console.error(e)
@@ -405,7 +427,7 @@ const showJobLogDrawer = (v: Job) => {
 // region 实用方法
 const toolOptions = [
   {
-    label: '创建ODS数量统计记录表',
+    label: '创建ODS数据量统计记录表',
     key: 'CREATE_ODSTJ',
     icon: renderIcon(TableAdd24Regular)
   }
@@ -474,6 +496,7 @@ const handleToolSelect = async (key: string) => {
 }
 
 //endregion
+
 </script>
 
 <style scoped>

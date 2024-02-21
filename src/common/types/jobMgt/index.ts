@@ -76,6 +76,10 @@ export enum JobType {
      **/
         'odstj' = 'odstj',
     /**
+     * ODS数据融合任务
+     **/
+        'odsrh' = 'odsrh',
+    /**
      * ODS表数据量统计备份任务
      **/
         'odstjbf' = 'odstjbf',
@@ -113,6 +117,8 @@ export const getJobTypeComment = (type: JobType) => {
             return '数据共享任务'
         case JobType.odstj:
             return 'ODS数据量统计任务'
+        case JobType.odsrh:
+            return 'ODS数据融合任务'
         case JobType.odstjbf:
             return 'ODS数据量统计备份任务'
     }
