@@ -45,7 +45,6 @@
     "vue3-uuid": "^1.0.0"
   },
   "devDependencies": {
-    "@ant-design/icons-vue": "^6.1.0",
     "@lightwing/eslint-config": "0.0.7",
     "@types/lodash-es": "^4.17.6",
     "@vicons/antd": "^0.12.0",
