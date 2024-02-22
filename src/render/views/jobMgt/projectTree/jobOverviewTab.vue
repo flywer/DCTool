@@ -112,6 +112,13 @@
               :project-abbr="projectAbbr"
           />
         </n-gi>
+        <n-gi :span="1">
+          <overview-workflow-card
+              title="ODS数据融合任务"
+              job-prefix="odsrh\_"
+              :project-abbr="projectAbbr"
+          />
+        </n-gi>
       </n-grid>
 
     </n-card>
