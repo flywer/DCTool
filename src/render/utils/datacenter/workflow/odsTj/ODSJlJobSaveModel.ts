@@ -9,14 +9,14 @@ import {format} from "sql-formatter";
 import {isEmpty} from "lodash-es";
 
 /**
- * ODS数据量统计任务 将数据统计至数据湖
+ * ODS数据记录任务
  **/
-export class ODSRhJobSaveModel extends Workflow {
+export class ODSJlJobSaveModel extends Workflow {
     constructor() {
         super();
     }
 
-    public static async createODSRhJob(model: ODSRhJobFormModel) {
+    public static async createODSJlJob(model: ODSJlJobFormModel) {
         const project = await find_by_project_id(model.projectId)
         const projectTableAbbr = project.tableAbbr
 
@@ -30,7 +30,7 @@ export class ODSRhJobSaveModel extends Workflow {
 
             const sourceTableColumns1 = sourceTableColumns.map(col => {
                 if (col.toLowerCase() === pColName.toLowerCase()) {
-                   return `concat(t1.${col},'#${model.projectId}') as ${pColName}`
+                    return `concat(t1.${col},'#${model.projectId}') as ${pColName}`
                 }
                 return col
             })
@@ -64,21 +64,21 @@ export class ODSRhJobSaveModel extends Workflow {
                            GROUP BY ${pColName}) t2 ON t1.${pColName} = t2.${pColName} AND t1.cd_time = t2.max_cd_time) latest
             WHERE latest.rn = 1`
 
-            const {
-                minutes,
-                hours
-            } = await this.createCronByProject(project, model.tableName)
+            /*         const {
+                         minutes,
+                         hours
+                     } = await this.createCronByProject(project, model.tableName)*/
 
             const jobJson = {
-                name: `odsrh_${project.projectAbbr}_${model.tableName.toLowerCase()}`,
+                name: `odsjl_${project.projectAbbr}_${model.tableName.toLowerCase()}`,
                 email: '',
                 description: '',
                 personId: model.personId,
                 personName: personIdOptions.find(option => option.value === model.personId).label as string,
                 projectId: model.projectId,
                 projectName: projectIdOptions.find(option => option.value === model.projectId).label as string,
-                crontab: `0 ${minutes} ${hours} ? * * *`,
-                schedulingMode: '2',
+                crontab: null,
+                schedulingMode: '0',
                 type: "流程",
                 code: this.getCodeByModelXml(modelXml),
                 modelXml: modelXml,
@@ -171,7 +171,7 @@ export class ODSRhJobSaveModel extends Workflow {
     }
 }
 
-export type ODSRhJobFormModel = {
+export type ODSJlJobFormModel = {
     projectId: string,
     personId: string,
     tableName: string

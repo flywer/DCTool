@@ -53,7 +53,7 @@ import {ProjectInfo} from "@common/types";
 import {Workflow} from "@common/types/datacenter/workflow";
 import {getJobTypeComment, Job, JobStatus, JobType} from "@common/types/jobMgt";
 import {find_by_project_id} from "@render/api/auxiliaryDb/projectInfo.api";
-import {create_table, get_job_project_by_id, get_workflow_page} from "@render/api/datacenter.api";
+import {create_table, get_job_project_by_id, get_workflow_page, workflow_delete} from "@render/api/datacenter.api";
 import {useProjectTreeStore} from "@render/stores/projectTree";
 import {calculateDaysDifferenceFromNow} from "@render/utils/common/dateUtils";
 import {renderIcon} from "@render/utils/common/renderIcon";
@@ -78,7 +78,7 @@ import {VNode} from "@vue/runtime-core";
 import {isEmpty} from "lodash-es";
 import {DataTableColumns, NButton, NSpace, NTag} from "naive-ui";
 import {computed, h, onMounted, ref, watch} from "vue";
-import {ODSRhJobSaveModel} from "@render/utils/datacenter/workflow/odsTj/ODSRhJobSaveModel";
+import {ODSJlJobSaveModel} from "@render/utils/datacenter/workflow/odsTj/ODSJlJobSaveModel";
 
 // 创建计算属性来获取 Pinia 存储中的值
 const selectedKeys = computed(() => useProjectTreeStore().selectedKeys)
@@ -91,7 +91,7 @@ const datacenterProjectRef = ref(null)
 
 const queryParam = ref({
   projectId: null,
-  tableAbbr: null as string //此为表名的最简化，比如di_ssft_z2010_temp_ods 则为z2010
+  tableAbbr: null as string // 此为表名的最简化，比如di_ssft_z2010_temp_ods 则为z2010
 })
 
 watch(selectedKeys, (newValue, oldValue) => {
@@ -205,9 +205,7 @@ const createColumns = (): DataTableColumns<Job> => {
                   personId: datacenterProjectRef.value?.userId,
                   tableName: queryParam.value.tableAbbr
                 }).then(() => {
-                  setTimeout(() => {
-                    tableDataInit()
-                  }, 500)
+                  tableDataInit()
                 })
                 break
               case JobType.odstjbf:
@@ -216,13 +214,11 @@ const createColumns = (): DataTableColumns<Job> => {
                   personId: datacenterProjectRef.value?.userId,
                   tableName: queryParam.value.tableAbbr
                 }).then(() => {
-                  setTimeout(() => {
-                    tableDataInit()
-                  }, 500)
+                  tableDataInit()
                 })
                 break
-              case JobType.odsrh:
-                ODSRhJobSaveModel.createODSRhJob({
+              case JobType.odsjl:
+                ODSJlJobSaveModel.createODSJlJob({
                   projectId: project.projectId,
                   personId: datacenterProjectRef.value?.userId,
                   tableName: queryParam.value.tableAbbr
@@ -282,7 +278,7 @@ const childrenPushMoreBtn = (row: Job, children: VNode[]) => {
 
 const columnsRef = ref(createColumns())
 
-// region ODS表数据量统计任务表
+// region ODS表数据统计任务
 const odsTableDataStatJobTableData = ref([])
 const isOdsTableDataStatJobTableLoading = ref(false)
 const odsTableDataStatJobTableInit = async () => {
@@ -341,41 +337,41 @@ const odsTableDataStatJobTableInit = async () => {
 
     // endregion
 
-    // region  odsrh
-    const odsrhJobData: Workflow = (await get_workflow_page({
+    // region  odsjl
+    const odsJlJobData: Workflow = (await get_workflow_page({
       page: 1,
       size: 1,
       status: null,
-      procName: `odsrh_${projectAbbr}_${queryParam.value.tableAbbr}`
+      procName: `odsjl_${projectAbbr}_${queryParam.value.tableAbbr}`
     })).data?.records.at(0) || null
 
-    if (odsrhJobData) {
-      const odsrhJob: Job = {
-        id: odsrhJobData.id,
-        jobName: odsrhJobData.procName,
-        type: getJobType(odsrhJobData.procName),
-        status: getWorkflowJobStatus(odsrhJobData),
-        schedMode: parseInt(odsrhJobData.schedulingMode) == 1 ? 1 : 2,
-        cron: odsrhJobData.crontab == '' ? null : odsrhJobData.crontab,
-        lastExecTime: await workflowJobGetLastExecTime(odsrhJobData),
-        nextExecTime: workflowJobGetNextExecTime(odsrhJobData),
-        createBy: odsrhJobData.createBy,
-        code: odsrhJobData.procCode,
-        createTime: odsrhJobData.createTime,
-        updateTime: odsrhJobData.updateTime,
-        jobRerunType: odsrhJobData.editModel == 1 ? 2 : 1,
+    if (odsJlJobData) {
+      const odsjlJob: Job = {
+        id: odsJlJobData.id,
+        jobName: odsJlJobData.procName,
+        type: getJobType(odsJlJobData.procName),
+        status: getWorkflowJobStatus(odsJlJobData),
+        schedMode: parseInt(odsJlJobData.schedulingMode) == 1 ? 1 : 2,
+        cron: odsJlJobData.crontab == '' ? null : odsJlJobData.crontab,
+        lastExecTime: await workflowJobGetLastExecTime(odsJlJobData),
+        nextExecTime: workflowJobGetNextExecTime(odsJlJobData),
+        createBy: odsJlJobData.createBy,
+        code: odsJlJobData.procCode,
+        createTime: odsJlJobData.createTime,
+        updateTime: odsJlJobData.updateTime,
+        jobRerunType: odsJlJobData.editModel == 1 ? 2 : 1,
         project: projectRef.value
       }
       if (curKey == useProjectTreeStore().selectedKeys[0]) {
-        odsTableDataStatJobTableData.value.push(odsrhJob)
+        odsTableDataStatJobTableData.value.push(odsjlJob)
       }
     } else {
       if (curKey == useProjectTreeStore().selectedKeys[0]) {
         odsTableDataStatJobTableData.value.push({
           id: null,
-          jobName: `odsrh_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
+          jobName: `odsjl_${projectAbbr}_${queryParam.value.tableAbbr.toLowerCase()}`,
           status: -1,
-          type: JobType.odsrh,
+          type: JobType.odsjl,
           schedMode: 0,
           cron: null,
           lastExecTime: '--',

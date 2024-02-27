@@ -114,8 +114,8 @@
         </n-gi>
         <n-gi :span="1">
           <overview-workflow-card
-              title="ODS数据融合任务"
-              job-prefix="odsrh\_"
+              title="ODS数据记录任务"
+              job-prefix="odsjl\_"
               :project-abbr="projectAbbr"
           />
         </n-gi>

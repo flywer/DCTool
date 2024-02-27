@@ -1,7 +1,7 @@
 import {cloneDeep} from "lodash-es";
 import {add_datax_job, build_datax_json, get_columns} from "@render/api/datacenter.api";
 
-export type ODSRhQcFormModelType = {
+export type ODSJlQcFormModelType = {
     name: string,
     dataSourceId: '12',
     tableName: string,
@@ -93,7 +93,7 @@ const templateJson = {
 }
 
 
-const buildODSRhQcJobJson = async (model: ODSRhQcFormModelType) => {
+const buildODSJlQcJobJson = async (model: ODSJlQcFormModelType) => {
 
     const tableColumns = await get_columns('12', `ods_${model.tableName.toLowerCase()}`, true)
 
@@ -138,8 +138,8 @@ const buildODSRhQcJobJson = async (model: ODSRhQcFormModelType) => {
     return paramsJson
 }
 
-export const createODSRhQcJob = async (formModel: ODSRhQcFormModelType) => {
-    const param = await buildODSRhQcJobJson(formModel)
+export const createODSJlQcJob = async (formModel: ODSJlQcFormModelType) => {
+    const param = await buildODSJlQcJobJson(formModel)
     if (param != null) {
         await add_datax_job(param).then(async (res) => {
             if (res.code == 0) {
