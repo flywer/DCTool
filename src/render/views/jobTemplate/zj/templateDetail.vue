@@ -1,5 +1,5 @@
 <template>
-  <n-layout id="main-layout" class="animate__animated animate__slideInRight  animate__faster ">
+  <n-layout id="main-layout" class="animate__animated animate__slideInRight animate__faster ">
     <n-layout-header>
       <n-page-header @back="back" :title="template?.templateName||''" class="select-none">
         <template #extra>
